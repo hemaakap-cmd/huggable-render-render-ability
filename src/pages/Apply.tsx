@@ -60,7 +60,7 @@ export default function Apply() {
         email:           form.email,
         country:         form.country,
         degree:          form.degree,
-        graduation_year: form.graduationYear ? Number(form.graduationYear) : null,
+        graduation_year: form.graduationYear || null,
         german_level:    form.germanLevel,
         motivation:      form.motivation,
         course_id:       form.course || null,
