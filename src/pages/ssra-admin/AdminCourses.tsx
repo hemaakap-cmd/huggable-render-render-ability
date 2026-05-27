@@ -1,0 +1,341 @@
+import { useState, useRef } from "react";
+import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload } from "lucide-react";
+import AdminLayout from "@/components/ssra/AdminLayout";
+import { useAdminCourses, useUpsertCourse, useToggleCourse } from "@/hooks/useSsraData";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+const CATEGORIES = ["clinical", "language", "career"] as const;
+const TYPES = ["one_time", "subscription"] as const;
+const EMPTY: Record<string, unknown> = {
+  id: "", title: "", title_ar: "", subtitle: "", description: "",
+  category: "clinical", type: "one_time", price_eur: 0, price_egp: 0,
+  weeks: "", level: "Beginner", requires_verification: false,
+  is_active: true, sort_order: 99, stripe_price_id: "",
+  image_url: "", modules: [],
+};
+
+export default function AdminCourses() {
+  const { data: courses = [], isLoading } = useAdminCourses();
+  const upsert  = useUpsertCourse();
+  const toggle  = useToggleCourse();
+  const { toast } = useToast();
+
+  const [modal, setModal]     = useState(false);
+  const [form, setForm]       = useState<Record<string, unknown>>({ ...EMPTY });
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving]   = useState(false);
+  const [modulesText, setModulesText] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function openNew() {
+    setForm({ ...EMPTY });
+    setModulesText("");
+    setModal(true);
+  }
+  function openEdit(c: Record<string, unknown>) {
+    setForm({ ...c });
+    setModulesText(Array.isArray(c.modules) ? (c.modules as string[]).join("\n") : "");
+    setModal(true);
+  }
+
+  const field = (key: string, value: unknown) => setForm((f) => ({ ...f, [key]: value }));
+
+  async function uploadImage(file: File) {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `courses/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("ssra-course-images").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from("ssra-course-images").getPublicUrl(path);
+      field("image_url", data.publicUrl);
+      toast({ title: "Image uploaded" });
+    } catch (e: unknown) {
+      toast({ title: "Upload failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const modules = modulesText.split("\n").map((s) => s.trim()).filter(Boolean);
+      const payload = {
+        ...form,
+        price_eur: Number(form.price_eur),
+        price_egp: Number(form.price_egp),
+        sort_order: Number(form.sort_order),
+        modules,
+        id: form.id || undefined,
+      };
+      await upsert.mutateAsync(payload);
+      toast({ title: form.id ? "Course updated" : "Course created" });
+      setModal(false);
+    } catch (e: unknown) {
+      toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleToggle(c: { id: string; is_active: boolean }) {
+    await toggle.mutateAsync({ id: c.id, is_active: !c.is_active });
+    toast({ title: c.is_active ? "Course hidden" : "Course visible" });
+  }
+
+  const categoryColor: Record<string, string> = {
+    clinical:  "bg-blue-50 text-blue-700",
+    language:  "bg-emerald-50 text-emerald-700",
+    career:    "bg-amber-50 text-amber-700",
+  };
+
+  return (
+    <AdminLayout>
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-slate-900">Courses</h1>
+            <p className="text-slate-500 text-sm mt-1">Manage course catalogue, prices, and images.</p>
+          </div>
+          <button onClick={openNew}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors">
+            <Plus className="w-4 h-4" /> Add Course
+          </button>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          {isLoading ? (
+            <div className="text-center py-16 text-slate-400 text-sm">Loading…</div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-16 text-slate-400 text-sm">No courses yet. Add one above.</div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                  <th className="text-left px-5 py-3">Course</th>
+                  <th className="text-left px-4 py-3 hidden md:table-cell">Category</th>
+                  <th className="text-right px-4 py-3">EUR</th>
+                  <th className="text-right px-4 py-3 hidden sm:table-cell">EGP</th>
+                  <th className="text-center px-4 py-3">Active</th>
+                  <th className="text-right px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {(courses as any[]).map((c) => (
+                  <tr key={c.id} className={`hover:bg-slate-50 transition-colors ${!c.is_active ? "opacity-50" : ""}`}>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        {c.image_url ? (
+                          <img src={c.image_url} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-100 shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                            <ImageIcon className="w-4 h-4 text-slate-300" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-medium text-slate-800">{c.title}</div>
+                          {c.title_ar && <div className="text-xs text-slate-400 font-arabic">{c.title_ar}</div>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 hidden md:table-cell">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${categoryColor[c.category] ?? "bg-slate-100 text-slate-500"}`}>
+                        {c.category}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-right font-bold text-slate-800">€{c.price_eur}</td>
+                    <td className="px-4 py-3.5 text-right text-slate-500 text-xs hidden sm:table-cell">
+                      {c.price_egp ? `${Number(c.price_egp).toLocaleString()} ج.م` : "—"}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <button onClick={() => handleToggle(c)} className="text-slate-400 hover:text-slate-700 transition-colors">
+                        {c.is_active
+                          ? <ToggleRight className="w-5 h-5 text-emerald-500" />
+                          : <ToggleLeft className="w-5 h-5" />}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <button onClick={() => openEdit(c)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                        <Edit2 className="w-3.5 h-3.5" /> Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <h2 className="font-display font-bold text-slate-900">{form.id ? "Edit Course" : "New Course"}</h2>
+              <button onClick={() => setModal(false)} className="text-slate-400 hover:text-slate-700 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSave} className="px-6 py-5 space-y-5">
+              {/* Image */}
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">Course Image</label>
+                <div className="flex items-center gap-4">
+                  {form.image_url ? (
+                    <img src={form.image_url as string} alt="" className="w-20 h-20 rounded-xl object-cover border border-slate-200" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200">
+                      <ImageIcon className="w-6 h-6 text-slate-300" />
+                    </div>
+                  )}
+                  <div>
+                    <input type="file" ref={fileRef} accept="image/*" className="hidden"
+                      onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0])} />
+                    <button type="button" disabled={uploading} onClick={() => fileRef.current?.click()}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50">
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                      {uploading ? "Uploading…" : "Upload Image"}
+                    </button>
+                    <p className="text-xs text-slate-400 mt-1">JPG, PNG, WebP — max 5 MB</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Titles */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Title (English) *</label>
+                  <input required value={form.title as string} onChange={(e) => field("title", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">العنوان (Arabic)</label>
+                  <input dir="rtl" value={form.title_ar as string} onChange={(e) => field("title_ar", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Subtitle</label>
+                <input value={form.subtitle as string} onChange={(e) => field("subtitle", e.target.value)}
+                  className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Description</label>
+                <textarea rows={3} value={form.description as string} onChange={(e) => field("description", e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] resize-none" />
+              </div>
+
+              {/* Pricing */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Price EUR *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">€</span>
+                    <input required type="number" min="0" step="0.01"
+                      value={form.price_eur as number} onChange={(e) => field("price_eur", e.target.value)}
+                      className="w-full h-10 pl-7 pr-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Price EGP</label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">ج.م</span>
+                    <input type="number" min="0"
+                      value={form.price_egp as number} onChange={(e) => field("price_egp", e.target.value)}
+                      className="w-full h-10 pl-9 pr-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Duration</label>
+                  <input placeholder="e.g. 6 weeks" value={form.weeks as string} onChange={(e) => field("weeks", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Sort Order</label>
+                  <input type="number" min="0" value={form.sort_order as number} onChange={(e) => field("sort_order", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                </div>
+              </div>
+
+              {/* Category / Type / Level */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Category</label>
+                  <select value={form.category as string} onChange={(e) => field("category", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
+                    {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Type</label>
+                  <select value={form.type as string} onChange={(e) => field("type", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
+                    {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Level</label>
+                  <select value={form.level as string} onChange={(e) => field("level", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
+                    {["Beginner", "Intermediate", "Advanced"].map((l) => <option key={l}>{l}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Stripe Price ID</label>
+                <input placeholder="price_xxxxxxxxxxxxxxxx" value={form.stripe_price_id as string} onChange={(e) => field("stripe_price_id", e.target.value)}
+                  className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  Modules (one per line)
+                </label>
+                <textarea rows={5} value={modulesText} onChange={(e) => setModulesText(e.target.value)}
+                  placeholder={"Anatomical foundations\nMovement pathology\nRehabilitation planning"}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] resize-none font-mono" />
+              </div>
+
+              {/* Checkboxes */}
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.requires_verification as boolean}
+                    onChange={(e) => field("requires_verification", e.target.checked)}
+                    className="w-4 h-4 rounded accent-[hsl(220,91%,54%)]" />
+                  <span className="text-sm text-slate-700">Requires diploma verification</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.is_active as boolean}
+                    onChange={(e) => field("is_active", e.target.checked)}
+                    className="w-4 h-4 rounded accent-emerald-500" />
+                  <span className="text-sm text-slate-700">Active / visible</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                <button type="button" onClick={() => setModal(false)}
+                  className="px-5 py-2.5 rounded-xl text-sm text-slate-600 hover:bg-slate-100 transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors disabled:opacity-50">
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {saving ? "Saving…" : form.id ? "Save Changes" : "Create Course"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </AdminLayout>
+  );
+}
