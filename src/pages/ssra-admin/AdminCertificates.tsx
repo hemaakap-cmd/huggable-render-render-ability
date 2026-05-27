@@ -164,6 +164,7 @@ function IssueDialog({
     setSubmitting(true);
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from("ssra_certificates").insert({
+      certificate_code: "",
       user_id: form.user_id || null,
       course_id: form.course_id || null,
       student_name: form.student_name,
