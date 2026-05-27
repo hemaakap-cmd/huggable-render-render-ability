@@ -118,7 +118,7 @@ export default function Courses() {
       <section className="bg-hero pt-32 pb-20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-blue-500/10 blur-[80px] pointer-events-none" />
         <div className="container max-w-3xl text-center relative reveal">
-          <span className="badge-gold mb-6">9 Courses Available</span>
+          <span className="badge-gold mb-6">11 Courses Available</span>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-5">
             SSRA Course Catalogue
           </h1>
