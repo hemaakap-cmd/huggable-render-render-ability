@@ -49,6 +49,7 @@ export default function Footer() {
                 ["About Us", "/about"],
                 ["Apply Free", "/apply"],
                 ["Pricing", "/pricing"],
+                ["Verify Certificate", "/verify"],
                 ["Contact", "/contact"],
               ].map(([l, h]) => (
                 <li key={l}>

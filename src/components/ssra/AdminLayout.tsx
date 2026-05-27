@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
   GraduationCap, LayoutDashboard, Users, ShieldCheck,
-  BookOpen, CreditCard, LogOut, Menu, X, TrendingUp, Library,
+  BookOpen, CreditCard, LogOut, Menu, X, TrendingUp, Library, Award,
 } from "lucide-react";
 import { ssraSignOut } from "@/hooks/useSsraAuth";
 
@@ -12,6 +12,7 @@ const NAV = [
   { icon: Users,           label: "Students",         href: "/ssra-admin/students" },
   { icon: ShieldCheck,     label: "Verifications",    href: "/ssra-admin/verifications" },
   { icon: BookOpen,        label: "Enrollments",      href: "/ssra-admin/enrollments" },
+  { icon: Award,           label: "Certificates",     href: "/ssra-admin/certificates" },
   { icon: CreditCard,      label: "Subscriptions",    href: "/ssra-admin/subscriptions" },
   { icon: TrendingUp,      label: "Revenue",          href: "/ssra-admin/revenue" },
 ];
