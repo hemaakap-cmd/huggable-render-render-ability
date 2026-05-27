@@ -21,6 +21,7 @@ const Checkout        = lazy(() => import("./pages/Checkout"));
 const PaymentSuccess  = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled"));
 const StudentLogin    = lazy(() => import("./pages/StudentLogin"));
+const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 
 /* ── Legal pages ── */
 const PrivacyPolicy      = lazy(() => import("./pages/legal/PrivacyPolicy"));
@@ -31,6 +32,7 @@ const RefundCancellation = lazy(() => import("./pages/legal/RefundCancellation")
 const StudentDashboard  = lazy(() => import("./pages/dashboard/StudentDashboard"));
 const MyCourses         = lazy(() => import("./pages/dashboard/MyCourses"));
 const MySubscription    = lazy(() => import("./pages/dashboard/MySubscription"));
+const MyCertificates    = lazy(() => import("./pages/dashboard/MyCertificates"));
 
 /* ── Admin dashboard ── */
 const AdminOverview       = lazy(() => import("./pages/ssra-admin/AdminOverview"));
@@ -39,6 +41,7 @@ const AdminStudents       = lazy(() => import("./pages/ssra-admin/AdminStudents"
 const AdminVerifications  = lazy(() => import("./pages/ssra-admin/AdminVerifications"));
 const AdminEnrollments    = lazy(() => import("./pages/ssra-admin/AdminEnrollments"));
 const AdminRevenue        = lazy(() => import("./pages/ssra-admin/AdminRevenue"));
+const AdminCertificates   = lazy(() => import("./pages/ssra-admin/AdminCertificates"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -94,6 +97,8 @@ const App = () => (
                 <Route path="/payment-success"  element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/login"            element={<StudentLogin />} />
+                <Route path="/verify"           element={<VerifyCertificate />} />
+                <Route path="/verify/:code"     element={<VerifyCertificate />} />
 
                 {/* Legal pages */}
                 <Route path="/privacy"          element={<PrivacyPolicy />} />
@@ -104,6 +109,7 @@ const App = () => (
                 <Route path="/dashboard"              element={<RequireAuth><StudentDashboard /></RequireAuth>} />
                 <Route path="/dashboard/courses"      element={<RequireAuth><MyCourses /></RequireAuth>} />
                 <Route path="/dashboard/subscription" element={<RequireAuth><MySubscription /></RequireAuth>} />
+                <Route path="/dashboard/certificates" element={<RequireAuth><MyCertificates /></RequireAuth>} />
                 <Route path="/dashboard/*"            element={<RequireAuth><StudentDashboard /></RequireAuth>} />
 
                 {/* Admin — admin role required */}
@@ -114,6 +120,7 @@ const App = () => (
                 <Route path="/ssra-admin/enrollments"       element={<RequireAdmin><AdminEnrollments /></RequireAdmin>} />
                 <Route path="/ssra-admin/subscriptions"     element={<RequireAdmin><AdminRevenue /></RequireAdmin>} />
                 <Route path="/ssra-admin/revenue"           element={<RequireAdmin><AdminRevenue /></RequireAdmin>} />
+                <Route path="/ssra-admin/certificates"      element={<RequireAdmin><AdminCertificates /></RequireAdmin>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
