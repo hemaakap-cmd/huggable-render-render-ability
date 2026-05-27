@@ -14,13 +14,276 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ssra_courses: {
+        Row: {
+          category: string
+          course_type: string
+          created_at: string | null
+          description: string | null
+          duration_weeks: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          level: string | null
+          modules: Json | null
+          price_egp: number | null
+          price_eur: number
+          requires_verification: boolean
+          sort_order: number
+          stripe_price_id: string | null
+          subtitle: string | null
+          title: string
+          title_ar: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          course_type: string
+          created_at?: string | null
+          description?: string | null
+          duration_weeks?: string | null
+          id: string
+          image_url?: string | null
+          is_active?: boolean
+          level?: string | null
+          modules?: Json | null
+          price_egp?: number | null
+          price_eur: number
+          requires_verification?: boolean
+          sort_order?: number
+          stripe_price_id?: string | null
+          subtitle?: string | null
+          title: string
+          title_ar?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          course_type?: string
+          created_at?: string | null
+          description?: string | null
+          duration_weeks?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          level?: string | null
+          modules?: Json | null
+          price_egp?: number | null
+          price_eur?: number
+          requires_verification?: boolean
+          sort_order?: number
+          stripe_price_id?: string | null
+          subtitle?: string | null
+          title?: string
+          title_ar?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ssra_enrollments: {
+        Row: {
+          amount_eur: number | null
+          course_id: string | null
+          created_at: string | null
+          enrolled_at: string | null
+          id: string
+          status: string
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_eur?: number | null
+          course_id?: string | null
+          created_at?: string | null
+          enrolled_at?: string | null
+          id?: string
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_eur?: number | null
+          course_id?: string | null
+          created_at?: string | null
+          enrolled_at?: string | null
+          id?: string
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ssra_profiles: {
+        Row: {
+          avatar_url: string | null
+          country: string | null
+          created_at: string | null
+          degree: string | null
+          email: string | null
+          full_name: string | null
+          german_level: string | null
+          id: string
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string | null
+          degree?: string | null
+          email?: string | null
+          full_name?: string | null
+          german_level?: string | null
+          id: string
+          role?: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string | null
+          degree?: string | null
+          email?: string | null
+          full_name?: string | null
+          german_level?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ssra_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          course_id: string | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          course_id?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          course_id?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_subscriptions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ssra_verifications: {
+        Row: {
+          admin_notes: string | null
+          country: string | null
+          course_id: string | null
+          created_at: string | null
+          degree: string | null
+          diploma_url: string | null
+          email: string
+          full_name: string
+          german_level: string | null
+          graduation_year: string | null
+          id: string
+          motivation: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          country?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          degree?: string | null
+          diploma_url?: string | null
+          email: string
+          full_name: string
+          german_level?: string | null
+          graduation_year?: string | null
+          id?: string
+          motivation?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          country?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          degree?: string | null
+          diploma_url?: string | null
+          email?: string
+          full_name?: string
+          german_level?: string | null
+          graduation_year?: string | null
+          id?: string
+          motivation?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_verifications_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
