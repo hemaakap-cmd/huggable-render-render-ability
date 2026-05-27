@@ -178,6 +178,40 @@ export const COURSES: Course[] = [
     modules: ["DOSB exam structure", "Sports science theory", "German sports law", "Practical assessment prep", "Mock exams"],
     color: "from-orange-600 to-orange-800",
   },
+
+  /* ── ADVANCED ANATOMY & PHYSIOLOGY ── */
+  {
+    id: "advanced-anatomy",
+    title: "Funktionelle Anatomie für Leistungssport",
+    titleAr: "التشريح الوظيفي للرياضة التنافسية",
+    subtitle: "Advanced Functional Anatomy for Performance Sport",
+    desc: "Deep dive into musculoskeletal and neural anatomy applied to elite sport rehabilitation and performance — taught with the German clinical terminology used in rehab centres and Vereine.",
+    price: 59,
+    type: "one_time",
+    priceId: import.meta.env.VITE_STRIPE_PRICE_ADV_ANATOMY ?? "price_adv_anatomy",
+    category: "clinical",
+    weeks: "7 weeks",
+    level: "Intermediate → Advanced",
+    requires_verification: false,
+    modules: ["Upper limb functional anatomy", "Lower limb & kinetic chain", "Spine, core & posture", "Neural & fascial systems", "German anatomical nomenclature"],
+    color: "from-teal-600 to-teal-800",
+  },
+  {
+    id: "exercise-physiology",
+    title: "Sportphysiologie & Leistungsdiagnostik",
+    titleAr: "فسيولوجيا الرياضة وتشخيص الأداء",
+    subtitle: "Exercise Physiology & Performance Diagnostics",
+    desc: "How the body responds and adapts to training — energy systems, cardio-respiratory function, lactate testing, VO2max protocols, and recovery science as practised in German Leistungsdiagnostik labs.",
+    price: 65,
+    type: "one_time",
+    priceId: import.meta.env.VITE_STRIPE_PRICE_PHYSIOLOGY ?? "price_physiology",
+    category: "clinical",
+    weeks: "8 weeks",
+    level: "Intermediate",
+    requires_verification: false,
+    modules: ["Energy systems & metabolism", "Cardio-respiratory adaptations", "Lactate & VO2max testing", "Strength & endurance physiology", "Recovery & overtraining"],
+    color: "from-fuchsia-600 to-fuchsia-800",
+  },
 ];
 
 export function getCourse(id: string) {
