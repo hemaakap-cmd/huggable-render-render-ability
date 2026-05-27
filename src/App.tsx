@@ -85,6 +85,7 @@ const App = () => (
                 {/* Public marketing */}
                 <Route path="/"                 element={<Index />} />
                 <Route path="/courses"          element={<Courses />} />
+                <Route path="/courses/:id"      element={<CourseDetail />} />
                 <Route path="/about"            element={<About />} />
                 <Route path="/apply"            element={<Apply />} />
                 <Route path="/contact"          element={<Contact />} />
