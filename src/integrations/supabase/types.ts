@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ssra_certificates: {
+        Row: {
+          certificate_code: string
+          course_id: string | null
+          course_title: string
+          created_at: string
+          grade: string | null
+          id: string
+          issued_at: string
+          issued_by: string | null
+          revoked: boolean
+          revoked_reason: string | null
+          student_name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          certificate_code: string
+          course_id?: string | null
+          course_title: string
+          created_at?: string
+          grade?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          revoked?: boolean
+          revoked_reason?: string | null
+          student_name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          certificate_code?: string
+          course_id?: string | null
+          course_title?: string
+          created_at?: string
+          grade?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          revoked?: boolean
+          revoked_reason?: string | null
+          student_name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ssra_courses: {
         Row: {
           category: string
@@ -283,6 +331,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_ssra_cert_code: { Args: never; Returns: string }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
