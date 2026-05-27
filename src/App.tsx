@@ -21,6 +21,11 @@ const PaymentSuccess  = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled"));
 const StudentLogin    = lazy(() => import("./pages/StudentLogin"));
 
+/* ── Legal pages ── */
+const PrivacyPolicy      = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const TermsConditions    = lazy(() => import("./pages/legal/TermsConditions"));
+const RefundCancellation = lazy(() => import("./pages/legal/RefundCancellation"));
+
 /* ── Student dashboard ── */
 const StudentDashboard  = lazy(() => import("./pages/dashboard/StudentDashboard"));
 const MyCourses         = lazy(() => import("./pages/dashboard/MyCourses"));
@@ -87,6 +92,11 @@ const App = () => (
                 <Route path="/payment-success"  element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/login"            element={<StudentLogin />} />
+
+                {/* Legal pages */}
+                <Route path="/privacy"          element={<PrivacyPolicy />} />
+                <Route path="/terms"            element={<TermsConditions />} />
+                <Route path="/refund"           element={<RefundCancellation />} />
 
                 {/* Student dashboard — auth required */}
                 <Route path="/dashboard"              element={<RequireAuth><StudentDashboard /></RequireAuth>} />
