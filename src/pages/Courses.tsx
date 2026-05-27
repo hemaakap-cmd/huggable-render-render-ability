@@ -94,8 +94,14 @@ function CourseRow({ course }: { course: Course }) {
               {course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
               <ArrowRight className="w-4 h-4" />
             </button>
-            <Link to="/pricing" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
-              View pricing
+            <Link
+              to={`/courses/${course.id}`}
+              className="text-sm font-medium text-slate-600 hover:text-[hsl(220,91%,54%)] transition-colors"
+            >
+              View details
+            </Link>
+            <Link to="/pricing" className="text-sm text-slate-400 hover:text-slate-600 transition-colors ml-auto">
+              Pricing
             </Link>
           </div>
         </div>
