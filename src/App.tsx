@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 
 /* ── Public ── */
 const Courses         = lazy(() => import("./pages/Courses"));
+const CourseDetail    = lazy(() => import("./pages/CourseDetail"));
 const About           = lazy(() => import("./pages/About"));
 const Apply           = lazy(() => import("./pages/Apply"));
 const Contact         = lazy(() => import("./pages/Contact"));
