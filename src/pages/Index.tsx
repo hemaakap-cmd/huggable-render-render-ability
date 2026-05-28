@@ -47,10 +47,22 @@ export default function Index() {
 
       {/* ══ HERO ══ */}
       <section className="relative min-h-screen flex items-center bg-hero overflow-hidden">
+        {/* Biomechanics background image */}
+        <div className="absolute inset-0">
+          <img
+            src={heroBiomechanics}
+            alt="Athlete sprinting with biomechanics and anatomy overlay"
+            width={1920}
+            height={1080}
+            className="w-full h-full object-cover opacity-40 mix-blend-luminosity"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950" />
+        </div>
+
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-blue-600/20 blur-[100px]" />
           <div className="absolute -bottom-48 -left-24 w-[500px] h-[500px] rounded-full bg-indigo-800/30 blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-slate-900/40 blur-[60px]" />
         </div>
 
         <div
