@@ -73,44 +73,45 @@ export default function Index() {
           }}
         />
 
-        <div className="container relative z-10 pt-28 pb-20">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/15 text-white/80 text-xs font-medium mb-8 backdrop-blur-sm">
+        <div className="container relative z-10 pt-20 md:pt-28 pb-14 md:pb-20">
+          <div className="max-w-4xl mx-auto text-center px-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/8 border border-white/15 text-white/80 text-[10px] md:text-xs font-medium mb-5 md:mb-8 backdrop-blur-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-[hsl(43,96%,50%)] animate-pulse" />
-              A new academy for sports science graduates · Just launched
+              For sports science graduates · Just launched
             </div>
 
-            <h1 className="font-display text-5xl md:text-7xl font-bold text-white leading-[1.05] mb-6">
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white leading-[1.1] mb-4 md:mb-6">
               Sports Science Graduate?
               <br />
               <span className="text-gold-shimmer">Build Your Career</span>
-              <br />
-              Abroad.
+              <br className="hidden sm:block" />
+              <span className="sm:hidden"> Abroad.</span>
+              <span className="hidden sm:inline"> Abroad.</span>
             </h1>
 
-            <p className="text-white/60 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
+            <p className="text-white/60 text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto mb-6 md:mb-10 px-2 sm:px-0">
               SSRA Academy helps graduates of sports science and physiotherapy faculties travel and work abroad — starting with Germany. Medical German, rehabilitation training, and credential recognition, all in one place.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-14">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 md:mb-14">
               <Link to="/courses">
-                <button className="btn-gold flex items-center gap-2 px-8 py-4 rounded-xl text-base">
+                <button className="btn-gold flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base w-full sm:w-auto justify-center">
                   <span>Explore Courses</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>
               <Link to="/apply">
-                <button className="btn-outline-white flex items-center gap-2 px-8 py-4 rounded-xl text-base">
+                <button className="btn-outline-white flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base w-full sm:w-auto justify-center">
                   <span>Apply Free</span>
                 </button>
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-white/40">
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> For sports science graduates</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Career-focused curriculum</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Secure payments</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-8 text-[10px] sm:text-xs text-white/40">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" /> Sports science grads</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" /> Career-focused</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" /> Secure payments</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" /> Cancel anytime</span>
             </div>
           </div>
         </div>
