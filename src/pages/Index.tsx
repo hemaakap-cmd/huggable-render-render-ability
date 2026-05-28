@@ -8,6 +8,7 @@ import {
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/stripe";
+import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 
 function useReveal() {
   useEffect(() => {
