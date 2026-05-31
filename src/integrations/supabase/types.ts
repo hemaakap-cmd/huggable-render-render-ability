@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_otp_aliases: {
+        Row: {
+          alias_code: string
+          consumed_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          original_token: string
+          otp_type: string
+        }
+        Insert: {
+          alias_code: string
+          consumed_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          original_token: string
+          otp_type: string
+        }
+        Update: {
+          alias_code?: string
+          consumed_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          original_token?: string
+          otp_type?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string

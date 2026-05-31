@@ -41,6 +41,13 @@ const SENDER_DOMAIN = "notify.ssracourses.com"
 const ROOT_DOMAIN = "ssracourses.com"
 const FROM_DOMAIN = "notify.ssracourses.com" // Domain shown in From address (may be root or sender subdomain)
 
+const OTP_ALIAS_EMAIL_TYPES = new Set(['signup', 'magiclink'])
+
+function generateSixDigitCode(): string {
+  const value = crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000
+  return value.toString().padStart(6, '0')
+}
+
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
@@ -218,13 +225,37 @@ async function handleWebhook(req: Request): Promise<Response> {
     )
   }
 
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  let displayToken = payload.data.token
+  if (payload.data.token && OTP_ALIAS_EMAIL_TYPES.has(emailType)) {
+    displayToken = generateSixDigitCode()
+    const { error: aliasError } = await supabase.from('auth_otp_aliases').insert({
+      email: String(payload.data.email || '').trim().toLowerCase(),
+      otp_type: emailType,
+      alias_code: displayToken,
+      original_token: payload.data.token,
+    })
+
+    if (aliasError) {
+      console.error('Failed to create 6-digit OTP alias', { error: aliasError, run_id, emailType })
+      return new Response(JSON.stringify({ error: 'Failed to prepare verification code' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
     confirmationUrl: payload.data.url,
-    token: payload.data.token,
+    token: displayToken,
     email: payload.data.email,
     oldEmail: payload.data.old_email,
     newEmail: payload.data.new_email,
@@ -235,12 +266,6 @@ async function handleWebhook(req: Request): Promise<Response> {
   const text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
     plainText: true,
   })
-
-  // Enqueue email for async processing by the dispatcher (process-email-queue).
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
 
   const messageId = crypto.randomUUID()
 
