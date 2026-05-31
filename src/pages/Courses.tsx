@@ -62,7 +62,7 @@ function CourseRow({ course }: { course: Course }) {
               {course.type === "subscription" ? (
                 <span className="badge-gold flex items-center gap-1"><Crown className="w-3 h-3" /> Subscription · €{course.price}/mo</span>
               ) : (
-                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> €{course.price} one-time</span>
+                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> Coming soon · قريبًا</span>
               )}
               {course.requires_verification && (
                 <span className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
