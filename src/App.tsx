@@ -21,6 +21,7 @@ const Checkout          = lazy(() => import("./pages/Checkout"));
 const PaymentSuccess    = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCanceled   = lazy(() => import("./pages/PaymentCanceled"));
 const StudentLogin      = lazy(() => import("./pages/StudentLogin"));
+const VerifyOtp         = lazy(() => import("./pages/VerifyOtp"));
 const ResetPassword     = lazy(() => import("./pages/ResetPassword"));
 const Legal             = lazy(() => import("./pages/Legal"));
 const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
@@ -115,6 +116,7 @@ const App = () => (
                 <Route path="/payment-success"  element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/login"            element={<StudentLogin />} />
+                <Route path="/verify-otp"       element={<VerifyOtp />} />
                 <Route path="/reset-password"   element={<ResetPassword />} />
                 <Route path="/legal"            element={<Legal />} />
                 <Route path="/verify"           element={<VerifyCertificate />} />
