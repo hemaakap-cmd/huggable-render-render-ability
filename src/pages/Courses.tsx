@@ -4,6 +4,7 @@ import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown } from "
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, type Course } from "@/lib/stripe";
+import { usePriceHiddenMap } from "@/hooks/useSsraData";
 
 function useReveal() {
   useEffect(() => {
@@ -26,7 +27,7 @@ const TABS: { label: string; value: Category }[] = [
   { label: "Career",      value: "career" },
 ];
 
-function CourseRow({ course }: { course: Course }) {
+function CourseRow({ course, hidden }: { course: Course; hidden: boolean }) {
   const navigate = useNavigate();
 
   const handleEnrol = () => {
@@ -59,10 +60,12 @@ function CourseRow({ course }: { course: Course }) {
         <div className="md:col-span-3 p-8 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {course.type === "subscription" ? (
+              {hidden ? (
+                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> Coming soon · قريبًا</span>
+              ) : course.type === "subscription" ? (
                 <span className="badge-gold flex items-center gap-1"><Crown className="w-3 h-3" /> Subscription · €{course.price}/mo</span>
               ) : (
-                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> Coming soon · قريبًا</span>
+                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> €{course.price} one-time</span>
               )}
               {course.requires_verification && (
                 <span className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
@@ -89,10 +92,10 @@ function CourseRow({ course }: { course: Course }) {
           <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
             <button
               onClick={handleEnrol}
-              disabled={course.type !== "subscription"}
+              disabled={hidden}
               className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {course.type !== "subscription"
+              {hidden
                 ? "Coming soon"
                 : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
               <ArrowRight className="w-4 h-4" />
@@ -116,6 +119,7 @@ function CourseRow({ course }: { course: Course }) {
 export default function Courses() {
   useReveal();
   const [active, setActive] = useState<Category>("all");
+  const { data: priceHidden = {} } = usePriceHiddenMap();
 
   const filtered = active === "all" ? COURSES : COURSES.filter((c) => c.category === active);
 
@@ -161,7 +165,7 @@ export default function Courses() {
       {/* Course list */}
       <section className="py-12">
         <div className="container space-y-6">
-          {filtered.map((c) => <CourseRow key={c.id} course={c} />)}
+          {filtered.map((c) => <CourseRow key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
         </div>
       </section>
 

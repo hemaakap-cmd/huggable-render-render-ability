@@ -7,6 +7,7 @@ import {
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE, type Course } from "@/lib/stripe";
+import { usePriceHiddenMap } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 
 function useReveal() {
@@ -21,7 +22,7 @@ function useReveal() {
   }, []);
 }
 
-function PriceCard({ course, highlight = false }: { course: Course; highlight?: boolean }) {
+function PriceCard({ course, hidden = false, highlight = false }: { course: Course; hidden?: boolean; highlight?: boolean }) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -66,7 +67,16 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
 
         {/* Price */}
         <div className="mb-5">
-          {course.type === "subscription" ? (
+          {hidden ? (
+            <>
+              <span className={`text-2xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                Coming soon
+              </span>
+              <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
+                قريبًا — سيتم الإعلان عن السعر لاحقًا
+              </div>
+            </>
+          ) : course.type === "subscription" ? (
             <>
               <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
                 €{course.price}
@@ -79,11 +89,12 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
             </>
           ) : (
             <>
-              <span className={`text-2xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
-                Coming soon
+              <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                €{course.price}
               </span>
               <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
-                قريبًا — سيتم الإعلان عن السعر لاحقًا
+                One-time payment
+                {course.requires_verification && " · Verification required"}
               </div>
             </>
           )}
@@ -105,20 +116,20 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
 
         <button
           onClick={handleCheckout}
-          disabled={course.type !== "subscription"}
+          disabled={hidden}
           className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
             highlight
               ? "btn-gold"
               : "btn-primary"
           }`}
         >
-          {course.type !== "subscription"
+          {hidden
             ? "Coming soon"
             : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        {course.type === "subscription" && (
+        {!hidden && course.type === "subscription" && (
           <p className={`text-center text-xs mt-2 ${highlight ? "text-white/35" : "text-slate-400"}`}>
             Requires sports science diploma or student ID
           </p>
@@ -130,6 +141,7 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
 
 export default function Pricing() {
   useReveal();
+  const { data: priceHidden = {} } = usePriceHiddenMap();
 
   const clinical  = COURSES.filter((c) => c.category === "clinical");
   const language  = COURSES.filter((c) => c.category === "language");
@@ -170,7 +182,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">Requires proof of sports science graduation or enrolment.</p>
           </div>
           <div className="max-w-lg mx-auto reveal">
-            <PriceCard course={SUBSCRIPTION_COURSE} highlight />
+            <PriceCard course={SUBSCRIPTION_COURSE} hidden={!!priceHidden[SUBSCRIPTION_COURSE.id]} highlight />
           </div>
         </div>
       </section>
@@ -184,7 +196,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">One-time payment · No verification required</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {clinical.map((c) => <PriceCard key={c.id} course={c} />)}
+            {clinical.map((c) => <PriceCard key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
           </div>
         </div>
       </section>
@@ -198,7 +210,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">One-time payment (except Medical German subscription)</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
-            {language.filter((c) => c.type === "one_time").map((c) => <PriceCard key={c.id} course={c} />)}
+            {language.filter((c) => c.type === "one_time").map((c) => <PriceCard key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
           </div>
         </div>
       </section>
@@ -212,7 +224,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">One-time payment · No verification required</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
-            {career.map((c) => <PriceCard key={c.id} course={c} />)}
+            {career.map((c) => <PriceCard key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
           </div>
         </div>
       </section>
