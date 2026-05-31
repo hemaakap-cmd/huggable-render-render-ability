@@ -62,6 +62,10 @@ export default function Footer() {
           <div>
             <h3 className="text-slate-200 text-sm font-semibold mb-4 tracking-wide">Contact</h3>
             <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                <span>Bracknellstraße 41<br />51379 Leverkusen, Germany</span>
+              </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
                 <span>info@ssracourses.com</span>
