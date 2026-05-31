@@ -17,6 +17,7 @@ export interface Course {
   interval?: "month";
   type: CourseType;
   priceId: string;       // Stripe Price ID — set in .env or Stripe dashboard
+  paymentLink?: string;  // Optional Stripe Payment Link (overrides checkout session flow)
   category: "clinical" | "language" | "career";
   weeks: string;
   level: string;
@@ -37,6 +38,7 @@ export const COURSES: Course[] = [
     interval: "month",
     type: "subscription",
     priceId: import.meta.env.VITE_STRIPE_PRICE_GERMAN_SUB ?? "price_german_sub",
+    paymentLink: "https://buy.stripe.com/dRm7sLbJm5E0h2m2rab7y0b",
     category: "language",
     weeks: "Ongoing",
     level: "A0 → B1",
