@@ -27,6 +27,26 @@ export interface Course {
 }
 
 export const COURSES: Course[] = [
+  /* ── TEST COURSE (€1 — for payment testing) ── */
+  {
+    id: "test-language-1eur",
+    title: "Test Course — Language (€1)",
+    titleAr: "كورس تجريبي — لغة (١ يورو)",
+    subtitle: "Test payment flow — €1",
+    desc: "A €1 test course used only to verify the Stripe payment flow end-to-end. Safe to subscribe and cancel anytime.",
+    price: 1,
+    interval: "month",
+    type: "subscription",
+    priceId: "price_test_1eur",
+    paymentLink: "https://buy.stripe.com/6oUdR900E2rOaDY5Dmb7y0c",
+    category: "language",
+    weeks: "Test",
+    level: "Test",
+    requires_verification: false,
+    modules: ["Test module 1", "Test module 2"],
+    color: "from-slate-500 to-slate-700",
+  },
+
   /* ── LANGUAGE (subscription) ── */
   {
     id: "medical-german",
