@@ -415,6 +415,7 @@ export type Database = {
     Functions: {
       generate_ssra_cert_code: { Args: never; Returns: string }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
+      is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
