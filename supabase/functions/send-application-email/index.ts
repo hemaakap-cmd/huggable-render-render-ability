@@ -25,7 +25,7 @@ async function sendEmail(to: string[], subject: string, html: string) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_API_KEY}` },
-    body: JSON.stringify({ from: "SSRA Academy <noreply@ssra-academy.de>", to, reply_to: "info@ssra-academy.de", subject, html }),
+    body: JSON.stringify({ from: "SSRA Academy <noreply@ssracourses.com>", to, reply_to: "info@ssracourses.com", subject, html }),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailDetailRow("German Level", sanitize(d.germanLevel || "—")) +
         emailDetailRow("Course Interest", COURSE_NAMES[d.courseId] ?? d.courseId ?? "—")
       )}
-      ${emailNotice("If you have any questions while you wait, feel free to reply to this email or write us at <a href='mailto:info@ssra-academy.de' style='color:#1d4ed8;'>info@ssra-academy.de</a>.")}
+      ${emailNotice("If you have any questions while you wait, feel free to reply to this email or write us at <a href='mailto:info@ssracourses.com' style='color:#1d4ed8;'>info@ssracourses.com</a>.")}
       ${emailSignature()}
     `);
 
@@ -100,11 +100,11 @@ const handler = async (req: Request): Promise<Response> => {
       <div style="background:#f8fafc;border-radius:8px;padding:14px 16px;margin:12px 0;">
         <p style="margin:0;font-size:13px;color:#334155;line-height:1.65;white-space:pre-wrap;">${sanitize(d.motivation || "—")}</p>
       </div>
-      ${emailNotice("Review this application in the <a href='https://ssra-academy.de/ssra-admin/verifications' style='color:#1d4ed8;'>Admin Portal → Verifications</a>.")}
+      ${emailNotice("Review this application in the <a href='https://ssracourses.com/ssra-admin/verifications' style='color:#1d4ed8;'>Admin Portal → Verifications</a>.")}
     `);
 
     try {
-      await sendEmail(["info@ssra-academy.de"], `New Application: ${sanitize(d.fullName)} (${sanitize(d.country || "")})`, adminHtml);
+      await sendEmail(["info@ssracourses.com"], `New Application: ${sanitize(d.fullName)} (${sanitize(d.country || "")})`, adminHtml);
     } catch (adminErr) {
       console.error("Admin notification failed (non-blocking):", adminErr);
     }

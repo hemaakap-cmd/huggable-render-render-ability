@@ -87,8 +87,8 @@ const handler = async (req: Request): Promise<Response> => {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_API_KEY}` },
       body: JSON.stringify({
-        from: "SSRA Academy <noreply@ssra-academy.de>",
-        to: ["info@ssra-academy.de"],
+        from: "SSRA Academy <noreply@ssracourses.com>",
+        to: ["info@ssracourses.com"],
         reply_to: data.email.trim(),
         subject: `Kontaktformular: ${safeSubject}`,
         html: emailLayout(content),
@@ -125,9 +125,9 @@ const handler = async (req: Request): Promise<Response> => {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_API_KEY}` },
         body: JSON.stringify({
-          from: "SSRA Academy <noreply@ssra-academy.de>",
+          from: "SSRA Academy <noreply@ssracourses.com>",
           to: [data.email.trim()],
-          reply_to: "info@ssra-academy.de",
+          reply_to: "info@ssracourses.com",
           subject: "Wir haben Ihre Nachricht erhalten – SSRA Academy",
           html: emailLayout(confirmationContent),
         }),

@@ -64,15 +64,15 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
-                <span>info@ssra-academy.de</span>
+                <span>info@ssracourses.com</span>
               </li>
               <li className="flex items-center gap-2">
                 <Globe2 className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
                 <span>Online · Germany</span>
               </li>
             </ul>
-            <a href="mailto:info@ssra-academy.de" className="inline-flex items-center gap-2 mt-4 text-xs text-[hsl(220,91%,54%)] hover:text-blue-400 transition-colors">
-              <Mail className="w-3.5 h-3.5" /> info@ssra-academy.de
+            <a href="mailto:info@ssracourses.com" className="inline-flex items-center gap-2 mt-4 text-xs text-[hsl(220,91%,54%)] hover:text-blue-400 transition-colors">
+              <Mail className="w-3.5 h-3.5" /> info@ssracourses.com
             </a>
           </div>
         </div>

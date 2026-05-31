@@ -73,7 +73,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-foreground mb-1">Email</div>
-                  <div className="text-sm text-muted-foreground">info@ssra-academy.de</div>
+                  <div className="text-sm text-muted-foreground">info@ssracourses.com</div>
                 </div>
               </div>
 

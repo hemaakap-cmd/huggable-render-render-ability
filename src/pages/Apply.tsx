@@ -124,7 +124,7 @@ export default function Apply() {
       <Helmet>
         <title>Apply — SSRA Academy</title>
         <meta name="description" content="Apply to SSRA Academy for free. Open to sports science graduates worldwide. Complete the form in 5 minutes and get a response within 3–5 business days." />
-        <link rel="canonical" href="https://ssra-academy.de/apply" />
+        <link rel="canonical" href="https://ssracourses.com/apply" />
       </Helmet>
       <Header />
 
