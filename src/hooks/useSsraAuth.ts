@@ -18,11 +18,12 @@ interface AuthState {
   profile: SsraProfile | null;
   loading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
 }
 
 export function useSsraAuth(): AuthState {
   const [state, setState] = useState<AuthState>({
-    user: null, session: null, profile: null, loading: true, isAdmin: false,
+    user: null, session: null, profile: null, loading: true, isAdmin: false, isSuperAdmin: false,
   });
 
   useEffect(() => {
@@ -57,7 +58,8 @@ export function useSsraAuth(): AuthState {
       session,
       profile: profile as SsraProfile | null,
       loading: false,
-      isAdmin: profile?.role === "admin" || profile?.role === "super_admin",
+      isAdmin:      profile?.role === "admin" || profile?.role === "super_admin",
+      isSuperAdmin: profile?.role === "super_admin",
     });
   }
 
