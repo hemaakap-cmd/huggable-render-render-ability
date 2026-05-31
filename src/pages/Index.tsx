@@ -8,6 +8,7 @@ import {
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/stripe";
+import { usePriceHiddenMap } from "@/hooks/useSsraData";
 import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 
 function useReveal() {
@@ -247,11 +248,15 @@ export default function Index() {
                 <div className="p-5 md:p-6">
                   <div className="flex items-start justify-between mb-3">
                     <span className={`text-[10px] md:text-xs font-semibold px-2 py-1 md:px-2.5 rounded-full ${
-                      course.type === "subscription"
-                        ? "bg-amber-50 text-amber-700 border border-amber-200"
-                        : "bg-slate-100 text-slate-600"
+                      priceHidden[course.id]
+                        ? "bg-slate-100 text-slate-600"
+                        : course.type === "subscription"
+                          ? "bg-amber-50 text-amber-700 border border-amber-200"
+                          : "bg-slate-100 text-slate-600"
                     }`}>
-                      {course.type === "subscription" ? `€${course.price}/mo` : "Coming soon · قريبًا"}
+                      {priceHidden[course.id]
+                        ? "Coming soon · قريبًا"
+                        : course.type === "subscription" ? `€${course.price}/mo` : `€${course.price}`}
                     </span>
                     <span className="text-[10px] md:text-xs text-slate-400">{course.weeks}</span>
                   </div>
