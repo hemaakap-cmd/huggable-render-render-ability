@@ -38,11 +38,7 @@ export default function Header() {
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-            scrolled ? "bg-[hsl(220,91%,54%)]" : "bg-white/15 border border-white/25"
-          }`}>
-            <GraduationCap className={`w-5 h-5 text-white`} />
-          </div>
+          <img src="/logo.svg" alt="SSRA Academy" className="w-9 h-9 rounded-xl" />
           <div className="leading-none">
             <span className={`block font-bold font-display text-[15px] tracking-wide ${scrolled ? "text-slate-900" : "text-white"}`}>
               SSRA
