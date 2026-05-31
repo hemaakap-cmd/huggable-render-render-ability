@@ -132,7 +132,7 @@ export default function RefundCancellation() {
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>To request a refund, please follow these steps:</p>
                 <ol className="list-decimal list-inside space-y-2 ml-2">
-                  <li>Send an email to <a href="mailto:info@ssra-academy.de" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssra-academy.de</a> with the subject line "Refund Request".</li>
+                  <li>Send an email to <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> with the subject line "Refund Request".</li>
                   <li>Include your full name, email address used for registration, and order confirmation number.</li>
                   <li>Provide a brief reason for the refund request (this helps us improve our courses).</li>
                   <li>Allow up to 5-10 business days for our team to review and process your request.</li>
@@ -176,7 +176,7 @@ export default function RefundCancellation() {
                 <p>You can cancel your subscription through any of the following methods:</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li><strong className="text-slate-800">Account Settings:</strong> Log into your SSRA Academy account, go to "My Subscription," and click "Cancel Subscription."</li>
-                  <li><strong className="text-slate-800">Email:</strong> Send a cancellation request to <a href="mailto:info@ssra-academy.de" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssra-academy.de</a> from your registered email address.</li>
+                  <li><strong className="text-slate-800">Email:</strong> Send a cancellation request to <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> from your registered email address.</li>
                   <li><strong className="text-slate-800">Stripe Customer Portal:</strong> Access the billing portal directly from your payment confirmation email.</li>
                 </ul>
                 <p className="text-sm text-slate-500 italic">Cancellation requests are typically processed within 24-48 hours. You will receive a confirmation email once your cancellation is complete.</p>
@@ -220,7 +220,7 @@ export default function RefundCancellation() {
               </p>
               <div className="bg-white rounded-xl p-6 border border-slate-100">
                 <p className="text-slate-800 font-semibold">SSRA Academy Support</p>
-                <p className="text-slate-600">Email: <a href="mailto:info@ssra-academy.de" className="text-[hsl(220,91%,54%)] hover:underline">info@ssra-academy.de</a></p>
+                <p className="text-slate-600">Email: <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a></p>
                 <p className="text-slate-600">Online · Germany</p>
                 <p className="text-slate-500 text-sm mt-2">We aim to respond to all inquiries within 24-48 business hours.</p>
               </div>

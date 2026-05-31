@@ -129,7 +129,7 @@ export default function TermsConditions() {
                   <li>Subscription cancellations take effect at the end of the current billing period.</li>
                   <li>No refunds are provided for partial months or unused portions of a subscription period.</li>
                 </ul>
-                <p>To request a refund, please contact us at <a href="mailto:info@ssra-academy.de" className="text-[hsl(220,91%,54%)] hover:underline">info@ssra-academy.de</a>.</p>
+                <p>To request a refund, please contact us at <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a>.</p>
               </div>
             </div>
 
@@ -195,7 +195,7 @@ export default function TermsConditions() {
               </p>
               <div className="bg-slate-50 rounded-xl p-6 border border-slate-100">
                 <p className="text-slate-800 font-semibold">SSRA Academy</p>
-                <p className="text-slate-600">Email: <a href="mailto:info@ssra-academy.de" className="text-[hsl(220,91%,54%)] hover:underline">info@ssra-academy.de</a></p>
+                <p className="text-slate-600">Email: <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a></p>
                 <p className="text-slate-600">Online · Germany</p>
               </div>
             </div>
