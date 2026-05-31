@@ -58,7 +58,7 @@ export const COURSES: Course[] = [
     interval: "month",
     type: "subscription",
     priceId: import.meta.env.VITE_STRIPE_PRICE_GERMAN_SUB ?? "price_german_sub",
-    paymentLink: "https://buy.stripe.com/dRm7sLbJm5E0h2m2rab7y0b",
+    paymentLink: "https://buy.stripe.com/4gM4gz4gUeawfYi8Pyb7y0d",
     category: "language",
     weeks: "Ongoing",
     level: "A0 → B1",
