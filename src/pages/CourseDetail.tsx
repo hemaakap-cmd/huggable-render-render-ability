@@ -8,11 +8,14 @@ import {
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, getCourse } from "@/lib/stripe";
+import { usePriceHiddenMap } from "@/hooks/useSsraData";
 
 export default function CourseDetail() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const course = getCourse(id);
+  const { data: priceHidden = {} } = usePriceHiddenMap();
+  const hidden = !!priceHidden[id];
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
