@@ -34,7 +34,7 @@ export const COURSES: Course[] = [
     titleAr: "الألمانية الطبية",
     subtitle: "German for Sports Scientists — Monthly Subscription",
     desc: "The cornerstone subscription course. Medical vocabulary, clinic conversations, patient communication, and B1 exam prep — all in Arabic-guided modules. New content every month.",
-    price: 29,
+    price: 19,
     interval: "month",
     type: "subscription",
     priceId: import.meta.env.VITE_STRIPE_PRICE_GERMAN_SUB ?? "price_german_sub",
