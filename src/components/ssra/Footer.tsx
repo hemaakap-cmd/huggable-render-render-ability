@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { GraduationCap, Mail, Globe2, Heart } from "lucide-react";
+import { GraduationCap, Mail, Globe2, Heart, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
