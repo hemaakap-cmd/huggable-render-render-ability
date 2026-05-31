@@ -1,0 +1,14 @@
+{
+  "name": "SSRA Academy",
+  "short_name": "SSRA",
+  "description": "Sports Science & Rehabilitation Academy — Medical German, Rehabilitation, and Career Entry in Germany.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#071020",
+  "theme_color": "#071020",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
