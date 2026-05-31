@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 const CODE_LEN = 6;
 const RESEND_COOLDOWN = 60;
 
+const getOtpType = (mode: string | null) => (mode === "signup" ? "signup" : "magiclink");
+
 export default function VerifyOtp() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -14,6 +16,7 @@ export default function VerifyOtp() {
 
   const email = params.get("email") ?? "";
   const redirect = params.get("redirect") ?? "/dashboard";
+  const mode = params.get("mode") ?? "login";
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LEN).fill(""));
   const [loading, setLoading] = useState(false);
@@ -61,7 +64,7 @@ export default function VerifyOtp() {
 
   const verify = async (code: string) => {
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: getOtpType(mode) });
     setLoading(false);
     if (error) {
       toast({ title: "Invalid code", description: error.message, variant: "destructive" });
@@ -76,7 +79,6 @@ export default function VerifyOtp() {
   const resend = async () => {
     if (cooldown > 0) return;
     setResending(true);
-    const mode = params.get("mode") ?? "login";
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: mode === "signup" },
