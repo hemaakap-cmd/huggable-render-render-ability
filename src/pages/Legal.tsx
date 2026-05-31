@@ -122,7 +122,7 @@ export default function Legal() {
 
             <div className="p-5 rounded-xl bg-muted border border-border space-y-2">
               <p className="font-semibold text-foreground">SSRA — Sports Science &amp; Rehabilitation Academy</p>
-              <p>Germany</p>
+              <p>Bracknellstraße 41<br />51379 Leverkusen<br />Germany</p>
               <p>Email: <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a></p>
             </div>
 
