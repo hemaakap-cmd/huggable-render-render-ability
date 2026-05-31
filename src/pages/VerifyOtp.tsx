@@ -64,13 +64,18 @@ export default function VerifyOtp() {
 
   const verify = async (code: string) => {
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: getOtpType(mode) });
+    const { data, error } = await supabase.functions.invoke("verify-otp-code", {
+      body: { email, token: code, type: getOtpType(mode) },
+    });
     setLoading(false);
-    if (error) {
-      toast({ title: "Invalid code", description: error.message, variant: "destructive" });
+    if (error || data?.error) {
+      toast({ title: "Invalid code", description: data?.error || error?.message, variant: "destructive" });
       setDigits(Array(CODE_LEN).fill(""));
       inputs.current[0]?.focus();
       return;
+    }
+    if (data?.session) {
+      await supabase.auth.setSession(data.session);
     }
     toast({ title: "Verified!", description: "Welcome to SSRA." });
     navigate(redirect, { replace: true });
