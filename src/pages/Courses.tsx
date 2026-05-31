@@ -62,7 +62,7 @@ function CourseRow({ course }: { course: Course }) {
               {course.type === "subscription" ? (
                 <span className="badge-gold flex items-center gap-1"><Crown className="w-3 h-3" /> Subscription · €{course.price}/mo</span>
               ) : (
-                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> €{course.price} one-time</span>
+                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> Coming soon · قريبًا</span>
               )}
               {course.requires_verification && (
                 <span className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
@@ -89,9 +89,12 @@ function CourseRow({ course }: { course: Course }) {
           <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
             <button
               onClick={handleEnrol}
-              className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2"
+              disabled={course.type !== "subscription"}
+              className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+              {course.type !== "subscription"
+                ? "Coming soon"
+                : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
               <ArrowRight className="w-4 h-4" />
             </button>
             <Link
