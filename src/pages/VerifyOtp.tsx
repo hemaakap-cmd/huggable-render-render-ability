@@ -110,7 +110,7 @@ export default function VerifyOtp() {
           </div>
           <h1 className="text-center text-xl font-bold text-slate-900 mb-2">Verify your email</h1>
           <p className="text-center text-sm text-slate-500 mb-6">
-            We sent an 8-digit code to<br />
+            We sent a 6-digit code to<br />
             <span className="font-semibold text-slate-700">{email}</span>
           </p>
 
