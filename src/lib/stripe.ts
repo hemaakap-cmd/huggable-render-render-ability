@@ -42,7 +42,7 @@ export const COURSES: Course[] = [
     category: "language",
     weeks: "Test",
     level: "Test",
-    requires_verification: false,
+    requires_verification: true,
     modules: ["Test module 1", "Test module 2"],
     color: "from-slate-500 to-slate-700",
   },
