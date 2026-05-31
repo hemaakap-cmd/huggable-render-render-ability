@@ -1,43 +1,39 @@
 /// <reference types="npm:@types/react@18.3.1" />
 
 import * as React from 'npm:react@18.3.1'
-
 import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Preview,
-  Text,
+  Body, Button, Container, Head, Heading, Html, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 
 interface RecoveryEmailProps {
   siteName: string
   confirmationUrl: string
+  token?: string
 }
 
-export const RecoveryEmail = ({
-  siteName,
-  confirmationUrl,
-}: RecoveryEmailProps) => (
+export const RecoveryEmail = ({ siteName, confirmationUrl, token }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Reset your password for {siteName}</Preview>
+    <Preview>Reset your {siteName} password{token ? ` — code ${token}` : ''}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
+          We received a request to reset your password for <strong>{siteName}</strong>.
+          Use the code below or click the button to continue.
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Reset Password
-        </Button>
+
+        {token && (
+          <Section style={codeBox}>
+            <Text style={codeLabel}>Your reset code</Text>
+            <Text style={codeText}>{token}</Text>
+          </Section>
+        )}
+
+        <Button style={button} href={confirmationUrl}>Reset Password</Button>
+
         <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
+          If you didn't request a password reset, you can safely ignore this email.
         </Text>
       </Container>
     </Body>
@@ -47,25 +43,23 @@ export const RecoveryEmail = ({
 export default RecoveryEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+const container = { padding: '20px 25px', maxWidth: '560px' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#0f172a', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: '#334155', lineHeight: '1.6', margin: '0 0 18px' }
+const codeBox = {
+  background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px',
+  padding: '18px 20px', margin: '8px 0 22px', textAlign: 'center' as const,
 }
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+const codeLabel = {
+  fontSize: '11px', color: '#64748b', textTransform: 'uppercase' as const,
+  letterSpacing: '1px', margin: '0 0 6px', fontWeight: 600 as const,
+}
+const codeText = {
+  fontSize: '30px', fontWeight: 'bold' as const, color: '#0f172a',
+  letterSpacing: '8px', margin: 0, fontFamily: 'monospace',
 }
 const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
+  backgroundColor: '#1d4ed8', color: '#ffffff', fontSize: '14px',
+  borderRadius: '8px', padding: '12px 22px', textDecoration: 'none', fontWeight: 600 as const,
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const footer = { fontSize: '12px', color: '#94a3b8', margin: '28px 0 0' }
