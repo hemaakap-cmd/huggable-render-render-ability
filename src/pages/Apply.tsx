@@ -29,6 +29,7 @@ const STEPS = [
 ];
 
 const COURSES = [
+  { id: "test-language-1eur",    label: "🧪 Test Course — Language (€1) — كورس تجريبي" },
   { id: "medical-german",        label: "Medizinisches Deutsch (الألمانية الطبية)" },
   { id: "sport-rehab-basics",    label: "Grundlagen der Sportrehabilitation" },
   { id: "bewegungsanalyse",      label: "Bewegungsanalyse & Funktionsdiagnostik" },
