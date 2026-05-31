@@ -240,4 +240,5 @@ export function getCourse(id: string) {
   return COURSES.find((c) => c.id === id);
 }
 
-export const SUBSCRIPTION_COURSE = COURSES.find((c) => c.type === "subscription")!;
+export const SUBSCRIPTION_COURSE = COURSES.find((c) => c.id === "medical-german")!;
+export const TEST_COURSE = COURSES.find((c) => c.id === "test-language-1eur")!;
