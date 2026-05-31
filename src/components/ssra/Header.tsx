@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, GraduationCap, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
+import { Menu, X, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
 const NAV = [
