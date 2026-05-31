@@ -42,6 +42,14 @@ export default function AdminVerifications() {
   );
 
   const handleUpdate = async (id: string, status: "approved" | "rejected") => {
+    if (status === "rejected" && !notes.trim()) {
+      toast({ title: "Notes required", description: "Please add a reason before rejecting.", variant: "destructive" });
+      return;
+    }
+    const confirmMsg = status === "approved"
+      ? "Approve this verification? The student will gain access to the Medical German subscription."
+      : "Reject this verification? The student will be notified.";
+    if (!window.confirm(confirmMsg)) return;
     await update.mutateAsync({ id, status, notes });
     toast({
       title: status === "approved" ? "Verification approved" : "Verification rejected",
@@ -139,7 +147,7 @@ export default function AdminVerifications() {
                       {v.status === "pending" && (
                         <div className="space-y-3">
                           <div>
-                            <label className="text-xs text-slate-500 mb-1 block">Admin notes (optional)</label>
+                            <label className="text-xs text-slate-500 mb-1 block">Admin notes <span className="text-red-400">(required if rejecting)</span></label>
                             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
                               placeholder="Reason for approval/rejection…"
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30" />

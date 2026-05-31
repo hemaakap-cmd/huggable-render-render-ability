@@ -30,7 +30,7 @@ export default function Checkout() {
           customerEmail: email,
           successUrl:    `${origin}/payment-success?courseId=${course.id}&session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl:     `${origin}/checkout?courseId=${course.id}`,
-          metadata:      { courseName: course.title, studentName: name },
+          metadata:      { courseId: course.id, courseName: course.title, studentName: name, customerEmail: email },
         },
       });
       if (error) throw new Error(error.message);

@@ -10,12 +10,25 @@ export default function StudentLogin() {
   const { toast }   = useToast();
   const redirect    = params.get("redirect") ?? "/dashboard";
 
-  const [tab, setTab]         = useState<"login" | "signup">("login");
-  const [email, setEmail]     = useState("");
+  const [tab, setTab]           = useState<"login" | "signup">("login");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName]       = useState("");
-  const [show, setShow]       = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [name, setName]         = useState("");
+  const [show, setShow]         = useState(false);
+  const [loading, setLoading]   = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const handleReset = async () => {
+    if (!email) { toast({ title: "Enter your email first", variant: "destructive" }); return; }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setResetSent(true);
+    toast({ title: "Password reset email sent", description: "Check your inbox." });
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +41,10 @@ export default function StudentLogin() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password.length < 8) {
+      toast({ title: "Password too short", description: "Minimum 8 characters required.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email, password,
@@ -96,6 +113,16 @@ export default function StudentLogin() {
                   className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
                 </button>
+                <div className="text-center mt-3">
+                  {resetSent ? (
+                    <span className="text-xs text-emerald-600">Reset email sent — check your inbox.</span>
+                  ) : (
+                    <button type="button" onClick={handleReset}
+                      className="text-xs text-slate-400 hover:text-[hsl(220,91%,54%)] transition-colors">
+                      Forgot your password?
+                    </button>
+                  )}
+                </div>
               </form>
             ) : (
               <form onSubmit={handleSignup} className="space-y-4">

@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Users, Mail, Globe2 } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminStudents } from "@/hooks/useSsraData";
 
+type SubFilter = "all" | "active" | "none";
+
 export default function AdminStudents() {
-  const [search, setSearch] = useState("");
-  const { data = [], isLoading } = useAdminStudents(search);
+  const [search, setSearch]       = useState("");
+  const [subFilter, setSubFilter] = useState<SubFilter>("all");
+  const { data = [], isLoading }  = useAdminStudents(search);
+
+  const filtered = useMemo(() => {
+    if (subFilter === "all") return data;
+    if (subFilter === "active") return data.filter((s: any) => s.ssra_subscriptions?.[0]?.status === "active");
+    return data.filter((s: any) => !s.ssra_subscriptions?.[0]?.status);
+  }, [data, subFilter]);
 
   return (
     <AdminLayout>
@@ -15,15 +24,27 @@ export default function AdminStudents() {
             <h1 className="font-display text-2xl font-bold text-slate-900">Students</h1>
             <p className="text-slate-500 text-sm mt-1">All registered students on SSRA.</p>
           </div>
-          <div className="text-2xl font-bold font-display text-slate-400">{data.length}</div>
+          <div className="text-2xl font-bold font-display text-slate-400">{filtered.length}</div>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name…"
-            className="w-full pl-9 pr-4 h-10 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white" />
+        {/* Search + filters */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
+            {(["all", "active", "none"] as SubFilter[]).map((v) => (
+              <button key={v} onClick={() => setSubFilter(v)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${
+                  subFilter === v ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                }`}>
+                {v === "none" ? "No Sub" : v === "active" ? "Active Sub" : "All"}
+              </button>
+            ))}
+          </div>
+          <div className="relative flex-1 min-w-[180px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name…"
+              className="w-full pl-9 pr-4 h-10 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white" />
+          </div>
         </div>
 
         {/* Table */}
@@ -37,14 +58,14 @@ export default function AdminStudents() {
 
           {isLoading ? (
             <div className="text-center py-12 text-slate-400 text-sm">Loading…</div>
-          ) : data.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-10 h-10 text-slate-200 mx-auto mb-3" />
               <div className="text-slate-400 text-sm">No students found.</div>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {data.map((s: any) => {
+              {filtered.map((s: any) => {
                 const subStatus = s.ssra_subscriptions?.[0]?.status;
                 return (
                   <div key={s.id} className="grid grid-cols-12 gap-4 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors">
