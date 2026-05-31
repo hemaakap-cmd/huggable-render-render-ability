@@ -34,40 +34,56 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY')!
     )
 
-    const { data: alias } = await adminClient
+    const { data: aliases } = await adminClient
       .from('auth_otp_aliases')
       .select('id, original_token')
       .eq('email', normalizedEmail)
-      .eq('otp_type', otpType)
       .eq('alias_code', normalizedToken)
       .is('consumed_at', null)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+      .limit(5)
 
-    const tokenToVerify = alias?.original_token ?? normalizedToken
-    const { data, error } = await authClient.auth.verifyOtp({
-      email: normalizedEmail,
-      token: tokenToVerify,
-      type: otpType,
-    })
+    const candidates = [
+      ...(aliases ?? []).map((alias) => ({ aliasId: alias.id, token: alias.original_token, type: otpType })),
+      { aliasId: null, token: normalizedToken, type: otpType },
+    ]
 
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    let verifiedData: unknown = null
+    let verifiedAliasId: string | null = null
+    let lastError = 'Token has expired or is invalid'
+
+    for (const candidate of candidates) {
+      const { data, error } = await authClient.auth.verifyOtp({
+        email: normalizedEmail,
+        token: candidate.token,
+        type: candidate.type,
+      })
+
+      if (!error) {
+        verifiedData = data
+        verifiedAliasId = candidate.aliasId
+        break
+      }
+
+      lastError = error.message
+    }
+
+    if (!verifiedData) {
+      return new Response(JSON.stringify({ error: lastError }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    if (alias?.id) {
+    if (verifiedAliasId) {
       await adminClient
         .from('auth_otp_aliases')
         .update({ consumed_at: new Date().toISOString() })
-        .eq('id', alias.id)
+        .eq('id', verifiedAliasId)
     }
 
-    return new Response(JSON.stringify({ session: data.session, user: data.user }), {
+    return new Response(JSON.stringify(verifiedData), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
