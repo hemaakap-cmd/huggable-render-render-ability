@@ -76,6 +76,7 @@ export type Database = {
           modules: Json | null
           price_egp: number | null
           price_eur: number
+          price_hidden: boolean
           requires_verification: boolean
           sort_order: number
           stripe_price_id: string | null
@@ -97,6 +98,7 @@ export type Database = {
           modules?: Json | null
           price_egp?: number | null
           price_eur: number
+          price_hidden?: boolean
           requires_verification?: boolean
           sort_order?: number
           stripe_price_id?: string | null
@@ -118,6 +120,7 @@ export type Database = {
           modules?: Json | null
           price_egp?: number | null
           price_eur?: number
+          price_hidden?: boolean
           requires_verification?: boolean
           sort_order?: number
           stripe_price_id?: string | null
@@ -210,6 +213,85 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      ssra_session_attendance: {
+        Row: {
+          attended_at: string
+          id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          attended_at?: string
+          id?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          attended_at?: string
+          id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_session_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ssra_sessions: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_cancelled: boolean
+          recording_url: string | null
+          scheduled_at: string
+          title: string
+          zoom_link: string
+          zoom_password: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_cancelled?: boolean
+          recording_url?: string | null
+          scheduled_at: string
+          title: string
+          zoom_link: string
+          zoom_password?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_cancelled?: boolean
+          recording_url?: string | null
+          scheduled_at?: string
+          title?: string
+          zoom_link?: string
+          zoom_password?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ssra_subscriptions: {
         Row: {

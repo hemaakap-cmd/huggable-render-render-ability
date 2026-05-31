@@ -1,13 +1,11 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ArrowRight, Mail } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/stripe";
 
 export default function PaymentSuccess() {
   const [params] = useSearchParams();
-  const { t }    = useTranslation();
   const courseId = params.get("courseId");
   const course   = courseId ? getCourse(courseId) : null;
 
@@ -42,17 +40,17 @@ export default function PaymentSuccess() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/courses">
               <button className="btn-primary px-6 py-3 rounded-xl text-sm font-semibold flex items-center gap-2">
-                {t("paymentSuccess.bookAnother")} <ArrowRight className="w-4 h-4" />
+                Browse More Courses <ArrowRight className="w-4 h-4" />
               </button>
             </Link>
             <Link to="/dashboard">
               <button className="btn-outline px-6 py-3 rounded-xl text-sm font-semibold">
-                {t("paymentSuccess.manageBookingLink")}
+                Go to Dashboard
               </button>
             </Link>
             <Link to="/">
               <button className="btn-outline px-6 py-3 rounded-xl text-sm font-semibold">
-                {t("paymentSuccess.backHome")}
+                Back to Home
               </button>
             </Link>
           </div>

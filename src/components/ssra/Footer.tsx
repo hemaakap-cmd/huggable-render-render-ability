@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { GraduationCap, Mail, Globe2, Heart, Twitter, Instagram, Youtube } from "lucide-react";
+import { GraduationCap, Mail, Globe2, Heart } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -49,7 +49,6 @@ export default function Footer() {
                 ["About Us", "/about"],
                 ["Apply Free", "/apply"],
                 ["Pricing", "/pricing"],
-                ["Verify Certificate", "/verify"],
                 ["Contact", "/contact"],
               ].map(([l, h]) => (
                 <li key={l}>
@@ -72,13 +71,9 @@ export default function Footer() {
                 <span>Online · Germany</span>
               </li>
             </ul>
-            <div className="flex gap-3 mt-5">
-              {[Twitter, Instagram, Youtube].map((Icon, i) => (
-                <div key={i} className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors">
-                  <Icon className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
-                </div>
-              ))}
-            </div>
+            <a href="mailto:info@ssra-academy.de" className="inline-flex items-center gap-2 mt-4 text-xs text-[hsl(220,91%,54%)] hover:text-blue-400 transition-colors">
+              <Mail className="w-3.5 h-3.5" /> info@ssra-academy.de
+            </a>
           </div>
         </div>
 
@@ -87,9 +82,9 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <span>© {new Date().getFullYear()} SSRA — Sports Science &amp; Rehabilitation Academy. All rights reserved.</span>
           <div className="flex gap-5">
-            <Link to="/privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-slate-400 transition-colors">Terms of Use</Link>
-            <Link to="/refund" className="hover:text-slate-400 transition-colors">Refund & Cancellation</Link>
+            <Link to="/legal#privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
+            <Link to="/legal#terms" className="hover:text-slate-400 transition-colors">Terms of Use</Link>
+            <Link to="/legal#impressum" className="hover:text-slate-400 transition-colors">Impressum</Link>
           </div>
         </div>
       </div>

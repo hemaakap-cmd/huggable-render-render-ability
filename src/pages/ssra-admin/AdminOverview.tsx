@@ -62,8 +62,8 @@ export default function AdminOverview() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={Users}      label="Total Students"         value={statsLoading ? "…" : stats?.totalStudents ?? 0}        color="bg-blue-100 text-[hsl(220,91%,54%)]"  href="/ssra-admin/students" />
           <StatCard icon={ShieldCheck}label="Pending Verifications"  value={statsLoading ? "…" : stats?.pendingVerifications ?? 0} color="bg-amber-100 text-amber-600"             href="/ssra-admin/verifications" sub="Needs review" />
-          <StatCard icon={CreditCard} label="Active Subscriptions"   value={statsLoading ? "…" : stats?.activeSubscriptions ?? 0}  color="bg-emerald-100 text-emerald-600"        href="/ssra-admin/subscriptions" />
-          <StatCard icon={TrendingUp} label="Total Revenue"          value={statsLoading ? "…" : `€${(stats?.totalRevenue ?? 0).toFixed(0)}`} color="bg-violet-100 text-violet-600" href="/ssra-admin/revenue" />
+          <StatCard icon={CreditCard} label="Active Subscriptions"   value={statsLoading ? "…" : stats?.activeSubscriptions ?? 0}  color="bg-emerald-100 text-emerald-600"        href="/ssra-admin/enrollments" />
+          <StatCard icon={TrendingUp} label="Total Revenue"          value={statsLoading ? "…" : `€${(stats?.totalRevenue ?? 0).toFixed(0)}`} color="bg-violet-100 text-violet-600" />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">

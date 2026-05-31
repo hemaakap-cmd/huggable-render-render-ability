@@ -82,13 +82,13 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // 1) Send notification to MASSAVO team
+    // 1) Send notification to SSRA team
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_API_KEY}` },
       body: JSON.stringify({
-        from: "MASSAVO Contact <noreply@massavo.com>",
-        to: ["info@massavo.com"],
+        from: "SSRA Academy <noreply@ssra-academy.de>",
+        to: ["info@ssra-academy.de"],
         reply_to: data.email.trim(),
         subject: `Kontaktformular: ${safeSubject}`,
         html: emailLayout(content),
@@ -125,10 +125,10 @@ const handler = async (req: Request): Promise<Response> => {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_API_KEY}` },
         body: JSON.stringify({
-          from: "MASSAVO <noreply@massavo.com>",
+          from: "SSRA Academy <noreply@ssra-academy.de>",
           to: [data.email.trim()],
-          reply_to: "info@massavo.com",
-          subject: "Wir haben Ihre Nachricht erhalten – MASSAVO",
+          reply_to: "info@ssra-academy.de",
+          subject: "Wir haben Ihre Nachricht erhalten – SSRA Academy",
           html: emailLayout(confirmationContent),
         }),
       });

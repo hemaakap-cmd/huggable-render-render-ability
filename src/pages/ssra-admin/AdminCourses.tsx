@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
-import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload } from "lucide-react";
+import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
-import { useAdminCourses, useUpsertCourse, useToggleCourse } from "@/hooks/useSsraData";
+import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,14 +11,15 @@ const EMPTY: Record<string, unknown> = {
   id: "", title: "", title_ar: "", subtitle: "", description: "",
   category: "clinical", type: "one_time", price_eur: 0, price_egp: 0,
   weeks: "", level: "Beginner", requires_verification: false,
-  is_active: true, sort_order: 99, stripe_price_id: "",
+  is_active: true, price_hidden: false, sort_order: 99, stripe_price_id: "",
   image_url: "", modules: [],
 };
 
 export default function AdminCourses() {
   const { data: courses = [], isLoading } = useAdminCourses();
-  const upsert  = useUpsertCourse();
-  const toggle  = useToggleCourse();
+  const upsert       = useUpsertCourse();
+  const toggle       = useToggleCourse();
+  const togglePrice  = useTogglePriceHidden();
   const { toast } = useToast();
 
   const [modal, setModal]     = useState(false);
@@ -86,6 +87,11 @@ export default function AdminCourses() {
     toast({ title: c.is_active ? "Course hidden" : "Course visible" });
   }
 
+  async function handleTogglePrice(c: { id: string; price_hidden: boolean }) {
+    await togglePrice.mutateAsync({ id: c.id, price_hidden: !c.price_hidden });
+    toast({ title: c.price_hidden ? "Price is now visible" : "Price hidden — showing 'Coming Soon'" });
+  }
+
   const categoryColor: Record<string, string> = {
     clinical:  "bg-blue-50 text-blue-700",
     language:  "bg-emerald-50 text-emerald-700",
@@ -119,6 +125,7 @@ export default function AdminCourses() {
                   <th className="text-left px-4 py-3 hidden md:table-cell">Category</th>
                   <th className="text-right px-4 py-3">EUR</th>
                   <th className="text-right px-4 py-3 hidden sm:table-cell">EGP</th>
+                  <th className="text-center px-4 py-3">Show Price</th>
                   <th className="text-center px-4 py-3">Active</th>
                   <th className="text-right px-4 py-3"></th>
                 </tr>
@@ -149,6 +156,14 @@ export default function AdminCourses() {
                     <td className="px-4 py-3.5 text-right font-bold text-slate-800">€{c.price_eur}</td>
                     <td className="px-4 py-3.5 text-right text-slate-500 text-xs hidden sm:table-cell">
                       {c.price_egp ? `${Number(c.price_egp).toLocaleString()} ج.م` : "—"}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <button onClick={() => handleTogglePrice(c)} title={c.price_hidden ? "Price hidden — click to show" : "Price visible — click to hide"}
+                        className="text-slate-400 hover:text-slate-700 transition-colors">
+                        {c.price_hidden
+                          ? <EyeOff className="w-4.5 h-4.5 text-amber-500" />
+                          : <Eye className="w-4.5 h-4.5 text-emerald-500" />}
+                      </button>
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <button onClick={() => handleToggle(c)} className="text-slate-400 hover:text-slate-700 transition-colors">
@@ -306,12 +321,18 @@ export default function AdminCourses() {
               </div>
 
               {/* Checkboxes */}
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.requires_verification as boolean}
                     onChange={(e) => field("requires_verification", e.target.checked)}
                     className="w-4 h-4 rounded accent-[hsl(220,91%,54%)]" />
                   <span className="text-sm text-slate-700">Requires diploma verification</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.price_hidden as boolean}
+                    onChange={(e) => field("price_hidden", e.target.checked)}
+                    className="w-4 h-4 rounded accent-amber-500" />
+                  <span className="text-sm text-slate-700">Hide price (show "Coming Soon")</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.is_active as boolean}

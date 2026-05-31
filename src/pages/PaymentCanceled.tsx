@@ -1,12 +1,9 @@
 import { Link } from "react-router-dom";
 import { XCircle } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 
 export default function PaymentCanceled() {
-  const { t } = useTranslation();
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
@@ -22,12 +19,12 @@ export default function PaymentCanceled() {
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/pricing">
               <button className="btn-primary px-6 py-3 rounded-xl text-sm font-semibold">
-                {t("paymentCanceled.tryAgain")}
+                View Pricing
               </button>
             </Link>
             <Link to="/">
               <button className="btn-outline px-6 py-3 rounded-xl text-sm font-semibold">
-                {t("paymentCanceled.backHome")}
+                Back to Home
               </button>
             </Link>
           </div>
