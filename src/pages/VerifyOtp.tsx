@@ -76,7 +76,11 @@ export default function VerifyOtp() {
   const resend = async () => {
     if (cooldown > 0) return;
     setResending(true);
-    const { error } = await supabase.auth.resend({ type: "signup", email });
+    const mode = params.get("mode") ?? "login";
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: mode === "signup" },
+    });
     setResending(false);
     if (error) {
       toast({ title: "Couldn't resend", description: error.message, variant: "destructive" });
