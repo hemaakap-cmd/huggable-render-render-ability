@@ -43,7 +43,7 @@ export default function StudentLogin() {
 
     toast({
       title: "Check your email",
-      description: "We sent you an 8-digit code.",
+      description: "We sent you a 6-digit code.",
     });
     navigate(`/verify-otp?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirect)}&mode=${mode}`);
   };
@@ -94,7 +94,7 @@ export default function StudentLogin() {
             {tab === "login" ? (
               <form onSubmit={handleLogin} className="space-y-4">
                 <p className="text-sm text-slate-500 mb-2">
-                  Enter your email and we'll send you an 8-digit login code.
+                  Enter your email and we'll send you a 6-digit login code.
                 </p>
                 <div>
                   <label className="text-sm font-medium text-slate-700 block mb-1.5">Email</label>
@@ -119,7 +119,7 @@ export default function StudentLogin() {
             ) : (
               <form onSubmit={handleSignup} className="space-y-4">
                 <p className="text-sm text-slate-500 mb-2">
-                  Sign up with just your email — we'll send you an 8-digit code to verify.
+                  Sign up with just your email — we'll send you a 6-digit code to verify.
                 </p>
                 <div>
                   <label className="text-sm font-medium text-slate-700 block mb-1.5">Full Name</label>
