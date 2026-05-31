@@ -141,6 +141,7 @@ function PriceCard({ course, hidden = false, highlight = false }: { course: Cour
 
 export default function Pricing() {
   useReveal();
+  const { data: priceHidden = {} } = usePriceHiddenMap();
 
   const clinical  = COURSES.filter((c) => c.category === "clinical");
   const language  = COURSES.filter((c) => c.category === "language");
@@ -181,7 +182,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">Requires proof of sports science graduation or enrolment.</p>
           </div>
           <div className="max-w-lg mx-auto reveal">
-            <PriceCard course={SUBSCRIPTION_COURSE} highlight />
+            <PriceCard course={SUBSCRIPTION_COURSE} hidden={!!priceHidden[SUBSCRIPTION_COURSE.id]} highlight />
           </div>
         </div>
       </section>
@@ -195,7 +196,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">One-time payment · No verification required</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {clinical.map((c) => <PriceCard key={c.id} course={c} />)}
+            {clinical.map((c) => <PriceCard key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
           </div>
         </div>
       </section>
@@ -209,7 +210,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">One-time payment (except Medical German subscription)</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
-            {language.filter((c) => c.type === "one_time").map((c) => <PriceCard key={c.id} course={c} />)}
+            {language.filter((c) => c.type === "one_time").map((c) => <PriceCard key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
           </div>
         </div>
       </section>
@@ -223,7 +224,7 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">One-time payment · No verification required</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
-            {career.map((c) => <PriceCard key={c.id} course={c} />)}
+            {career.map((c) => <PriceCard key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
           </div>
         </div>
       </section>
