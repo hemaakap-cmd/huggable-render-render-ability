@@ -27,20 +27,15 @@ export function useSsraAuth(): AuthState {
   });
 
   useEffect(() => {
+    const empty = { user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false };
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchProfile(session.user.id, session);
-      } else {
-        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false });
-      }
+      if (session?.user) fetchProfile(session.user.id, session);
+      else setState(empty);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        fetchProfile(session.user.id, session);
-      } else {
-        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false });
-      }
+      if (session?.user) fetchProfile(session.user.id, session);
+      else setState(empty);
     });
 
     return () => subscription.unsubscribe();

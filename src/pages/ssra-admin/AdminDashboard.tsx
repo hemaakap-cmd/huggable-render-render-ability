@@ -103,9 +103,9 @@ export default function AdminDashboard() {
   [sessions]);
 
   const v = statsLoading ? "…" : "";
-  const totalStudents = v || stats?.totalStudents ?? 0;
-  const pendingCount  = v || stats?.pendingVerifications ?? 0;
-  const activeSubs    = v || stats?.activeSubscriptions ?? 0;
+  const totalStudents = v || (stats?.totalStudents ?? 0);
+  const pendingCount  = v || (stats?.pendingVerifications ?? 0);
+  const activeSubs    = v || (stats?.activeSubscriptions ?? 0);
 
   return (
     <AdminLayout>

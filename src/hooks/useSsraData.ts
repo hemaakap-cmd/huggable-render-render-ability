@@ -183,10 +183,10 @@ export function useUpsertCourse() {
     mutationFn: async (course: Record<string, unknown>) => {
       const { id, ...rest } = course;
       if (id) {
-        const { error } = await supabase.from("ssra_courses").update({ ...rest, updated_at: new Date().toISOString() }).eq("id", id as string);
+        const { error } = await supabase.from("ssra_courses").update({ ...rest, updated_at: new Date().toISOString() } as never).eq("id", id as string);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("ssra_courses").insert(rest);
+        const { error } = await supabase.from("ssra_courses").insert(rest as never);
         if (error) throw error;
       }
     },
@@ -209,7 +209,7 @@ export function useTogglePriceHidden() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, price_hidden }: { id: string; price_hidden: boolean }) => {
-      const { error } = await supabase.from("ssra_courses").update({ price_hidden, updated_at: new Date().toISOString() }).eq("id", id);
+      const { error } = await supabase.from("ssra_courses").update({ price_hidden, updated_at: new Date().toISOString() } as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
@@ -271,10 +271,10 @@ export function useUpsertSession() {
     mutationFn: async (session: Record<string, unknown>) => {
       const { id, ...rest } = session;
       if (id) {
-        const { error } = await supabase.from("ssra_sessions").update(rest).eq("id", id as string);
+        const { error } = await supabase.from("ssra_sessions").update(rest as never).eq("id", id as string);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("ssra_sessions").insert(rest);
+        const { error } = await supabase.from("ssra_sessions").insert(rest as never);
         if (error) throw error;
       }
     },
