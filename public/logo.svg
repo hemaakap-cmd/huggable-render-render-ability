@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#071020"/>
+      <stop offset="100%" stop-color="#1B3A8C"/>
+    </linearGradient>
+    <linearGradient id="sh" x1="20" y1="11" x2="20" y2="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#3B82F6" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <!-- Background badge -->
+  <rect width="40" height="40" rx="9" fill="url(#bg)"/>
+  <!-- Shield -->
+  <path d="M8 11 L32 11 L32 20 Q32 28 20 34 Q8 28 8 20 Z"
+        fill="url(#sh)" stroke="rgba(255,255,255,0.18)" stroke-width="0.75"/>
+  <!-- Graduation cap board (gold) -->
+  <rect x="11" y="7.5" width="18" height="2.5" rx="1.25" fill="#F5A623"/>
+  <!-- Tassel cord -->
+  <line x1="26.5" y1="10" x2="26.5" y2="13.5" stroke="#F5A623" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Tassel knot -->
+  <circle cx="26.5" cy="14.6" r="1.15" fill="#F5A623"/>
+  <!-- S-curve (sports science · movement · rehabilitation) -->
+  <path d="M25 16 Q25 13 20 13 Q15 13 15 19 Q15 22 20 22 Q25 22 25 28 Q25 31 20 31 Q15 31 15 27"
+        stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
