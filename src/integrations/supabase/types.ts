@@ -76,6 +76,7 @@ export type Database = {
           modules: Json | null
           price_egp: number | null
           price_eur: number
+          price_hidden: boolean
           requires_verification: boolean
           sort_order: number
           stripe_price_id: string | null
@@ -97,6 +98,7 @@ export type Database = {
           modules?: Json | null
           price_egp?: number | null
           price_eur: number
+          price_hidden?: boolean
           requires_verification?: boolean
           sort_order?: number
           stripe_price_id?: string | null
@@ -118,6 +120,7 @@ export type Database = {
           modules?: Json | null
           price_egp?: number | null
           price_eur?: number
+          price_hidden?: boolean
           requires_verification?: boolean
           sort_order?: number
           stripe_price_id?: string | null

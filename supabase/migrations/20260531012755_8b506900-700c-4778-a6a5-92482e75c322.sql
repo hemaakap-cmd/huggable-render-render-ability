@@ -1,0 +1,1 @@
+ALTER TABLE public.ssra_courses ADD COLUMN IF NOT EXISTS price_hidden boolean NOT NULL DEFAULT false;
