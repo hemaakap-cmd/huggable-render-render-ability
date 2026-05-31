@@ -68,7 +68,7 @@ export default function CourseDetail() {
               </span>
             ) : (
               <span className="badge-gold flex items-center gap-1">
-                <CreditCard className="w-3 h-3" /> €{course.price} one-time
+                <CreditCard className="w-3 h-3" /> Coming soon · قريبًا
               </span>
             )}
             <span className="text-xs px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/20 capitalize">
@@ -141,12 +141,17 @@ export default function CourseDetail() {
             <div className="sticky top-24 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <div className="mb-4">
                 <div className="text-xs uppercase tracking-wider text-slate-400 mb-1">Price</div>
-                <div className="font-display text-3xl font-bold text-slate-900">
-                  €{course.price}
-                  {course.type === "subscription" && (
+                {course.type === "subscription" ? (
+                  <div className="font-display text-3xl font-bold text-slate-900">
+                    €{course.price}
                     <span className="text-base font-medium text-slate-400">/month</span>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="font-display text-2xl font-bold text-slate-900">
+                    Coming soon
+                    <div className="text-xs font-normal text-slate-400 mt-1">قريبًا</div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2 mb-6 text-sm text-slate-600 border-t border-slate-100 pt-4">
@@ -158,9 +163,12 @@ export default function CourseDetail() {
 
               <button
                 onClick={handleEnrol}
-                className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                disabled={course.type !== "subscription"}
+                className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+                {course.type !== "subscription"
+                  ? "Coming soon"
+                  : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
                 <ArrowRight className="w-4 h-4" />
               </button>
 

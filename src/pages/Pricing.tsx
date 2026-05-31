@@ -66,16 +66,27 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
 
         {/* Price */}
         <div className="mb-5">
-          <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
-            €{course.price}
-          </span>
-          {course.type === "subscription" && (
-            <span className={`text-sm ml-1 ${highlight ? "text-white/50" : "text-slate-400"}`}>/month</span>
+          {course.type === "subscription" ? (
+            <>
+              <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                €{course.price}
+              </span>
+              <span className={`text-sm ml-1 ${highlight ? "text-white/50" : "text-slate-400"}`}>/month</span>
+              <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
+                Cancel anytime
+                {course.requires_verification && " · Verification required"}
+              </div>
+            </>
+          ) : (
+            <>
+              <span className={`text-2xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                Coming soon
+              </span>
+              <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
+                قريبًا — سيتم الإعلان عن السعر لاحقًا
+              </div>
+            </>
           )}
-          <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
-            {course.type === "subscription" ? "Cancel anytime" : "One-time payment"}
-            {course.requires_verification && " · Verification required"}
-          </div>
         </div>
 
         <p className={`text-sm leading-relaxed mb-5 ${highlight ? "text-white/65" : "text-slate-500"}`}>
@@ -94,13 +105,16 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
 
         <button
           onClick={handleCheckout}
-          className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+          disabled={course.type !== "subscription"}
+          className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
             highlight
               ? "btn-gold"
               : "btn-primary"
           }`}
         >
-          {course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+          {course.type !== "subscription"
+            ? "Coming soon"
+            : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
           <ArrowRight className="w-4 h-4" />
         </button>
 

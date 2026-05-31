@@ -89,9 +89,12 @@ function CourseRow({ course }: { course: Course }) {
           <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
             <button
               onClick={handleEnrol}
-              className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2"
+              disabled={course.type !== "subscription"}
+              className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+              {course.type !== "subscription"
+                ? "Coming soon"
+                : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
               <ArrowRight className="w-4 h-4" />
             </button>
             <Link
