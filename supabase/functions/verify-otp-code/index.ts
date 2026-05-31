@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
 
     const { data: aliases } = await adminClient
       .from('auth_otp_aliases')
-      .select('id, original_token')
+      .select('id, original_token, otp_type')
       .eq('email', normalizedEmail)
       .eq('alias_code', normalizedToken)
       .is('consumed_at', null)
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       .limit(5)
 
     const candidates = [
-      ...(aliases ?? []).map((alias) => ({ aliasId: alias.id, token: alias.original_token, type: otpType })),
+      ...(aliases ?? []).map((alias) => ({ aliasId: alias.id, token: alias.original_token, type: alias.otp_type })),
       { aliasId: null, token: normalizedToken, type: otpType },
     ]
 
