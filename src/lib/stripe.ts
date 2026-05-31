@@ -17,6 +17,7 @@ export interface Course {
   interval?: "month";
   type: CourseType;
   priceId: string;       // Stripe Price ID — set in .env or Stripe dashboard
+  paymentLink?: string;  // Optional Stripe Payment Link (overrides checkout session flow)
   category: "clinical" | "language" | "career";
   weeks: string;
   level: string;
