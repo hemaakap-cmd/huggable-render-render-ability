@@ -41,6 +41,7 @@ export default function Index() {
   useReveal();
 
   const featuredCourses = COURSES.slice(0, 3);
+  const { data: priceHidden = {} } = usePriceHiddenMap();
 
   return (
     <div className="min-h-screen bg-white">

@@ -4,6 +4,7 @@ import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown } from "
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, type Course } from "@/lib/stripe";
+import { usePriceHiddenMap } from "@/hooks/useSsraData";
 
 function useReveal() {
   useEffect(() => {
@@ -26,7 +27,7 @@ const TABS: { label: string; value: Category }[] = [
   { label: "Career",      value: "career" },
 ];
 
-function CourseRow({ course }: { course: Course }) {
+function CourseRow({ course, hidden }: { course: Course; hidden: boolean }) {
   const navigate = useNavigate();
 
   const handleEnrol = () => {
