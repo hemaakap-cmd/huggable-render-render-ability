@@ -67,7 +67,16 @@ function PriceCard({ course, hidden = false, highlight = false }: { course: Cour
 
         {/* Price */}
         <div className="mb-5">
-          {course.type === "subscription" ? (
+          {hidden ? (
+            <>
+              <span className={`text-2xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                Coming soon
+              </span>
+              <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
+                قريبًا — سيتم الإعلان عن السعر لاحقًا
+              </div>
+            </>
+          ) : course.type === "subscription" ? (
             <>
               <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
                 €{course.price}
@@ -80,11 +89,12 @@ function PriceCard({ course, hidden = false, highlight = false }: { course: Cour
             </>
           ) : (
             <>
-              <span className={`text-2xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
-                Coming soon
+              <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                €{course.price}
               </span>
               <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
-                قريبًا — سيتم الإعلان عن السعر لاحقًا
+                One-time payment
+                {course.requires_verification && " · Verification required"}
               </div>
             </>
           )}
@@ -106,20 +116,20 @@ function PriceCard({ course, hidden = false, highlight = false }: { course: Cour
 
         <button
           onClick={handleCheckout}
-          disabled={course.type !== "subscription"}
+          disabled={hidden}
           className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
             highlight
               ? "btn-gold"
               : "btn-primary"
           }`}
         >
-          {course.type !== "subscription"
+          {hidden
             ? "Coming soon"
             : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        {course.type === "subscription" && (
+        {!hidden && course.type === "subscription" && (
           <p className={`text-center text-xs mt-2 ${highlight ? "text-white/35" : "text-slate-400"}`}>
             Requires sports science diploma or student ID
           </p>
