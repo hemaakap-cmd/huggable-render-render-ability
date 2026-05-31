@@ -9,9 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-8 h-8 rounded-lg bg-[hsl(220,91%,54%)] flex items-center justify-center">
-                <GraduationCap className="w-4 h-4 text-white" />
-              </div>
+              <img src="/logo.svg" alt="SSRA Academy" className="w-8 h-8 rounded-lg" />
               <span className="text-white font-bold font-display text-lg">SSRA</span>
             </div>
             <p className="text-sm leading-relaxed text-slate-500 mb-5">
