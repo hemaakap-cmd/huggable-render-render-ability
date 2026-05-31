@@ -4,7 +4,7 @@ import { GraduationCap, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const CODE_LEN = 8;
+const CODE_LEN = 6;
 const RESEND_COOLDOWN = 60;
 
 const getOtpType = (mode: string | null) => (mode === "signup" ? "signup" : "magiclink");
