@@ -50,6 +50,15 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const d: ApplicationPayload = await req.json();
 
+    // If Resend is not configured, skip sending but don't fail the request —
+    // the application has already been saved to the database.
+    if (!RESEND_API_KEY) {
+      console.warn("RESEND_API_KEY not configured — skipping email notifications.");
+      return new Response(JSON.stringify({ success: true, emailed: false }), {
+        status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     // 1) Confirmation to applicant
     const studentHtml = emailLayout(`
       ${emailHeading("تم استلام طلبك — Application Received!")}
@@ -69,7 +78,11 @@ const handler = async (req: Request): Promise<Response> => {
       ${emailSignature()}
     `);
 
-    await sendEmail([d.email], "Application Received — SSRA Academy", studentHtml);
+    try {
+      await sendEmail([d.email], "Application Received — SSRA Academy", studentHtml);
+    } catch (studentErr) {
+      console.error("Student confirmation failed (non-blocking):", studentErr);
+    }
 
     // 2) Notification to admin
     const adminHtml = emailLayout(`
@@ -101,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (err: unknown) {
     console.error("send-application-email error:", err);
-    return new Response(JSON.stringify({ error: "Failed to send email" }), {
+    return new Response(JSON.stringify({ error: "Failed to process request" }), {
       status: 500, headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
