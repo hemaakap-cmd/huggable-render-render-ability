@@ -35,7 +35,16 @@ export default function StudentLogin() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) { toast({ title: "Login failed", description: error.message, variant: "destructive" }); return; }
+    if (error) {
+      if (/confirm/i.test(error.message)) {
+        await supabase.auth.resend({ type: "signup", email });
+        toast({ title: "Verify your email", description: "We sent a 6-digit code to your inbox." });
+        navigate(`/verify-otp?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirect)}`);
+        return;
+      }
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+      return;
+    }
     navigate(redirect);
   };
 
@@ -48,12 +57,12 @@ export default function StudentLogin() {
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: name } },
+      options: { data: { full_name: name }, emailRedirectTo: `${window.location.origin}/dashboard` },
     });
     setLoading(false);
     if (error) { toast({ title: "Signup failed", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "Account created!", description: "Check your email to confirm, then log in." });
-    setTab("login");
+    toast({ title: "Check your email", description: "We sent a 6-digit verification code." });
+    navigate(`/verify-otp?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirect)}`);
   };
 
   return (
