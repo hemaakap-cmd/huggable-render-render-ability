@@ -7,6 +7,7 @@ import {
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE, type Course } from "@/lib/stripe";
+import { usePriceHiddenMap } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 
 function useReveal() {
@@ -21,7 +22,7 @@ function useReveal() {
   }, []);
 }
 
-function PriceCard({ course, highlight = false }: { course: Course; highlight?: boolean }) {
+function PriceCard({ course, hidden = false, highlight = false }: { course: Course; hidden?: boolean; highlight?: boolean }) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
