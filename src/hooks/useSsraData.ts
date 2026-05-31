@@ -162,6 +162,25 @@ export function useAdminSubscriptions() {
   });
 }
 
+/* ── Public: price visibility map (id -> price_hidden) ── */
+export function usePriceHiddenMap() {
+  return useQuery({
+    queryKey: ["ssra-price-hidden-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_courses")
+        .select("id, price_hidden");
+      if (error) throw error;
+      const map: Record<string, boolean> = {};
+      (data ?? []).forEach((c: { id: string; price_hidden: boolean }) => {
+        map[c.id] = !!c.price_hidden;
+      });
+      return map;
+    },
+    staleTime: 60_000,
+  });
+}
+
 /* ── Admin: all courses ── */
 export function useAdminCourses() {
   return useQuery({
