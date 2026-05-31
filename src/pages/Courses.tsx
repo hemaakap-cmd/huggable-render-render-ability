@@ -92,10 +92,10 @@ function CourseRow({ course, hidden }: { course: Course; hidden: boolean }) {
           <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
             <button
               onClick={handleEnrol}
-              disabled={course.type !== "subscription"}
+              disabled={hidden}
               className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {course.type !== "subscription"
+              {hidden
                 ? "Coming soon"
                 : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
               <ArrowRight className="w-4 h-4" />
@@ -119,6 +119,7 @@ function CourseRow({ course, hidden }: { course: Course; hidden: boolean }) {
 export default function Courses() {
   useReveal();
   const [active, setActive] = useState<Category>("all");
+  const { data: priceHidden = {} } = usePriceHiddenMap();
 
   const filtered = active === "all" ? COURSES : COURSES.filter((c) => c.category === active);
 
@@ -164,7 +165,7 @@ export default function Courses() {
       {/* Course list */}
       <section className="py-12">
         <div className="container space-y-6">
-          {filtered.map((c) => <CourseRow key={c.id} course={c} />)}
+          {filtered.map((c) => <CourseRow key={c.id} course={c} hidden={!!priceHidden[c.id]} />)}
         </div>
       </section>
 
