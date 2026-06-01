@@ -96,10 +96,11 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <span>© {new Date().getFullYear()} SSRA — Sports Science &amp; Rehabilitation Academy. All rights reserved.</span>
-          <div className="flex gap-5">
+          <div className="flex gap-5 items-center">
             <Link to="/legal#privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
             <Link to="/legal#terms" className="hover:text-slate-400 transition-colors">Terms of Use</Link>
             <Link to="/legal#impressum" className="hover:text-slate-400 transition-colors">Impressum</Link>
+            <Link to="/staff-login" className="text-slate-700 hover:text-slate-400 transition-colors text-[10px] tracking-wide">Staff</Link>
           </div>
         </div>
       </div>

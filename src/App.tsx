@@ -21,6 +21,7 @@ const Checkout        = lazy(() => import("./pages/Checkout"));
 const PaymentSuccess  = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled"));
 const StudentLogin    = lazy(() => import("./pages/StudentLogin"));
+const AdminLogin      = lazy(() => import("./pages/AdminLogin"));
 const ResetPassword   = lazy(() => import("./pages/ResetPassword"));
 const Legal           = lazy(() => import("./pages/Legal"));
 
@@ -113,6 +114,7 @@ function AppInner() {
                 <Route path="/payment-success"  element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/login"            element={<StudentLogin />} />
+                <Route path="/staff-login"      element={<AdminLogin />} />
                 <Route path="/reset-password"  element={<ResetPassword />} />
                 <Route path="/legal"           element={<Legal />} />
 
