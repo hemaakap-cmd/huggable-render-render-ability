@@ -216,6 +216,21 @@ export function useTogglePriceHidden() {
   });
 }
 
+export function usePriceHiddenMap() {
+  return useQuery({
+    queryKey: ["ssra-price-hidden-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("ssra_courses").select("id, price_hidden");
+      if (error) throw error;
+      const map: Record<string, boolean> = {};
+      (data ?? []).forEach((c: { id: string; price_hidden: boolean | null }) => {
+        map[c.id] = !!c.price_hidden;
+      });
+      return map;
+    },
+  });
+}
+
 /* ── Sessions: upcoming for subscriber ── */
 export function useUpcomingSessions() {
   return useQuery({
