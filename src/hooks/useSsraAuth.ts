@@ -27,15 +27,20 @@ export function useSsraAuth(): AuthState {
   });
 
   useEffect(() => {
-    const empty = { user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false };
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) fetchProfile(session.user.id, session);
-      else setState(empty);
+      if (session?.user) {
+        fetchProfile(session.user.id, session);
+      } else {
+        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false });
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) fetchProfile(session.user.id, session);
-      else setState(empty);
+      if (session?.user) {
+        fetchProfile(session.user.id, session);
+      } else {
+        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false });
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -49,10 +54,10 @@ export function useSsraAuth(): AuthState {
       .single();
 
     setState({
-      user: session.user,
+      user:         session.user,
       session,
-      profile: profile as SsraProfile | null,
-      loading: false,
+      profile:      profile as SsraProfile | null,
+      loading:      false,
       isAdmin:      profile?.role === "admin" || profile?.role === "super_admin",
       isSuperAdmin: profile?.role === "super_admin",
     });

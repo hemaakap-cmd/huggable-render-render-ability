@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { COURSES as STRIPE_COURSES } from "@/lib/stripe";
 
 function useReveal() {
   useEffect(() => {
@@ -24,22 +25,11 @@ function useReveal() {
 
 const STEPS = [
   { n: "01", title: "Fill the Form", desc: "Takes about 5 minutes." },
-  { n: "02", title: "We Review",      desc: "We read every application personally within 3–5 days." },
-  { n: "03", title: "Welcome Email",  desc: "You'll receive onboarding instructions and your first course access." },
+  { n: "02", title: "We Review",     desc: "We read every application personally within 3–5 days." },
+  { n: "03", title: "Get Access",    desc: "Once approved, you'll receive an email to complete your subscription." },
 ];
 
-const COURSES = [
-  { id: "test-language-1eur",    label: "🧪 Test Course — Language (€1) — كورس تجريبي" },
-  { id: "medical-german",        label: "Medizinisches Deutsch (الألمانية الطبية)" },
-  { id: "sport-rehab-basics",    label: "Grundlagen der Sportrehabilitation" },
-  { id: "bewegungsanalyse",      label: "Bewegungsanalyse & Funktionsdiagnostik" },
-  { id: "sporttherapie-praxis",  label: "Sporttherapie in der deutschen Praxis" },
-  { id: "therapeutisches-training", label: "Therapeutisches Training" },
-  { id: "anatomie-rehab",        label: "Anatomie für Sport-Reha" },
-  { id: "telefonkommunikation",  label: "Telefonkommunikation im Gesundheitswesen" },
-  { id: "berufseinstieg",        label: "Berufseinstieg & Anerkennung in Deutschland" },
-  { id: "dosb-vorbereitung",     label: "DOSB-Lizenz Vorbereitung" },
-];
+const COURSES = STRIPE_COURSES.map((c) => ({ id: c.id, label: c.titleAr ? `${c.title} (${c.titleAr})` : c.title }));
 
 export default function Apply() {
   useReveal();
@@ -124,8 +114,11 @@ export default function Apply() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Apply — SSRA Academy</title>
-        <meta name="description" content="Apply to SSRA Academy for free. Open to sports science graduates worldwide. Complete the form in 5 minutes and get a response within 3–5 business days." />
-        <link rel="canonical" href="https://ssracourses.com/apply" />
+        <meta name="description" content="Apply to SSRA Academy for free. Open to all sports science graduates worldwide. Start learning Medical German, sports rehabilitation and more — from €29/month." />
+        <meta property="og:image" content="https://ssra-academy.de/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://ssra-academy.de/og-image.png" />
+        <link rel="canonical" href="https://ssra-academy.de/apply" />
       </Helmet>
       <Header />
 

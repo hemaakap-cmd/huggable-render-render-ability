@@ -50,8 +50,8 @@ export function emailLayout(content: string): string {
         <tr>
           <td style="background:${BG};border-top:1px solid ${BORDER};padding:20px 32px;text-align:center;">
             <p style="margin:0;font-size:11px;color:${SUBTLE};">
-              SSRA Academy · ssracourses.com<br/>
-              <a href="mailto:info@ssracourses.com" style="color:${SUBTLE};">info@ssracourses.com</a>
+              SSRA Academy · ssra-academy.de<br/>
+              <a href="mailto:info@ssra-academy.de" style="color:${SUBTLE};">info@ssra-academy.de</a>
             </p>
           </td>
         </tr>
@@ -98,8 +98,8 @@ export function emailSignature(): string {
       <td>
         <p style="margin:0;font-size:13px;font-weight:600;color:${DARK};">SSRA Academy Team</p>
         <p style="margin:2px 0 0;font-size:12px;color:${SUBTLE};">
-          <a href="mailto:info@ssracourses.com" style="color:${PRIMARY};text-decoration:none;">info@ssracourses.com</a>
-           · ssracourses.com
+          <a href="mailto:info@ssra-academy.de" style="color:${PRIMARY};text-decoration:none;">info@ssra-academy.de</a>
+           · ssra-academy.de
         </p>
       </td>
     </tr>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
+import SsraLogo from "@/components/ssra/SsraLogo";
 
 const NAV = [
   { label: "Home",    href: "/" },
@@ -37,16 +38,8 @@ export default function Header() {
     >
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <img src="/logo.svg" alt="SSRA Academy" className="w-9 h-9 rounded-xl" />
-          <div className="leading-none">
-            <span className={`block font-bold font-display text-[15px] tracking-wide ${scrolled ? "text-slate-900" : "text-white"}`}>
-              SSRA
-            </span>
-            <span className={`block text-[9px] tracking-[0.2em] uppercase ${scrolled ? "text-slate-400" : "text-white/50"}`}>
-              Academy
-            </span>
-          </div>
+        <Link to="/" aria-label="SSRA Academy — Home">
+          <SsraLogo size={36} scheme={scrolled ? "dark" : "light"} />
         </Link>
 
         {/* Desktop nav */}

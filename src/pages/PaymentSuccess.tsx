@@ -1,13 +1,23 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { CheckCircle2, ArrowRight, Mail } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/stripe";
 
 export default function PaymentSuccess() {
-  const [params] = useSearchParams();
-  const courseId = params.get("courseId");
-  const course   = courseId ? getCourse(courseId) : null;
+  const [params]  = useSearchParams();
+  const navigate  = useNavigate();
+  const courseId  = params.get("courseId");
+  const course    = courseId ? getCourse(courseId) : null;
+
+  // Auto-redirect to dashboard after 6s so student sees their enrollment
+  useEffect(() => {
+    const t = setTimeout(() => {
+      navigate(course?.type === "subscription" ? "/dashboard/subscription" : "/dashboard/courses");
+    }, 6000);
+    return () => clearTimeout(t);
+  }, [navigate, course]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -23,9 +33,10 @@ export default function PaymentSuccess() {
           {course && (
             <p className="text-[hsl(220,91%,54%)] font-semibold mb-3">{course.title}</p>
           )}
-          <p className="text-slate-500 leading-relaxed mb-8">
-            Welcome to SSRA! Check your email for your course access link and receipt.
+          <p className="text-slate-500 leading-relaxed mb-4">
+            Welcome to SSRA! Your course is now active in your dashboard.
           </p>
+          <p className="text-xs text-slate-400 mb-8">Redirecting to your dashboard in a few seconds…</p>
 
           <div className="p-5 rounded-xl bg-white border border-slate-200 mb-8 flex items-start gap-3 text-left">
             <Mail className="w-5 h-5 text-[hsl(220,91%,54%)] mt-0.5 shrink-0" />

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Mail, Globe2, Heart, MapPin } from "lucide-react";
+import { Mail, Globe2, Heart, Instagram, Facebook, Youtube } from "lucide-react";
+import SsraLogo from "@/components/ssra/SsraLogo";
 
 export default function Footer() {
   return (
@@ -8,9 +9,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="flex items-center gap-2.5 mb-5">
-              <img src="/logo.svg" alt="SSRA Academy" className="w-8 h-8 rounded-lg" />
-              <span className="text-white font-bold font-display text-lg">SSRA</span>
+            <div className="mb-5">
+              <SsraLogo size={34} scheme="light" />
             </div>
             <p className="text-sm leading-relaxed text-slate-500 mb-5">
               Sports Science &amp; Rehabilitation Academy — non-profit education for international graduates pursuing careers in German healthcare.
@@ -60,22 +60,35 @@ export default function Footer() {
           <div>
             <h3 className="text-slate-200 text-sm font-semibold mb-4 tracking-wide">Contact</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
-                <span>Bracknellstraße 41<br />51379 Leverkusen, Germany</span>
-              </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
-                <span>info@ssracourses.com</span>
+                <span>info@ssra-academy.de</span>
               </li>
               <li className="flex items-center gap-2">
                 <Globe2 className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
                 <span>Online · Germany</span>
               </li>
             </ul>
-            <a href="mailto:info@ssracourses.com" className="inline-flex items-center gap-2 mt-4 text-xs text-[hsl(220,91%,54%)] hover:text-blue-400 transition-colors">
-              <Mail className="w-3.5 h-3.5" /> info@ssracourses.com
+            <a href="mailto:info@ssra-academy.de" className="inline-flex items-center gap-2 mt-4 text-xs text-[hsl(220,91%,54%)] hover:text-blue-400 transition-colors">
+              <Mail className="w-3.5 h-3.5" /> info@ssra-academy.de
             </a>
+            <div className="flex gap-3 mt-5">
+              <a href="https://instagram.com/ssra.academy" target="_blank" rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/30 transition-all"
+                aria-label="Instagram">
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a href="https://facebook.com/ssraacademy" target="_blank" rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/30 transition-all"
+                aria-label="Facebook">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="https://youtube.com/@ssraacademy" target="_blank" rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/30 transition-all"
+                aria-label="YouTube">
+                <Youtube className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </div>
 
