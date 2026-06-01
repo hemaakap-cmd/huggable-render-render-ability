@@ -111,6 +111,7 @@ export default function StudentLogin() {
       email,
       options: {
         shouldCreateUser: tab === "signup",
+        data: tab === "signup" ? { full_name: name.trim() } : undefined,
         emailRedirectTo: `${window.location.origin}/login`,
       },
     });
