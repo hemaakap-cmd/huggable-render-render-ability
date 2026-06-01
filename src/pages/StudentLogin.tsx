@@ -27,6 +27,7 @@ export default function StudentLogin() {
   const [otp, setOtp]           = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [otpFailed, setOtpFailed] = useState(false); // show password fallback
 
   // If Supabase redirects back with ?code= (PKCE email confirmation link),
   // the client auto-exchanges it; we just need to catch SIGNED_IN and redirect.
@@ -74,7 +75,7 @@ export default function StudentLogin() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -87,7 +88,13 @@ export default function StudentLogin() {
       toast({ title: "Signup failed", description: error.message, variant: "destructive" });
       return;
     }
-    // Show OTP entry screen
+    // If Supabase auto-confirms (email confirmation disabled in project settings),
+    // a session is returned immediately — redirect directly, no OTP needed.
+    if (data.session) {
+      navigate(redirect, { replace: true });
+      return;
+    }
+    // Email confirmation enabled → show OTP entry screen
     setOtpStep(true);
     setResendCooldown(60);
   };
@@ -100,31 +107,50 @@ export default function StudentLogin() {
       return;
     }
     setOtpLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: otp,
-      type: "signup",
-    });
-    setOtpLoading(false);
-    if (error) {
-      // Try "email" type as fallback (for magic-link OTP)
-      const { error: err2 } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
-      if (err2) {
-        toast({ title: "Invalid or expired code", description: "Check the code and try again.", variant: "destructive" });
+    setOtpFailed(false);
+
+    // Try signup type first, then email type as fallback
+    const { error: e1 } = await supabase.auth.verifyOtp({ email, token: otp, type: "signup" });
+    if (e1) {
+      const { error: e2 } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
+      if (e2) {
+        setOtpLoading(false);
+        setOtpFailed(true); // show password fallback option
+        toast({
+          title: "Code invalid or expired",
+          description: "Request a new code, or sign in with your password directly.",
+          variant: "destructive",
+        });
         return;
       }
     }
+    setOtpLoading(false);
     // onAuthStateChange will fire SIGNED_IN → navigate to dashboard
+  };
+
+  /* ── Sign in with password (fallback from OTP screen) ── */
+  const handlePasswordFallback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    navigate(redirect, { replace: true });
   };
 
   /* ── Resend OTP ── */
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setLoading(true);
+    setOtpFailed(false);
+    setOtp("");
     await supabase.auth.resend({ type: "signup", email });
     setLoading(false);
     setResendCooldown(60);
-    toast({ title: "Code resent", description: "Check your inbox." });
+    toast({ title: "New code sent!", description: "Check your inbox — use it within 10 minutes." });
   };
 
   /* ── Reset password ── */
@@ -164,28 +190,57 @@ export default function StudentLogin() {
               You can also click the link in the email directly.
             </p>
 
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1.5">Verification Code</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="123456"
-                  className="w-full px-4 h-14 rounded-xl border border-slate-200 text-center text-2xl font-bold tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
-                  autoFocus
-                />
+            {/* OTP form */}
+            {!otpFailed ? (
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1.5">Verification Code</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => { setOtp(e.target.value.replace(/\D/g, "").slice(0, 6)); setOtpFailed(false); }}
+                    placeholder="123456"
+                    className="w-full px-4 h-14 rounded-xl border border-slate-200 text-center text-2xl font-bold tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                    autoFocus
+                  />
+                </div>
+                <button type="submit" disabled={otpLoading || otp.length < 6}
+                  className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                  {otpLoading
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</>
+                    : <><CheckCircle2 className="w-4 h-4" /> Verify & Sign In</>}
+                </button>
+              </form>
+            ) : (
+              /* Password fallback — shown after OTP fails */
+              <div className="space-y-4">
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
+                  Code expired or invalid. Enter your password to sign in directly, or request a new code.
+                </div>
+                <form onSubmit={handlePasswordFallback} className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input type={show ? "text" : "password"} value={password}
+                        onChange={(e) => setPassword(e.target.value)} required
+                        placeholder="Your password"
+                        className="w-full pl-10 pr-10 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                      <button type="button" onClick={() => setShow(!show)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading}
+                    className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In with Password"}
+                  </button>
+                </form>
               </div>
-
-              <button type="submit" disabled={otpLoading || otp.length < 6}
-                className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
-                {otpLoading
-                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</>
-                  : <><CheckCircle2 className="w-4 h-4" /> Verify & Sign In</>}
-              </button>
-            </form>
+            )}
 
             <div className="mt-5 flex items-center justify-between text-xs text-slate-400">
               <button
