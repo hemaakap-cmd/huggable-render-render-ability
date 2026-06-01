@@ -119,6 +119,24 @@ export default function StudentLogin() {
         setOtpStep(false);
         return;
       }
+
+      // Explicit read-back: confirm the name actually persisted in DB before allowing entry
+      const { data: confirmRow, error: confirmErr } = await supabase
+        .from("ssra_profiles")
+        .select("full_name")
+        .eq("id", userId)
+        .maybeSingle();
+      if (confirmErr || !confirmRow || !confirmRow.full_name || confirmRow.full_name.trim() === "") {
+        await supabase.auth.signOut();
+        setOtpLoading(false);
+        toast({
+          title: "Verification failed",
+          description: "Your name could not be confirmed in our records. Please try again.",
+          variant: "destructive",
+        });
+        setOtpStep(false);
+        return;
+      }
     } else {
       // Login: profile must exist with a non-empty name
       const { data: prof } = await supabase
