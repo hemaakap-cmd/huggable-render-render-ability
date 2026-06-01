@@ -114,6 +114,7 @@ function AppInner() {
                 <Route path="/payment-success"  element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/login"            element={<StudentLogin />} />
+                <Route path="/staff-login"      element={<AdminLogin />} />
                 <Route path="/reset-password"  element={<ResetPassword />} />
                 <Route path="/legal"           element={<Legal />} />
 
