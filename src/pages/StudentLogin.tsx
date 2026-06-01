@@ -89,9 +89,9 @@ export default function StudentLogin() {
       return;
     }
     setOtpLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
-    setOtpLoading(false);
-    if (error) {
+    const { data: verifyData, error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
+    if (error || !verifyData?.user) {
+      setOtpLoading(false);
       toast({
         title: "Invalid or expired code",
         description: "Press 'Resend code' to get a new one.",
@@ -99,6 +99,48 @@ export default function StudentLogin() {
       });
       return;
     }
+
+    const userId = verifyData.user.id;
+
+    if (tab === "signup") {
+      // Ensure profile has the full name. Trigger creates row; we update name.
+      const { error: upErr } = await supabase
+        .from("ssra_profiles")
+        .update({ full_name: name.trim(), email })
+        .eq("id", userId);
+      if (upErr) {
+        await supabase.auth.signOut();
+        setOtpLoading(false);
+        toast({
+          title: "Registration failed",
+          description: "Could not save your data. Please try again.",
+          variant: "destructive",
+        });
+        setOtpStep(false);
+        return;
+      }
+    } else {
+      // Login: profile must exist with a non-empty name
+      const { data: prof } = await supabase
+        .from("ssra_profiles")
+        .select("full_name")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!prof || !prof.full_name || prof.full_name.trim() === "") {
+        await supabase.auth.signOut();
+        setOtpLoading(false);
+        toast({
+          title: "Account not registered",
+          description: "Please use 'New Student' to complete your registration first.",
+          variant: "destructive",
+        });
+        setOtpStep(false);
+        setTab("signup");
+        return;
+      }
+    }
+
+    setOtpLoading(false);
     // SIGNED_IN event → navigate
   };
 
