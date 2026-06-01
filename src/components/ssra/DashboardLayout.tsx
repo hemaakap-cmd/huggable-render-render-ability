@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, CreditCard,
-  User, LogOut, Menu, X, ChevronRight, Video,
+  User, LogOut, Menu, X, ChevronRight, Video, AlertCircle,
 } from "lucide-react";
 import { ssraSignOut, useSsraAuth } from "@/hooks/useSsraAuth";
 import SsraLogo from "@/components/ssra/SsraLogo";
@@ -17,8 +17,20 @@ const NAV = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { profile } = useSsraAuth();
+  const { profile, loading } = useSsraAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const initial = (profile?.full_name ?? profile?.email ?? "S")[0].toUpperCase();
+
+  // Force students with incomplete profiles to complete their data
+  const needsCompletion = !loading && profile && (!profile.full_name || profile.full_name.trim() === "");
+  const onProfilePage = location.pathname === "/dashboard/profile";
+
+  useEffect(() => {
+    if (needsCompletion && !onProfilePage) {
+      navigate("/dashboard/profile", { replace: true });
+    }
+  }, [needsCompletion, onProfilePage, navigate]);
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <aside className={`flex flex-col h-full bg-slate-950 ${mobile ? "w-64" : "w-64 hidden lg:flex"}`}>
@@ -105,6 +117,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-6">
+          {needsCompletion && onProfilePage && (
+            <div className="max-w-2xl mx-auto mb-4 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+              <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <div className="font-semibold text-amber-900">Complete your profile</div>
+                <div className="text-amber-700 mt-0.5">
+                  Please add your full name to continue using the dashboard.
+                </div>
+              </div>
+            </div>
+          )}
           {children}
         </main>
       </div>
