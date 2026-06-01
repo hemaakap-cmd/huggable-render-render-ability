@@ -271,10 +271,10 @@ export function useUpsertSession() {
     mutationFn: async (session: Record<string, unknown>) => {
       const { id, ...rest } = session;
       if (id) {
-        const { error } = await supabase.from("ssra_sessions").update(rest).eq("id", id as string);
+        const { error } = await supabase.from("ssra_sessions").update(rest as never).eq("id", id as string);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("ssra_sessions").insert(rest);
+        const { error } = await supabase.from("ssra_sessions").insert(rest as never);
         if (error) throw error;
       }
     },
