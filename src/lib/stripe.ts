@@ -17,36 +17,16 @@ export interface Course {
   interval?: "month";
   type: CourseType;
   priceId: string;       // Stripe Price ID — set in .env or Stripe dashboard
-  paymentLink?: string;  // Optional Stripe Payment Link (overrides checkout session flow)
   category: "clinical" | "language" | "career";
   weeks: string;
   level: string;
   requires_verification: boolean;
   modules: string[];
   color: string;
+  price_hidden?: boolean; // if true: hide price and show "Coming Soon" on public pages
 }
 
 export const COURSES: Course[] = [
-  /* ── TEST COURSE (€1 — for payment testing) ── */
-  {
-    id: "test-language-1eur",
-    title: "Test Course — Language (€1)",
-    titleAr: "كورس تجريبي — لغة (١ يورو)",
-    subtitle: "Test payment flow — €1",
-    desc: "A €1 test course used only to verify the Stripe payment flow end-to-end. Safe to subscribe and cancel anytime.",
-    price: 1,
-    interval: "month",
-    type: "subscription",
-    priceId: "price_test_1eur",
-    paymentLink: "https://buy.stripe.com/6oUdR900E2rOaDY5Dmb7y0c",
-    category: "language",
-    weeks: "Test",
-    level: "Test",
-    requires_verification: true,
-    modules: ["Test module 1", "Test module 2"],
-    color: "from-slate-500 to-slate-700",
-  },
-
   /* ── LANGUAGE (subscription) ── */
   {
     id: "medical-german",
@@ -54,15 +34,14 @@ export const COURSES: Course[] = [
     titleAr: "الألمانية الطبية",
     subtitle: "German for Sports Scientists — Monthly Subscription",
     desc: "The cornerstone subscription course. Medical vocabulary, clinic conversations, patient communication, and B1 exam prep — all in Arabic-guided modules. New content every month.",
-    price: 19,
+    price: 29,
     interval: "month",
     type: "subscription",
     priceId: import.meta.env.VITE_STRIPE_PRICE_GERMAN_SUB ?? "price_german_sub",
-    paymentLink: "https://buy.stripe.com/4gM4gz4gUeawfYi8Pyb7y0d",
     category: "language",
     weeks: "Ongoing",
     level: "A0 → B1",
-    requires_verification: true,
+    requires_verification: false,
     modules: ["Body & movement vocabulary", "Clinic conversations", "Written report templates", "Patient explanation scripts", "B1 exam preparation"],
     color: "from-emerald-600 to-teal-800",
   },
@@ -70,6 +49,7 @@ export const COURSES: Course[] = [
   /* ── CLINICAL (one-time) ── */
   {
     id: "sport-rehab-basics",
+    price_hidden: true,
     title: "Grundlagen der Sportrehabilitation",
     titleAr: "أسس التأهيل الرياضي",
     subtitle: "Basics of Sports Rehabilitation",
@@ -99,6 +79,7 @@ export const COURSES: Course[] = [
     requires_verification: false,
     modules: ["Gait analysis", "FMS protocols", "Video analysis tools", "German report writing", "Client communication"],
     color: "from-indigo-600 to-indigo-800",
+    price_hidden: true,
   },
   {
     id: "sporttherapie-praxis",
@@ -115,6 +96,7 @@ export const COURSES: Course[] = [
     requires_verification: false,
     modules: ["Patient intake process", "Treatment planning", "GKV documentation", "Professional ethics", "Referral systems"],
     color: "from-violet-600 to-violet-800",
+    price_hidden: true,
   },
   {
     id: "anatomie-rehab",
@@ -131,6 +113,7 @@ export const COURSES: Course[] = [
     requires_verification: false,
     modules: ["Skeletal anatomy", "Muscle function", "Joint mechanics", "Common injuries in sport", "German anatomical terms"],
     color: "from-cyan-600 to-cyan-800",
+    price_hidden: true,
   },
   {
     id: "therapeutisches-training",
@@ -147,6 +130,7 @@ export const COURSES: Course[] = [
     requires_verification: false,
     modules: ["Exercise prescription principles", "Progressive overload in rehab", "Group vs. individual therapy", "Documentation & billing", "Real clinic protocols"],
     color: "from-sky-600 to-sky-800",
+    price_hidden: true,
   },
 
   /* ── LANGUAGE / COMMUNICATION ── */
@@ -165,6 +149,7 @@ export const COURSES: Course[] = [
     requires_verification: false,
     modules: ["Appointment booking phrases", "Insurance call scripts", "Referral follow-ups", "Complaint handling", "Role-play practice"],
     color: "from-amber-600 to-amber-800",
+    price_hidden: true,
   },
 
   /* ── CAREER ── */
@@ -183,6 +168,7 @@ export const COURSES: Course[] = [
     requires_verification: false,
     modules: ["Credential recognition process", "Lebenslauf & Anschreiben", "Healthcare job platforms", "Visa & residence options", "Integration support"],
     color: "from-rose-600 to-rose-800",
+    price_hidden: true,
   },
   {
     id: "dosb-vorbereitung",
@@ -199,40 +185,7 @@ export const COURSES: Course[] = [
     requires_verification: false,
     modules: ["DOSB exam structure", "Sports science theory", "German sports law", "Practical assessment prep", "Mock exams"],
     color: "from-orange-600 to-orange-800",
-  },
-
-  /* ── ADVANCED ANATOMY & PHYSIOLOGY ── */
-  {
-    id: "advanced-anatomy",
-    title: "Funktionelle Anatomie für Leistungssport",
-    titleAr: "التشريح الوظيفي للرياضة التنافسية",
-    subtitle: "Advanced Functional Anatomy for Performance Sport",
-    desc: "Deep dive into musculoskeletal and neural anatomy applied to elite sport rehabilitation and performance — taught with the German clinical terminology used in rehab centres and Vereine.",
-    price: 59,
-    type: "one_time",
-    priceId: import.meta.env.VITE_STRIPE_PRICE_ADV_ANATOMY ?? "price_adv_anatomy",
-    category: "clinical",
-    weeks: "7 weeks",
-    level: "Intermediate → Advanced",
-    requires_verification: false,
-    modules: ["Upper limb functional anatomy", "Lower limb & kinetic chain", "Spine, core & posture", "Neural & fascial systems", "German anatomical nomenclature"],
-    color: "from-teal-600 to-teal-800",
-  },
-  {
-    id: "exercise-physiology",
-    title: "Sportphysiologie & Leistungsdiagnostik",
-    titleAr: "فسيولوجيا الرياضة وتشخيص الأداء",
-    subtitle: "Exercise Physiology & Performance Diagnostics",
-    desc: "How the body responds and adapts to training — energy systems, cardio-respiratory function, lactate testing, VO2max protocols, and recovery science as practised in German Leistungsdiagnostik labs.",
-    price: 65,
-    type: "one_time",
-    priceId: import.meta.env.VITE_STRIPE_PRICE_PHYSIOLOGY ?? "price_physiology",
-    category: "clinical",
-    weeks: "8 weeks",
-    level: "Intermediate",
-    requires_verification: false,
-    modules: ["Energy systems & metabolism", "Cardio-respiratory adaptations", "Lactate & VO2max testing", "Strength & endurance physiology", "Recovery & overtraining"],
-    color: "from-fuchsia-600 to-fuchsia-800",
+    price_hidden: true,
   },
 ];
 
@@ -240,5 +193,4 @@ export function getCourse(id: string) {
   return COURSES.find((c) => c.id === id);
 }
 
-export const SUBSCRIPTION_COURSE = COURSES.find((c) => c.id === "medical-german")!;
-export const TEST_COURSE = COURSES.find((c) => c.id === "test-language-1eur")!;
+export const SUBSCRIPTION_COURSE = COURSES.find((c) => c.type === "subscription")!;

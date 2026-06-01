@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Mail, MessageSquare, Globe2, Send, MapPin } from "lucide-react";
+import { Mail, MessageSquare, Globe2, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
@@ -49,6 +50,14 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Contact — SSRA Academy</title>
+        <meta name="description" content="Get in touch with SSRA Academy. We're here to help Arabic-speaking sports science graduates build their career in Germany." />
+        <meta property="og:image" content="https://ssra-academy.de/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://ssra-academy.de/og-image.png" />
+        <link rel="canonical" href="https://ssra-academy.de/contact" />
+      </Helmet>
       <Header />
 
       {/* Page hero */}
@@ -69,21 +78,11 @@ export default function Contact() {
             <div className="md:col-span-2 space-y-6 reveal">
               <div className="p-5 rounded-xl bg-card border border-border flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-[hsl(43,96%,50%)] bg-opacity-10 flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5 text-[hsl(43,96%,50%)]" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-foreground mb-1">Address</div>
-                  <div className="text-sm text-muted-foreground">Bracknellstraße 41<br />51379 Leverkusen, Germany</div>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-card border border-border flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-[hsl(43,96%,50%)] bg-opacity-10 flex items-center justify-center shrink-0">
                   <Mail className="w-5 h-5 text-[hsl(43,96%,50%)]" />
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-foreground mb-1">Email</div>
-                  <div className="text-sm text-muted-foreground">info@ssracourses.com</div>
+                  <div className="text-sm text-muted-foreground">info@ssra-academy.de</div>
                 </div>
               </div>
 

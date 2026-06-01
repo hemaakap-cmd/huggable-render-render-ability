@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-  GraduationCap, LayoutDashboard, Users, ShieldCheck,
+  LayoutDashboard, Users, ShieldCheck,
   BookOpen, CreditCard, LogOut, Menu, X, Library, Video,
-  ClipboardList, TrendingUp, Crown, UserCog, ChevronDown,
+  ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
+  GraduationCap,
 } from "lucide-react";
+import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
 const ADMIN_NAV = [
@@ -18,9 +20,10 @@ const ADMIN_NAV = [
 ];
 
 const SUPER_NAV = [
-  { icon: TrendingUp, label: "Finance",       href: "/ssra-admin/finance" },
-  { icon: CreditCard, label: "Revenue",       href: "/ssra-admin/revenue" },
-  { icon: UserCog,    label: "Manage Admins", href: "/ssra-admin/admins" },
+  { icon: Activity,   label: "Activity Monitor", href: "/ssra-admin/activity" },
+  { icon: TrendingUp, label: "Finance",           href: "/ssra-admin/finance" },
+  { icon: CreditCard, label: "Revenue",           href: "/ssra-admin/revenue" },
+  { icon: UserCog,    label: "Manage Admins",     href: "/ssra-admin/admins" },
 ];
 
 function NavItem({ icon: Icon, label, href, end = false, onClick }: {
@@ -53,20 +56,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       mobile ? "w-64" : collapsed ? "w-16 hidden lg:flex" : "w-64 hidden lg:flex"
     }`}>
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-white/8">
-        <div className="w-8 h-8 rounded-lg bg-[hsl(43,96%,50%)] flex items-center justify-center shrink-0">
-          <GraduationCap className="w-4 h-4 text-slate-900" />
-        </div>
-        {!collapsed && (
-          <div className="min-w-0">
-            <div className="text-white font-bold font-display text-sm truncate">SSRA Admin</div>
-            <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded mt-0.5 inline-block ${
-              isSuperAdmin ? "bg-[hsl(43,96%,50%)] text-slate-900" : "bg-white/10 text-white/50"
-            }`}>
-              {isSuperAdmin ? "Super Admin" : "Admin"}
+      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-white/8 min-w-0">
+        {collapsed
+          ? <SsraLogo variant="mark" size={32} />
+          : (
+            <div className="min-w-0">
+              <SsraLogo size={32} scheme="light" />
+              <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded mt-1.5 inline-block ${
+                isSuperAdmin ? "bg-[hsl(43,96%,50%)] text-slate-900" : "bg-white/10 text-white/50"
+              }`}>
+                {isSuperAdmin ? "Super Admin" : "Admin"}
+              </div>
             </div>
-          </div>
-        )}
+          )
+        }
       </div>
 
       {/* Nav */}

@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
-import { Search, Users, Mail, Globe2 } from "lucide-react";
+import { Search, Users, Mail, Globe2, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminStudents } from "@/hooks/useSsraData";
+import { useSsraAuth } from "@/hooks/useSsraAuth";
 
 type SubFilter = "all" | "active" | "none";
 
@@ -9,6 +11,8 @@ export default function AdminStudents() {
   const [search, setSearch]       = useState("");
   const [subFilter, setSubFilter] = useState<SubFilter>("all");
   const { data = [], isLoading }  = useAdminStudents(search);
+  const { isSuperAdmin }          = useSsraAuth();
+  const navigate                  = useNavigate();
 
   const filtered = useMemo(() => {
     if (subFilter === "all") return data;
@@ -49,11 +53,12 @@ export default function AdminStudents() {
 
         {/* Table */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wide">
-            <span className="col-span-4">Student</span>
-            <span className="col-span-3">Country · Degree</span>
-            <span className="col-span-2 text-center">Enrollments</span>
-            <span className="col-span-3 text-center">Subscription</span>
+          <div className={`grid gap-4 px-4 py-3 border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wide ${isSuperAdmin ? "grid-cols-13" : "grid-cols-12"}`}>
+            <span className={isSuperAdmin ? "col-span-4" : "col-span-4"}>Student</span>
+            <span className={isSuperAdmin ? "col-span-3" : "col-span-3"}>Country · Degree</span>
+            <span className={`col-span-2 text-center`}>Enrollments</span>
+            <span className={`${isSuperAdmin ? "col-span-2" : "col-span-3"} text-center`}>Subscription</span>
+            {isSuperAdmin && <span className="col-span-2 text-center">View As</span>}
           </div>
 
           {isLoading ? (
@@ -68,7 +73,7 @@ export default function AdminStudents() {
               {filtered.map((s: any) => {
                 const subStatus = s.ssra_subscriptions?.[0]?.status;
                 return (
-                  <div key={s.id} className="grid grid-cols-12 gap-4 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors">
+                  <div key={s.id} className={`grid gap-4 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors ${isSuperAdmin ? "grid-cols-13" : "grid-cols-12"}`}>
                     <div className="col-span-4 flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-[hsl(220,91%,54%)]/10 flex items-center justify-center text-[hsl(220,91%,54%)] font-bold text-xs shrink-0">
                         {s.full_name?.[0] ?? s.email?.[0] ?? "?"}
@@ -91,7 +96,7 @@ export default function AdminStudents() {
                         {s.ssra_enrollments?.[0]?.count ?? 0}
                       </span>
                     </div>
-                    <div className="col-span-3 text-center">
+                    <div className={`${isSuperAdmin ? "col-span-2" : "col-span-3"} text-center`}>
                       {subStatus ? (
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
                           subStatus === "active"   ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
@@ -104,6 +109,15 @@ export default function AdminStudents() {
                         <span className="text-xs text-slate-300">—</span>
                       )}
                     </div>
+                    {isSuperAdmin && (
+                      <div className="col-span-2 flex justify-center">
+                        <button
+                          onClick={() => navigate(`/ssra-admin/view-as/${s.id}`)}
+                          className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors">
+                          <Eye className="w-3 h-3" /> View as
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { GraduationCap, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import SsraLogo from "@/components/ssra/SsraLogo";
 
 export default function ResetPassword() {
   const navigate    = useNavigate();
@@ -48,11 +49,8 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-[hsl(220,91%,54%)] flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-display text-xl font-bold text-slate-900">SSRA</span>
+        <Link to="/" className="flex items-center justify-center mb-8">
+          <SsraLogo size={36} scheme="dark" />
         </Link>
 
         <div className="bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden">

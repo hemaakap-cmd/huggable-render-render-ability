@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-  GraduationCap, LayoutDashboard, BookOpen, CreditCard,
+  LayoutDashboard, BookOpen, CreditCard,
   User, LogOut, Menu, X, ChevronRight, Video,
 } from "lucide-react";
 import { ssraSignOut, useSsraAuth } from "@/hooks/useSsraAuth";
+import SsraLogo from "@/components/ssra/SsraLogo";
 
 const NAV = [
   { icon: LayoutDashboard, label: "Overview",     href: "/dashboard" },
@@ -22,14 +23,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <aside className={`flex flex-col h-full bg-slate-950 ${mobile ? "w-64" : "w-64 hidden lg:flex"}`}>
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-6 py-5 border-b border-white/8">
-        <div className="w-8 h-8 rounded-lg bg-[hsl(220,91%,54%)] flex items-center justify-center">
-          <GraduationCap className="w-4 h-4 text-white" />
-        </div>
-        <div>
-          <div className="text-white font-bold font-display text-sm">SSRA</div>
-          <div className="text-white/30 text-[10px]">Student Portal</div>
-        </div>
+      <div className="px-5 py-5 border-b border-white/8">
+        <Link to="/" aria-label="SSRA Academy — Home">
+          <SsraLogo size={32} scheme="light" />
+        </Link>
+        <div className="text-white/25 text-[10px] tracking-widest uppercase mt-1.5 pl-0.5">Student Portal</div>
       </div>
 
       {/* Nav */}

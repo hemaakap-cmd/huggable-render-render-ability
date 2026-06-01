@@ -40,12 +40,12 @@ export default function StudentDashboard() {
           <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
             <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
             <div className="flex-1">
-              <div className="text-sm font-semibold text-amber-800">Student verification required</div>
-              <div className="text-xs text-amber-700 mt-0.5">Complete verification to access the Medical German subscription course.</div>
+              <div className="text-sm font-semibold text-amber-800">Get your student profile verified</div>
+              <div className="text-xs text-amber-700 mt-0.5">Verified students may get access to exclusive community features and future courses.</div>
             </div>
             <Link to="/apply">
               <button className="text-xs font-semibold text-amber-700 border border-amber-300 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors">
-                Apply now
+                Learn more
               </button>
             </Link>
           </div>

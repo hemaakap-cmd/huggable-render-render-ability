@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: sub.stripe_customer_id,
-      return_url: returnUrl ?? "https://ssracourses.com/dashboard/subscription",
+      return_url: returnUrl ?? "https://ssra-academy.de/dashboard/subscription",
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

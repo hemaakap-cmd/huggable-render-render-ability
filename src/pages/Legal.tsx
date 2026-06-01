@@ -17,7 +17,7 @@ export default function Legal() {
       <Helmet>
         <title>Legal — SSRA Academy</title>
         <meta name="description" content="Privacy Policy, Terms of Use, and Impressum for SSRA Academy." />
-        <link rel="canonical" href="https://ssracourses.com/legal" />
+        <link rel="canonical" href="https://ssra-academy.de/legal" />
       </Helmet>
       <Header />
 
@@ -35,7 +35,7 @@ export default function Legal() {
 
             <h3 className="font-semibold text-foreground text-base mt-6">1. Data Controller</h3>
             <p>SSRA — Sports Science &amp; Rehabilitation Academy<br />
-            Contact: info@ssracourses.com</p>
+            Contact: info@ssra-academy.de</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">2. Data We Collect</h3>
             <ul className="list-disc pl-5 space-y-1">
@@ -69,7 +69,7 @@ export default function Legal() {
             <p>We retain your data for as long as your account is active, plus up to 7 years for financial records as required by German law (§ 257 HGB).</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">7. Your Rights</h3>
-            <p>Under GDPR you have the right to access, rectify, erase, restrict processing of, and port your data. You may also object to processing or withdraw consent. Contact us at info@ssracourses.com to exercise these rights.</p>
+            <p>Under GDPR you have the right to access, rectify, erase, restrict processing of, and port your data. You may also object to processing or withdraw consent. Contact us at info@ssra-academy.de to exercise these rights.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">8. Cookies</h3>
             <p>We use only essential cookies required for authentication and security. No third-party tracking or advertising cookies are used.</p>
@@ -122,8 +122,8 @@ export default function Legal() {
 
             <div className="p-5 rounded-xl bg-muted border border-border space-y-2">
               <p className="font-semibold text-foreground">SSRA — Sports Science &amp; Rehabilitation Academy</p>
-              <p>Bracknellstraße 41<br />51379 Leverkusen<br />Germany</p>
-              <p>Email: <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a></p>
+              <p>Germany</p>
+              <p>Email: <a href="mailto:info@ssra-academy.de" className="text-[hsl(220,91%,54%)] hover:underline">info@ssra-academy.de</a></p>
             </div>
 
             <h3 className="font-semibold text-foreground text-base mt-6">Haftungshinweis</h3>

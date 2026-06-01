@@ -50,23 +50,29 @@ Deno.serve(async (req: Request) => {
 });
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const courseId    = session.metadata?.courseId ?? "";
+  const courseId      = session.metadata?.courseId ?? "";
   const customerEmail = session.customer_email ?? session.metadata?.customerEmail ?? "";
-  const mode        = session.mode; // "payment" | "subscription"
+  const mode          = session.mode; // "payment" | "subscription"
 
   if (!courseId) {
     console.warn("No courseId in session metadata, skipping enrollment:", session.id);
     return;
   }
 
-  // Find the user by email
-  const { data: profile } = await supabase
-    .from("ssra_profiles")
-    .select("id")
-    .eq("email", customerEmail)
-    .maybeSingle();
+  // Prefer userId from metadata (reliable); fall back to case-insensitive email lookup
+  let userId: string | null = session.metadata?.userId ?? null;
+  if (!userId) {
+    const { data: profile } = await supabase
+      .from("ssra_profiles")
+      .select("id")
+      .ilike("email", customerEmail)
+      .maybeSingle();
+    userId = profile?.id ?? null;
+  }
 
-  const userId = profile?.id ?? null;
+  if (!userId) {
+    console.warn(`Could not resolve user for email ${customerEmail}, enrollment will have null user_id`);
+  }
 
   if (mode === "payment") {
     // One-time course purchase → create enrollment

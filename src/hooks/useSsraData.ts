@@ -162,25 +162,6 @@ export function useAdminSubscriptions() {
   });
 }
 
-/* ── Public: price visibility map (id -> price_hidden) ── */
-export function usePriceHiddenMap() {
-  return useQuery({
-    queryKey: ["ssra-price-hidden-map"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("ssra_courses")
-        .select("id, price_hidden");
-      if (error) throw error;
-      const map: Record<string, boolean> = {};
-      (data ?? []).forEach((c: { id: string; price_hidden: boolean }) => {
-        map[c.id] = !!c.price_hidden;
-      });
-      return map;
-    },
-    staleTime: 60_000,
-  });
-}
-
 /* ── Admin: all courses ── */
 export function useAdminCourses() {
   return useQuery({
@@ -202,10 +183,10 @@ export function useUpsertCourse() {
     mutationFn: async (course: Record<string, unknown>) => {
       const { id, ...rest } = course;
       if (id) {
-        const { error } = await supabase.from("ssra_courses").update({ ...rest, updated_at: new Date().toISOString() } as never).eq("id", id as string);
+        const { error } = await supabase.from("ssra_courses").update({ ...rest, updated_at: new Date().toISOString() }).eq("id", id as string);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("ssra_courses").insert(rest as never);
+        const { error } = await supabase.from("ssra_courses").insert(rest);
         if (error) throw error;
       }
     },
@@ -228,7 +209,7 @@ export function useTogglePriceHidden() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, price_hidden }: { id: string; price_hidden: boolean }) => {
-      const { error } = await supabase.from("ssra_courses").update({ price_hidden, updated_at: new Date().toISOString() } as never).eq("id", id);
+      const { error } = await supabase.from("ssra_courses").update({ price_hidden, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
@@ -290,10 +271,10 @@ export function useUpsertSession() {
     mutationFn: async (session: Record<string, unknown>) => {
       const { id, ...rest } = session;
       if (id) {
-        const { error } = await supabase.from("ssra_sessions").update(rest as never).eq("id", id as string);
+        const { error } = await supabase.from("ssra_sessions").update(rest).eq("id", id as string);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("ssra_sessions").insert(rest as never);
+        const { error } = await supabase.from("ssra_sessions").insert(rest);
         if (error) throw error;
       }
     },
@@ -444,6 +425,139 @@ export function useSetUserRole() {
       qc.invalidateQueries({ queryKey: ["ssra-admin-users"] });
       qc.invalidateQueries({ queryKey: ["ssra-search-students"] });
       qc.invalidateQueries({ queryKey: ["ssra-admin-students"] });
+    },
+  });
+}
+
+/* ── Super Admin: view as student ── */
+export function useStudentProfileById(userId: string) {
+  return useQuery({
+    queryKey: ["ssra-student-profile", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useStudentEnrollmentsById(userId: string) {
+  return useQuery({
+    queryKey: ["ssra-student-enrollments", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_enrollments")
+        .select("*, ssra_courses(*)")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .order("enrolled_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useStudentSubscriptionById(userId: string) {
+  return useQuery({
+    queryKey: ["ssra-student-subscription", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_subscriptions")
+        .select("*, ssra_courses(*)")
+        .eq("user_id", userId)
+        .in("status", ["active", "trialing", "past_due"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useStudentVerificationById(userId: string) {
+  return useQuery({
+    queryKey: ["ssra-student-verification", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_verifications")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useStudentAttendanceById(userId: string) {
+  return useQuery({
+    queryKey: ["ssra-student-attendance", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_session_attendance")
+        .select("*, ssra_sessions(title, scheduled_at, duration_minutes, ssra_courses(title))")
+        .eq("user_id", userId)
+        .order("joined_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+/* ── Super Admin: admin activity feed ── */
+export function useAdminActivityFeed() {
+  return useQuery({
+    queryKey: ["ssra-admin-activity-feed"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_verifications")
+        .select("id, full_name, email, status, reviewed_at, admin_notes, created_at, reviewer:ssra_profiles!ssra_verifications_reviewed_by_fkey(id, full_name, email)")
+        .not("reviewed_at", "is", null)
+        .order("reviewed_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useAdminSessionsActivity() {
+  return useQuery({
+    queryKey: ["ssra-admin-sessions-activity"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_sessions")
+        .select("id, title, scheduled_at, is_cancelled, created_at, ssra_courses(title)")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useAdminCoursesActivity() {
+  return useQuery({
+    queryKey: ["ssra-admin-courses-activity"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_courses")
+        .select("id, title, title_ar, is_active, price_eur, updated_at, created_at, category, course_type")
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
     },
   });
 }

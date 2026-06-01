@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
       allow_promotion_codes: true,
       ...(mode === "subscription" && {
         subscription_data: {
-          metadata: metadata ?? {},
+          metadata: metadata ?? {},  // ensures userId is on the subscription too
         },
       }),
     });
