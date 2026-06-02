@@ -83,37 +83,64 @@ export function useUpdateProfile() {
   });
 }
 
-/* ── Admin: all students ── */
-export function useAdminStudents(search = "") {
+/* ── Admin: paginated students ── */
+export function useAdminStudents(search = "", page = 0, pageSize = 25) {
   return useQuery({
-    queryKey: ["ssra-admin-students", search],
+    queryKey: ["ssra-admin-students", search, page, pageSize],
     queryFn: async () => {
+      const from = page * pageSize;
+      const to   = from + pageSize - 1;
       let q = supabase
         .from("ssra_profiles")
-        .select("*, ssra_enrollments(count), ssra_subscriptions(status)")
+        .select("*, ssra_enrollments(count), ssra_subscriptions(status)", { count: "exact" })
         .eq("role", "student")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(from, to);
       if (search) q = q.ilike("full_name", `%${search}%`);
-      const { data, error } = await q;
+      const { data, error, count } = await q;
       if (error) throw error;
-      return data ?? [];
+      return { rows: data ?? [], total: count ?? 0 };
     },
   });
 }
 
-/* ── Admin: verification queue ── */
-export function useAdminVerifications(status?: string) {
+/* ── Admin: paginated verification queue ── */
+export function useAdminVerifications(status?: string, page = 0, pageSize = 25) {
   return useQuery({
-    queryKey: ["ssra-admin-verifications", status],
+    queryKey: ["ssra-admin-verifications", status, page, pageSize],
     queryFn: async () => {
+      const from = page * pageSize;
+      const to   = from + pageSize - 1;
       let q = supabase
         .from("ssra_verifications")
-        .select("*, ssra_profiles(full_name, email, country)")
-        .order("created_at", { ascending: false });
+        .select("*, ssra_profiles(full_name, email, country)", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
       if (status && status !== "all") q = q.eq("status", status);
-      const { data, error } = await q;
+      const { data, error, count } = await q;
       if (error) throw error;
-      return data ?? [];
+      return { rows: data ?? [], total: count ?? 0 };
+    },
+  });
+}
+
+/* ── Admin: revenue summary (DB view) ── */
+export function useRevenueSummary() {
+  return useQuery({
+    queryKey: ["ssra-revenue-summary"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_revenue_summary" as never)
+        .select("*")
+        .order("month", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        month: string;
+        course_id: string | null;
+        course_title: string | null;
+        enrollments: number;
+        revenue_eur: number;
+      }>;
     },
   });
 }
