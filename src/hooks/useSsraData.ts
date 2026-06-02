@@ -695,3 +695,38 @@ export function useAdminStats() {
     },
   });
 }
+
+/* ── Public: live schedule/instructor data for a single course ── */
+export function useCourseSchedule(courseId: string) {
+  return useQuery({
+    enabled: !!courseId,
+    queryKey: ["ssra-course-schedule", courseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_courses")
+        .select("id, title, start_date, start_time, duration, end_date, instructor_name, course_format, price_eur")
+        .eq("id", courseId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+/* ── Fetch enrollment by Stripe session id (for confirmation page) ── */
+export function useEnrollmentBySession(sessionId: string) {
+  return useQuery({
+    enabled: !!sessionId,
+    queryKey: ["ssra-enrollment-by-session", sessionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_enrollments")
+        .select("*")
+        .eq("stripe_session_id", sessionId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: (q: any) => (q?.state?.data ? false : 2500),
+  });
+}
