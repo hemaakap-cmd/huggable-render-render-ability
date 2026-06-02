@@ -48,19 +48,10 @@ export default function Checkout() {
       const origin = window.location.origin;
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
         body: {
-          priceId:       course.priceId,
-          mode:          course.type === "subscription" ? "subscription" : "payment",
-          customerEmail: displayEmail,
-          successUrl:    `${origin}/payment-success?courseId=${course.id}&session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl:     `${origin}/checkout?courseId=${course.id}`,
-          metadata:      {
-            courseId:      course.id,
-            courseName:    course.title,
-            studentName:   displayName,
-            customerEmail: displayEmail,
-            userId:        user.id,
-            ...getUtmMeta(),
-          },
+          courseId:   course.id,
+          successUrl: `${origin}/payment-success?courseId=${course.id}&session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl:  `${origin}/checkout?courseId=${course.id}`,
+          metadata:   getUtmMeta(),
         },
       });
       if (error) throw new Error(error.message);

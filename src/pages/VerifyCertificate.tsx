@@ -34,11 +34,9 @@ export default function VerifyCertificate() {
     setLoading(true);
     setSearched(true);
     const { data } = await supabase
-      .from("ssra_certificates")
-      .select("id,certificate_code,student_name,course_title,grade,issued_at,revoked")
-      .eq("certificate_code", code.trim().toUpperCase())
-      .maybeSingle();
-    setCert((data as Certificate | null) ?? null);
+      .rpc("verify_ssra_certificate", { _code: code.trim().toUpperCase() });
+    const row = Array.isArray(data) ? data[0] : null;
+    setCert((row as Certificate | null) ?? null);
     setLoading(false);
   }
 
