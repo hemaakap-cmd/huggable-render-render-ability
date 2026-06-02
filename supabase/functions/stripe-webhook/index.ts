@@ -44,6 +44,19 @@ Deno.serve(async (req: Request) => {
       const charge = event.data.object as Stripe.Charge;
       await handleChargeRefunded(charge);
     }
+
+    if (event.type === "charge.dispute.created" || event.type === "charge.dispute.closed") {
+      const dispute = event.data.object as Stripe.Dispute;
+      await handleChargeDispute(event.type, dispute);
+    }
+
+    if (event.type === "charge.refund.updated") {
+      const refund = event.data.object as Stripe.Refund;
+      if (refund.status === "succeeded" && typeof refund.charge === "string") {
+        const ch = await stripe.charges.retrieve(refund.charge);
+        await handleChargeRefunded(ch);
+      }
+    }
   } catch (err) {
     console.error("Error handling webhook event:", err);
     return new Response("Internal error", { status: 500 });
