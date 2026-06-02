@@ -5,7 +5,8 @@ import StudentLogin from "./StudentLogin";
 
 /* ── Mocks ── */
 const signOut       = vi.fn().mockResolvedValue({ error: null });
-const verifyOtp     = vi.fn();
+const setSession    = vi.fn().mockResolvedValue({ error: null });
+const functionsInvoke = vi.fn();
 const signInWithOtp = vi.fn().mockResolvedValue({ error: null });
 const onAuthStateChange = vi.fn().mockReturnValue({
   data: { subscription: { unsubscribe: vi.fn() } },
@@ -21,10 +22,13 @@ const selectFn     = vi.fn(() => ({ eq: eqSelect }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     auth: {
-      verifyOtp:          (...a: unknown[]) => verifyOtp(...a),
+      setSession:         (...a: unknown[]) => setSession(...a),
       signInWithOtp:      (...a: unknown[]) => signInWithOtp(...a),
       signOut:            (...a: unknown[]) => signOut(...a),
       onAuthStateChange:  (...a: unknown[]) => onAuthStateChange(...a),
+    },
+    functions: {
+      invoke:             (...a: unknown[]) => functionsInvoke(...a),
     },
     from: vi.fn(() => ({ update: updateFn, select: selectFn })),
   },
@@ -63,7 +67,7 @@ beforeEach(() => {
   eqSelect.mockReset();
   maybeSingle.mockReset();
   eqSelect.mockReturnValue({ maybeSingle });
-  verifyOtp.mockResolvedValue({ data: { user: { id: "u-1" } }, error: null });
+  functionsInvoke.mockResolvedValue({ data: { user: { id: "u-1" }, session: { access_token: "token", refresh_token: "refresh" } }, error: null });
 });
 
 describe("StudentLogin — OTP verify hardening", () => {
@@ -147,7 +151,7 @@ describe("StudentLogin — OTP verify hardening", () => {
 
   /* ─── OTP itself fails ─── */
   it("invalid OTP → no sign-out, no profile queries", async () => {
-    verifyOtp.mockResolvedValueOnce({ data: null, error: { message: "bad code" } });
+    functionsInvoke.mockResolvedValueOnce({ data: null, error: { message: "bad code" } });
     await reachOtpScreen("login");
     await submitOtp();
     await waitFor(() => expect(toast).toHaveBeenCalledWith(expect.objectContaining({
