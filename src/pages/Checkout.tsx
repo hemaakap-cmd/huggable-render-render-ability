@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, ShieldCheck } from "lucide-react";
+import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, ShieldCheck, Calendar, Clock, User } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
-import { useMyVerification } from "@/hooks/useSsraData";
+import { useMyVerification, useCourseSchedule } from "@/hooks/useSsraData";
+
+function fmtDate(d?: string | null) {
+  if (!d) return null;
+  try { return new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }); } catch { return d; }
+}
+function fmtTime(t?: string | null) { return t ? (t.length >= 5 ? t.slice(0, 5) : t) : null; }
 
 export default function Checkout() {
   const [params]  = useSearchParams();
