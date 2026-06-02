@@ -250,11 +250,13 @@ export default function Checkout() {
               </div>
 
               <form onSubmit={handlePay}>
-                <button type="submit" disabled={loading}
-                  className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                <button type="submit" disabled={loading || !scheduleReady}
+                  className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Stripe…</>
-                    : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{course.price}{course.type === "subscription" ? "/mo" : ""}</>
+                    : !scheduleReady
+                      ? <>Enrollment unavailable — schedule pending</>
+                      : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{course.price}{course.type === "subscription" ? "/mo" : ""}</>
                   }
                 </button>
               </form>
