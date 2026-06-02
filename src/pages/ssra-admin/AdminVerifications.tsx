@@ -186,6 +186,22 @@ export default function AdminVerifications() {
             </div>
           )}
         </div>
+
+        {total > PAGE_SIZE && (
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <div>Page {page + 1} of {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} submissions</div>
+            <div className="flex gap-2">
+              <button disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
+                <ChevronLeft className="w-4 h-4" /> Prev
+              </button>
+              <button disabled={(page + 1) * PAGE_SIZE >= total} onClick={() => setPage((p) => p + 1)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
