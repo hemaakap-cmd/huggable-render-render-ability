@@ -21,11 +21,6 @@ export default function Checkout() {
   const { toast } = useToast();
   const courseId  = params.get("courseId") ?? "";
   const course    = getCourse(courseId);
-
-  const { user, profile, loading: authLoading } = useSsraAuth();
-  const { data: verification, isLoading: vLoad } = useMyVerification();
-
-  const course    = getCourse(courseId);
   const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
