@@ -524,7 +524,7 @@ export function useStudentAttendanceById(userId: string) {
         .from("ssra_session_attendance")
         .select("*, ssra_sessions(title, scheduled_at, duration_minutes, ssra_courses(title))")
         .eq("user_id", userId)
-        .order("joined_at", { ascending: false });
+        .order("attended_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },

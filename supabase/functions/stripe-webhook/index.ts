@@ -75,17 +75,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   if (mode === "payment") {
-    // One-time course purchase → create enrollment
-    const { error } = await supabase.from("ssra_enrollments").insert({
+    // One-time course purchase → upsert enrollment (idempotent for webhook retries)
+    const { error } = await supabase.from("ssra_enrollments").upsert({
       user_id:    userId,
       course_id:  courseId,
       status:     "active",
       amount_eur: (session.amount_total ?? 0) / 100,
+      stripe_session_id:     session.id,
       stripe_payment_intent: session.payment_intent as string ?? null,
       enrolled_at: new Date().toISOString(),
-    });
-    if (error) throw new Error(`Enrollment insert failed: ${error.message}`);
-    console.log(`Enrollment created for ${customerEmail} → ${courseId}`);
+    }, { onConflict: "user_id,course_id" });
+    if (error) throw new Error(`Enrollment upsert failed: ${error.message}`);
+    console.log(`Enrollment upserted for ${customerEmail} → ${courseId}`);
 
   } else if (mode === "subscription") {
     // Subscription → find or create Stripe subscription record
