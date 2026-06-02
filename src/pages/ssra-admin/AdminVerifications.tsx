@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, Clock, Search, ChevronDown } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Search, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminVerifications, useUpdateVerification } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
@@ -76,7 +76,7 @@ export default function AdminVerifications() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
             {STATUS_TABS.map(({ label, value }) => (
-              <button key={value} onClick={() => setTab(value)}
+              <button key={value} onClick={() => { setTab(value); setPage(0); }}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   tab === value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
                 }`}>
