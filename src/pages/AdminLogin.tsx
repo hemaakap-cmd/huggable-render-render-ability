@@ -203,7 +203,7 @@ export default function AdminLogin() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     autoFocus
-                    placeholder="staff@ssra-academy.de"
+                    placeholder="staff@ssracourses.com"
                     className="w-full pl-10 pr-4 h-11 rounded-xl bg-slate-950 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
                   />
                 </div>
