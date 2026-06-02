@@ -408,10 +408,22 @@ export function useSessionAttendance(sessionId: string | null) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_session_attendance")
-        .select("*, ssra_profiles(full_name, email)")
+        .select("*")
         .eq("session_id", sessionId!);
       if (error) throw error;
-      return data ?? [];
+
+      const rows = data ?? [];
+      const userIds = [...new Set(rows.map((a) => a.user_id).filter((id): id is string => Boolean(id)))];
+      if (userIds.length === 0) return rows;
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("ssra_profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      if (profilesError) throw profilesError;
+
+      const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
+      return rows.map((a) => ({ ...a, ssra_profiles: a.user_id ? profilesById.get(a.user_id) ?? null : null }));
     },
   });
 }
