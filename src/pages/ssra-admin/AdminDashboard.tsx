@@ -56,16 +56,18 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useAdminStats();
-  const { data: verifications = [] }             = useAdminVerifications("all");
-  const { data: pendingVerif = [] }              = useAdminVerifications("pending");
+  const { data: verificationsPage }              = useAdminVerifications("all");
+  const { data: pendingVerifPage }               = useAdminVerifications("pending");
   const { data: enrollments = [] }               = useAdminEnrollments();
   const { data: growth = [] }                    = useStudentGrowth();
   const { data: sessions = [] }                  = useAdminSessions();
+  const verifications = verificationsPage?.rows ?? [];
+  const pendingVerif = pendingVerifPage?.rows ?? [];
 
   /* Verification status breakdown for pie chart */
   const verifPie = useMemo(() => {
     const counts: Record<string, number> = { pending: 0, approved: 0, rejected: 0 };
-    for (const v of verifications as any[]) {
+    for (const v of verifications) {
       if (v.status in counts) counts[v.status]++;
     }
     return Object.entries(counts)
@@ -82,7 +84,7 @@ export default function AdminDashboard() {
       status: e.status,
       date: e.enrolled_at,
     }));
-    const verifItems = (verifications as any[]).slice(0, 4).map((v) => ({
+    const verifItems = verifications.slice(0, 4).map((v) => ({
       id: v.id, type: "verification",
       name: v.full_name ?? "Unknown",
       detail: `${v.country} · ${v.degree}`,
@@ -195,14 +197,14 @@ export default function AdminDashboard() {
                 View all
               </Link>
             </div>
-            {(pendingVerif as any[]).length === 0 ? (
+            {pendingVerif.length === 0 ? (
               <div className="text-center py-6">
                 <CheckCircle2 className="w-8 h-8 text-emerald-300 mx-auto mb-2" />
                 <div className="text-slate-400 text-sm">All caught up!</div>
               </div>
             ) : (
               <div className="space-y-2">
-                {(pendingVerif as any[]).slice(0, 5).map((v: any) => (
+                {pendingVerif.slice(0, 5).map((v: any) => (
                   <div key={v.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
                     <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-bold shrink-0">
                       {v.full_name?.[0] ?? "?"}

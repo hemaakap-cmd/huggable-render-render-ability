@@ -92,14 +92,48 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
       const to   = from + pageSize - 1;
       let q = supabase
         .from("ssra_profiles")
-        .select("*, ssra_enrollments(count), ssra_subscriptions(status)", { count: "exact" })
+        .select("*", { count: "exact" })
         .eq("role", "student")
         .order("created_at", { ascending: false })
         .range(from, to);
       if (search) q = q.ilike("full_name", `%${search}%`);
       const { data, error, count } = await q;
       if (error) throw error;
-      return { rows: data ?? [], total: count ?? 0 };
+
+      const rows = data ?? [];
+      const ids = rows.map((s) => s.id);
+      if (ids.length === 0) return { rows, total: count ?? 0 };
+
+      const [enrollments, subscriptions] = await Promise.all([
+        supabase.from("ssra_enrollments").select("user_id").in("user_id", ids),
+        supabase.from("ssra_subscriptions").select("user_id, status, created_at").in("user_id", ids).order("created_at", { ascending: false }),
+      ]);
+      if (enrollments.error) throw enrollments.error;
+      if (subscriptions.error) throw subscriptions.error;
+
+      const enrollmentCounts = new Map<string, number>();
+      for (const e of enrollments.data ?? []) {
+        if (!e.user_id) continue;
+        enrollmentCounts.set(e.user_id, (enrollmentCounts.get(e.user_id) ?? 0) + 1);
+      }
+
+      const latestSubscription = new Map<string, { status: string }>();
+      for (const s of subscriptions.data ?? []) {
+        if (!s.user_id) continue;
+        if (!latestSubscription.has(s.user_id)) latestSubscription.set(s.user_id, { status: s.status });
+      }
+
+      return {
+        rows: rows.map((s) => {
+          const subscription = latestSubscription.get(s.id);
+          return {
+            ...s,
+            ssra_enrollments: [{ count: enrollmentCounts.get(s.id) ?? 0 }],
+            ssra_subscriptions: subscription ? [subscription] : [],
+          };
+        }),
+        total: count ?? 0,
+      };
     },
   });
 }
@@ -113,7 +147,7 @@ export function useAdminVerifications(status?: string, page = 0, pageSize = 25) 
       const to   = from + pageSize - 1;
       let q = supabase
         .from("ssra_verifications")
-        .select("*, ssra_profiles(full_name, email, country)", { count: "exact" })
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, to);
       if (status && status !== "all") q = q.eq("status", status);
@@ -166,10 +200,22 @@ export function useAdminEnrollments() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_enrollments")
-        .select("*, ssra_courses(title, price_eur), ssra_profiles(full_name, email)")
+        .select("*, ssra_courses(title, price_eur)")
         .order("enrolled_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+
+      const rows = data ?? [];
+      const userIds = [...new Set(rows.map((e) => e.user_id).filter((id): id is string => Boolean(id)))];
+      if (userIds.length === 0) return rows;
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("ssra_profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      if (profilesError) throw profilesError;
+
+      const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
+      return rows.map((e) => ({ ...e, ssra_profiles: e.user_id ? profilesById.get(e.user_id) ?? null : null }));
     },
   });
 }
@@ -181,10 +227,22 @@ export function useAdminSubscriptions() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_subscriptions")
-        .select("*, ssra_courses(title, price_eur), ssra_profiles(full_name, email)")
+        .select("*, ssra_courses(title, price_eur)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+
+      const rows = data ?? [];
+      const userIds = [...new Set(rows.map((s) => s.user_id).filter((id): id is string => Boolean(id)))];
+      if (userIds.length === 0) return rows;
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("ssra_profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      if (profilesError) throw profilesError;
+
+      const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
+      return rows.map((s) => ({ ...s, ssra_profiles: s.user_id ? profilesById.get(s.user_id) ?? null : null }));
     },
   });
 }
@@ -350,10 +408,22 @@ export function useSessionAttendance(sessionId: string | null) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_session_attendance")
-        .select("*, ssra_profiles(full_name, email)")
+        .select("*")
         .eq("session_id", sessionId!);
       if (error) throw error;
-      return data ?? [];
+
+      const rows = data ?? [];
+      const userIds = [...new Set(rows.map((a) => a.user_id).filter((id): id is string => Boolean(id)))];
+      if (userIds.length === 0) return rows;
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("ssra_profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      if (profilesError) throw profilesError;
+
+      const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
+      return rows.map((a) => ({ ...a, ssra_profiles: a.user_id ? profilesById.get(a.user_id) ?? null : null }));
     },
   });
 }

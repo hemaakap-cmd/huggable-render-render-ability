@@ -27,7 +27,8 @@ export default function AdminAttendance() {
 
   const { data: sessions = [], isLoading: sessionsLoading } = useAdminSessions();
   const { data: attendanceData = [], isLoading: attLoading }  = useSessionAttendance(selectedSession);
-  const { data: allStudents = [] }                            = useAdminStudents("");
+  const { data: studentsPage }                                = useAdminStudents("");
+  const allStudents                                           = studentsPage?.rows ?? [];
   const markAttendance = useMarkAttendance();
 
   const session = useMemo(
