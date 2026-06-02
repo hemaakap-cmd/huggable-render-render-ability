@@ -73,7 +73,7 @@ export default function StudentDashboard() {
           <StatCard label="Courses enrolled"   value={eLoading ? "…" : enrollments.length} color="text-[hsl(220,91%,54%)]" />
           <StatCard label="Subscription"
             value={sLoading ? "…" : hasActiveSubscription ? "Active" : "None"}
-            sub={hasActiveSubscription ? "Medical German" : "€29/mo available"}
+            sub={hasActiveSubscription ? "Medical German" : "€19/mo available"}
             color={hasActiveSubscription ? "text-emerald-600" : "text-slate-400"} />
           <StatCard label="Verification"
             value={isVerified ? "Approved" : isPending ? "Pending" : "Required"}
