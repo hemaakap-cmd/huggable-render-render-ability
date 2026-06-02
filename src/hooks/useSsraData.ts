@@ -124,11 +124,14 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
       }
 
       return {
-        rows: rows.map((s) => ({
-          ...s,
-          ssra_enrollments: [{ count: enrollmentCounts.get(s.id) ?? 0 }],
-          ssra_subscriptions: latestSubscription.has(s.id) ? [latestSubscription.get(s.id)] : [],
-        })),
+        rows: rows.map((s) => {
+          const subscription = latestSubscription.get(s.id);
+          return {
+            ...s,
+            ssra_enrollments: [{ count: enrollmentCounts.get(s.id) ?? 0 }],
+            ssra_subscriptions: subscription ? [subscription] : [],
+          };
+        }),
         total: count ?? 0,
       };
     },
