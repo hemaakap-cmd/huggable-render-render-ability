@@ -108,6 +108,7 @@ export default function AdminLogin() {
     dismiss();
     setLoading(true);
     setOtp("");
+    await supabase.auth.signOut().catch(() => {});
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/ssra-admin` },
