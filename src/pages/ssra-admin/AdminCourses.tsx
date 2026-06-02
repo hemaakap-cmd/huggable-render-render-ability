@@ -65,8 +65,27 @@ export default function AdminCourses() {
     }
   }
 
+  function missingSchedule(f: Record<string, unknown>): string[] {
+    const m: string[] = [];
+    if (!f.start_date) m.push("start date");
+    if (!f.start_time) m.push("start time");
+    if (!String(f.duration ?? "").trim()) m.push("duration");
+    if (!String(f.instructor_name ?? "").trim()) m.push("instructor name");
+    if (!f.course_format) m.push("course format");
+    return m;
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const missing = missingSchedule(form);
+    if (form.is_active && missing.length > 0) {
+      toast({
+        title: "Cannot publish course",
+        description: `Missing required fields: ${missing.join(", ")}. Uncheck "Active" to save as draft.`,
+        variant: "destructive",
+      });
+      return;
+    }
     setSaving(true);
     try {
       const modules = modulesText.split("\n").map((s) => s.trim()).filter(Boolean);
@@ -76,6 +95,11 @@ export default function AdminCourses() {
         price_egp: Number(form.price_egp),
         sort_order: Number(form.sort_order),
         modules,
+        start_date: form.start_date || null,
+        start_time: form.start_time || null,
+        duration: form.duration || null,
+        instructor_name: form.instructor_name || null,
+        course_format: form.course_format || null,
         id: form.id || undefined,
       };
       await upsert.mutateAsync(payload);
@@ -88,7 +112,18 @@ export default function AdminCourses() {
     }
   }
 
-  async function handleToggle(c: { id: string; is_active: boolean }) {
+  async function handleToggle(c: { id: string; is_active: boolean; start_date?: string | null; start_time?: string | null; duration?: string | null; instructor_name?: string | null; course_format?: string | null }) {
+    if (!c.is_active) {
+      const missing = missingSchedule(c as Record<string, unknown>);
+      if (missing.length > 0) {
+        toast({
+          title: "Cannot publish course",
+          description: `Missing: ${missing.join(", ")}. Edit course first.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     await toggle.mutateAsync({ id: c.id, is_active: !c.is_active });
     toast({ title: c.is_active ? "Course hidden" : "Course visible" });
   }
