@@ -122,6 +122,19 @@ export default function SuperAdminManualGrant() {
             )}
           </div>
 
+          <label className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer">
+            <input
+              type="checkbox"
+              checked={skipVerification}
+              onChange={(e) => setSkipVerification(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span className="text-xs text-amber-900">
+              <strong>Skip Stripe verification</strong> — only use when Stripe is unreachable or for legacy/offline receipts. The reference will be saved as-is without validation.
+            </span>
+          </label>
+
+
           <button
             type="submit"
             disabled={loading}
