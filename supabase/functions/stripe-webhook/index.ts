@@ -136,21 +136,37 @@ async function handleSubscriptionChange(sub: Stripe.Subscription) {
 }
 
 async function handleChargeRefunded(charge: Stripe.Charge) {
-  const paymentIntent = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id ?? null;
+  const paymentIntent = typeof charge.payment_intent === "string"
+    ? charge.payment_intent
+    : charge.payment_intent?.id ?? null;
+
   if (!paymentIntent) {
-    console.warn("charge.refunded without payment_intent — skipping", charge.id);
+    console.warn(`charge.refunded ${charge.id}: no payment_intent — skipping`);
     return;
   }
 
+  const isFullRefund = (charge.amount_refunded ?? 0) >= (charge.amount ?? 0);
+  const newStatus    = isFullRefund ? "refunded" : "partially_refunded";
+
   const { error, data } = await supabase
     .from("ssra_enrollments")
-    .update({ status: "refunded" })
+    .update({ status: newStatus })
     .eq("stripe_payment_intent", paymentIntent)
-    .select("id");
+    .select("id, user_id, course_id");
 
   if (error) {
-    console.error("Refund status update failed:", error.message);
+    console.error(`Refund update failed for PI ${paymentIntent}:`, error.message);
     throw new Error(error.message);
   }
-  console.log(`Refund applied to ${data?.length ?? 0} enrollment(s) for payment_intent ${paymentIntent}`);
+
+  if (!data || data.length === 0) {
+    // Likely a subscription invoice refund (no enrollment row) — log for ops visibility
+    console.warn(`charge.refunded ${charge.id}: no enrollment matched PI ${paymentIntent} (likely subscription invoice)`);
+    return;
+  }
+
+  console.log(
+    `Refund (${newStatus}) applied to ${data.length} enrollment(s) for PI ${paymentIntent}: ` +
+    data.map((r) => `${r.user_id}/${r.course_id}`).join(", ")
+  );
 }
