@@ -30,6 +30,8 @@ export default function AdminLogin() {
     dismiss();
     setLoading(true);
     setOtp("");
+    // Clear any stale session before requesting a new code
+    await supabase.auth.signOut().catch(() => {});
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
