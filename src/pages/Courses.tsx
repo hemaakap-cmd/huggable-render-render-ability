@@ -128,10 +128,10 @@ export default function Courses() {
       <Helmet>
         <title>Courses — SSRA Academy</title>
         <meta name="description" content="9 courses for Arabic-speaking sports science graduates. Medical German, clinical rehabilitation, movement analysis, career entry in Germany. From €29." />
-        <link rel="canonical" href="https://ssra-academy.de/courses" />
-        <meta property="og:image" content="https://ssra-academy.de/og-image.png" />
+        <link rel="canonical" href="https://ssracourses.com/courses" />
+        <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://ssra-academy.de/og-image.png" />
+        <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
       </Helmet>
       <Header />
 

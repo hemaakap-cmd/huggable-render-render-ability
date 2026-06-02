@@ -53,10 +53,10 @@ export default function Contact() {
       <Helmet>
         <title>Contact — SSRA Academy</title>
         <meta name="description" content="Get in touch with SSRA Academy. We're here to help Arabic-speaking sports science graduates build their career in Germany." />
-        <meta property="og:image" content="https://ssra-academy.de/og-image.png" />
+        <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://ssra-academy.de/og-image.png" />
-        <link rel="canonical" href="https://ssra-academy.de/contact" />
+        <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
+        <link rel="canonical" href="https://ssracourses.com/contact" />
       </Helmet>
       <Header />
 
@@ -82,7 +82,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-foreground mb-1">Email</div>
-                  <div className="text-sm text-muted-foreground">info@ssra-academy.de</div>
+                  <div className="text-sm text-muted-foreground">info@ssracourses.com</div>
                 </div>
               </div>
 
