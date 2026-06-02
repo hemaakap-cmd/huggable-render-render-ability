@@ -346,6 +346,44 @@ export default function AdminCourses() {
                 </div>
               </div>
 
+              {/* Schedule & Instructor — required for publishing */}
+              <div className="border-t border-slate-100 pt-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-900">Schedule & Instructor</h3>
+                  <span className="text-xs text-slate-400">Required to publish</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Start Date *</label>
+                    <input type="date" value={(form.start_date as string) ?? ""} onChange={(e) => field("start_date", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Start Time *</label>
+                    <input type="time" value={(form.start_time as string) ?? ""} onChange={(e) => field("start_time", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Duration *</label>
+                    <input placeholder="e.g. 8 weeks · 2h/session" value={(form.duration as string) ?? ""} onChange={(e) => field("duration", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Format *</label>
+                    <select value={(form.course_format as string) ?? "online_live"} onChange={(e) => field("course_format", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
+                      {FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Instructor Name *</label>
+                  <input placeholder="e.g. Dr. Ahmed Hassan" value={(form.instructor_name as string) ?? ""} onChange={(e) => field("instructor_name", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                </div>
+              </div>
+
+
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Stripe Price ID</label>
                 <input placeholder="price_xxxxxxxxxxxxxxxx" value={form.stripe_price_id as string} onChange={(e) => field("stripe_price_id", e.target.value)}
