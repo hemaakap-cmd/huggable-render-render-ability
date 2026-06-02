@@ -6,9 +6,11 @@ import {
   CreditCard, Play, ChevronRight,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/stripe";
+import { supabase } from "@/integrations/supabase/client";
 
 function useReveal() {
   useEffect(() => {
@@ -22,12 +24,30 @@ function useReveal() {
   }, []);
 }
 
-const STATS = [
-  { value: "200+", label: "Students enrolled", icon: Users },
-  { value: "9",    label: "Courses available", icon: BookOpen },
-  { value: "15+",  label: "Countries",         icon: Globe2 },
-  { value: "€29",  label: "Starting price",    icon: CreditCard },
-];
+type HomeStats = {
+  students_count: number;
+  courses_count: number;
+  countries_count: number;
+  min_price: number | null;
+};
+
+function useHomeStats() {
+  return useQuery({
+    queryKey: ["public-home-stats"],
+    queryFn: async (): Promise<HomeStats> => {
+      const { data, error } = await supabase.rpc("get_public_home_stats");
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return {
+        students_count: Number(row?.students_count ?? 0),
+        courses_count: Number(row?.courses_count ?? 0),
+        countries_count: Number(row?.countries_count ?? 0),
+        min_price: row?.min_price != null ? Number(row.min_price) : null,
+      };
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
 
 const FEATURES = [
   { icon: Shield,   title: "Verified Curriculum",   desc: "Every course reviewed by practising German sports scientists and physiotherapists." },
@@ -46,12 +66,36 @@ export default function Index() {
   useReveal();
 
   const featuredCourses = COURSES.slice(0, 3);
+  const { data: stats } = useHomeStats();
+
+  const STATS = [
+    {
+      value: stats ? String(stats.students_count) : "—",
+      label: "Students enrolled",
+      icon: Users,
+    },
+    {
+      value: stats ? String(stats.courses_count) : "—",
+      label: "Courses available",
+      icon: BookOpen,
+    },
+    {
+      value: stats ? String(stats.countries_count) : "—",
+      label: "Countries",
+      icon: Globe2,
+    },
+    {
+      value: stats?.min_price != null ? `€${stats.min_price}` : "—",
+      label: "Starting price",
+      icon: CreditCard,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
         <title>SSRA Academy — Sports Science & Rehabilitation for Arabic Speakers</title>
-        <meta name="description" content="Work in Germany as a sports scientist. Medical German, clinical courses and career support — all taught in Arabic. Join 200+ graduates already enrolled." />
+        <meta name="description" content="Work in Germany as a sports scientist. Medical German, clinical courses and career support — all taught in Arabic." />
         <meta property="og:title" content="SSRA Academy — Work in Germany as a Sports Scientist" />
         <meta property="og:description" content="Medical German, clinical courses and career support for Arabic-speaking sports science graduates. From €29/month." />
         <meta property="og:type" content="website" />
