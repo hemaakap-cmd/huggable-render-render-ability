@@ -60,16 +60,20 @@ export default function AdminLogin() {
       return;
     }
     setOtpLoading(true);
-    const { data: verifyData, error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
-    if (error || !verifyData?.user) {
+    const { data: verifyData, error } = await supabase.functions.invoke("verify-otp-code", {
+      body: { email, token: otp, type: "magiclink" },
+    });
+    if (error || verifyData?.error || !verifyData?.user || !verifyData?.session) {
       setOtpLoading(false);
       toast({
         title: "Invalid or expired code",
-        description: "Press 'Resend code' to get a new one.",
+        description: verifyData?.error || error?.message || "Press 'Resend code' to get a new one.",
         variant: "destructive",
       });
       return;
     }
+
+    await supabase.auth.setSession(verifyData.session);
 
     // Role gate: must be admin or super_admin
     const { data: prof, error: profErr } = await supabase
