@@ -13,7 +13,7 @@
  */
 export const COMPANY_INFO = {
   name: "MASSAVO",
-  email: "info@massavo.com",
+  email: "info@ssracourses.com",
   phone: "+49 160 5652154",
   address: "Bracknellstraße 41, 51379 Leverkusen",
   tagline: "Professional Massage Services",

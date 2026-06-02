@@ -55,10 +55,10 @@ export default function About() {
       <Helmet>
         <title>About — SSRA Academy</title>
         <meta name="description" content="SSRA Academy helps Arabic-speaking sports science graduates build careers in Germany. Our mission: accessible, high-quality education in Arabic." />
-        <link rel="canonical" href="https://ssra-academy.de/about" />
-        <meta property="og:image" content="https://ssra-academy.de/og-image.png" />
+        <link rel="canonical" href="https://ssracourses.com/about" />
+        <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://ssra-academy.de/og-image.png" />
+        <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
       </Helmet>
       <Header />
 

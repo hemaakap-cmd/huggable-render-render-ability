@@ -56,15 +56,15 @@ export default function Index() {
         <meta property="og:description" content="Medical German, clinical courses and career support for Arabic-speaking sports science graduates. From €29/month." />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://ssra-academy.de/" />
+        <link rel="canonical" href="https://ssracourses.com/" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "EducationalOrganization",
           "name": "SSRA Academy",
-          "url": "https://ssra-academy.de",
-          "logo": "https://ssra-academy.de/logo.svg",
+          "url": "https://ssracourses.com",
+          "logo": "https://ssracourses.com/logo.svg",
           "description": "Online academy for Arabic-speaking sports science graduates pursuing careers in Germany.",
-          "email": "info@ssra-academy.de",
+          "email": "info@ssracourses.com",
           "address": { "@type": "PostalAddress", "addressCountry": "DE" },
           "sameAs": [
             "https://instagram.com/ssra.academy",
