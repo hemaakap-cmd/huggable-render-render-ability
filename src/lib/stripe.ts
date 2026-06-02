@@ -67,7 +67,7 @@ export const COURSES: Course[] = [
     interval: "month" as const,
     type: "subscription" as const,
     priceId: "price_test_placeholder",
-    paymentLink: "https://buy.stripe.com/6oUdR900E2rOaDY5Dmb7y0c",
+    paymentLink: "https://buy.stripe.com/3cI6oH4gUd6sbI23veb7y0e",
     category: "language" as const,
     weeks: "Ongoing",
     level: "Test",
