@@ -4,6 +4,7 @@ import { Mail, Loader2, CheckCircle2, ArrowLeft, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import { verifyOtpCode } from "@/lib/verifyOtpCode";
 
 type Tab = "signup" | "login";
 
@@ -91,9 +92,7 @@ export default function StudentLogin() {
       return;
     }
     setOtpLoading(true);
-    const { data: verifyData, error } = await supabase.functions.invoke("verify-otp-code", {
-      body: { email, token: otp, type: tab === "signup" ? "signup" : "magiclink" },
-    });
+    const { data: verifyData, error } = await verifyOtpCode({ email, token: otp, type: tab === "signup" ? "signup" : "magiclink" });
     if (error || verifyData?.error || !verifyData?.user || !verifyData?.session) {
       setOtpLoading(false);
       toast({
