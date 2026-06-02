@@ -71,17 +71,36 @@ export default function AdminEnrollments() {
               <div className="text-center py-8 text-slate-400 text-sm">No enrollments yet.</div>
             )}
             {enrollments.map((e: any) => (
-              <div key={e.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-slate-800">
-                    {e.ssra_profiles?.full_name ?? e.ssra_profiles?.email ?? "Unknown"}
+              <div key={e.id} className="px-5 py-4 hover:bg-slate-50 transition-colors">
+                <div className="flex items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-slate-800">
+                      {e.ssra_profiles?.full_name ?? e.student_name_snapshot ?? e.ssra_profiles?.email ?? e.student_email_snapshot ?? "Unknown"}
+                    </div>
+                    <div className="text-xs text-slate-500 truncate">
+                      {e.course_title_snapshot ?? e.ssra_courses?.title}
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-slate-400">
+                      {e.order_number && (
+                        <span className="font-mono text-slate-600">{e.order_number}</span>
+                      )}
+                      {e.start_date_snapshot && (
+                        <span>Starts: {new Date(e.start_date_snapshot + "T00:00:00").toLocaleDateString()}
+                          {e.start_time_snapshot ? ` · ${String(e.start_time_snapshot).slice(0, 5)}` : ""}</span>
+                      )}
+                      {e.duration_snapshot && <span>· {e.duration_snapshot}</span>}
+                      {e.instructor_snapshot && <span>· {e.instructor_snapshot}</span>}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-400 truncate">{e.ssra_courses?.title}</div>
-                </div>
-                <div className="text-sm font-bold text-slate-900 shrink-0">€{e.amount_eur ?? 0}</div>
-                <StatusBadge status={e.status} />
-                <div className="text-xs text-slate-400 shrink-0 hidden sm:block">
-                  {e.enrolled_at ? new Date(e.enrolled_at).toLocaleDateString() : "—"}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <div className="text-sm font-bold text-slate-900">€{e.amount_eur ?? 0}</div>
+                    <StatusBadge status={e.status} />
+                    <div className="text-xs text-slate-400">
+                      {e.paid_at
+                        ? new Date(e.paid_at).toLocaleDateString()
+                        : e.enrolled_at ? new Date(e.enrolled_at).toLocaleDateString() : "—"}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
