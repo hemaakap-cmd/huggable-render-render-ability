@@ -189,13 +189,18 @@ export default function Checkout() {
                 <div className="font-display text-lg font-bold text-slate-900">{course.title}</div>
                 <div className="text-xs text-[hsl(220,91%,54%)] mt-0.5">{course.subtitle}</div>
               </div>
-              <ul className="space-y-1.5 mb-5">
-                {course.modules.slice(0, 4).map((m) => (
-                  <li key={m} className="flex items-center gap-2 text-xs text-slate-500">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {m}
-                  </li>
-                ))}
-              </ul>
+              <div className="mb-4 space-y-2 text-xs">
+                <div className="flex items-center gap-2 text-slate-600"><Calendar className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Start date:</span> <span className="font-semibold">{fmtDate(schedule?.start_date) ?? "TBA"}</span></div>
+                <div className="flex items-center gap-2 text-slate-600"><Clock className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Start time:</span> <span className="font-semibold">{fmtTime(schedule?.start_time) ?? "TBA"}</span></div>
+                <div className="flex items-center gap-2 text-slate-600"><CheckCircle2 className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Duration:</span> <span className="font-semibold">{schedule?.duration || course.weeks}</span></div>
+                {schedule?.instructor_name && <div className="flex items-center gap-2 text-slate-600"><User className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Instructor:</span> <span className="font-semibold">{schedule.instructor_name}</span></div>}
+              </div>
+              {!scheduleReady && (
+                <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>This course is missing schedule details (start date, time, or duration). Enrollment is disabled until the admin completes the setup.</span>
+                </div>
+              )}
               <div className="border-t border-slate-100 pt-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
