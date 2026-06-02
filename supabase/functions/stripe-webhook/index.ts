@@ -115,6 +115,31 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     studentName = profile?.full_name ?? null;
   }
 
+  // SAFETY: never store an enrollment with NULL user_id.
+  // If the buyer paid without an account (e.g., guest checkout / payment link),
+  // provision an auth user on the fly so the enrollment is attributable.
+  if (!userId && customerEmail) {
+    try {
+      const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+        email: customerEmail,
+        email_confirm: true,  // they paid — trust the email
+        user_metadata: { source: "stripe_webhook_auto", course_id: courseId },
+      });
+      if (createErr) {
+        // Race: another concurrent webhook may have created them; refetch
+        const { data: existing } = await supabase
+          .from("ssra_profiles").select("id, full_name").ilike("email", customerEmail).maybeSingle();
+        userId = existing?.id ?? null;
+        studentName = existing?.full_name ?? null;
+      } else if (created?.user) {
+        userId = created.user.id;
+        console.log(`[webhook] auto-provisioned user ${userId} for ${customerEmail}`);
+      }
+    } catch (e) {
+      console.error("[webhook] auto-provision failed:", e);
+    }
+  }
+
   const { data: course } = await supabase
     .from("ssra_courses")
     .select("title, start_date, start_time, duration, instructor_name, course_format, price_eur")
@@ -125,7 +150,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const paidAtIso   = new Date().toISOString();
   const currency    = (session.currency ?? "eur").toUpperCase();
 
-  if (!userId) console.warn(`Could not resolve user for email ${customerEmail}, enrollment will have null user_id`);
+  if (!userId) {
+    console.error(`[webhook] CRITICAL: cannot resolve or provision user for ${customerEmail} on session ${session.id} — refusing to create orphaned enrollment.`);
+    // Do NOT create an orphaned row. Stripe will retry the webhook; meanwhile we have
+    // a clear log and the payment is recoverable via Stripe dashboard.
+    return;
+  }
 
   if (mode === "payment") {
     const { data: enrollment, error } = await supabase.from("ssra_enrollments").upsert({
