@@ -583,6 +583,7 @@ export type Database = {
         Returns: number
       }
       generate_ssra_cert_code: { Args: never; Returns: string }
+      get_ssra_role: { Args: { _uid: string }; Returns: string }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
       is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }
       move_to_dlq: {
@@ -600,6 +601,17 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      verify_ssra_certificate: {
+        Args: { _code: string }
+        Returns: {
+          certificate_code: string
+          course_title: string
+          grade: string
+          issued_at: string
+          revoked: boolean
+          student_name: string
         }[]
       }
     }
