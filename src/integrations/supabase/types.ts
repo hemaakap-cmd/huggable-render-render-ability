@@ -629,6 +629,15 @@ export type Database = {
       }
       generate_ssra_cert_code: { Args: never; Returns: string }
       generate_ssra_order_number: { Args: never; Returns: string }
+      get_public_home_stats: {
+        Args: never
+        Returns: {
+          countries_count: number
+          courses_count: number
+          min_price: number
+          students_count: number
+        }[]
+      }
       get_ssra_role: { Args: { _uid: string }; Returns: string }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
       is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }
