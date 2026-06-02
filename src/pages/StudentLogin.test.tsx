@@ -6,7 +6,7 @@ import StudentLogin from "./StudentLogin";
 /* ── Mocks ── */
 const signOut       = vi.fn().mockResolvedValue({ error: null });
 const setSession    = vi.fn().mockResolvedValue({ error: null });
-const functionsInvoke = vi.fn();
+const verifyOtpCode = vi.fn();
 const signInWithOtp = vi.fn().mockResolvedValue({ error: null });
 const onAuthStateChange = vi.fn().mockReturnValue({
   data: { subscription: { unsubscribe: vi.fn() } },
@@ -27,11 +27,12 @@ vi.mock("@/integrations/supabase/client", () => ({
       signOut:            (...a: unknown[]) => signOut(...a),
       onAuthStateChange:  (...a: unknown[]) => onAuthStateChange(...a),
     },
-    functions: {
-      invoke:             (...a: unknown[]) => functionsInvoke(...a),
-    },
     from: vi.fn(() => ({ update: updateFn, select: selectFn })),
   },
+}));
+
+vi.mock("@/lib/verifyOtpCode", () => ({
+  verifyOtpCode: (...a: unknown[]) => verifyOtpCode(...a),
 }));
 
 const toast = vi.fn();
@@ -68,7 +69,7 @@ beforeEach(() => {
   eqSelect.mockReset();
   maybeSingle.mockReset();
   eqSelect.mockReturnValue({ maybeSingle });
-  functionsInvoke.mockResolvedValue({ data: { user: { id: "u-1" }, session: { access_token: "token", refresh_token: "refresh" } }, error: null });
+  verifyOtpCode.mockResolvedValue({ data: { user: { id: "u-1" }, session: { access_token: "token", refresh_token: "refresh" } }, error: null });
 });
 
 describe("StudentLogin — OTP verify hardening", () => {
@@ -152,7 +153,7 @@ describe("StudentLogin — OTP verify hardening", () => {
 
   /* ─── OTP itself fails ─── */
   it("invalid OTP → no sign-out, no profile queries", async () => {
-    functionsInvoke.mockResolvedValueOnce({ data: null, error: { message: "bad code" } });
+    verifyOtpCode.mockResolvedValueOnce({ data: null, error: { message: "bad code" } });
     await reachOtpScreen("login");
     await submitOtp();
     await waitFor(() => expect(toast).toHaveBeenCalledWith(expect.objectContaining({
