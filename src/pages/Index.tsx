@@ -66,6 +66,30 @@ export default function Index() {
   useReveal();
 
   const featuredCourses = COURSES.slice(0, 3);
+  const { data: stats } = useHomeStats();
+
+  const STATS = [
+    {
+      value: stats ? String(stats.students_count) : "—",
+      label: "Students enrolled",
+      icon: Users,
+    },
+    {
+      value: stats ? String(stats.courses_count) : "—",
+      label: "Courses available",
+      icon: BookOpen,
+    },
+    {
+      value: stats ? String(stats.countries_count) : "—",
+      label: "Countries",
+      icon: Globe2,
+    },
+    {
+      value: stats?.min_price != null ? `€${stats.min_price}` : "—",
+      label: "Starting price",
+      icon: CreditCard,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
