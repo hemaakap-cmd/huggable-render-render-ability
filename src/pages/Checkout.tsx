@@ -25,9 +25,16 @@ export default function Checkout() {
   const { user, profile, loading: authLoading } = useSsraAuth();
   const { data: verification, isLoading: vLoad } = useMyVerification();
 
+  const course    = getCourse(courseId);
+  const { data: schedule } = useCourseSchedule(courseId);
+
+  const { user, profile, loading: authLoading } = useSsraAuth();
+  const { data: verification, isLoading: vLoad } = useMyVerification();
+
   const [loading, setLoading] = useState(false);
 
-  /* pre-fill from logged-in profile */
+  const scheduleReady = !!(schedule?.start_date && schedule?.start_time && schedule?.duration);
+
   const displayName  = profile?.full_name  ?? user?.user_metadata?.full_name ?? "";
   const displayEmail = profile?.email      ?? user?.email ?? "";
 
