@@ -153,33 +153,111 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     ? charge.payment_intent
     : charge.payment_intent?.id ?? null;
 
-  if (!paymentIntent) {
-    console.warn(`charge.refunded ${charge.id}: no payment_intent — skipping`);
-    return;
-  }
-
   const isFullRefund = (charge.amount_refunded ?? 0) >= (charge.amount ?? 0);
   const newStatus    = isFullRefund ? "refunded" : "partially_refunded";
 
-  const { error, data } = await supabase
-    .from("ssra_enrollments")
-    .update({ status: newStatus })
-    .eq("stripe_payment_intent", paymentIntent)
-    .select("id, user_id, course_id");
+  // 1) One-time enrollments — revoke by payment_intent
+  if (paymentIntent) {
+    const { error, data } = await supabase
+      .from("ssra_enrollments")
+      .update({ status: newStatus })
+      .eq("stripe_payment_intent", paymentIntent)
+      .select("id, user_id, course_id");
 
-  if (error) {
-    console.error(`Refund update failed for PI ${paymentIntent}:`, error.message);
-    throw new Error(error.message);
+    if (error) {
+      console.error(`Refund update failed for PI ${paymentIntent}:`, error.message);
+    } else if (data?.length) {
+      console.log(`Refund (${newStatus}) → ${data.length} enrollment(s):`,
+        data.map((r) => `${r.user_id}/${r.course_id}`).join(", "));
+    }
   }
 
-  if (!data || data.length === 0) {
-    // Likely a subscription invoice refund (no enrollment row) — log for ops visibility
-    console.warn(`charge.refunded ${charge.id}: no enrollment matched PI ${paymentIntent} (likely subscription invoice)`);
+  // 2) Subscriptions — if this charge belongs to a subscription invoice, revoke it
+  const invoiceId = typeof charge.invoice === "string" ? charge.invoice : charge.invoice?.id ?? null;
+  if (invoiceId) {
+    try {
+      const invoice = await stripe.invoices.retrieve(invoiceId);
+      const subId = typeof invoice.subscription === "string"
+        ? invoice.subscription
+        : invoice.subscription?.id ?? null;
+      if (subId) {
+        const subStatus = isFullRefund ? "refunded" : "partially_refunded";
+        const { error, data } = await supabase
+          .from("ssra_subscriptions")
+          .update({ status: subStatus, cancel_at_period_end: true })
+          .eq("stripe_subscription_id", subId)
+          .select("user_id, course_id");
+        if (error) console.error(`Sub refund update failed for ${subId}:`, error.message);
+        else if (data?.length) {
+          console.log(`Refund (${subStatus}) → subscription ${subId}:`,
+            data.map((r) => `${r.user_id}/${r.course_id}`).join(", "));
+        }
+      }
+    } catch (e) {
+      console.error(`Failed to resolve invoice ${invoiceId} for refund:`, e);
+    }
+  }
+}
+
+/**
+ * Chargeback / dispute handling:
+ *  - dispute.created → suspend access immediately (status="disputed")
+ *  - dispute.closed  → if won, restore; if lost, mark as "charged_back" (kept revoked)
+ */
+async function handleChargeDispute(eventType: string, dispute: Stripe.Dispute) {
+  const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id ?? null;
+  if (!chargeId) {
+    console.warn(`${eventType}: no charge id on dispute ${dispute.id}`);
     return;
   }
 
-  console.log(
-    `Refund (${newStatus}) applied to ${data.length} enrollment(s) for PI ${paymentIntent}: ` +
-    data.map((r) => `${r.user_id}/${r.course_id}`).join(", ")
-  );
+  // Resolve payment_intent + subscription via charge → invoice
+  const charge = await stripe.charges.retrieve(chargeId, { expand: ["invoice"] });
+  const paymentIntent = typeof charge.payment_intent === "string"
+    ? charge.payment_intent
+    : charge.payment_intent?.id ?? null;
+  const invoice = charge.invoice as Stripe.Invoice | null;
+  const subId = invoice && typeof invoice.subscription === "string"
+    ? invoice.subscription
+    : (invoice?.subscription as Stripe.Subscription | null)?.id ?? null;
+
+  let newStatus: string;
+  if (eventType === "charge.dispute.created") {
+    newStatus = "disputed";
+  } else {
+    // dispute.closed: status is "won", "lost", or "warning_closed"
+    if (dispute.status === "won") newStatus = "active";       // restore
+    else if (dispute.status === "lost") newStatus = "charged_back";
+    else return; // ignore warning_closed etc.
+  }
+
+  // Update enrollment(s)
+  if (paymentIntent) {
+    const { data, error } = await supabase
+      .from("ssra_enrollments")
+      .update({ status: newStatus })
+      .eq("stripe_payment_intent", paymentIntent)
+      .select("user_id, course_id");
+    if (error) console.error(`Dispute(${dispute.status}) enrollment update failed:`, error.message);
+    else if (data?.length) {
+      console.log(`Dispute(${eventType}/${dispute.status}) → enrollment status=${newStatus} for`,
+        data.map((r) => `${r.user_id}/${r.course_id}`).join(", "));
+    }
+  }
+
+  // Update subscription
+  if (subId) {
+    const patch: Record<string, unknown> = { status: newStatus };
+    if (newStatus !== "active") patch.cancel_at_period_end = true;
+    const { data, error } = await supabase
+      .from("ssra_subscriptions")
+      .update(patch)
+      .eq("stripe_subscription_id", subId)
+      .select("user_id, course_id");
+    if (error) console.error(`Dispute(${dispute.status}) sub update failed:`, error.message);
+    else if (data?.length) {
+      console.log(`Dispute(${eventType}/${dispute.status}) → subscription status=${newStatus} for`,
+        data.map((r) => `${r.user_id}/${r.course_id}`).join(", "));
+    }
+  }
 }
