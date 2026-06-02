@@ -95,7 +95,7 @@ export default function Index() {
     <div className="min-h-screen bg-white">
       <Helmet>
         <title>SSRA Academy — Sports Science & Rehabilitation for Arabic Speakers</title>
-        <meta name="description" content="Work in Germany as a sports scientist. Medical German, clinical courses and career support — all taught in Arabic. Join 200+ graduates already enrolled." />
+        <meta name="description" content="Work in Germany as a sports scientist. Medical German, clinical courses and career support — all taught in Arabic." />
         <meta property="og:title" content="SSRA Academy — Work in Germany as a Sports Scientist" />
         <meta property="og:description" content="Medical German, clinical courses and career support for Arabic-speaking sports science graduates. From €29/month." />
         <meta property="og:type" content="website" />
