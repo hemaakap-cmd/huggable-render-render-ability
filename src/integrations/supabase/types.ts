@@ -185,12 +185,16 @@ export type Database = {
       ssra_courses: {
         Row: {
           category: string
+          course_format: string | null
           course_type: string
           created_at: string | null
           description: string | null
+          duration: string | null
           duration_weeks: string | null
+          end_date: string | null
           id: string
           image_url: string | null
+          instructor_name: string | null
           is_active: boolean
           level: string | null
           modules: Json | null
@@ -199,6 +203,8 @@ export type Database = {
           price_hidden: boolean
           requires_verification: boolean
           sort_order: number
+          start_date: string | null
+          start_time: string | null
           stripe_price_id: string | null
           subtitle: string | null
           title: string
@@ -207,12 +213,16 @@ export type Database = {
         }
         Insert: {
           category: string
+          course_format?: string | null
           course_type: string
           created_at?: string | null
           description?: string | null
+          duration?: string | null
           duration_weeks?: string | null
+          end_date?: string | null
           id: string
           image_url?: string | null
+          instructor_name?: string | null
           is_active?: boolean
           level?: string | null
           modules?: Json | null
@@ -221,6 +231,8 @@ export type Database = {
           price_hidden?: boolean
           requires_verification?: boolean
           sort_order?: number
+          start_date?: string | null
+          start_time?: string | null
           stripe_price_id?: string | null
           subtitle?: string | null
           title: string
@@ -229,12 +241,16 @@ export type Database = {
         }
         Update: {
           category?: string
+          course_format?: string | null
           course_type?: string
           created_at?: string | null
           description?: string | null
+          duration?: string | null
           duration_weeks?: string | null
+          end_date?: string | null
           id?: string
           image_url?: string | null
+          instructor_name?: string | null
           is_active?: boolean
           level?: string | null
           modules?: Json | null
@@ -243,6 +259,8 @@ export type Database = {
           price_hidden?: boolean
           requires_verification?: boolean
           sort_order?: number
+          start_date?: string | null
+          start_time?: string | null
           stripe_price_id?: string | null
           subtitle?: string | null
           title?: string
@@ -255,34 +273,61 @@ export type Database = {
         Row: {
           amount_eur: number | null
           course_id: string | null
+          course_title_snapshot: string | null
           created_at: string | null
+          duration_snapshot: string | null
           enrolled_at: string | null
           id: string
+          instructor_snapshot: string | null
+          order_number: string | null
+          paid_at: string | null
+          start_date_snapshot: string | null
+          start_time_snapshot: string | null
           status: string
           stripe_payment_intent: string | null
           stripe_session_id: string | null
+          student_email_snapshot: string | null
+          student_name_snapshot: string | null
           user_id: string | null
         }
         Insert: {
           amount_eur?: number | null
           course_id?: string | null
+          course_title_snapshot?: string | null
           created_at?: string | null
+          duration_snapshot?: string | null
           enrolled_at?: string | null
           id?: string
+          instructor_snapshot?: string | null
+          order_number?: string | null
+          paid_at?: string | null
+          start_date_snapshot?: string | null
+          start_time_snapshot?: string | null
           status?: string
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
+          student_email_snapshot?: string | null
+          student_name_snapshot?: string | null
           user_id?: string | null
         }
         Update: {
           amount_eur?: number | null
           course_id?: string | null
+          course_title_snapshot?: string | null
           created_at?: string | null
+          duration_snapshot?: string | null
           enrolled_at?: string | null
           id?: string
+          instructor_snapshot?: string | null
+          order_number?: string | null
+          paid_at?: string | null
+          start_date_snapshot?: string | null
+          start_time_snapshot?: string | null
           status?: string
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
+          student_email_snapshot?: string | null
+          student_name_snapshot?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -583,6 +628,7 @@ export type Database = {
         Returns: number
       }
       generate_ssra_cert_code: { Args: never; Returns: string }
+      generate_ssra_order_number: { Args: never; Returns: string }
       get_ssra_role: { Args: { _uid: string }; Returns: string }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
       is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }

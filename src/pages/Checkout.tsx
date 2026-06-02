@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, ShieldCheck } from "lucide-react";
+import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, ShieldCheck, Calendar, Clock, User } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
-import { useMyVerification } from "@/hooks/useSsraData";
+import { useMyVerification, useCourseSchedule } from "@/hooks/useSsraData";
+
+function fmtDate(d?: string | null) {
+  if (!d) return null;
+  try { return new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }); } catch { return d; }
+}
+function fmtTime(t?: string | null) { return t ? (t.length >= 5 ? t.slice(0, 5) : t) : null; }
 
 export default function Checkout() {
   const [params]  = useSearchParams();
@@ -15,13 +21,15 @@ export default function Checkout() {
   const { toast } = useToast();
   const courseId  = params.get("courseId") ?? "";
   const course    = getCourse(courseId);
+  const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
   const { data: verification, isLoading: vLoad } = useMyVerification();
 
   const [loading, setLoading] = useState(false);
 
-  /* pre-fill from logged-in profile */
+  const scheduleReady = !!(schedule?.start_date && schedule?.start_time && schedule?.duration);
+
   const displayName  = profile?.full_name  ?? user?.user_metadata?.full_name ?? "";
   const displayEmail = profile?.email      ?? user?.email ?? "";
 
@@ -181,13 +189,18 @@ export default function Checkout() {
                 <div className="font-display text-lg font-bold text-slate-900">{course.title}</div>
                 <div className="text-xs text-[hsl(220,91%,54%)] mt-0.5">{course.subtitle}</div>
               </div>
-              <ul className="space-y-1.5 mb-5">
-                {course.modules.slice(0, 4).map((m) => (
-                  <li key={m} className="flex items-center gap-2 text-xs text-slate-500">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {m}
-                  </li>
-                ))}
-              </ul>
+              <div className="mb-4 space-y-2 text-xs">
+                <div className="flex items-center gap-2 text-slate-600"><Calendar className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Start date:</span> <span className="font-semibold">{fmtDate(schedule?.start_date) ?? "TBA"}</span></div>
+                <div className="flex items-center gap-2 text-slate-600"><Clock className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Start time:</span> <span className="font-semibold">{fmtTime(schedule?.start_time) ?? "TBA"}</span></div>
+                <div className="flex items-center gap-2 text-slate-600"><CheckCircle2 className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Duration:</span> <span className="font-semibold">{schedule?.duration || course.weeks}</span></div>
+                {schedule?.instructor_name && <div className="flex items-center gap-2 text-slate-600"><User className="w-3.5 h-3.5 text-[hsl(220,91%,54%)]" /> <span className="text-slate-400">Instructor:</span> <span className="font-semibold">{schedule.instructor_name}</span></div>}
+              </div>
+              {!scheduleReady && (
+                <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>This course is missing schedule details (start date, time, or duration). Enrollment is disabled until the admin completes the setup.</span>
+                </div>
+              )}
               <div className="border-t border-slate-100 pt-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
@@ -237,11 +250,13 @@ export default function Checkout() {
               </div>
 
               <form onSubmit={handlePay}>
-                <button type="submit" disabled={loading}
-                  className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                <button type="submit" disabled={loading || !scheduleReady}
+                  className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Stripe…</>
-                    : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{course.price}{course.type === "subscription" ? "/mo" : ""}</>
+                    : !scheduleReady
+                      ? <>Enrollment unavailable — schedule pending</>
+                      : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{course.price}{course.type === "subscription" ? "/mo" : ""}</>
                   }
                 </button>
               </form>

@@ -67,47 +67,106 @@ Deno.serve(async (req: Request) => {
   });
 });
 
+async function sendTransactionalEmail(templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, unknown>) {
+  try {
+    const { error } = await supabase.functions.invoke("send-transactional-email", {
+      body: { templateName, recipientEmail, idempotencyKey, templateData },
+    });
+    if (error) console.error(`[email:${templateName}] invoke failed:`, error.message);
+    else console.log(`[email:${templateName}] queued for ${recipientEmail}`);
+  } catch (e) {
+    console.error(`[email:${templateName}] threw:`, e);
+  }
+}
+
+function fmtMoney(amountCents: number, currency = "EUR") {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format((amountCents ?? 0) / 100);
+}
+function fmtDate(d?: string | null) {
+  if (!d) return "—";
+  try { return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }); }
+  catch { return d; }
+}
+function fmtTime(t?: string | null) {
+  if (!t) return "—";
+  return t.length >= 5 ? t.slice(0, 5) : t;
+}
+
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const courseId      = session.metadata?.courseId ?? "";
   const customerEmail = session.customer_email ?? session.metadata?.customerEmail ?? "";
-  const mode          = session.mode; // "payment" | "subscription"
+  const mode          = session.mode;
 
   if (!courseId) {
     console.warn("No courseId in session metadata, skipping enrollment:", session.id);
     return;
   }
 
-  // Prefer userId from metadata (reliable); fall back to case-insensitive email lookup
   let userId: string | null = session.metadata?.userId ?? null;
-  if (!userId) {
+  let studentName: string | null = null;
+  if (!userId && customerEmail) {
     const { data: profile } = await supabase
-      .from("ssra_profiles")
-      .select("id")
-      .ilike("email", customerEmail)
-      .maybeSingle();
+      .from("ssra_profiles").select("id, full_name").ilike("email", customerEmail).maybeSingle();
     userId = profile?.id ?? null;
+    studentName = profile?.full_name ?? null;
+  } else if (userId) {
+    const { data: profile } = await supabase
+      .from("ssra_profiles").select("full_name").eq("id", userId).maybeSingle();
+    studentName = profile?.full_name ?? null;
   }
 
-  if (!userId) {
-    console.warn(`Could not resolve user for email ${customerEmail}, enrollment will have null user_id`);
-  }
+  const { data: course } = await supabase
+    .from("ssra_courses")
+    .select("title, start_date, start_time, duration, instructor_name, course_format, price_eur")
+    .eq("id", courseId)
+    .maybeSingle();
+
+  const amountCents = session.amount_total ?? 0;
+  const paidAtIso   = new Date().toISOString();
+  const currency    = (session.currency ?? "eur").toUpperCase();
+
+  if (!userId) console.warn(`Could not resolve user for email ${customerEmail}, enrollment will have null user_id`);
 
   if (mode === "payment") {
-    // One-time course purchase → upsert enrollment (idempotent for webhook retries)
-    const { error } = await supabase.from("ssra_enrollments").upsert({
+    const { data: enrollment, error } = await supabase.from("ssra_enrollments").upsert({
       user_id:    userId,
       course_id:  courseId,
       status:     "active",
-      amount_eur: (session.amount_total ?? 0) / 100,
+      amount_eur: amountCents / 100,
       stripe_session_id:     session.id,
       stripe_payment_intent: session.payment_intent as string ?? null,
-      enrolled_at: new Date().toISOString(),
-    }, { onConflict: "user_id,course_id" });
+      enrolled_at: paidAtIso,
+      paid_at:     paidAtIso,
+      course_title_snapshot:  course?.title ?? null,
+      start_date_snapshot:    course?.start_date ?? null,
+      start_time_snapshot:    course?.start_time ?? null,
+      duration_snapshot:      course?.duration ?? null,
+      instructor_snapshot:    course?.instructor_name ?? null,
+      student_name_snapshot:  studentName,
+      student_email_snapshot: customerEmail,
+    }, { onConflict: "user_id,course_id" }).select("order_number").maybeSingle();
+
     if (error) throw new Error(`Enrollment upsert failed: ${error.message}`);
-    console.log(`Enrollment upserted for ${customerEmail} → ${courseId}`);
+    console.log(`Enrollment upserted for ${customerEmail} → ${courseId} (order=${enrollment?.order_number})`);
+
+    if (customerEmail) {
+      const emailData = {
+        studentName: studentName ?? "",
+        courseName: course?.title ?? "",
+        startDate: fmtDate(course?.start_date),
+        startTime: fmtTime(course?.start_time),
+        duration: course?.duration ?? "",
+        instructor: course?.instructor_name ?? "",
+        courseFormat: course?.course_format ?? "",
+        orderNumber: enrollment?.order_number ?? session.id,
+        amountPaid: fmtMoney(amountCents, currency),
+        paymentDate: fmtDate(paidAtIso),
+      };
+      await sendTransactionalEmail("payment-confirmation", customerEmail, `pay-${session.id}`, emailData);
+      await sendTransactionalEmail("enrollment-confirmation", customerEmail, `enr-${session.id}`, emailData);
+    }
 
   } else if (mode === "subscription") {
-    // Subscription → find or create Stripe subscription record
     const stripeSubId = session.subscription as string | null;
     let periodEnd: string | null = null;
 
@@ -123,11 +182,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripe_subscription_id: stripeSubId,
       stripe_customer_id:   session.customer as string ?? null,
       current_period_end:   periodEnd,
-      created_at:           new Date().toISOString(),
+      created_at:           paidAtIso,
     }, { onConflict: "stripe_subscription_id" });
 
     if (error) throw new Error(`Subscription upsert failed: ${error.message}`);
     console.log(`Subscription created for ${customerEmail} → ${courseId}`);
+
+    if (customerEmail) {
+      const emailData = {
+        studentName: studentName ?? "",
+        courseName: course?.title ?? "",
+        startDate: fmtDate(course?.start_date),
+        startTime: fmtTime(course?.start_time),
+        duration: course?.duration ?? "",
+        instructor: course?.instructor_name ?? "",
+        courseFormat: course?.course_format ?? "",
+        orderNumber: stripeSubId ?? session.id,
+        amountPaid: fmtMoney(amountCents, currency) + "/mo",
+        paymentDate: fmtDate(paidAtIso),
+      };
+      await sendTransactionalEmail("payment-confirmation", customerEmail, `pay-sub-${session.id}`, emailData);
+      await sendTransactionalEmail("enrollment-confirmation", customerEmail, `enr-sub-${session.id}`, emailData);
+    }
   }
 }
 

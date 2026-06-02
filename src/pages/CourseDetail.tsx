@@ -3,18 +3,29 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft, ArrowRight, BookOpen, Clock, Globe2, CheckCircle2,
-  CreditCard, Crown, ShieldCheck,
+  CreditCard, Crown, ShieldCheck, Calendar, User, Tv,
 } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, getCourse } from "@/lib/stripe";
-import { usePriceHiddenMap } from "@/hooks/useSsraData";
+import { usePriceHiddenMap, useCourseSchedule } from "@/hooks/useSsraData";
+
+function formatDate(d?: string | null) {
+  if (!d) return null;
+  try { return new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }); }
+  catch { return d; }
+}
+function formatTime(t?: string | null) {
+  if (!t) return null;
+  return t.length >= 5 ? t.slice(0, 5) : t;
+}
 
 export default function CourseDetail() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const course = getCourse(id);
   const { data: priceHidden = {} } = usePriceHiddenMap();
+  const { data: schedule } = useCourseSchedule(id);
   const hidden = !!priceHidden[id];
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
@@ -131,6 +142,48 @@ export default function CourseDetail() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* Schedule & instructor — live data from DB */}
+            <div>
+              <h2 className="font-display text-2xl font-bold text-slate-900 mb-5">Schedule & instructor</h2>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <Calendar className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Start date</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{formatDate(schedule?.start_date) ?? "To be announced"}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <Clock className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Start time</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{formatTime(schedule?.start_time) ?? "To be announced"}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <BookOpen className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Duration</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{schedule?.duration || course.weeks}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <Tv className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Course type</div>
+                    <div className="text-sm text-slate-800 mt-0.5 capitalize">{schedule?.course_format ?? "Online"}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl sm:col-span-2">
+                  <User className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Instructor</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{schedule?.instructor_name ?? "To be announced"}</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div>
