@@ -13,6 +13,7 @@ export default function SuperAdminManualGrant() {
   const [stripeReference, setStripeReference] = useState("");
   const [amountEur, setAmountEur] = useState("29");
   const [periodMonths, setPeriodMonths] = useState("1");
+  const [skipVerification, setSkipVerification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
@@ -34,6 +35,7 @@ export default function SuperAdminManualGrant() {
           stripeReference: stripeReference.trim() || undefined,
           amountEur: Number(amountEur) || 0,
           periodMonths: Number(periodMonths) || 1,
+          skipVerification,
         },
       });
       if (error) throw error;
@@ -119,6 +121,19 @@ export default function SuperAdminManualGrant() {
               </Field>
             )}
           </div>
+
+          <label className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer">
+            <input
+              type="checkbox"
+              checked={skipVerification}
+              onChange={(e) => setSkipVerification(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span className="text-xs text-amber-900">
+              <strong>Skip Stripe verification</strong> — only use when Stripe is unreachable or for legacy/offline receipts. The reference will be saved as-is without validation.
+            </span>
+          </label>
+
 
           <button
             type="submit"
