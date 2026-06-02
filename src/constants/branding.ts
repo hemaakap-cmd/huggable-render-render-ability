@@ -1,26 +1,29 @@
 /**
- * MASSAVO Company Branding Constants
- * Used across all printable materials and documents
- * 
+ * SSRA Academy Company Branding Constants
+ * Used across all printable materials and documents (certificates,
+ * invoices, enrollment confirmations, exported reports).
+ *
  * Brand Colors (HSL):
- * - Primary: 25 45% 35% (Warm Terracotta)
- * - Accent: 32 70% 45% (Rich Amber)
- * - Background: 30 20% 94% (Warm Cream)
- * 
+ * - Primary: 220 91% 54% (SSRA Blue)
+ * - Accent:  142 71% 45% (Growth Green)
+ * - Background: 210 20% 98% (Cool Off-White)
+ *
  * Fonts:
  * - Display: Playfair Display (headers)
- * - Body: Inter (text)
+ * - Body:    Inter (text)
  */
 export const COMPANY_INFO = {
-  name: "MASSAVO",
+  name: "SSRA Academy",
+  legalName: "Sports Science Rehabilitation Academy",
   email: "info@ssracourses.com",
+  supportEmail: "support@ssracourses.com",
   phone: "+49 160 5652154",
-  address: "Bracknellstraße 41, 51379 Leverkusen",
-  tagline: "Professional Massage Services",
-  website: "www.massavo.com",
-  services: "Sportmassage • Klassische Massage",
+  address: "Bracknellstraße 41, 51379 Leverkusen, Germany",
+  tagline: "German sports science career path — taught in Arabic",
+  website: "www.ssracourses.com",
+  services: "Medical German · Clinical Rehabilitation · Career Support",
   social: {
-    instagram: "@massavo.gym",
+    instagram: "@ssra.academy",
   },
 } as const;
 
@@ -30,12 +33,12 @@ export const COMPANY_INFO = {
  */
 export const PRINT_STYLES = {
   colors: {
-    primary: "#7a4a2a", // HSL 25 45% 35%
-    accent: "#c9782a", // HSL 32 70% 45%
-    headerBorder: "#d97706", // amber-600
-    text: "#1c1917", // stone-900
-    textMuted: "#57534e", // stone-600
-    background: "#fffbf7", // warm cream
+    primary: "#1d6ef0",    // HSL 220 91% 54%
+    accent: "#22c55e",     // HSL 142 71% 45%
+    headerBorder: "#1d6ef0",
+    text: "#0f172a",       // slate-900
+    textMuted: "#475569",  // slate-600
+    background: "#f8fafc", // slate-50
   },
   fonts: {
     display: "'Playfair Display', serif",

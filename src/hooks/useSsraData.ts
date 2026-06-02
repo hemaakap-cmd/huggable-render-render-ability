@@ -183,11 +183,50 @@ export function useUpdateVerification() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
+      // 1. Fetch the verification + course so we can include them in the notification email
+      const { data: verification, error: fetchErr } = await supabase
+        .from("ssra_verifications")
+        .select("id, full_name, email, course_id")
+        .eq("id", id)
+        .maybeSingle();
+      if (fetchErr) throw fetchErr;
+
+      // 2. Update the verification row
       const { error } = await supabase
         .from("ssra_verifications")
         .update({ status, admin_notes: notes, reviewed_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // 3. Notify the student — never block the admin flow if email fails
+      if (verification?.email && (status === "approved" || status === "rejected")) {
+        try {
+          let courseName: string | undefined;
+          if (verification.course_id) {
+            const { data: course } = await supabase
+              .from("ssra_courses")
+              .select("title")
+              .eq("id", verification.course_id)
+              .maybeSingle();
+            courseName = course?.title ?? undefined;
+          }
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: status === "approved" ? "verification-approved" : "verification-rejected",
+              recipientEmail: verification.email,
+              idempotencyKey: `verification-${id}-${status}`,
+              templateData: {
+                studentName: verification.full_name ?? undefined,
+                courseName,
+                adminNotes: notes?.trim() || undefined,
+              },
+            },
+          });
+        } catch (emailErr) {
+          // Log but don't fail the mutation — admin already approved/rejected successfully
+          console.error("[verification-email] failed to send:", emailErr);
+        }
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-verifications"] }),
   });

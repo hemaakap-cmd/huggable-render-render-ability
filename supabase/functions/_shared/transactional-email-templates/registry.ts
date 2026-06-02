@@ -12,9 +12,13 @@ export interface TemplateEntry {
 import { template as testEmail } from './test-email.tsx'
 import { template as paymentConfirmation } from './payment-confirmation.tsx'
 import { template as enrollmentConfirmation } from './enrollment-confirmation.tsx'
+import { template as verificationApproved } from './verification-approved.tsx'
+import { template as verificationRejected } from './verification-rejected.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'test-email': testEmail,
   'payment-confirmation': paymentConfirmation,
   'enrollment-confirmation': enrollmentConfirmation,
+  'verification-approved': verificationApproved,
+  'verification-rejected': verificationRejected,
 }
