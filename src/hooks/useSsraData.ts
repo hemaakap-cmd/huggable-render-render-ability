@@ -193,10 +193,22 @@ export function useAdminEnrollments() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_enrollments")
-        .select("*, ssra_courses(title, price_eur), ssra_profiles(full_name, email)")
+        .select("*, ssra_courses(title, price_eur)")
         .order("enrolled_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+
+      const rows = data ?? [];
+      const userIds = [...new Set(rows.map((e) => e.user_id).filter(Boolean))];
+      if (userIds.length === 0) return rows;
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("ssra_profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      if (profilesError) throw profilesError;
+
+      const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
+      return rows.map((e) => ({ ...e, ssra_profiles: profilesById.get(e.user_id) ?? null }));
     },
   });
 }
@@ -208,10 +220,22 @@ export function useAdminSubscriptions() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_subscriptions")
-        .select("*, ssra_courses(title, price_eur), ssra_profiles(full_name, email)")
+        .select("*, ssra_courses(title, price_eur)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+
+      const rows = data ?? [];
+      const userIds = [...new Set(rows.map((s) => s.user_id).filter(Boolean))];
+      if (userIds.length === 0) return rows;
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("ssra_profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      if (profilesError) throw profilesError;
+
+      const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
+      return rows.map((s) => ({ ...s, ssra_profiles: profilesById.get(s.user_id) ?? null }));
     },
   });
 }
