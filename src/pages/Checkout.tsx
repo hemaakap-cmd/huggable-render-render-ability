@@ -45,6 +45,14 @@ export default function Checkout() {
     if (!course || !user) return;
     setLoading(true);
     try {
+      // If course has a direct Stripe payment link, redirect to it (test/legacy flow)
+      if (course.paymentLink) {
+        const url = new URL(course.paymentLink);
+        if (user.email) url.searchParams.set("prefilled_email", user.email);
+        window.location.href = url.toString();
+        return;
+      }
+
       const origin = window.location.origin;
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
         body: {

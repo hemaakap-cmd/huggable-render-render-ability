@@ -52,29 +52,29 @@ export interface Course {
   modules: string[];
   color: string;
   price_hidden?: boolean; // if true: hide price and show "Coming Soon" on public pages
+  paymentLink?: string;   // direct Stripe payment link — bypasses create-checkout-session
 }
 
-const TEST_PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_TEST as string | undefined;
-
 export const COURSES: Course[] = [
-  /* ── TEST COURSE (only shown when VITE_STRIPE_PRICE_TEST is set) ── */
-  ...(TEST_PRICE_ID ? [{
+  /* ── TEST COURSE — direct payment link for end-to-end Stripe testing ── */
+  {
     id: "test-course",
     title: "Test Course (€1/mo)",
     titleAr: "كورس تجريبي",
     subtitle: "End-to-end Stripe checkout test — €1/month",
-    desc: "Internal test subscription for verifying checkout, webhooks, and access provisioning. Do not enroll real students here.",
+    desc: "Internal test subscription for verifying checkout flow. After payment, use Manual Grant to provision access (webhook cannot auto-link payment links).",
     price: 1,
     interval: "month" as const,
     type: "subscription" as const,
-    priceId: TEST_PRICE_ID,
+    priceId: "price_test_placeholder",
+    paymentLink: "https://buy.stripe.com/6oUdR900E2rOaDY5Dmb7y0c",
     category: "language" as const,
     weeks: "Ongoing",
     level: "Test",
     requires_verification: false,
     modules: ["Sandbox module"],
     color: "from-slate-500 to-slate-700",
-  }] : []),
+  },
 
   /* ── LANGUAGE (subscription) ── */
   {
