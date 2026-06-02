@@ -13,6 +13,7 @@ export default function SuperAdminManualGrant() {
   const [stripeReference, setStripeReference] = useState("");
   const [amountEur, setAmountEur] = useState("29");
   const [periodMonths, setPeriodMonths] = useState("1");
+  const [skipVerification, setSkipVerification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
@@ -34,6 +35,7 @@ export default function SuperAdminManualGrant() {
           stripeReference: stripeReference.trim() || undefined,
           amountEur: Number(amountEur) || 0,
           periodMonths: Number(periodMonths) || 1,
+          skipVerification,
         },
       });
       if (error) throw error;
