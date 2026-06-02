@@ -27,16 +27,21 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+const PAGE_SIZE = 25;
+
 export default function AdminVerifications() {
   const [tab, setTab]     = useState<Status>("pending");
   const [search, setSearch] = useState("");
+  const [page, setPage]   = useState(0);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const { toast }         = useToast();
-  const { data = [], isLoading } = useAdminVerifications(tab);
+  const { data, isLoading } = useAdminVerifications(tab, page, PAGE_SIZE);
+  const rows  = data?.rows ?? [];
+  const total = data?.total ?? 0;
   const update = useUpdateVerification();
 
-  const filtered = data.filter((v: any) =>
+  const filtered = rows.filter((v: any) =>
     v.full_name?.toLowerCase().includes(search.toLowerCase()) ||
     v.email?.toLowerCase().includes(search.toLowerCase())
   );

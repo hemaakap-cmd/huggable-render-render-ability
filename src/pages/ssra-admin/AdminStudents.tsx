@@ -1,24 +1,28 @@
 import { useState, useMemo } from "react";
-import { Search, Users, Mail, Globe2, Eye } from "lucide-react";
+import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminStudents } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 
 type SubFilter = "all" | "active" | "none";
+const PAGE_SIZE = 25;
 
 export default function AdminStudents() {
   const [search, setSearch]       = useState("");
   const [subFilter, setSubFilter] = useState<SubFilter>("all");
-  const { data = [], isLoading }  = useAdminStudents(search);
+  const [page, setPage]           = useState(0);
+  const { data, isLoading }       = useAdminStudents(search, page, PAGE_SIZE);
+  const rows = data?.rows ?? [];
+  const total = data?.total ?? 0;
   const { isSuperAdmin }          = useSsraAuth();
   const navigate                  = useNavigate();
 
   const filtered = useMemo(() => {
-    if (subFilter === "all") return data;
-    if (subFilter === "active") return data.filter((s: any) => s.ssra_subscriptions?.[0]?.status === "active");
-    return data.filter((s: any) => !s.ssra_subscriptions?.[0]?.status);
-  }, [data, subFilter]);
+    if (subFilter === "all") return rows;
+    if (subFilter === "active") return rows.filter((s: any) => s.ssra_subscriptions?.[0]?.status === "active");
+    return rows.filter((s: any) => !s.ssra_subscriptions?.[0]?.status);
+  }, [rows, subFilter]);
 
   return (
     <AdminLayout>

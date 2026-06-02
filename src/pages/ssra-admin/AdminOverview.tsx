@@ -45,7 +45,8 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function AdminOverview() {
   const { data: stats, isLoading: statsLoading } = useAdminStats();
-  const { data: verifications = [] }             = useAdminVerifications("pending");
+  const { data: verificationsPage } = useAdminVerifications("pending", 0, 4);
+  const verifications = verificationsPage?.rows ?? [];
   const { data: enrollments = [] }               = useAdminEnrollments();
 
   const recentEnrollments = enrollments.slice(0, 5);
