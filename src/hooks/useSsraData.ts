@@ -112,10 +112,14 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
       if (subscriptions.error) throw subscriptions.error;
 
       const enrollmentCounts = new Map<string, number>();
-      for (const e of enrollments.data ?? []) enrollmentCounts.set(e.user_id, (enrollmentCounts.get(e.user_id) ?? 0) + 1);
+      for (const e of enrollments.data ?? []) {
+        if (!e.user_id) continue;
+        enrollmentCounts.set(e.user_id, (enrollmentCounts.get(e.user_id) ?? 0) + 1);
+      }
 
       const latestSubscription = new Map<string, { status: string }>();
       for (const s of subscriptions.data ?? []) {
+        if (!s.user_id) continue;
         if (!latestSubscription.has(s.user_id)) latestSubscription.set(s.user_id, { status: s.status });
       }
 
