@@ -54,7 +54,28 @@ export interface Course {
   price_hidden?: boolean; // if true: hide price and show "Coming Soon" on public pages
 }
 
+const TEST_PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_TEST as string | undefined;
+
 export const COURSES: Course[] = [
+  /* ── TEST COURSE (only shown when VITE_STRIPE_PRICE_TEST is set) ── */
+  ...(TEST_PRICE_ID ? [{
+    id: "test-course",
+    title: "Test Course (€1/mo)",
+    titleAr: "كورس تجريبي",
+    subtitle: "End-to-end Stripe checkout test — €1/month",
+    desc: "Internal test subscription for verifying checkout, webhooks, and access provisioning. Do not enroll real students here.",
+    price: 1,
+    interval: "month" as const,
+    type: "subscription" as const,
+    priceId: TEST_PRICE_ID,
+    category: "language" as const,
+    weeks: "Ongoing",
+    level: "Test",
+    requires_verification: false,
+    modules: ["Sandbox module"],
+    color: "from-slate-500 to-slate-700",
+  }] : []),
+
   /* ── LANGUAGE (subscription) ── */
   {
     id: "medical-german",
