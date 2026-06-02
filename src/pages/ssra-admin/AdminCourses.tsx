@@ -7,12 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["clinical", "language", "career"] as const;
 const TYPES = ["one_time", "subscription"] as const;
+const FORMATS = [
+  { value: "online_live", label: "Online — Live" },
+  { value: "online_recorded", label: "Online — Recorded" },
+  { value: "in_person", label: "In-person" },
+] as const;
 const EMPTY: Record<string, unknown> = {
   id: "", title: "", title_ar: "", subtitle: "", description: "",
   category: "clinical", type: "one_time", price_eur: 0, price_egp: 0,
   weeks: "", level: "Beginner", requires_verification: false,
   is_active: true, price_hidden: false, sort_order: 99, stripe_price_id: "",
   image_url: "", modules: [],
+  start_date: "", start_time: "", duration: "", instructor_name: "", course_format: "online_live",
 };
 
 export default function AdminCourses() {
