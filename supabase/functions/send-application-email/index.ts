@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   emailLayout, emailHeading, emailSubheading, emailParagraph,
   emailDetailRow, emailDetailTable, emailNotice, emailSignature,
@@ -6,6 +7,8 @@ import {
 import { buildCorsHeaders } from "../_shared/cors.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
 interface ApplicationPayload {
   fullName:       string;
@@ -46,6 +49,24 @@ const COURSE_NAMES: Record<string, string> = {
 const handler = async (req: Request): Promise<Response> => {
   const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Require an authenticated Supabase session
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+  const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+  if (userErr || !userData?.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
 
   try {
     const d: ApplicationPayload = await req.json();

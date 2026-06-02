@@ -554,7 +554,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ssra_revenue_summary: {
+        Row: {
+          course_id: string | null
+          course_title: string | null
+          enrollments: number | null
+          month: string | null
+          revenue_eur: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       delete_email: {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, Clock, Search, ChevronDown } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Search, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminVerifications, useUpdateVerification } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
@@ -27,16 +27,21 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+const PAGE_SIZE = 25;
+
 export default function AdminVerifications() {
   const [tab, setTab]     = useState<Status>("pending");
   const [search, setSearch] = useState("");
+  const [page, setPage]   = useState(0);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const { toast }         = useToast();
-  const { data = [], isLoading } = useAdminVerifications(tab);
+  const { data, isLoading } = useAdminVerifications(tab, page, PAGE_SIZE);
+  const rows  = data?.rows ?? [];
+  const total = data?.total ?? 0;
   const update = useUpdateVerification();
 
-  const filtered = data.filter((v: any) =>
+  const filtered = rows.filter((v: any) =>
     v.full_name?.toLowerCase().includes(search.toLowerCase()) ||
     v.email?.toLowerCase().includes(search.toLowerCase())
   );
@@ -71,7 +76,7 @@ export default function AdminVerifications() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
             {STATUS_TABS.map(({ label, value }) => (
-              <button key={value} onClick={() => setTab(value)}
+              <button key={value} onClick={() => { setTab(value); setPage(0); }}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   tab === value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
                 }`}>
@@ -181,6 +186,22 @@ export default function AdminVerifications() {
             </div>
           )}
         </div>
+
+        {total > PAGE_SIZE && (
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <div>Page {page + 1} of {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} submissions</div>
+            <div className="flex gap-2">
+              <button disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
+                <ChevronLeft className="w-4 h-4" /> Prev
+              </button>
+              <button disabled={(page + 1) * PAGE_SIZE >= total} onClick={() => setPage((p) => p + 1)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

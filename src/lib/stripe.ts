@@ -69,7 +69,7 @@ export const COURSES: Course[] = [
     category: "language",
     weeks: "Ongoing",
     level: "A0 → B1",
-    requires_verification: false,
+    requires_verification: true,
     modules: ["Body & movement vocabulary", "Clinic conversations", "Written report templates", "Patient explanation scripts", "B1 exam preparation"],
     color: "from-emerald-600 to-teal-800",
   },

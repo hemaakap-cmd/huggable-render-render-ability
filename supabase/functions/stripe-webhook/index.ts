@@ -39,6 +39,11 @@ Deno.serve(async (req: Request) => {
       const sub = event.data.object as Stripe.Subscription;
       await handleSubscriptionChange(sub);
     }
+
+    if (event.type === "charge.refunded") {
+      const charge = event.data.object as Stripe.Charge;
+      await handleChargeRefunded(charge);
+    }
   } catch (err) {
     console.error("Error handling webhook event:", err);
     return new Response("Internal error", { status: 500 });
@@ -128,4 +133,24 @@ async function handleSubscriptionChange(sub: Stripe.Subscription) {
 
   if (error) console.error("Subscription status update failed:", error.message);
   else console.log(`Subscription ${stripeSubId} updated to ${status}`);
+}
+
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  const paymentIntent = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id ?? null;
+  if (!paymentIntent) {
+    console.warn("charge.refunded without payment_intent — skipping", charge.id);
+    return;
+  }
+
+  const { error, data } = await supabase
+    .from("ssra_enrollments")
+    .update({ status: "refunded" })
+    .eq("stripe_payment_intent", paymentIntent)
+    .select("id");
+
+  if (error) {
+    console.error("Refund status update failed:", error.message);
+    throw new Error(error.message);
+  }
+  console.log(`Refund applied to ${data?.length ?? 0} enrollment(s) for payment_intent ${paymentIntent}`);
 }

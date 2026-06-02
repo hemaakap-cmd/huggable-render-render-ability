@@ -5,7 +5,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from "recharts";
 import AdminLayout from "@/components/ssra/AdminLayout";
-import { useAdminEnrollments, useAdminSubscriptions, useAdminStats } from "@/hooks/useSsraData";
+import { useAdminEnrollments, useAdminSubscriptions, useAdminStats, useRevenueSummary } from "@/hooks/useSsraData";
 
 const COLORS = ["hsl(220,91%,54%)", "hsl(43,96%,50%)", "hsl(160,84%,39%)", "hsl(262,83%,58%)", "hsl(15,86%,56%)", "hsl(200,98%,39%)"];
 
@@ -28,35 +28,31 @@ export default function AdminRevenue() {
   const { data: enrollments = [] } = useAdminEnrollments();
   const { data: subs = [] }        = useAdminSubscriptions();
   const { data: stats }            = useAdminStats();
+  const { data: summary = [] }     = useRevenueSummary();
 
-  /* Monthly enrollment revenue — group by month */
+  /* Monthly enrollment revenue — from DB view */
   const monthlyData = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const e of enrollments as any[]) {
-      if (e.status !== "active") continue;
-      const d = e.enrolled_at ? new Date(e.enrolled_at) : null;
-      if (!d) continue;
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      map[key] = (map[key] ?? 0) + (e.amount_eur ?? 0);
+    for (const r of summary) {
+      map[r.month] = (map[r.month] ?? 0) + Number(r.revenue_eur ?? 0);
     }
     return Object.entries(map)
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-8)
       .map(([month, revenue]) => ({ month: month.slice(5), revenue: Number(revenue.toFixed(2)) }));
-  }, [enrollments]);
+  }, [summary]);
 
-  /* Revenue by course */
+  /* Revenue by course — from DB view */
   const byCourse = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const e of enrollments as any[]) {
-      if (e.status !== "active") continue;
-      const title = e.ssra_courses?.title ?? "Unknown";
-      map[title] = (map[title] ?? 0) + (e.amount_eur ?? 0);
+    for (const r of summary) {
+      const title = r.course_title ?? r.course_id ?? "Unknown";
+      map[title] = (map[title] ?? 0) + Number(r.revenue_eur ?? 0);
     }
     return Object.entries(map)
       .sort(([, a], [, b]) => b - a)
       .map(([name, value]) => ({ name: name.length > 20 ? name.slice(0, 18) + "…" : name, value: Number(value.toFixed(2)) }));
-  }, [enrollments]);
+  }, [summary]);
 
   /* MRR from active subscriptions */
   const mrr = useMemo(() =>
