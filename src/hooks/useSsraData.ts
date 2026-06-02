@@ -205,7 +205,7 @@ export function useAdminEnrollments() {
       if (error) throw error;
 
       const rows = data ?? [];
-      const userIds = [...new Set(rows.map((e) => e.user_id).filter(Boolean))];
+      const userIds = [...new Set(rows.map((e) => e.user_id).filter((id): id is string => Boolean(id)))];
       if (userIds.length === 0) return rows;
 
       const { data: profiles, error: profilesError } = await supabase
@@ -215,7 +215,7 @@ export function useAdminEnrollments() {
       if (profilesError) throw profilesError;
 
       const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
-      return rows.map((e) => ({ ...e, ssra_profiles: profilesById.get(e.user_id) ?? null }));
+      return rows.map((e) => ({ ...e, ssra_profiles: e.user_id ? profilesById.get(e.user_id) ?? null : null }));
     },
   });
 }
@@ -232,7 +232,7 @@ export function useAdminSubscriptions() {
       if (error) throw error;
 
       const rows = data ?? [];
-      const userIds = [...new Set(rows.map((s) => s.user_id).filter(Boolean))];
+      const userIds = [...new Set(rows.map((s) => s.user_id).filter((id): id is string => Boolean(id)))];
       if (userIds.length === 0) return rows;
 
       const { data: profiles, error: profilesError } = await supabase
@@ -242,7 +242,7 @@ export function useAdminSubscriptions() {
       if (profilesError) throw profilesError;
 
       const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
-      return rows.map((s) => ({ ...s, ssra_profiles: profilesById.get(s.user_id) ?? null }));
+      return rows.map((s) => ({ ...s, ssra_profiles: s.user_id ? profilesById.get(s.user_id) ?? null : null }));
     },
   });
 }
