@@ -35,7 +35,8 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 
 const toast = vi.fn();
-vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast }) }));
+const dismiss = vi.fn();
+vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast, dismiss }) }));
 
 function setup() {
   return render(

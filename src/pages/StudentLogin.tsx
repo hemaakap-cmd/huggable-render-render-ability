@@ -10,7 +10,7 @@ type Tab = "signup" | "login";
 export default function StudentLogin() {
   const navigate  = useNavigate();
   const [params]  = useSearchParams();
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const redirect  = params.get("redirect") ?? "/dashboard";
 
   const [tab, setTab]       = useState<Tab>("login");
@@ -50,6 +50,7 @@ export default function StudentLogin() {
   /* ── Send OTP ── */
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    dismiss();
     if (tab === "signup" && !name.trim()) {
       toast({ title: "Please enter your full name", variant: "destructive" });
       return;
@@ -84,6 +85,7 @@ export default function StudentLogin() {
   /* ── Verify OTP ── */
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    dismiss();
     if (otp.length !== 6) {
       toast({ title: "Enter the 6-digit code", variant: "destructive" });
       return;
@@ -169,9 +171,10 @@ export default function StudentLogin() {
   /* ── Resend ── */
   const handleResend = async () => {
     if (resendCooldown > 0) return;
+    dismiss();
     setLoading(true);
     setOtp("");
-    await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: tab === "signup",
@@ -180,6 +183,10 @@ export default function StudentLogin() {
       },
     });
     setLoading(false);
+    if (error) {
+      toast({ title: "Couldn't resend", description: error.message, variant: "destructive" });
+      return;
+    }
     setResendCooldown(60);
     toast({ title: "New code sent!", description: "Check your inbox — valid for 10 minutes." });
   };
@@ -219,7 +226,10 @@ export default function StudentLogin() {
                 inputMode="numeric"
                 maxLength={6}
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => {
+                  dismiss();
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
+                }}
                 placeholder="• • • • • •"
                 autoFocus
                 className="w-full px-4 h-16 rounded-xl border-2 border-slate-200 text-center text-3xl font-bold tracking-[0.5em] focus:outline-none focus:border-[hsl(220,91%,54%)] transition-colors"

@@ -7,7 +7,7 @@ import SsraLogo from "@/components/ssra/SsraLogo";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
 
   const [email, setEmail]   = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,9 @@ export default function AdminLogin() {
   /* ── Send OTP (login only — never create new users from this page) ── */
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    dismiss();
     setLoading(true);
+    setOtp("");
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -55,6 +57,7 @@ export default function AdminLogin() {
   /* ── Verify OTP + enforce admin/super_admin role ── */
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    dismiss();
     if (otp.length !== 6) {
       toast({ title: "Enter the 6-digit code", variant: "destructive" });
       return;
@@ -101,13 +104,18 @@ export default function AdminLogin() {
 
   const handleResend = async () => {
     if (resendCooldown > 0) return;
+    dismiss();
     setLoading(true);
     setOtp("");
-    await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/ssra-admin` },
     });
     setLoading(false);
+    if (error) {
+      toast({ title: "Failed to resend code", description: error.message, variant: "destructive" });
+      return;
+    }
     setResendCooldown(60);
     toast({ title: "New code sent!", description: "Check your inbox — valid for 10 minutes." });
   };
@@ -139,7 +147,10 @@ export default function AdminLogin() {
                 inputMode="numeric"
                 maxLength={6}
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => {
+                  dismiss();
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
+                }}
                 placeholder="• • • • • •"
                 autoFocus
                 className="w-full px-4 h-16 rounded-xl bg-slate-950 border-2 border-white/10 text-white text-center text-3xl font-bold tracking-[0.5em] focus:outline-none focus:border-blue-500 transition-colors"
