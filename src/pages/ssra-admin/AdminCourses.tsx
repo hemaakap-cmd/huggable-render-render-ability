@@ -7,12 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["clinical", "language", "career"] as const;
 const TYPES = ["one_time", "subscription"] as const;
+const FORMATS = [
+  { value: "online_live", label: "Online — Live" },
+  { value: "online_recorded", label: "Online — Recorded" },
+  { value: "in_person", label: "In-person" },
+] as const;
 const EMPTY: Record<string, unknown> = {
   id: "", title: "", title_ar: "", subtitle: "", description: "",
   category: "clinical", type: "one_time", price_eur: 0, price_egp: 0,
   weeks: "", level: "Beginner", requires_verification: false,
   is_active: true, price_hidden: false, sort_order: 99, stripe_price_id: "",
   image_url: "", modules: [],
+  start_date: "", start_time: "", duration: "", instructor_name: "", course_format: "online_live",
 };
 
 export default function AdminCourses() {
@@ -59,8 +65,27 @@ export default function AdminCourses() {
     }
   }
 
+  function missingSchedule(f: Record<string, unknown>): string[] {
+    const m: string[] = [];
+    if (!f.start_date) m.push("start date");
+    if (!f.start_time) m.push("start time");
+    if (!String(f.duration ?? "").trim()) m.push("duration");
+    if (!String(f.instructor_name ?? "").trim()) m.push("instructor name");
+    if (!f.course_format) m.push("course format");
+    return m;
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const missing = missingSchedule(form);
+    if (form.is_active && missing.length > 0) {
+      toast({
+        title: "Cannot publish course",
+        description: `Missing required fields: ${missing.join(", ")}. Uncheck "Active" to save as draft.`,
+        variant: "destructive",
+      });
+      return;
+    }
     setSaving(true);
     try {
       const modules = modulesText.split("\n").map((s) => s.trim()).filter(Boolean);
@@ -70,6 +95,11 @@ export default function AdminCourses() {
         price_egp: Number(form.price_egp),
         sort_order: Number(form.sort_order),
         modules,
+        start_date: form.start_date || null,
+        start_time: form.start_time || null,
+        duration: form.duration || null,
+        instructor_name: form.instructor_name || null,
+        course_format: form.course_format || null,
         id: form.id || undefined,
       };
       await upsert.mutateAsync(payload);
@@ -82,7 +112,18 @@ export default function AdminCourses() {
     }
   }
 
-  async function handleToggle(c: { id: string; is_active: boolean }) {
+  async function handleToggle(c: { id: string; is_active: boolean; start_date?: string | null; start_time?: string | null; duration?: string | null; instructor_name?: string | null; course_format?: string | null }) {
+    if (!c.is_active) {
+      const missing = missingSchedule(c as Record<string, unknown>);
+      if (missing.length > 0) {
+        toast({
+          title: "Cannot publish course",
+          description: `Missing: ${missing.join(", ")}. Edit course first.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     await toggle.mutateAsync({ id: c.id, is_active: !c.is_active });
     toast({ title: c.is_active ? "Course hidden" : "Course visible" });
   }
@@ -304,6 +345,44 @@ export default function AdminCourses() {
                   </select>
                 </div>
               </div>
+
+              {/* Schedule & Instructor — required for publishing */}
+              <div className="border-t border-slate-100 pt-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-900">Schedule & Instructor</h3>
+                  <span className="text-xs text-slate-400">Required to publish</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Start Date *</label>
+                    <input type="date" value={(form.start_date as string) ?? ""} onChange={(e) => field("start_date", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Start Time *</label>
+                    <input type="time" value={(form.start_time as string) ?? ""} onChange={(e) => field("start_time", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Duration *</label>
+                    <input placeholder="e.g. 8 weeks · 2h/session" value={(form.duration as string) ?? ""} onChange={(e) => field("duration", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Format *</label>
+                    <select value={(form.course_format as string) ?? "online_live"} onChange={(e) => field("course_format", e.target.value)}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
+                      {FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Instructor Name *</label>
+                  <input placeholder="e.g. Dr. Ahmed Hassan" value={(form.instructor_name as string) ?? ""} onChange={(e) => field("instructor_name", e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                </div>
+              </div>
+
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Stripe Price ID</label>
