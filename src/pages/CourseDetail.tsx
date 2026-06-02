@@ -3,18 +3,29 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft, ArrowRight, BookOpen, Clock, Globe2, CheckCircle2,
-  CreditCard, Crown, ShieldCheck,
+  CreditCard, Crown, ShieldCheck, Calendar, User, Tv,
 } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, getCourse } from "@/lib/stripe";
-import { usePriceHiddenMap } from "@/hooks/useSsraData";
+import { usePriceHiddenMap, useCourseSchedule } from "@/hooks/useSsraData";
+
+function formatDate(d?: string | null) {
+  if (!d) return null;
+  try { return new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }); }
+  catch { return d; }
+}
+function formatTime(t?: string | null) {
+  if (!t) return null;
+  return t.length >= 5 ? t.slice(0, 5) : t;
+}
 
 export default function CourseDetail() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const course = getCourse(id);
   const { data: priceHidden = {} } = usePriceHiddenMap();
+  const { data: schedule } = useCourseSchedule(id);
   const hidden = !!priceHidden[id];
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
