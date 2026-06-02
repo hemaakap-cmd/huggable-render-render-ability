@@ -48,6 +48,7 @@ const SuperAdminAdmins    = lazy(() => import("./pages/ssra-admin/SuperAdminAdmi
 const SuperAdminActivity  = lazy(() => import("./pages/ssra-admin/SuperAdminActivity"));
 const SuperAdminViewAs    = lazy(() => import("./pages/ssra-admin/SuperAdminViewAs"));
 const SuperAdminSyncStatus = lazy(() => import("./pages/ssra-admin/SuperAdminSyncStatus"));
+const SuperAdminManualGrant = lazy(() => import("./pages/ssra-admin/SuperAdminManualGrant"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -143,6 +144,7 @@ function AppInner() {
                 <Route path="/ssra-admin/activity"          element={<RequireSuperAdmin><SuperAdminActivity /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/view-as/:userId"  element={<RequireSuperAdmin><SuperAdminViewAs /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/sync-status"      element={<RequireSuperAdmin><SuperAdminSyncStatus /></RequireSuperAdmin>} />
+                <Route path="/ssra-admin/manual-grant"     element={<RequireSuperAdmin><SuperAdminManualGrant /></RequireSuperAdmin>} />
 
                 <Route path="*" element={<NotFound />} />
         </Routes>

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, ShieldCheck,
   BookOpen, CreditCard, LogOut, Menu, X, Library, Video,
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
-  GraduationCap, GitBranch,
+  GraduationCap, GitBranch, Wand2,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
@@ -25,6 +25,7 @@ const SUPER_NAV = [
   { icon: CreditCard, label: "Revenue",           href: "/ssra-admin/revenue" },
   { icon: UserCog,    label: "Manage Admins",     href: "/ssra-admin/admins" },
   { icon: GitBranch,  label: "Sync Status",       href: "/ssra-admin/sync-status" },
+  { icon: Wand2,      label: "Manual Grant",      href: "/ssra-admin/manual-grant" },
 ];
 
 function NavItem({ icon: Icon, label, href, end = false, onClick }: {
