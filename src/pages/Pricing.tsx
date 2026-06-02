@@ -144,7 +144,7 @@ export default function Pricing() {
     <div className="min-h-screen bg-slate-50">
       <Helmet>
         <title>Pricing — SSRA Academy</title>
-        <meta name="description" content="Transparent pricing for all SSRA Academy courses. Medical German subscription from €29/month. One-time clinical and career courses from €29–€79." />
+        <meta name="description" content="Transparent pricing for all SSRA Academy courses. Medical German subscription from €19/month. One-time clinical and career courses from €29–€79." />
         <link rel="canonical" href="https://ssracourses.com/pricing" />
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
