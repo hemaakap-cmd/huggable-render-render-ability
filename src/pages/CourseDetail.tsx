@@ -144,6 +144,48 @@ export default function CourseDetail() {
               </ul>
             </div>
 
+            {/* Schedule & instructor — live data from DB */}
+            <div>
+              <h2 className="font-display text-2xl font-bold text-slate-900 mb-5">Schedule & instructor</h2>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <Calendar className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Start date</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{formatDate(schedule?.start_date) ?? "To be announced"}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <Clock className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Start time</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{formatTime(schedule?.start_time) ?? "To be announced"}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <BookOpen className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Duration</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{schedule?.duration || course.weeks}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl">
+                  <Tv className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Course type</div>
+                    <div className="text-sm text-slate-800 mt-0.5 capitalize">{schedule?.course_format ?? "Online"}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl sm:col-span-2">
+                  <User className="w-5 h-5 text-[hsl(220,91%,54%)] shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wide font-semibold">Instructor</div>
+                    <div className="text-sm text-slate-800 mt-0.5">{schedule?.instructor_name ?? "To be announced"}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div>
               <h2 className="font-display text-2xl font-bold text-slate-900 mb-3">Who it's for</h2>
               <p className="text-slate-600 leading-relaxed">
