@@ -1,5 +1,33 @@
 import { loadStripe } from "@stripe/stripe-js";
 
+/* ── Startup env validation ──
+ * In production, missing Stripe env vars would silently fall back to
+ * invalid placeholder price IDs and every checkout would fail with
+ * "No such price". Fail loud instead. */
+const REQUIRED_STRIPE_ENV = [
+  "VITE_STRIPE_PUBLISHABLE_KEY",
+  "VITE_STRIPE_PRICE_GERMAN_SUB",
+  "VITE_STRIPE_PRICE_REHAB",
+  "VITE_STRIPE_PRICE_BEWEGUNG",
+  "VITE_STRIPE_PRICE_PRAXIS",
+  "VITE_STRIPE_PRICE_ANATOMIE",
+  "VITE_STRIPE_PRICE_TRAINING",
+  "VITE_STRIPE_PRICE_TELEFON",
+  "VITE_STRIPE_PRICE_BERUF",
+  "VITE_STRIPE_PRICE_DOSB",
+] as const;
+
+if (import.meta.env.PROD) {
+  const missing = REQUIRED_STRIPE_ENV.filter((k) => !import.meta.env[k]);
+  if (missing.length > 0) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[stripe] Missing required env vars in production: ${missing.join(", ")}. ` +
+      `Checkout flows will fail until these are set.`
+    );
+  }
+}
+
 export const stripePromise = loadStripe(
   import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? ""
 );

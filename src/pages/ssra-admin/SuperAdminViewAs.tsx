@@ -450,7 +450,7 @@ export default function SuperAdminViewAs() {
                       </div>
                     </div>
                     <div className="text-xs text-slate-400 shrink-0">
-                      Joined {a.joined_at ? fmt(a.joined_at) : "—"}
+                      Joined {a.attended_at ? fmt(a.attended_at) : "—"}
                     </div>
                   </div>
                 ))}

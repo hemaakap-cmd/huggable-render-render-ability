@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CheckCircle2, GraduationCap } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
@@ -34,6 +35,7 @@ const COURSES = STRIPE_COURSES.map((c) => ({ id: c.id, label: c.titleAr ? `${c.t
 export default function Apply() {
   useReveal();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -53,9 +55,19 @@ export default function Apply() {
     }
     setSubmitting(true);
     try {
+      // Require auth so the insert is tied to a real user_id and is never silently dropped by RLS.
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Please sign in first",
+          description: "You need an account before submitting an application.",
+        });
+        navigate(`/login?redirect=${encodeURIComponent("/apply")}`);
+        setSubmitting(false);
+        return;
+      }
       const { error } = await supabase.from("ssra_verifications").insert({
-        user_id:         user?.id ?? null,
+        user_id:         user.id,
         full_name:       form.fullName,
         email:           form.email,
         country:         form.country,
