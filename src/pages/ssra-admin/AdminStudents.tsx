@@ -32,7 +32,7 @@ export default function AdminStudents() {
             <h1 className="font-display text-2xl font-bold text-slate-900">Students</h1>
             <p className="text-slate-500 text-sm mt-1">All registered students on SSRA.</p>
           </div>
-          <div className="text-2xl font-bold font-display text-slate-400">{filtered.length}</div>
+          <div className="text-2xl font-bold font-display text-slate-400">{total}</div>
         </div>
 
         {/* Search + filters */}
@@ -49,7 +49,7 @@ export default function AdminStudents() {
           </div>
           <div className="relative flex-1 min-w-[180px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)}
+            <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }}
               placeholder="Search by name…"
               className="w-full pl-9 pr-4 h-10 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white" />
           </div>
@@ -128,6 +128,23 @@ export default function AdminStudents() {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {total > PAGE_SIZE && (
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <div>Page {page + 1} of {Math.max(1, Math.ceil(total / PAGE_SIZE))} · {total} students</div>
+            <div className="flex gap-2">
+              <button disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
+                <ChevronLeft className="w-4 h-4" /> Prev
+              </button>
+              <button disabled={(page + 1) * PAGE_SIZE >= total} onClick={() => setPage((p) => p + 1)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
