@@ -41,7 +41,14 @@ export default function AdminCourses() {
     setModal(true);
   }
   function openEdit(c: Record<string, unknown>) {
-    setForm({ ...c });
+    // Merge with EMPTY so legacy rows missing newer columns (e.g. course_format)
+    // pick up sensible defaults instead of leaving the form state as null while
+    // the <select> shows a fallback label — which caused "Missing required fields".
+    const merged: Record<string, unknown> = { ...EMPTY };
+    for (const [k, v] of Object.entries(c)) {
+      merged[k] = v === null || v === undefined || v === "" ? EMPTY[k] ?? v : v;
+    }
+    setForm(merged);
     setModulesText(Array.isArray(c.modules) ? (c.modules as string[]).join("\n") : "");
     setModal(true);
   }
