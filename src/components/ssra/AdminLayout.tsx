@@ -4,13 +4,14 @@ import {
   LayoutDashboard, Users, ShieldCheck,
   BookOpen, CreditCard, LogOut, Menu, X, Library, Video,
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
-  GraduationCap, GitBranch, Wand2,
+  GraduationCap, GitBranch, Wand2, Radio,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
 const ADMIN_NAV = [
   { icon: LayoutDashboard, label: "Dashboard",     href: "/ssra-admin" },
+  { icon: Radio,           label: "Live Visitors", href: "/ssra-admin/live" },
   { icon: Users,           label: "Students",      href: "/ssra-admin/students" },
   { icon: ClipboardList,   label: "Attendance",    href: "/ssra-admin/attendance" },
   { icon: ShieldCheck,     label: "Verifications", href: "/ssra-admin/verifications" },

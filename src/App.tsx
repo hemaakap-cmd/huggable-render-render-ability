@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { Loader2 } from "lucide-react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useSsraAuth } from "./hooks/useSsraAuth";
+import { useVisitorTracker } from "./hooks/useVisitorTracker";
 import Index from "./pages/Index";
 import WhatsAppButton from "./components/ssra/WhatsAppButton";
 
@@ -49,6 +50,7 @@ const SuperAdminActivity  = lazy(() => import("./pages/ssra-admin/SuperAdminActi
 const SuperAdminViewAs    = lazy(() => import("./pages/ssra-admin/SuperAdminViewAs"));
 const SuperAdminSyncStatus = lazy(() => import("./pages/ssra-admin/SuperAdminSyncStatus"));
 const SuperAdminManualGrant = lazy(() => import("./pages/ssra-admin/SuperAdminManualGrant"));
+const AdminLiveVisitors    = lazy(() => import("./pages/ssra-admin/AdminLiveVisitors"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -101,6 +103,9 @@ function AppInner() {
     });
   }, []);
 
+  // Live visitor tracking (skips admin/dashboard routes internally)
+  useVisitorTracker();
+
   return (
     <>
       <Suspense fallback={<Spinner />}>
@@ -138,6 +143,7 @@ function AppInner() {
                 <Route path="/ssra-admin/verifications"     element={<RequireAdmin><AdminVerifications /></RequireAdmin>} />
                 <Route path="/ssra-admin/enrollments"       element={<RequireAdmin><AdminEnrollments /></RequireAdmin>} />
                 <Route path="/ssra-admin/revenue"           element={<RequireAdmin><AdminRevenue /></RequireAdmin>} />
+                <Route path="/ssra-admin/live"              element={<RequireAdmin><AdminLiveVisitors /></RequireAdmin>} />
                 {/* Super Admin only */}
                 <Route path="/ssra-admin/finance"           element={<RequireSuperAdmin><SuperAdminFinance /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/admins"            element={<RequireSuperAdmin><SuperAdminAdmins /></RequireSuperAdmin>} />
