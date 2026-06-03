@@ -143,6 +143,7 @@ function AppInner() {
                 <Route path="/ssra-admin/verifications"     element={<RequireAdmin><AdminVerifications /></RequireAdmin>} />
                 <Route path="/ssra-admin/enrollments"       element={<RequireAdmin><AdminEnrollments /></RequireAdmin>} />
                 <Route path="/ssra-admin/revenue"           element={<RequireAdmin><AdminRevenue /></RequireAdmin>} />
+                <Route path="/ssra-admin/live"              element={<RequireAdmin><AdminLiveVisitors /></RequireAdmin>} />
                 {/* Super Admin only */}
                 <Route path="/ssra-admin/finance"           element={<RequireSuperAdmin><SuperAdminFinance /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/admins"            element={<RequireSuperAdmin><SuperAdminAdmins /></RequireSuperAdmin>} />
