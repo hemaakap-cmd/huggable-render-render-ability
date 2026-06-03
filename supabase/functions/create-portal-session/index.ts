@@ -15,6 +15,25 @@ Deno.serve(async (req: Request) => {
   try {
     const { returnUrl } = await req.json();
 
+    // Validate returnUrl against an allowlist to prevent open-redirect abuse.
+    const ALLOWED_ORIGINS = [
+      "https://ssracourses.com",
+      "https://www.ssracourses.com",
+      "https://huggable-render-render-ability.lovable.app",
+    ];
+    const DEFAULT_RETURN_URL = "https://ssracourses.com/dashboard/subscription";
+    let safeReturnUrl = DEFAULT_RETURN_URL;
+    if (returnUrl && typeof returnUrl === "string") {
+      try {
+        const u = new URL(returnUrl);
+        if (ALLOWED_ORIGINS.includes(u.origin)) {
+          safeReturnUrl = u.toString();
+        }
+      } catch {
+        // ignore malformed URL, fall back to default
+      }
+    }
+
     // Get the authenticated user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Not authenticated");
@@ -44,7 +63,7 @@ Deno.serve(async (req: Request) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: sub.stripe_customer_id,
-      return_url: returnUrl ?? "https://ssracourses.com/dashboard/subscription",
+      return_url: safeReturnUrl,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

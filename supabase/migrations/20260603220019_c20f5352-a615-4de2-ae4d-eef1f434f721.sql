@@ -1,0 +1,1 @@
+REVOKE SELECT (stripe_price_id) ON public.ssra_courses FROM anon;
