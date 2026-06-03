@@ -50,6 +50,7 @@ const SuperAdminActivity  = lazy(() => import("./pages/ssra-admin/SuperAdminActi
 const SuperAdminViewAs    = lazy(() => import("./pages/ssra-admin/SuperAdminViewAs"));
 const SuperAdminSyncStatus = lazy(() => import("./pages/ssra-admin/SuperAdminSyncStatus"));
 const SuperAdminManualGrant = lazy(() => import("./pages/ssra-admin/SuperAdminManualGrant"));
+const AdminLiveVisitors    = lazy(() => import("./pages/ssra-admin/AdminLiveVisitors"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
