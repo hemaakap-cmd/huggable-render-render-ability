@@ -103,6 +103,9 @@ function AppInner() {
     });
   }, []);
 
+  // Live visitor tracking (skips admin/dashboard routes internally)
+  useVisitorTracker();
+
   return (
     <>
       <Suspense fallback={<Spinner />}>
