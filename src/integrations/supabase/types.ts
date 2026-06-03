@@ -134,6 +134,72 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visitor_sessions: {
+        Row: {
+          city: string | null
+          country: string | null
+          country_code: string | null
+          created_at: string
+          device_type: string | null
+          first_seen_at: string
+          id: string
+          ip_hash: string | null
+          last_seen_at: string
+          page_views: number
+          path: string
+          referrer: string | null
+          region: string | null
+          session_id: string
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_type?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_hash?: string | null
+          last_seen_at?: string
+          page_views?: number
+          path?: string
+          referrer?: string | null
+          region?: string | null
+          session_id: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_type?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_hash?: string | null
+          last_seen_at?: string
+          page_views?: number
+          path?: string
+          referrer?: string | null
+          region?: string | null
+          session_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       ssra_certificates: {
         Row: {
           certificate_code: string
@@ -629,6 +695,10 @@ export type Database = {
       }
       generate_ssra_cert_code: { Args: never; Returns: string }
       generate_ssra_order_number: { Args: never; Returns: string }
+      get_live_visitor_stats: {
+        Args: { _window_minutes?: number }
+        Returns: Json
+      }
       get_public_home_stats: {
         Args: never
         Returns: {
