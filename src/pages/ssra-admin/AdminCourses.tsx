@@ -8,9 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 const CATEGORIES = ["clinical", "language", "career"] as const;
 const TYPES = ["one_time", "subscription"] as const;
 const FORMATS = [
-  { value: "online_live", label: "Online — Live" },
-  { value: "online_recorded", label: "Online — Recorded" },
-  { value: "in_person", label: "In-person" },
+  { value: "online", label: "Online — Live" },
+  { value: "recorded", label: "Online — Recorded" },
+  { value: "live", label: "In-person / Live" },
 ] as const;
 const EMPTY: Record<string, unknown> = {
   id: "", title: "", title_ar: "", subtitle: "", description: "",
@@ -18,8 +18,15 @@ const EMPTY: Record<string, unknown> = {
   weeks: "", level: "Beginner", requires_verification: false,
   is_active: true, price_hidden: false, sort_order: 99, stripe_price_id: "",
   image_url: "", modules: [],
-  start_date: "", start_time: "", duration: "", instructor_name: "", course_format: "online_live",
+  start_date: "", start_time: "", duration: "", instructor_name: "", course_format: "online",
 };
+
+function normalizeCourseFormat(value: unknown) {
+  if (value === "online_live") return "online";
+  if (value === "online_recorded") return "recorded";
+  if (value === "in_person") return "live";
+  return value || EMPTY.course_format;
+}
 
 export default function AdminCourses() {
   const { data: courses = [], isLoading } = useAdminCourses();
@@ -48,6 +55,7 @@ export default function AdminCourses() {
     for (const [k, v] of Object.entries(c)) {
       merged[k] = v === null || v === undefined || v === "" ? EMPTY[k] ?? v : v;
     }
+    merged.course_format = normalizeCourseFormat(merged.course_format);
     setForm(merged);
     setModulesText(Array.isArray(c.modules) ? (c.modules as string[]).join("\n") : "");
     setModal(true);
@@ -85,19 +93,13 @@ export default function AdminCourses() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     const missing = missingSchedule(form);
-    if (form.is_active && missing.length > 0) {
-      toast({
-        title: "Cannot publish course",
-        description: `Missing required fields: ${missing.join(", ")}. Uncheck "Active" to save as draft.`,
-        variant: "destructive",
-      });
-      return;
-    }
+    const saveAsDraft = Boolean(form.is_active && missing.length > 0);
     setSaving(true);
     try {
       const modules = modulesText.split("\n").map((s) => s.trim()).filter(Boolean);
       const payload = {
         ...form,
+        is_active: saveAsDraft ? false : Boolean(form.is_active),
         price_eur: Number(form.price_eur),
         price_egp: Number(form.price_egp),
         sort_order: Number(form.sort_order),
@@ -106,11 +108,14 @@ export default function AdminCourses() {
         start_time: form.start_time || null,
         duration: form.duration || null,
         instructor_name: form.instructor_name || null,
-        course_format: form.course_format || null,
+        course_format: normalizeCourseFormat(form.course_format) || null,
         id: form.id || undefined,
       };
       await upsert.mutateAsync(payload);
-      toast({ title: form.id ? "Course updated" : "Course created" });
+      toast({
+        title: saveAsDraft ? "Course saved as draft" : form.id ? "Course updated" : "Course created",
+        description: saveAsDraft ? `Missing required publishing fields: ${missing.join(", ")}.` : undefined,
+      });
       setModal(false);
     } catch (e: unknown) {
       toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" });
@@ -377,7 +382,7 @@ export default function AdminCourses() {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Format *</label>
-                    <select value={(form.course_format as string) ?? "online_live"} onChange={(e) => field("course_format", e.target.value)}
+                    <select value={(normalizeCourseFormat(form.course_format) as string) ?? "online"} onChange={(e) => field("course_format", e.target.value)}
                       className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
                       {FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
                     </select>
