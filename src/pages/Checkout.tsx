@@ -223,7 +223,7 @@ export default function Checkout() {
             <div className="bg-white border border-slate-200 rounded-2xl p-8">
               <h2 className="font-display text-2xl font-bold text-slate-900 mb-1">Complete Enrolment</h2>
               <p className="text-slate-500 text-sm mb-6">
-                You'll be redirected to Stripe's secure checkout to complete your payment.
+                A secure Paddle checkout will open to complete your payment.
               </p>
 
               {/* Logged-in user info — read only */}
