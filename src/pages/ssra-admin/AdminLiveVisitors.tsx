@@ -24,18 +24,25 @@ const WINDOW_MIN = 5;
 export default function AdminLiveVisitors() {
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [tick, setTick] = useState(0);
 
   async function load() {
-    const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
-    const { data } = await supabase
-      .from("site_visitor_sessions")
-      .select("*")
-      .gte("last_seen_at", since)
-      .order("last_seen_at", { ascending: false })
-      .limit(200);
-    setVisitors((data as Visitor[]) ?? []);
-    setLoading(false);
+    setRefreshing(true);
+    try {
+      const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
+      const { data, error } = await supabase
+        .from("site_visitor_sessions")
+        .select("*")
+        .gte("last_seen_at", since)
+        .order("last_seen_at", { ascending: false })
+        .limit(200);
+      if (error) console.error("[live-visitors] load error:", error);
+      setVisitors((data as Visitor[]) ?? []);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }
 
   useEffect(() => {
@@ -73,8 +80,14 @@ export default function AdminLiveVisitors() {
               </span>
             </p>
           </div>
-          <button onClick={load} className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-            <RefreshCw className="w-4 h-4" /> Refresh
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={refreshing}
+            className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-slate-200 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
         </div>
 
