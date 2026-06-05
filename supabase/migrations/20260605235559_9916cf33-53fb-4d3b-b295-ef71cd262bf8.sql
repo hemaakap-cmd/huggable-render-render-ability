@@ -1,0 +1,1 @@
+UPDATE public.ssra_sessions SET zoom_link='https://us04web.zoom.us/j/72035821250?pwd=uMn13ul4H5R1Gt2NfMVXmbpSgXZffv.1' WHERE id='6a1ee551-d0ab-4f80-83fc-78ee83c79056';
