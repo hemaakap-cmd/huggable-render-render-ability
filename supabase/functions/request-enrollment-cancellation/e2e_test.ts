@@ -310,4 +310,5 @@ Deno.test({
       try { await admin.from("ssra_courses").delete().in("id", CREATED_COURSE_IDS); } catch { /* noop */ }
     }
   },
+  },
 });
