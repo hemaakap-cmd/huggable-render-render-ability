@@ -32,7 +32,7 @@ export default function SuperAdminManualGrant() {
           email: email.trim(),
           courseId,
           kind: isSub ? "subscription" : kind,
-          paymentReference: paymentReference.trim() || undefined,
+          stripeReference: paymentReference.trim() || undefined,
           amountEur: Number(amountEur) || 0,
           periodMonths: Number(periodMonths) || 1,
           skipVerification,
@@ -96,7 +96,7 @@ export default function SuperAdminManualGrant() {
             <input
               value={paymentReference}
               onChange={(e) => setPaymentReference(e.target.value)}
-              placeholder="pi_... or sub_... or receipt code"
+              placeholder="transaction, subscription, or receipt code"
               className="input font-mono text-xs"
             />
           </Field>
