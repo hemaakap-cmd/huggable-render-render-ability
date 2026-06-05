@@ -168,8 +168,12 @@ function AppInner() {
                 <Route path="/reset-password"  element={<ResetPassword />} />
                 <Route path="/legal"           element={<Legal />} />
                 <Route path="/privacy-policy"  element={<PrivacyPolicy />} />
+                <Route path="/privacy"         element={<PrivacyPolicy />} />
                 <Route path="/terms"           element={<TermsConditions />} />
+                <Route path="/terms-of-service" element={<TermsConditions />} />
+                <Route path="/terms-and-conditions" element={<TermsConditions />} />
                 <Route path="/refund-policy"   element={<RefundCancellation />} />
+                <Route path="/refund"          element={<RefundCancellation />} />
                 <Route path="/verify/:code"    element={<VerifyCertificate />} />
                 <Route path="/verify"          element={<VerifyCertificate />} />
 
