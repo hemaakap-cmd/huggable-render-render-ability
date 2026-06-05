@@ -80,8 +80,14 @@ export default function AdminLiveVisitors() {
               </span>
             </p>
           </div>
-          <button onClick={load} className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-            <RefreshCw className="w-4 h-4" /> Refresh
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={refreshing}
+            className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-slate-200 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
         </div>
 
