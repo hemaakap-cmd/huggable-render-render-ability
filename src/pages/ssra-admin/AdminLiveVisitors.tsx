@@ -24,18 +24,25 @@ const WINDOW_MIN = 5;
 export default function AdminLiveVisitors() {
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [tick, setTick] = useState(0);
 
   async function load() {
-    const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
-    const { data } = await supabase
-      .from("site_visitor_sessions")
-      .select("*")
-      .gte("last_seen_at", since)
-      .order("last_seen_at", { ascending: false })
-      .limit(200);
-    setVisitors((data as Visitor[]) ?? []);
-    setLoading(false);
+    setRefreshing(true);
+    try {
+      const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
+      const { data, error } = await supabase
+        .from("site_visitor_sessions")
+        .select("*")
+        .gte("last_seen_at", since)
+        .order("last_seen_at", { ascending: false })
+        .limit(200);
+      if (error) console.error("[live-visitors] load error:", error);
+      setVisitors((data as Visitor[]) ?? []);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }
 
   useEffect(() => {
