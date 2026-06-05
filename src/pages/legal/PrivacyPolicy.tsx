@@ -179,6 +179,7 @@ export default function PrivacyPolicy() {
               </p>
               <div className="bg-slate-50 rounded-xl p-6 border border-slate-100">
                 <p className="text-slate-800 font-semibold">SSRA Academy</p>
+                <p className="text-slate-600">Owner & Data Controller: Ibrahim Elatir</p>
                 <p className="text-slate-600">Email: <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a></p>
                 <p className="text-slate-600">Online · Germany</p>
               </div>
