@@ -417,10 +417,10 @@ export default function Index() {
             </Link>
           </div>
 
-          {/* Stripe badge */}
+          {/* Paddle badge */}
           <div className="mt-10 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/12 text-white/50 text-xs">
             <CreditCard className="w-3.5 h-3.5" />
-            Payments secured by Stripe · Visa · Mastercard · Apple Pay · Google Pay
+            Payments processed by Paddle.com (Merchant of Record) · Visa · Mastercard · Apple Pay · Google Pay
           </div>
         </div>
       </section>
