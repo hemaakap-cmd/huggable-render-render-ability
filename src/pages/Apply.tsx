@@ -131,11 +131,9 @@ export default function Apply() {
         <meta property="og:title" content="Apply — SSRA Academy" />
         <meta property="og:description" content="Apply free to SSRA Academy. Medical German, sports rehabilitation and career support for Arabic-speaking sports science graduates." />
         <meta property="og:url" content="https://ssracourses.com/apply" />
-      </Helmet>
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
-        <link rel="canonical" href="https://ssracourses.com/apply" />
       </Helmet>
       <Header />
 
