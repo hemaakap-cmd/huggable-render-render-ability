@@ -1,6 +1,7 @@
 // Paddle webhook — auto-enroll student on payment, send confirmation + admin notice.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { verifyWebhook, EventName, type PaddleEnv } from '../_shared/paddle.ts';
+import { handleAdjustmentEvent } from './handlers.ts';
 
 const ADMIN_NOTIFY_EMAIL = Deno.env.get('ADMIN_NOTIFY_EMAIL') ?? 'hemaakap@gmail.com';
 const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://ssracourses.com';
