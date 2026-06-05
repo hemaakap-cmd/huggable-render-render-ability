@@ -758,8 +758,8 @@ export function useCourseCapacity(courseId: string) {
     enabled: !!courseId,
     queryKey: ["ssra-course-capacity", courseId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("ssra_courses")
+      const { data, error } = await (supabase
+        .from("ssra_courses") as any)
         .select("id, capacity, enrolled_count, waitlist_enabled, registration_open")
         .eq("id", courseId)
         .maybeSingle();
