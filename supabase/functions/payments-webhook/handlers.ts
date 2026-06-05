@@ -1,7 +1,7 @@
 // Handlers extracted from the webhook entrypoint so they can be unit-tested
 // without importing the Paddle SDK (which needs node_modules in the test runner).
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import type { PaddleEnv } from '../_shared/paddle.ts';
+type PaddleEnv = 'sandbox' | 'live';
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
