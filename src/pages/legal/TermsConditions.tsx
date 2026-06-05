@@ -101,12 +101,13 @@ export default function TermsConditions() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">4. Payment & Subscriptions</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>SSRA Academy offers both free and paid subscription plans. By selecting a paid subscription, you agree to pay all fees associated with the plan you select.</p>
+                <p>SSRA Academy offers both one-time course purchases and paid subscription plans. By completing a purchase or selecting a paid subscription, you agree to pay all fees associated with the plan you select.</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li>All payments are processed securely through our payment partners (Stripe).</li>
+                  <li>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns.</li>
                   <li>Subscription fees are billed in advance on a monthly or annual basis depending on your selected plan.</li>
                   <li>Your subscription will automatically renew unless you cancel it before the renewal date.</li>
                   <li>You may cancel your subscription at any time through your account settings or by contacting us.</li>
+                  <li>Payment, billing, tax, cancellation and refund mechanics are governed by Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">Buyer Terms</a>.</li>
                 </ul>
               </div>
             </div>
