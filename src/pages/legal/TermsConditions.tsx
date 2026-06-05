@@ -43,7 +43,7 @@ export default function TermsConditions() {
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  By accessing or using the SSRA Academy website and services, you agree to be bound by these Terms and Conditions and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
+                  By accessing or using the SSRA Academy website and services, you agree to be bound by these Terms and Conditions and all applicable laws and regulations. You are contracting with SSRA academy. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
                 </p>
                 <p>
                   SSRA Academy provides online educational content and resources designed for sports science graduates preparing for careers abroad. Our services include language courses, professional training materials, and career guidance resources.
@@ -103,10 +103,10 @@ export default function TermsConditions() {
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>SSRA Academy offers both one-time course purchases and paid subscription plans. By completing a purchase or selecting a paid subscription, you agree to pay all fees associated with the plan you select.</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns.</li>
+                  <li>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders, processes payments, may appear on your bank or card statement, provides billing customer service, and handles returns and refunds.</li>
                   <li>Subscription fees are billed in advance on a monthly or annual basis depending on your selected plan.</li>
                   <li>Your subscription will automatically renew unless you cancel it before the renewal date.</li>
-                  <li>You may cancel your subscription at any time through your account settings or by contacting us.</li>
+                  <li>You may cancel your subscription at any time through your account settings, by contacting us, or directly at <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> using the email address used at checkout.</li>
                   <li>Payment, billing, tax, cancellation and refund mechanics are governed by Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">Buyer Terms</a>.</li>
                 </ul>
               </div>
@@ -196,8 +196,7 @@ export default function TermsConditions() {
                 If you have any questions about these Terms & Conditions, please contact us:
               </p>
               <div className="bg-slate-50 rounded-xl p-6 border border-slate-100">
-                <p className="text-slate-800 font-semibold">SSRA Academy</p>
-                <p className="text-slate-600">Owner: Ibrahim Elatir</p>
+                <p className="text-slate-800 font-semibold">SSRA academy</p>
                 <p className="text-slate-600">Email: <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a></p>
                 <p className="text-slate-600">Online · Germany</p>
               </div>
