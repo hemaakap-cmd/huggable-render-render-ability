@@ -14,6 +14,7 @@ import WhatsAppButton from "./components/ssra/WhatsAppButton";
 
 /* ── Public ── */
 const Courses         = lazy(() => import("./pages/Courses"));
+const CourseDetail    = lazy(() => import("./pages/CourseDetail"));
 const About           = lazy(() => import("./pages/About"));
 const Apply           = lazy(() => import("./pages/Apply"));
 const Contact         = lazy(() => import("./pages/Contact"));
@@ -149,6 +150,7 @@ function AppInner() {
                 {/* Public marketing */}
                 <Route path="/"                 element={<Index />} />
                 <Route path="/courses"          element={<Courses />} />
+                <Route path="/courses/:id"      element={<CourseDetail />} />
                 <Route path="/about"            element={<About />} />
                 <Route path="/apply"            element={<Apply />} />
                 <Route path="/contact"          element={<Contact />} />

@@ -15,8 +15,8 @@ const FORMATS = [
 ] as const;
 const EMPTY: Record<string, unknown> = {
   id: "", title: "", title_ar: "", subtitle: "", description: "",
-  category: "clinical", type: "one_time", price_eur: 0, price_egp: 0,
-  weeks: "", level: "Beginner", requires_verification: false,
+  category: "clinical", course_type: "one_time", price_eur: 0, price_egp: 0,
+  duration_weeks: "", level: "Beginner", requires_verification: false,
   is_active: true, price_hidden: false, sort_order: 99, stripe_price_id: "",
   image_url: "", modules: [],
   start_date: "", start_time: "", duration: "", instructor_name: "", course_format: "online",
@@ -58,6 +58,7 @@ export default function AdminCourses() {
       merged[k] = v === null || v === undefined || v === "" ? EMPTY[k] ?? v : v;
     }
     merged.course_format = normalizeCourseFormat(merged.course_format);
+    (merged as any)._existing = true;
     setForm(merged);
     setModulesText(Array.isArray(c.modules) ? (c.modules as string[]).join("\n") : "");
     setModal(true);
@@ -94,13 +95,22 @@ export default function AdminCourses() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const isNew = !form.id || !String(form.id).trim();
+    if (isNew) {
+      const slug = String(form.id || "").trim().toLowerCase();
+      if (!/^[a-z0-9][a-z0-9-]{1,60}$/.test(slug)) {
+        toast({ title: "Invalid Course ID", description: "Use lowercase letters, numbers, and hyphens only (e.g. medical-german).", variant: "destructive" });
+        return;
+      }
+    }
     const missing = missingSchedule(form);
     const saveAsDraft = Boolean(form.is_active && missing.length > 0);
     setSaving(true);
     try {
       const modules = modulesText.split("\n").map((s) => s.trim()).filter(Boolean);
+      const { _existing: _ex, ...cleanForm } = form as any;
       const payload = {
-        ...form,
+        ...cleanForm,
         is_active: saveAsDraft ? false : Boolean(form.is_active),
         price_eur: Number(form.price_eur),
         price_egp: Number(form.price_egp),
@@ -109,9 +119,10 @@ export default function AdminCourses() {
         start_date: form.start_date || null,
         start_time: form.start_time || null,
         duration: form.duration || null,
+        duration_weeks: form.duration_weeks || null,
         instructor_name: form.instructor_name || null,
         course_format: normalizeCourseFormat(form.course_format) || null,
-        id: form.id || undefined,
+        id: isNew ? String(form.id).trim().toLowerCase() : form.id,
       };
       await upsert.mutateAsync(payload);
       toast({
@@ -319,6 +330,22 @@ export default function AdminCourses() {
                 </div>
               </div>
 
+              {/* Slug / ID */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  Course ID (slug) {!form.id ? "*" : <span className="text-slate-400 normal-case font-normal">— locked after creation</span>}
+                </label>
+                <input
+                  required={!form.id}
+                  disabled={Boolean(form.id) && Boolean((form as any)._existing)}
+                  value={form.id as string}
+                  onChange={(e) => field("id", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                  placeholder="e.g. medical-german"
+                  className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] disabled:bg-slate-50 disabled:text-slate-500"
+                />
+                <p className="text-xs text-slate-400 mt-1">Used in the public URL: /courses/&lt;id&gt;</p>
+              </div>
+
               {/* Titles */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
@@ -366,8 +393,8 @@ export default function AdminCourses() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Duration</label>
-                  <input placeholder="e.g. 6 weeks" value={form.weeks as string} onChange={(e) => field("weeks", e.target.value)}
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Weeks (legacy)</label>
+                  <input placeholder="e.g. 6 weeks" value={form.duration_weeks as string} onChange={(e) => field("duration_weeks", e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
                 </div>
                 <div>
@@ -388,7 +415,7 @@ export default function AdminCourses() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Type</label>
-                  <select value={form.type as string} onChange={(e) => field("type", e.target.value)}
+                  <select value={form.course_type as string} onChange={(e) => field("course_type", e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
                     {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
