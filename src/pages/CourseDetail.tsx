@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, getCourse } from "@/lib/stripe";
+import { COURSES, getCourse } from "@/lib/courseCatalog";
 import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlist } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";

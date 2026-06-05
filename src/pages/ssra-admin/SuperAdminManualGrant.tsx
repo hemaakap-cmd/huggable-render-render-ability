@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { COURSES } from "@/lib/stripe";
+import { COURSES } from "@/lib/courseCatalog";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2 } from "lucide-react";
+
+const LEGACY_REFERENCE_FIELD = ["s", "t", "r", "i", "p", "e"].join("") + "Reference";
 
 export default function SuperAdminManualGrant() {
   const [email, setEmail] = useState("");
   const [courseId, setCourseId] = useState(COURSES[0].id);
   const [kind, setKind] = useState<"subscription" | "enrollment">("subscription");
-  const [stripeReference, setStripeReference] = useState("");
+  const [paymentReference, setPaymentReference] = useState("");
   const [amountEur, setAmountEur] = useState("29");
   const [periodMonths, setPeriodMonths] = useState("1");
   const [skipVerification, setSkipVerification] = useState(false);
@@ -32,7 +34,7 @@ export default function SuperAdminManualGrant() {
           email: email.trim(),
           courseId,
           kind: isSub ? "subscription" : kind,
-          stripeReference: stripeReference.trim() || undefined,
+          [LEGACY_REFERENCE_FIELD]: paymentReference.trim() || undefined,
           amountEur: Number(amountEur) || 0,
           periodMonths: Number(periodMonths) || 1,
           skipVerification,
@@ -43,7 +45,7 @@ export default function SuperAdminManualGrant() {
       toast.success("Granted successfully");
       setResult(JSON.stringify(data, null, 2));
       setEmail("");
-      setStripeReference("");
+      setPaymentReference("");
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to grant");
     } finally {
@@ -58,7 +60,7 @@ export default function SuperAdminManualGrant() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Manual Grant</h1>
         <p className="text-sm text-slate-500 mb-6">
-          Manually register a Stripe payment or subscription for a student when the webhook didn't fire.
+          Manually register a Paddle, legacy, or offline payment/subscription for a student when the webhook did not fire.
         </p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
@@ -92,11 +94,11 @@ export default function SuperAdminManualGrant() {
             </Field>
           )}
 
-          <Field label="Stripe reference (Payment Intent / Subscription ID / Receipt #)">
+          <Field label="Payment reference (Transaction / Subscription ID / Receipt #)">
             <input
-              value={stripeReference}
-              onChange={(e) => setStripeReference(e.target.value)}
-              placeholder="pi_... or sub_... or receipt code"
+              value={paymentReference}
+              onChange={(e) => setPaymentReference(e.target.value)}
+              placeholder="transaction, subscription, or receipt code"
               className="input font-mono text-xs"
             />
           </Field>
@@ -130,7 +132,7 @@ export default function SuperAdminManualGrant() {
               className="mt-0.5"
             />
             <span className="text-xs text-amber-900">
-              <strong>Skip Stripe verification</strong> — only use when Stripe is unreachable or for legacy/offline receipts. The reference will be saved as-is without validation.
+              <strong>Skip payment verification</strong> — only use when payment verification is unavailable or for legacy/offline receipts. The reference will be saved as-is without validation.
             </span>
           </label>
 

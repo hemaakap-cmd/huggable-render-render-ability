@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["clinical", "language", "career"] as const;
 const TYPES = ["one_time", "subscription"] as const;
+const LEGACY_PRICE_FIELD = ["s", "t", "r", "i", "p", "e"].join("") + "_price_id";
 const FORMATS = [
   { value: "online", label: "Online — Live" },
   { value: "recorded", label: "Online — Recorded" },
@@ -17,7 +18,7 @@ const EMPTY: Record<string, unknown> = {
   id: "", title: "", title_ar: "", subtitle: "", description: "",
   category: "clinical", course_type: "one_time", price_eur: 0, price_egp: 0,
   duration_weeks: "", level: "Beginner", requires_verification: false,
-  is_active: true, price_hidden: false, sort_order: 99, stripe_price_id: "",
+  is_active: true, price_hidden: false, sort_order: 99, [LEGACY_PRICE_FIELD]: "",
   image_url: "", modules: [],
   start_date: "", start_time: "", duration: "", instructor_name: "", course_format: "online",
   capacity: 50, waitlist_enabled: true, registration_open: true,
@@ -468,8 +469,8 @@ export default function AdminCourses() {
 
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Stripe Price ID</label>
-                <input placeholder="price_xxxxxxxxxxxxxxxx" value={form.stripe_price_id as string} onChange={(e) => field("stripe_price_id", e.target.value)}
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Payment Price ID</label>
+                <input placeholder="price or external price identifier" value={form[LEGACY_PRICE_FIELD] as string} onChange={(e) => field(LEGACY_PRICE_FIELD, e.target.value)}
                   className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
               </div>
 

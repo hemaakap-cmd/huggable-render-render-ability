@@ -25,7 +25,7 @@ export default function MySubscription() {
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
 
-  async function openStripePortal() {
+  async function openBillingPortal() {
     setPortalLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-portal-session", {
@@ -90,7 +90,7 @@ export default function MySubscription() {
               )}
 
               <button
-                onClick={openStripePortal}
+                onClick={openBillingPortal}
                 disabled={portalLoading}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors disabled:opacity-60">
                 {portalLoading

@@ -4,7 +4,7 @@ import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown, AlertCi
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, type Course } from "@/lib/stripe";
+import { COURSES, type Course } from "@/lib/courseCatalog";
 import { useCoursesCapacityMap } from "@/hooks/useSsraData";
 
 function useReveal() {

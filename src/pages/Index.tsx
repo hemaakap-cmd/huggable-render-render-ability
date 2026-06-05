@@ -9,7 +9,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/stripe";
+import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/courseCatalog";
 import { supabase } from "@/integrations/supabase/client";
 
 function useReveal() {
