@@ -1,12 +1,27 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Mail, Loader2, CheckCircle2, ArrowLeft, User } from "lucide-react";
+import { Mail, Loader2, CheckCircle2, ArrowLeft, User, Phone, Globe, GraduationCap, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { verifyOtpCode } from "@/lib/verifyOtpCode";
 
 type Tab = "signup" | "login";
+
+const COUNTRIES = [
+  "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
+  "Algeria", "Tunisia", "Iraq", "Lebanon", "Syria", "Sudan", "Libya",
+  "Germany", "Austria", "Switzerland", "Other",
+];
+const DEGREES = [
+  "Bachelor of Physical Therapy",
+  "Bachelor of Sport Science",
+  "Bachelor of Medicine",
+  "Bachelor of Pharmacy",
+  "Bachelor of Nursing",
+  "Other",
+];
+const GERMAN_LEVELS = ["None / A0", "A1", "A2", "B1", "B2", "C1", "C2"];
 
 export default function StudentLogin() {
   const navigate  = useNavigate();
@@ -17,6 +32,10 @@ export default function StudentLogin() {
   const [tab, setTab]       = useState<Tab>("login");
   const [email, setEmail]   = useState("");
   const [name, setName]     = useState("");
+  const [phone, setPhone]   = useState("");
+  const [country, setCountry] = useState("");
+  const [degree, setDegree] = useState("");
+  const [germanLevel, setGermanLevel] = useState("");
   const [loading, setLoading] = useState(false);
 
   // OTP step
@@ -44,6 +63,10 @@ export default function StudentLogin() {
     setTab(t);
     setEmail("");
     setName("");
+    setPhone("");
+    setCountry("");
+    setDegree("");
+    setGermanLevel("");
     setOtpStep(false);
     setOtp("");
   };
@@ -52,9 +75,27 @@ export default function StudentLogin() {
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     dismiss();
-    if (tab === "signup" && !name.trim()) {
-      toast({ title: "Please enter your full name", variant: "destructive" });
-      return;
+    if (tab === "signup") {
+      if (!name.trim()) {
+        toast({ title: "Please enter your full name", variant: "destructive" });
+        return;
+      }
+      if (!phone.trim() || phone.trim().length < 6) {
+        toast({ title: "Please enter a valid phone number", variant: "destructive" });
+        return;
+      }
+      if (!country) {
+        toast({ title: "Please select your country", variant: "destructive" });
+        return;
+      }
+      if (!degree) {
+        toast({ title: "Please select your degree", variant: "destructive" });
+        return;
+      }
+      if (!germanLevel) {
+        toast({ title: "Please select your German level", variant: "destructive" });
+        return;
+      }
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
@@ -67,7 +108,6 @@ export default function StudentLogin() {
     });
     setLoading(false);
     if (error) {
-      // If user tries to sign in but has no account
       if (error.message.toLowerCase().includes("signups not allowed") || error.message.toLowerCase().includes("user not found")) {
         toast({
           title: "Account not found",
@@ -108,10 +148,17 @@ export default function StudentLogin() {
     const userId = verifyData.user.id;
 
     if (tab === "signup") {
-      // Ensure profile has the full name. Trigger creates row; we update name.
+      // Save all profile data collected before OTP
       const { error: upErr } = await supabase
         .from("ssra_profiles")
-        .update({ full_name: name.trim(), email })
+        .update({
+          full_name: name.trim(),
+          email,
+          phone_number: phone.trim(),
+          country,
+          degree,
+          german_level: germanLevel,
+        })
         .eq("id", userId);
       if (upErr) {
         await supabase.auth.signOut();
@@ -125,25 +172,23 @@ export default function StudentLogin() {
         return;
       }
 
-      // Explicit read-back: confirm the name actually persisted in DB before allowing entry
       const { data: confirmRow, error: confirmErr } = await supabase
         .from("ssra_profiles")
-        .select("full_name")
+        .select("full_name, phone_number, country, degree, german_level")
         .eq("id", userId)
         .maybeSingle();
-      if (confirmErr || !confirmRow || !confirmRow.full_name || confirmRow.full_name.trim() === "") {
+      if (confirmErr || !confirmRow || !confirmRow.full_name?.trim()) {
         await supabase.auth.signOut();
         setOtpLoading(false);
         toast({
           title: "Verification failed",
-          description: "Your name could not be confirmed in our records. Please try again.",
+          description: "Your data could not be confirmed. Please try again.",
           variant: "destructive",
         });
         setOtpStep(false);
         return;
       }
     } else {
-      // Login: profile must exist with a non-empty name
       const { data: prof } = await supabase
         .from("ssra_profiles")
         .select("full_name")
@@ -164,7 +209,6 @@ export default function StudentLogin() {
     }
 
     setOtpLoading(false);
-    // SIGNED_IN event → navigate
   };
 
   /* ── Resend ── */
@@ -200,7 +244,6 @@ export default function StudentLogin() {
           </Link>
 
           <div className="bg-white border border-slate-200 rounded-2xl shadow-lg p-8">
-            {/* Header */}
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                 <Mail className="w-6 h-6 text-[hsl(220,91%,54%)]" />
@@ -208,8 +251,7 @@ export default function StudentLogin() {
               <div>
                 <h2 className="font-display text-lg font-bold text-slate-900">Check your email</h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Code sent to{" "}
-                  <span className="font-semibold text-slate-700">{email}</span>
+                  Code sent to <span className="font-semibold text-slate-700">{email}</span>
                 </p>
               </div>
             </div>
@@ -240,7 +282,7 @@ export default function StudentLogin() {
               >
                 {otpLoading
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</>
-                  : <><CheckCircle2 className="w-4 h-4" /> Confirm &amp; Enter</>}
+                  : <><CheckCircle2 className="w-4 h-4" /> Confirm &amp; Complete Registration</>}
               </button>
             </form>
 
@@ -273,9 +315,9 @@ export default function StudentLogin() {
     );
   }
 
-  /* ═══════ EMAIL / NAME SCREEN ═══════ */
+  /* ═══════ EMAIL / DETAILS SCREEN ═══════ */
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center justify-center mb-8">
           <SsraLogo size={36} scheme="dark" />
@@ -285,8 +327,8 @@ export default function StudentLogin() {
           {/* Tabs */}
           <div className="flex border-b border-slate-100">
             {([
-              { key: "login",  label: "Sign In",        sub: "Already have an account" },
-              { key: "signup", label: "New Student",    sub: "Create a free account"   },
+              { key: "login",  label: "Sign In",     sub: "Already have an account" },
+              { key: "signup", label: "New Student", sub: "Create a free account"   },
             ] as { key: Tab; label: string; sub: string }[]).map(({ key, label }) => (
               <button
                 key={key}
@@ -303,31 +345,98 @@ export default function StudentLogin() {
           </div>
 
           <div className="p-8">
+            {tab === "signup" && (
+              <p className="text-xs text-slate-500 bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 leading-relaxed">
+                Fill in all your details below. A 6-digit verification code will be sent to your email to complete registration.
+              </p>
+            )}
+
             <form onSubmit={handleSendCode} className="space-y-4">
 
               {tab === "signup" && (
-                <div>
-                  <label className="text-sm font-medium text-slate-700 block mb-1.5">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      placeholder="Your full name"
-                      className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
-                    />
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Full Name *</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        placeholder="Your full name"
+                        className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                      />
+                    </div>
                   </div>
-                </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Phone Number *</label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                        placeholder="+20 1XX XXX XXXX"
+                        className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Country *</label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <select
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        required
+                        className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                      >
+                        <option value="">Select country…</option>
+                        {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Degree / Qualification *</label>
+                    <div className="relative">
+                      <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <select
+                        value={degree}
+                        onChange={(e) => setDegree(e.target.value)}
+                        required
+                        className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                      >
+                        <option value="">Select degree…</option>
+                        {DEGREES.map((d) => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1.5">German Level *</label>
+                    <div className="relative">
+                      <Languages className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <select
+                        value={germanLevel}
+                        onChange={(e) => setGermanLevel(e.target.value)}
+                        required
+                        className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                      >
+                        <option value="">Select German level…</option>
+                        {GERMAN_LEVELS.map((g) => <option key={g} value={g}>{g}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </>
               )}
 
               <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1.5">
-                  Email Address
-                </label>
+                <label className="text-sm font-medium text-slate-700 block mb-1.5">Email Address *</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
@@ -349,7 +458,7 @@ export default function StudentLogin() {
               >
                 {loading
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending code…</>
-                  : <><Mail className="w-4 h-4" /> Send Verification Code</>}
+                  : <><Mail className="w-4 h-4" /> {tab === "signup" ? "Continue — Send Verification Code" : "Send Verification Code"}</>}
               </button>
 
               <p className="text-center text-xs text-slate-400">
