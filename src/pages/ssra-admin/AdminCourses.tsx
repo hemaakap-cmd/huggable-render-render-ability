@@ -468,8 +468,8 @@ export default function AdminCourses() {
 
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Stripe Price ID</label>
-                <input placeholder="price_xxxxxxxxxxxxxxxx" value={form.stripe_price_id as string} onChange={(e) => field("stripe_price_id", e.target.value)}
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Payment Price ID</label>
+                <input placeholder="price or external price identifier" value={form.stripe_price_id as string} onChange={(e) => field("stripe_price_id", e.target.value)}
                   className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
               </div>
 
