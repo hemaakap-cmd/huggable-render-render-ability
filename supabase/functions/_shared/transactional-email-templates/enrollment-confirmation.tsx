@@ -39,6 +39,10 @@ const EnrollmentConfirmationEmail = ({
     <Preview>You're enrolled in {courseName ?? 'your course'} — starts {startDate ?? 'soon'}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={brandRow}>
+          <Img src={LOGO_URL} width="56" height="56" alt={SITE_NAME} style={logo} />
+          <Text style={brandName}>{SITE_NAME}</Text>
+        </Section>
         <Section style={header}>
           <Heading style={h1}>You're enrolled 🎉</Heading>
           <Text style={subhead}>Welcome, {studentName ?? 'student'}. Here are your course details.</Text>
