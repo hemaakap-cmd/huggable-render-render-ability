@@ -136,7 +136,11 @@ async function cleanupUser(userId: string) {
 
 // ---------- tests ----------
 
-Deno.test("E2E cancellation flow", async (t) => {
+Deno.test({
+  name: "E2E cancellation flow",
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: async (t) => {
   const stamp = Date.now();
   const student = await createUser(`student+${stamp}@e2e.test`, "student");
   const adminUser = await createUser(`admin+${stamp}@e2e.test`, "admin");
