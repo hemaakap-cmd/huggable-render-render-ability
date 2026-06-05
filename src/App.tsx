@@ -71,6 +71,7 @@ const AdminHomework        = lazy(() => import("./pages/ssra-admin/AdminHomework
 const AdminFraud           = lazy(() => import("./pages/ssra-admin/AdminFraud"));
 const AdminSystemHealth    = lazy(() => import("./pages/ssra-admin/AdminSystemHealth"));
 const AdminCertificates    = lazy(() => import("./pages/ssra-admin/AdminCertificates"));
+const AdminCancellations   = lazy(() => import("./pages/ssra-admin/AdminCancellations"));
 
 /* ── Instructor dashboard ── */
 const InstructorDashboard  = lazy(() => import("./pages/instructor/InstructorDashboard"));
@@ -208,6 +209,7 @@ function AppInner() {
                 <Route path="/ssra-admin/fraud"             element={<RequireAdmin><AdminFraud /></RequireAdmin>} />
                 <Route path="/ssra-admin/system-health"     element={<RequireAdmin><AdminSystemHealth /></RequireAdmin>} />
                 <Route path="/ssra-admin/certificates"      element={<RequireAdmin><AdminCertificates /></RequireAdmin>} />
+                <Route path="/ssra-admin/cancellations"     element={<RequireAdmin><AdminCancellations /></RequireAdmin>} />
 
                 {/* Instructor panel */}
                 <Route path="/instructor"                   element={<RequireInstructor><InstructorDashboard /></RequireInstructor>} />

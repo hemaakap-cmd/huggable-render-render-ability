@@ -292,6 +292,54 @@ export type Database = {
           },
         ]
       }
+      ssra_cancellation_requests: {
+        Row: {
+          admin_notes: string | null
+          course_id: string
+          created_at: string
+          enrollment_id: string
+          id: string
+          paddle_adjustment_id: string | null
+          reason: string
+          refund_amount_eur: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          course_id: string
+          created_at?: string
+          enrollment_id: string
+          id?: string
+          paddle_adjustment_id?: string | null
+          reason: string
+          refund_amount_eur?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          course_id?: string
+          created_at?: string
+          enrollment_id?: string
+          id?: string
+          paddle_adjustment_id?: string | null
+          reason?: string
+          refund_amount_eur?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ssra_certificates: {
         Row: {
           certificate_code: string
