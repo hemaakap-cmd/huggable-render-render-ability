@@ -27,6 +27,9 @@ const StudentLogin    = lazy(() => import("./pages/StudentLogin"));
 const AdminLogin      = lazy(() => import("./pages/AdminLogin"));
 const ResetPassword   = lazy(() => import("./pages/ResetPassword"));
 const Legal           = lazy(() => import("./pages/Legal"));
+const PrivacyPolicy   = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const TermsConditions = lazy(() => import("./pages/legal/TermsConditions"));
+const RefundCancellation = lazy(() => import("./pages/legal/RefundCancellation"));
 
 /* ── Student dashboard ── */
 const StudentDashboard  = lazy(() => import("./pages/dashboard/StudentDashboard"));
@@ -164,6 +167,9 @@ function AppInner() {
                 <Route path="/staff-login"      element={<AdminLogin />} />
                 <Route path="/reset-password"  element={<ResetPassword />} />
                 <Route path="/legal"           element={<Legal />} />
+                <Route path="/privacy-policy"  element={<PrivacyPolicy />} />
+                <Route path="/terms"           element={<TermsConditions />} />
+                <Route path="/refund-policy"   element={<RefundCancellation />} />
                 <Route path="/verify/:code"    element={<VerifyCertificate />} />
                 <Route path="/verify"          element={<VerifyCertificate />} />
 
