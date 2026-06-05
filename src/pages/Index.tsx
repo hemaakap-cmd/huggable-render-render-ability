@@ -401,7 +401,7 @@ export default function Index() {
             Start Learning Today
           </h2>
           <p className="text-white/55 text-lg max-w-xl mx-auto mb-10">
-            Applications are free. Pay only for the courses you choose. Cancel subscriptions anytime. We accept cards from all over the world via Stripe.
+            Applications are free. Pay only for the courses you choose. Cancel subscriptions anytime at paddle.net. We accept cards from all over the world via Paddle, our Merchant of Record.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/apply">
