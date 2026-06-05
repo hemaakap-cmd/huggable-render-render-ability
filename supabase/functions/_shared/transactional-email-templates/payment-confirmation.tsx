@@ -90,3 +90,6 @@ const text = { fontSize: '15px', color: '#334155', lineHeight: '1.65', margin: '
 const hr = { border: 'none', borderTop: '1px solid #e2e8f0', margin: '24px 0' }
 const footer = { fontSize: '12px', color: '#64748b', margin: '0 0 6px' }
 const link = { color: '#2563eb', textDecoration: 'underline' }
+const brandRow = { textAlign: 'center' as const, marginBottom: '16px' }
+const logo = { display: 'block', margin: '0 auto 6px', borderRadius: '12px' }
+const brandName = { fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, textAlign: 'center' as const, letterSpacing: '0.5px' }
