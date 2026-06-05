@@ -76,7 +76,24 @@ export default function CourseDetail() {
       <Helmet>
         <title>{course.subtitle} | SSRA Academy</title>
         <meta name="description" content={course.desc.slice(0, 155)} />
-        <link rel="canonical" href={`/courses/${course.id}`} />
+        <link rel="canonical" href={`https://ssracourses.com/courses/${course.id}`} />
+        <meta property="og:title" content={`${course.subtitle} | SSRA Academy`} />
+        <meta property="og:description" content={course.desc.slice(0, 155)} />
+        <meta property="og:url" content={`https://ssracourses.com/courses/${course.id}`} />
+        <meta property="og:type" content="article" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Course",
+          name: course.subtitle,
+          description: course.desc,
+          url: `https://ssracourses.com/courses/${course.id}`,
+          provider: {
+            "@type": "Organization",
+            name: "SSRA Academy",
+            sameAs: "https://ssracourses.com",
+          },
+          inLanguage: ["ar", "de"],
+        })}</script>
       </Helmet>
       <Header />
 
