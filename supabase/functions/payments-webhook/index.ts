@@ -225,6 +225,36 @@ async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
   }
 }
 
+// Exported for E2E tests. Marks a cancellation request as `refunded` once
+// Paddle confirms the adjustment is approved (post-webhook authoritative state).
+export async function handleAdjustmentEvent(data: any, _env: PaddleEnv) {
+  const adjustmentId = data?.id;
+  const status = data?.status;
+  if (!adjustmentId || status !== 'approved') return;
+
+  const supabase = getSupabase();
+  const { data: row } = await supabase
+    .from('ssra_cancellation_requests')
+    .select('id, user_id, status')
+    .eq('paddle_adjustment_id', adjustmentId)
+    .maybeSingle();
+  if (!row) return;
+  if (row.status === 'refunded') return;
+
+  await supabase
+    .from('ssra_cancellation_requests')
+    .update({ status: 'refunded' })
+    .eq('id', row.id);
+
+  await supabase.from('ssra_notifications').insert({
+    user_id: row.user_id,
+    type: 'cancellation',
+    title: 'Refund completed',
+    body: 'Your refund has been approved by Paddle. It may take 5–10 business days to appear on your statement.',
+    link: '/dashboard/courses',
+  });
+}
+
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);
   console.log('paddle event:', event.eventType);
@@ -240,6 +270,10 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
       break;
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
+      break;
+    case 'adjustment.created' as any:
+    case 'adjustment.updated' as any:
+      await handleAdjustmentEvent(event.data, env);
       break;
     default:
       break;
