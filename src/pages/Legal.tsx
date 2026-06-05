@@ -104,16 +104,16 @@ export default function Legal() {
               <li>Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> and enter the email address used at checkout to manage your order, or</li>
               <li>Email <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a> with subject "Refund Request" and your order number — we will forward your request to Paddle.</li>
             </ul>
-            <p>Approved refunds are returned to the original payment method within 5–14 business days. Subscriptions cancelled after the 14-day window remain active until the end of the current paid period and are not refunded for the remaining period.</p>
+            <p>Approved refunds are returned to the original payment method within 5–14 business days. Subscriptions cancelled after the 14-day window remain active until the end of the current paid period; any refund request is handled by Paddle under Paddle's Refund Policy and Buyer Terms.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">5. Intellectual Property</h3>
             <p>All course content — videos, documents, exercises — is owned by SSRA academy. You may not reproduce, distribute, or create derivative works without written permission.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">6. Scholarships</h3>
-            <p>Scholarship awards are at the sole discretion of SSRA Academy and may be revoked if the application was found to contain false information.</p>
+            <p>Scholarship awards are at the sole discretion of SSRA academy and may be revoked if the application was found to contain false information.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">7. Limitation of Liability</h3>
-            <p>SSRA Academy is not liable for career outcomes, credential recognition decisions made by German authorities, or technical interruptions beyond our reasonable control.</p>
+            <p>SSRA academy is not liable for career outcomes, credential recognition decisions made by German authorities, or technical interruptions beyond our reasonable control.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">8. Governing Law</h3>
             <p>These terms are governed by German law. Disputes shall be submitted to the courts of Germany.</p>
