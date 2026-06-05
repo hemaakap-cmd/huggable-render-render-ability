@@ -58,6 +58,7 @@ export default function AdminCourses() {
       merged[k] = v === null || v === undefined || v === "" ? EMPTY[k] ?? v : v;
     }
     merged.course_format = normalizeCourseFormat(merged.course_format);
+    (merged as any)._existing = true;
     setForm(merged);
     setModulesText(Array.isArray(c.modules) ? (c.modules as string[]).join("\n") : "");
     setModal(true);
