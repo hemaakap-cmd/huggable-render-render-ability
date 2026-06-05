@@ -258,8 +258,8 @@ export default function Pricing() {
           <div className="space-y-4">
             {[
               { q: "Why does the German language course require verification?", a: "We keep it exclusively for sports science graduates and students to ensure the community stays relevant and the content serves real needs." },
-              { q: "Can I pay from Egypt, Morocco, or Syria?", a: "Yes — Stripe accepts cards and payment methods from virtually every country. If you have a Visa or Mastercard, you can enrol." },
-              { q: "How do I cancel my subscription?", a: "You'll receive a link to your Stripe Customer Portal after subscribing. Cancel in one click, no questions asked." },
+              { q: "Can I pay from Egypt, Morocco, or Syria?", a: "Yes — Paddle accepts cards and payment methods from virtually every country. If you have a Visa or Mastercard, you can enrol." },
+              { q: "How do I cancel my subscription?", a: "Visit paddle.net and enter the email you used at checkout. You can cancel in one click — no questions asked. We also offer a 14-day money-back guarantee." },
               { q: "Are there scholarships for students who cannot afford fees?", a: "Yes — mention your situation in the application form. We review every case and offer full or partial waivers for demonstrated financial need." },
               { q: "Do I get a certificate?", a: "Yes, every completed course includes a digital SSRA certificate of completion." },
             ].map(({ q, a }) => (
