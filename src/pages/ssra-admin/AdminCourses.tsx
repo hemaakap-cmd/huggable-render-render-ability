@@ -218,9 +218,17 @@ export default function AdminCourses() {
                           </div>
                         )}
                         <div>
-                          <div className="font-medium text-slate-800">{c.title}</div>
+                          <div className="font-medium text-slate-800 flex items-center gap-1.5">
+                            {c.title}
+                            {c.is_active && (!c.start_date || !c.start_time || !c.instructor_name || !c.course_format || !c.duration) && (
+                              <span title="Missing required fields" className="text-amber-600">
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                              </span>
+                            )}
+                          </div>
                           {c.title_ar && <div className="text-xs text-slate-400 font-arabic">{c.title_ar}</div>}
                         </div>
+
                       </div>
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
