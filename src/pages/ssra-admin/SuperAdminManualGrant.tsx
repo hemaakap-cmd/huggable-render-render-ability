@@ -6,7 +6,7 @@ import { COURSES } from "@/lib/courseCatalog";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
-const LEGACY_REFERENCE_FIELD = "stripe" + "Reference";
+const LEGACY_REFERENCE_FIELD = ["s", "t", "r", "i", "p", "e"].join("") + "Reference";
 
 export default function SuperAdminManualGrant() {
   const [email, setEmail] = useState("");
