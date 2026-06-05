@@ -21,17 +21,17 @@ export async function handleAdjustmentEvent(data: any, _env: PaddleEnv) {
   const status = data?.status;
   if (!adjustmentId || status !== 'approved') return;
 
-  const supabase = getSupabase();
+  const supabase = getSupabase() as any;
   const { data: row } = await supabase
     .from('ssra_cancellation_requests')
     .select('id, user_id, status')
     .eq('paddle_adjustment_id', adjustmentId)
-    .maybeSingle() as { data: { id: string; user_id: string; status: string } | null };
+    .maybeSingle();
   if (!row || row.status === 'refunded') return;
 
   await supabase
     .from('ssra_cancellation_requests')
-    .update({ status: 'refunded' } as any)
+    .update({ status: 'refunded' })
     .eq('id', row.id);
 
   await supabase.from('ssra_notifications').insert({
@@ -40,5 +40,5 @@ export async function handleAdjustmentEvent(data: any, _env: PaddleEnv) {
     title: 'Refund completed',
     body: 'Your refund has been approved by Paddle. It may take 5–10 business days to appear on your statement.',
     link: '/dashboard/courses',
-  } as any);
+  });
 }
