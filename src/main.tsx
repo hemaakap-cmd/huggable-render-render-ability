@@ -3,7 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import "./i18n";
 
-// Warn (do not block) on missing Stripe envs; only Supabase is strictly required.
+// Warn (do not block) on missing backend envs.
 if (import.meta.env.PROD) {
   const required = ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"];
   const missing = required.filter(
