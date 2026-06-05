@@ -80,6 +80,12 @@ export default function SuperAdminAdmins() {
   const [confirm, setConfirm] = useState<{ userId: string; name: string; from: Role; to: Role } | null>(null);
   const { toast } = useToast();
 
+  // Invite-by-email form state
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName,  setInviteName]  = useState("");
+  const [inviteRole,  setInviteRole]  = useState<"admin" | "instructor">("instructor");
+  const [inviting,    setInviting]    = useState(false);
+
   const { data: admins = [], isLoading: adminsLoading } = useAdminUsers();
   const { data: searchResults = [] }                    = useSearchStudents(search);
   const setRole = useSetUserRole();
@@ -95,6 +101,38 @@ export default function SuperAdminAdmins() {
     });
     setConfirm(null);
     setSearch("");
+  }
+
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+    setInviting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-invite-user", {
+        body: {
+          email: inviteEmail.trim().toLowerCase(),
+          full_name: inviteName.trim() || null,
+          role: inviteRole,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      toast({
+        title: (data as any)?.invited ? "Invite sent ✉️" : "Role assigned",
+        description: (data as any)?.message ?? `${inviteEmail} is now ${ROLE_CONFIG[inviteRole].label}.`,
+      });
+      setInviteEmail("");
+      setInviteName("");
+    } catch (err: any) {
+      toast({
+        title: "Could not invite user",
+        description: err?.message ?? "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setInviting(false);
+    }
   }
 
   return (
