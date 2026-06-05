@@ -30,7 +30,8 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 });
 
 const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
-const COURSE_ID = "test-cancel-course";
+const COURSE_PREFIX = `test-cancel-${Date.now().toString(36)}-`;
+const CREATED_COURSE_IDS: string[] = [];
 
 // ---------- helpers ----------
 
