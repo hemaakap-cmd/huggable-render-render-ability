@@ -35,17 +35,19 @@ const COURSE_ID = "test-cancel-course";
 // ---------- helpers ----------
 
 async function ensureCourse() {
-  await admin.from("ssra_courses").upsert(
+  const { error } = await admin.from("ssra_courses").upsert(
     {
       id: COURSE_ID,
       title: "E2E Cancellation Course",
       price_eur: 100,
       course_type: "live",
       category: "test",
-      is_active: false, // hidden from public listings
-    },
+      is_active: false,
+      sort_order: 999,
+    } as any,
     { onConflict: "id" },
   );
+  if (error) throw new Error(`ensureCourse failed: ${error.message}`);
 }
 
 async function createUser(email: string, role: "student" | "admin") {
