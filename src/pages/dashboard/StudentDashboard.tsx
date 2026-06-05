@@ -77,10 +77,15 @@ function NextSessionBanner({ session }: { session: { title: string; scheduled_at
 }
 
 export default function StudentDashboard() {
+  const { isInstructor, isAdmin, isSuperAdmin, loading: authLoading } = useSsraAuth();
   const { data: enrollments = [], isLoading: eLoading }     = useMyEnrollments();
   const { data: subscription, isLoading: sLoading }         = useMySubscription();
   const { data: profile }                                   = useMyProfile();
   const { data: upcomingSessions = [] }                     = useMyUpcomingSessions();
+
+  // Auto-route staff to their correct dashboard
+  if (!authLoading && (isAdmin || isSuperAdmin)) return <Navigate to="/ssra-admin" replace />;
+  if (!authLoading && isInstructor)              return <Navigate to="/instructor" replace />;
 
   const hasActiveSubscription = subscription?.status === "active" || subscription?.status === "trialing";
   const nextSession = (upcomingSessions as any[])[0] ?? null;
