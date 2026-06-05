@@ -117,7 +117,7 @@ export default function MySubscription() {
             <Crown className="w-10 h-10 text-[hsl(43,96%,50%)] mx-auto mb-4" />
             <div className="font-display text-xl font-bold text-slate-900 mb-2">Medical German</div>
             <div className="text-slate-500 text-sm mb-1">Monthly subscription · <strong>€19/month</strong></div>
-            <div className="text-slate-400 text-xs mb-6">Cancel anytime from your Stripe portal.</div>
+            <div className="text-slate-400 text-xs mb-6">Cancel anytime at paddle.net. 14-day money-back guarantee.</div>
             <Link to="/checkout?courseId=medical-german">
               <button className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors">
                 <Crown className="w-4 h-4" /> Subscribe Now
