@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video } from "lucide-react";
+import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video, AlertTriangle } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
