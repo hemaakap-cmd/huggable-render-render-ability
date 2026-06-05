@@ -1,41 +1,4 @@
-import { loadStripe } from "@stripe/stripe-js";
-
-/* ── Startup env validation ──
- * In production, missing Stripe env vars would silently fail.
- * Fail loud instead. */
-const REQUIRED_STRIPE_ENV = [
-  "VITE_STRIPE_PUBLISHABLE_KEY",
-  "VITE_STRIPE_PRICE_GERMAN_SUB",
-  "VITE_STRIPE_PRICE_REHAB",
-  "VITE_STRIPE_PRICE_BEWEGUNG",
-  "VITE_STRIPE_PRICE_PRAXIS",
-  "VITE_STRIPE_PRICE_ANATOMIE",
-  "VITE_STRIPE_PRICE_TRAINING",
-  "VITE_STRIPE_PRICE_TELEFON",
-  "VITE_STRIPE_PRICE_BERUF",
-  "VITE_STRIPE_PRICE_DOSB",
-] as const;
-
-if (import.meta.env.PROD) {
-  const missing = REQUIRED_STRIPE_ENV.filter((k) => !import.meta.env[k]);
-  if (missing.length > 0) {
-    // eslint-disable-next-line no-console
-    console.error(
-      `[stripe] Missing required env vars in production: ${missing.join(", ")}. ` +
-      `Checkout flows will fail until these are set.`
-    );
-  }
-}
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-if (!publishableKey) {
-  // eslint-disable-next-line no-console
-  console.warn(
-    "[Stripe] VITE_STRIPE_PUBLISHABLE_KEY is not set. Checkout will be disabled."
-  );
-}
-
-export const stripePromise = publishableKey ? loadStripe(publishableKey) : Promise.resolve(null);
+import { coursePriceId } from "@/lib/paddle";
 
 /* ── Course catalogue with pricing ── */
 export type CourseType = "subscription" | "one_time";
@@ -49,7 +12,7 @@ export interface Course {
   price: number;         // EUR
   interval?: "month";
   type: CourseType;
-  priceId: string;       // Stripe Price ID — set in .env or Stripe dashboard
+  priceId: string;       // Paddle external price ID
   category: "clinical" | "language" | "career";
   weeks: string;
   level: string;
@@ -57,22 +20,21 @@ export interface Course {
   modules: string[];
   color: string;
   price_hidden?: boolean; // if true: hide price and show "Coming Soon" on public pages
-  paymentLink?: string;   // direct Stripe payment link — bypasses create-checkout-session
+  paymentLink?: string;
 }
 
 export const COURSES: Course[] = [
-  /* ── TEST COURSE — direct payment link for end-to-end Stripe testing ── */
+  /* ── TEST COURSE — internal checkout test ── */
   {
     id: "test-course",
     title: "Test Course (€1/mo)",
     titleAr: "كورس تجريبي",
-    subtitle: "End-to-end Stripe checkout test — €1/month",
+    subtitle: "End-to-end checkout test — €1/month",
     desc: "Internal test subscription for verifying checkout flow. After payment, use Manual Grant to provision access (webhook cannot auto-link payment links).",
     price: 1,
     interval: "month" as const,
     type: "subscription" as const,
-    priceId: "price_test_placeholder",
-    paymentLink: "https://buy.stripe.com/3cI6oH4gUd6sbI23veb7y0e",
+    priceId: coursePriceId("test-course"),
     category: "language" as const,
     weeks: "Ongoing",
     level: "Test",
