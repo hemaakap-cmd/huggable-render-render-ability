@@ -6,83 +6,30 @@
     <title>Legal Policies | SSRA academy</title>
     <meta name="description" content="Privacy Policy, Terms of Service, and Refund Policy for SSRA academy." />
     <link rel="canonical" href="https://ssracourses.com/legal" />
-    <style>
-      :root {
-        --background: 214 40% 98%;
-        --foreground: 222 47% 11%;
-        --muted: 215 16% 47%;
-        --border: 214 32% 91%;
-        --primary: 220 91% 54%;
-        --surface: 0 0% 100%;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        line-height: 1.65;
-        color: hsl(var(--foreground));
-        background: hsl(var(--background));
-      }
-      main { max-width: 920px; margin: 0 auto; padding: 56px 20px 80px; }
-      header { margin-bottom: 40px; }
-      nav { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
-      a { color: hsl(var(--primary)); }
-      nav a { border: 1px solid hsl(var(--border)); border-radius: 8px; padding: 8px 12px; text-decoration: none; background: hsl(var(--surface)); }
-      section { background: hsl(var(--surface)); border: 1px solid hsl(var(--border)); border-radius: 8px; padding: 28px; margin: 24px 0; }
-      h1 { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.1; margin: 0 0 12px; }
-      h2 { font-size: 1.65rem; margin: 0 0 18px; padding-bottom: 12px; border-bottom: 1px solid hsl(var(--border)); }
-      h3 { font-size: 1.05rem; margin: 24px 0 8px; }
-      p, li { color: hsl(var(--muted)); }
-      strong { color: hsl(var(--foreground)); }
-      .updated { color: hsl(var(--muted)); margin: 0; }
-    </style>
+    <style>body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65;color:#0f172a;background:#f8fafc}main{max-width:900px;margin:0 auto;padding:48px 20px 72px}section{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:28px;margin:24px 0}h1{font-size:2.6rem;line-height:1.1;margin:0 0 8px}h2{font-size:1.6rem;margin:0 0 16px}h3{font-size:1.1rem;margin:24px 0 8px}p,li{color:#475569}strong{color:#0f172a}a{color:#2563eb}nav{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0 32px}nav a{border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;background:#fff;text-decoration:none}</style>
   </head>
   <body>
     <main>
-      <header>
-        <h1>Legal Policies</h1>
-        <p class="updated">Last updated: June 2026</p>
-        <nav aria-label="Legal policy navigation">
-          <a href="#privacy-policy">Privacy Policy</a>
-          <a href="#terms-of-service">Terms of Service</a>
-          <a href="#refund-policy">Refund Policy</a>
-          <a href="/">Back to SSRA academy</a>
-        </nav>
-      </header>
+      <h1>Legal Policies</h1>
+      <p><strong>Last updated:</strong> June 2026</p>
+      <nav><a href="/privacy-policy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/refund-policy">Refund Policy</a><a href="/">Back to SSRA academy</a></nav>
 
       <section id="privacy-policy">
         <h2>Privacy Policy</h2>
         <h3>1. Data Controller</h3>
         <p><strong>SSRA academy</strong> is the data controller for personal data collected through our website, courses, applications, and support channels. Contact: <a href="mailto:info@ssracourses.com">info@ssracourses.com</a>.</p>
-
         <h3>2. Data We Collect</h3>
-        <ul>
-          <li>Account information, including name, email address, country, and login details.</li>
-          <li>Application and enrolment information, including academic background, German language level, course interest, and motivation statements.</li>
-          <li>Support and communication data, including messages you send to us.</li>
-          <li>Usage and technical data, including IP address, device information, browser type, pages visited, and security logs.</li>
-          <li>Payment-related checkout data is collected and processed by Paddle.com, our Merchant of Record. We do not store full payment card details.</li>
-        </ul>
-
+        <ul><li>Account information, including name, email address, country, and login details.</li><li>Application and enrolment information, including academic background, German language level, course interest, and motivation statements.</li><li>Support and communication data, including messages you send to us.</li><li>Usage and technical data, including IP address, device information, browser type, pages visited, and security logs.</li><li>Payment-related checkout data is collected and processed by Paddle.com, our Merchant of Record. We do not store full payment card details.</li></ul>
         <h3>3. Purposes and Legal Basis</h3>
         <p>We process personal data to create and manage accounts, provide course access, verify eligibility for restricted courses, deliver customer support, secure the platform, send transactional messages, comply with legal obligations, and improve our services. The legal bases include contract performance, legitimate interests, consent where required, and legal obligation.</p>
-
         <h3>4. Data Sharing</h3>
         <p>We share personal data only where necessary with the following recipients:</p>
-        <ul>
-          <li><strong>Paddle.com</strong> — our Merchant of Record for checkout, payment processing, subscription management, tax compliance, invoicing, customer service related to billing, and refund requests. Where applicable, Paddle uses appropriate international transfer safeguards, including EU Standard Contractual Clauses and the EU-US Data Privacy Framework.</li>
-          <li><strong>Hosting, database, email, analytics, and support service providers</strong> — to operate the website and provide our educational services.</li>
-          <li><strong>Professional advisers</strong> — such as legal, accounting, and tax advisers where required.</li>
-          <li><strong>Authorities</strong> — where required by law or to protect legal rights.</li>
-        </ul>
+        <ul><li><strong>Paddle.com</strong> — our Merchant of Record for checkout, payment processing, subscription management, tax compliance, invoicing, customer service related to billing, and refund requests. Where applicable, Paddle uses appropriate international transfer safeguards, including EU Standard Contractual Clauses and the EU-US Data Privacy Framework.</li><li>Hosting, database, email, analytics, and support service providers.</li><li>Professional advisers, including legal, accounting, and tax advisers where required.</li><li>Authorities where required by law or to protect legal rights.</li></ul>
         <p>We do not sell your personal data.</p>
-
         <h3>5. Retention</h3>
         <p>We retain personal data only for as long as needed for the purposes described above, including account operation, course access, legal, accounting, tax, security, and reporting obligations. When data is no longer needed, it is deleted or anonymised.</p>
-
         <h3>6. Your Rights</h3>
-        <p>Subject to applicable law, you may request access, rectification, erasure, restriction, portability, objection to processing, and withdrawal of consent. You may also lodge a complaint with a competent supervisory authority. Contact us at <a href="mailto:info@ssracourses.com">info@ssracourses.com</a> to exercise your rights.</p>
-
+        <p>Subject to applicable law, you may request access, rectification, erasure, restriction, portability, objection to processing, and withdrawal of consent. You may also lodge a complaint with a competent supervisory authority. Contact us at <a href="mailto:info@ssracourses.com">info@ssracourses.com</a>.</p>
         <h3>7. Security and Cookies</h3>
         <p>We use appropriate technical and organisational measures, including access controls, encryption in transit, and security monitoring. We use essential cookies for authentication, security, and service operation; analytics or marketing cookies are used only where permitted by law.</p>
       </section>
@@ -91,23 +38,17 @@
         <h2>Terms of Service</h2>
         <h3>1. Acceptance and Seller Identity</h3>
         <p>By accessing our website, creating an account, purchasing a course, or using our services, you agree to these Terms of Service. You are contracting with <strong>SSRA academy</strong>.</p>
-
         <h3>2. Services and Eligibility</h3>
         <p>SSRA academy provides online educational content, professional training materials, and career guidance resources for sports science graduates. You must provide accurate information and have authority to use or purchase the services.</p>
-
         <h3>3. Acceptable Use</h3>
         <p>You must not misuse the services, including unlawful use, fraud, spam, intellectual property infringement, sharing login credentials, attempting to bypass security, introducing malware, scraping, probing, or interfering with platform operation.</p>
-
         <h3>4. Intellectual Property</h3>
         <p>All course content, software, documentation, branding, videos, documents, exercises, and platform materials are owned by SSRA academy or its licensors. You receive a limited, personal, non-transferable licence to access purchased course content for your own educational use.</p>
-
         <h3>5. Payments, Subscriptions, and Paddle Merchant of Record Disclosure</h3>
         <p>Our order process is conducted by our online reseller <strong>Paddle.com</strong>. Paddle.com is the Merchant of Record for all our orders. Paddle processes payments, may appear on your bank or card statement, provides customer service inquiries related to billing, and handles returns and refunds.</p>
         <p>Payment, billing, tax, subscription renewal, cancellation, and refund mechanics are governed by Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer">Buyer Terms</a>. You may cancel a subscription through your account, by contacting us, or directly at <a href="https://paddle.net" target="_blank" rel="noopener noreferrer">paddle.net</a> using the email address used at checkout.</p>
-
         <h3>6. Service Availability and Suspension</h3>
         <p>We do not guarantee uninterrupted or error-free service. We may suspend or terminate access for material breach, non-payment, security or fraud risk, unlawful activity, or repeated or serious policy violations.</p>
-
         <h3>7. Liability and Governing Law</h3>
         <p>To the fullest extent permitted by law, SSRA academy is not liable for indirect losses, career outcomes, credential recognition decisions, external authority decisions, or interruptions beyond our reasonable control. These terms are governed by German law.</p>
       </section>
@@ -115,11 +56,9 @@
       <section id="refund-policy">
         <h2>Refund Policy</h2>
         <h3>1. 14-Day Money-Back Guarantee</h3>
-        <p>SSRA academy offers a <strong>14-day money-back guarantee</strong> on course purchases and the first billing period of a subscription. If you are not satisfied, you may request a full refund within 14 calendar days of your order date or first subscription charge.</p>
-
+        <p><strong>SSRA academy</strong> offers a <strong>14-day money-back guarantee</strong> on course purchases and the first billing period of a subscription. If you are not satisfied, you may request a full refund within 14 calendar days of your order date or first subscription charge.</p>
         <h3>2. How to Request a Refund</h3>
         <p>Refunds are handled by <strong>Paddle.com</strong>, our Merchant of Record. To request a refund, visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer">paddle.net</a> and use the email address from checkout so Paddle can locate your order. You may also contact us at <a href="mailto:info@ssracourses.com">info@ssracourses.com</a> with the subject “Refund Request” and your order number, and we will help route the request to Paddle.</p>
-
         <h3>3. Cancellations</h3>
         <p>You may cancel subscriptions at any time. After cancellation, access normally remains active until the end of the current paid billing period. Refund and cancellation handling is subject to Paddle's Refund Policy and Buyer Terms.</p>
       </section>
