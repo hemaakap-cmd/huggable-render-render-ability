@@ -167,13 +167,13 @@ export default function SuperAdminAdmins() {
           )}
         </div>
 
-        {/* Promote a student */}
+        {/* Promote a user */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100">
             <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-              <Crown className="w-4 h-4 text-[hsl(43,96%,50%)]" /> Promote a Student
+              <Crown className="w-4 h-4 text-[hsl(43,96%,50%)]" /> Promote a User
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">Search for a registered student to grant admin or super admin access.</p>
+            <p className="text-xs text-slate-400 mt-0.5">Search any registered user to grant Instructor, Admin or Super Admin access.</p>
           </div>
 
           <div className="px-5 py-4 space-y-4">
@@ -200,7 +200,14 @@ export default function SuperAdminAdmins() {
                           <div className="text-xs text-slate-400 truncate">{u.email}</div>
                         </div>
                         <RoleBadge role={u.role as Role} />
-                        <div className="flex gap-2 shrink-0">
+                        <div className="flex gap-2 shrink-0 flex-wrap justify-end">
+                          {u.role !== "instructor" && u.role !== "admin" && u.role !== "super_admin" && (
+                            <button
+                              onClick={() => setConfirm({ userId: u.id, name: u.full_name ?? u.email, from: u.role, to: "instructor" })}
+                              className="text-xs font-semibold text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg hover:bg-emerald-50 transition-colors">
+                              → Instructor
+                            </button>
+                          )}
                           {u.role !== "admin" && u.role !== "super_admin" && (
                             <button
                               onClick={() => setConfirm({ userId: u.id, name: u.full_name ?? u.email, from: u.role, to: "admin" })}
