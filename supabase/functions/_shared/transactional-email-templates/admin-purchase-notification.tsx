@@ -21,6 +21,9 @@ const Email = ({ studentName, studentEmail, courseName, orderNumber, amountPaid,
     <Preview>New purchase: {courseName ?? 'course'} · {amountPaid ?? ''}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={{ textAlign: 'center', marginBottom: '12px' }}>
+          <Img src={LOGO_URL} width="48" height="48" alt={SITE_NAME} style={{ display: 'block', margin: '0 auto', borderRadius: '10px' }} />
+        </Section>
         <Section style={header}>
           <Heading style={h1}>💰 New purchase</Heading>
           <Text style={subhead}>A student just enrolled on {SITE_NAME}.</Text>
