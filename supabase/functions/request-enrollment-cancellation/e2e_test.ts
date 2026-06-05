@@ -35,20 +35,20 @@ const CREATED_COURSE_IDS: string[] = [];
 
 // ---------- helpers ----------
 
-async function ensureCourse() {
-  const { error } = await admin.from("ssra_courses").upsert(
-    {
-      id: COURSE_ID,
-      title: "E2E Cancellation Course",
-      price_eur: 100,
-      course_type: "one_time",
-      category: "clinical",
-      is_active: false,
-      sort_order: 999,
-    } as any,
-    { onConflict: "id" },
-  );
-  if (error) throw new Error(`ensureCourse failed: ${error.message}`);
+async function createCourse(): Promise<string> {
+  const id = `${COURSE_PREFIX}${crypto.randomUUID().slice(0, 8)}`;
+  const { error } = await admin.from("ssra_courses").insert({
+    id,
+    title: "E2E Cancellation Course",
+    price_eur: 100,
+    course_type: "one_time",
+    category: "clinical",
+    is_active: false,
+    sort_order: 999,
+  } as any);
+  if (error) throw new Error(`createCourse failed: ${error.message}`);
+  CREATED_COURSE_IDS.push(id);
+  return id;
 }
 
 async function createUser(email: string, role: "student" | "admin") {
