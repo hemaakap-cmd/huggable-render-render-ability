@@ -42,7 +42,7 @@ export default function PrivacyPolicy() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">1. Introduction</h2>
               </div>
               <p className="text-slate-600 leading-relaxed">
-                SSRA Academy ("we", "our", "us") respects your privacy and is committed to protecting your personal data. This privacy policy will inform you about how we look after your personal data when you visit our website or use our services and tell you about your privacy rights and how the law protects you.
+                SSRA Academy ("we", "our", "us"), owned and operated by Ibrahim Elatir, is the data controller for personal data collected through our website and services. This privacy policy explains how we look after your personal data, what we share with our service providers (including Paddle.com, our Merchant of Record for payments), and what your privacy rights are under applicable law.
               </p>
             </div>
 
