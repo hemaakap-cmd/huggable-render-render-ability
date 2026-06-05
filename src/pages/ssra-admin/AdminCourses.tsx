@@ -328,6 +328,22 @@ export default function AdminCourses() {
                 </div>
               </div>
 
+              {/* Slug / ID */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  Course ID (slug) {!form.id ? "*" : <span className="text-slate-400 normal-case font-normal">— locked after creation</span>}
+                </label>
+                <input
+                  required={!form.id}
+                  disabled={Boolean(form.id) && Boolean((form as any)._existing)}
+                  value={form.id as string}
+                  onChange={(e) => field("id", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                  placeholder="e.g. medical-german"
+                  className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] disabled:bg-slate-50 disabled:text-slate-500"
+                />
+                <p className="text-xs text-slate-400 mt-1">Used in the public URL: /courses/&lt;id&gt;</p>
+              </div>
+
               {/* Titles */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
