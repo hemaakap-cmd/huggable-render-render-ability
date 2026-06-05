@@ -198,7 +198,6 @@ export default function AdminBatches() {
                 </tbody>
               </table>
             </div>
-            </div>
           );})
         )}
       </div>
