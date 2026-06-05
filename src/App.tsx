@@ -11,6 +11,7 @@ import { useSsraAuth } from "./hooks/useSsraAuth";
 import { useVisitorTracker } from "./hooks/useVisitorTracker";
 import Index from "./pages/Index";
 import WhatsAppButton from "./components/ssra/WhatsAppButton";
+import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
 
 /* ── Public ── */
 const Courses         = lazy(() => import("./pages/Courses"));
@@ -145,6 +146,7 @@ function AppInner() {
 
   return (
     <>
+      <PaymentTestModeBanner />
       <Suspense fallback={<Spinner />}>
         <Routes>
                 {/* Public marketing */}
