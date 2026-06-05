@@ -59,8 +59,23 @@ function EditLinkForm({ session, onClose }: { session: any; onClose: () => void 
   const update = useUpdateSessionLink();
 
   const save = async () => {
-    if (!link.trim()) return;
-    await update.mutateAsync({ id: session.id, zoom_link: link.trim(), zoom_password: pass.trim() });
+    const raw = link.trim();
+    if (!raw) return;
+    // Extract first http(s) URL from the input (handles pasted Zoom invite text)
+    const match = raw.match(/https?:\/\/[^\s<>"']+/i);
+    const url = match ? match[0] : raw;
+    try {
+      const parsed = new URL(url);
+      if (!/^https?:$/.test(parsed.protocol)) throw new Error("bad protocol");
+    } catch {
+      toast({
+        title: "Invalid Zoom link",
+        description: "Paste a full URL starting with https:// (e.g. https://zoom.us/j/...)",
+        variant: "destructive",
+      });
+      return;
+    }
+    await update.mutateAsync({ id: session.id, zoom_link: url, zoom_password: pass.trim() });
     toast({ title: "Zoom link updated" });
     onClose();
   };
