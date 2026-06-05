@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { BookOpen, CreditCard, Clock, ArrowRight, Crown, Video, Calendar, Bell } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMyEnrollments, useMySubscription, useMyProfile, useMyUpcomingSessions } from "@/hooks/useSsraData";
+import { useSsraAuth } from "@/hooks/useSsraAuth";
 
 function useCountdown(target: string | null) {
   const [ms, setMs] = useState(() => (target ? new Date(target).getTime() - Date.now() : 0));
