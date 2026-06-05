@@ -6,7 +6,7 @@ import {
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
   GraduationCap, GitBranch, Wand2, Radio, FileCheck, Tag, ShieldAlert,
   FileSpreadsheet, GraduationCap as InstructorIcon, Layers, BookCheck,
-  AlertOctagon, HeartPulse, BarChart3,
+  AlertOctagon, HeartPulse, BarChart3, Award,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
@@ -29,6 +29,7 @@ const ADMIN_NAV = [
   { icon: BookCheck,        label: "Homework",         href: "/ssra-admin/homework" },
   { icon: AlertOctagon,     label: "Fraud Flags",      href: "/ssra-admin/fraud" },
   { icon: HeartPulse,       label: "System Health",    href: "/ssra-admin/system-health" },
+  { icon: Award,            label: "Certificates",     href: "/ssra-admin/certificates" },
 ];
 
 const SUPER_NAV = [
