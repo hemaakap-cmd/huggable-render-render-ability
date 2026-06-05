@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Crown, UserCog, Search, Shield, ShieldCheck, User, GraduationCap, AlertTriangle, Check } from "lucide-react";
+import { Crown, UserCog, Search, Shield, ShieldCheck, User, GraduationCap, AlertTriangle, Check, Mail, Send, Loader2 } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminUsers, useSearchStudents, useSetUserRole } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 type Role = "student" | "instructor" | "admin" | "super_admin";
 
@@ -79,6 +80,12 @@ export default function SuperAdminAdmins() {
   const [confirm, setConfirm] = useState<{ userId: string; name: string; from: Role; to: Role } | null>(null);
   const { toast } = useToast();
 
+  // Invite-by-email form state
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName,  setInviteName]  = useState("");
+  const [inviteRole,  setInviteRole]  = useState<"admin" | "instructor">("instructor");
+  const [inviting,    setInviting]    = useState(false);
+
   const { data: admins = [], isLoading: adminsLoading } = useAdminUsers();
   const { data: searchResults = [] }                    = useSearchStudents(search);
   const setRole = useSetUserRole();
@@ -96,6 +103,38 @@ export default function SuperAdminAdmins() {
     setSearch("");
   }
 
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+    setInviting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-invite-user", {
+        body: {
+          email: inviteEmail.trim().toLowerCase(),
+          full_name: inviteName.trim() || null,
+          role: inviteRole,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      toast({
+        title: (data as any)?.invited ? "Invite sent ✉️" : "Role assigned",
+        description: (data as any)?.message ?? `${inviteEmail} is now ${ROLE_CONFIG[inviteRole].label}.`,
+      });
+      setInviteEmail("");
+      setInviteName("");
+    } catch (err: any) {
+      toast({
+        title: "Could not invite user",
+        description: err?.message ?? "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setInviting(false);
+    }
+  }
+
   return (
     <AdminLayout>
       <div className="max-w-4xl mx-auto space-y-6">
@@ -109,6 +148,68 @@ export default function SuperAdminAdmins() {
             <p className="text-slate-500 text-sm">Promote or demote admins, instructors and super admins — Super Admin only.</p>
           </div>
         </div>
+
+        {/* Invite by email — direct add */}
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100">
+            <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+              <Mail className="w-4 h-4 text-[hsl(220,91%,54%)]" /> Invite by Email
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Enter an email and assign a role. The user receives a confirmation link to set their password and sign in.
+            </p>
+          </div>
+
+          <form onSubmit={handleInvite} className="px-5 py-4 grid gap-3 md:grid-cols-[1fr_220px_140px_auto]">
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase tracking-wide font-semibold text-slate-500">Email *</label>
+              <input
+                type="email"
+                required
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                disabled={inviting}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase tracking-wide font-semibold text-slate-500">Full name</label>
+              <input
+                type="text"
+                value={inviteName}
+                onChange={(e) => setInviteName(e.target.value)}
+                placeholder="Optional"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                disabled={inviting}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase tracking-wide font-semibold text-slate-500">Role</label>
+              <select
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.target.value as "admin" | "instructor")}
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                disabled={inviting}
+              >
+                <option value="instructor">Instructor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                disabled={inviting || !inviteEmail.trim()}
+                className="h-10 w-full md:w-auto px-4 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[hsl(220,91%,46%)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {inviting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {inviting ? "Sending…" : "Send invite"}
+              </button>
+            </div>
+          </form>
+        </div>
+
+
 
         {/* Current team */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
