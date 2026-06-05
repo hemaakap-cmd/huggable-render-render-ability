@@ -4,6 +4,7 @@ import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/stripe";
+import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
@@ -87,27 +88,35 @@ export default function Checkout() {
     if (!course || !user) return;
     setLoading(true);
     try {
-      // If course has a direct Stripe payment link, redirect to it (test/legacy flow)
-      if (course.paymentLink) {
-        const url = new URL(course.paymentLink);
-        if (user.email) url.searchParams.set("prefilled_email", user.email);
-        window.location.href = url.toString();
-        return;
-      }
-
-      const origin = window.location.origin;
-      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+      // 1. Validate + create pending enrollment server-side
+      const { data, error } = await supabase.functions.invoke("paddle-prepare-checkout", {
         body: {
-          courseId:   course.id,
-          successUrl: `${origin}/payment-success?courseId=${course.id}&session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl:  `${origin}/checkout?courseId=${course.id}`,
-          metadata:   getUtmMeta(),
+          courseId: course.id,
+          metadata: getUtmMeta(),
           ...(couponApplied ? { couponCode: couponApplied.code } : {}),
         },
       });
       if (error) throw new Error(error.message);
-      if (data?.url) { window.location.href = data.url; }
-      else throw new Error("No checkout URL returned.");
+      if (!data?.paddlePriceId) throw new Error("Could not prepare checkout.");
+
+      // 2. Resolve external price id -> Paddle internal id
+      await initializePaddle();
+      const paddlePriceId = await getPaddlePriceId(data.paddlePriceId);
+
+      // 3. Open Paddle overlay
+      window.Paddle.Checkout.open({
+        items: [{ priceId: paddlePriceId, quantity: 1 }],
+        customer: data.customerEmail ? { email: data.customerEmail } : undefined,
+        customData: data.customData,
+        settings: {
+          displayMode: "overlay",
+          successUrl: `${window.location.origin}/payment-success?courseId=${course.id}`,
+          allowLogout: false,
+          variant: "one-page",
+        },
+      });
+      // Paddle takes over; reset our spinner so the page is responsive when the overlay closes.
+      setTimeout(() => setLoading(false), 1500);
     } catch (err: unknown) {
       toast({ title: "Payment error", description: (err as Error).message, variant: "destructive" });
       setLoading(false);
@@ -284,8 +293,8 @@ export default function Checkout() {
                 <button type="submit" disabled={loading}
                   className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Stripe…</>
-                    : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{couponApplied
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening secure checkout…</>
+                    : <><CreditCard className="w-4 h-4" /> Pay €{couponApplied
                         ? Math.max(0, course.price - couponApplied.finalDiscount).toFixed(2)
                         : course.price}{course.type === "subscription" ? "/mo" : ""}</>
                   }
