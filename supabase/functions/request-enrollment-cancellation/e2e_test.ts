@@ -137,8 +137,6 @@ async function cleanupUser(userId: string) {
 // ---------- tests ----------
 
 Deno.test("E2E cancellation flow", async (t) => {
-  await ensureCourse();
-
   const stamp = Date.now();
   const student = await createUser(`student+${stamp}@e2e.test`, "student");
   const adminUser = await createUser(`admin+${stamp}@e2e.test`, "admin");
@@ -149,8 +147,10 @@ Deno.test("E2E cancellation flow", async (t) => {
 
     // ------- 1. request rejected outside 14-day window -------
     await t.step("rejects request outside 14-day window", async () => {
+      const courseId = await createCourse();
       const oldEnrollment = await createEnrollment({
         userId: student.userId,
+        courseId,
         paidDaysAgo: 20,
       });
       const res = await callFn("request-enrollment-cancellation", studentToken, {
@@ -162,8 +162,10 @@ Deno.test("E2E cancellation flow", async (t) => {
     });
 
     // ------- 2. valid request creates pending row -------
+    const mainCourseId = await createCourse();
     const enrollmentId = await createEnrollment({
       userId: student.userId,
+      courseId: mainCourseId,
       paidDaysAgo: 2,
     });
     let requestId = "";
@@ -182,9 +184,9 @@ Deno.test("E2E cancellation flow", async (t) => {
         .select("status, user_id, course_id")
         .eq("id", requestId)
         .single();
-      assertEquals(row?.status, "pending");
-      assertEquals(row?.user_id, student.userId);
-      assertEquals(row?.course_id, COURSE_ID);
+      assertEquals((row as any)?.status, "pending");
+      assertEquals((row as any)?.user_id, student.userId);
+      assertEquals((row as any)?.course_id, mainCourseId);
     });
 
     // ------- 3. duplicate pending request is blocked -------
@@ -222,15 +224,15 @@ Deno.test("E2E cancellation flow", async (t) => {
         .select("status, reviewed_by")
         .eq("id", requestId)
         .single();
-      assertEquals(row?.status, "approved");
-      assertEquals(row?.reviewed_by, adminUser.userId);
+      assertEquals((row as any)?.status, "approved");
+      assertEquals((row as any)?.reviewed_by, adminUser.userId);
 
       const { data: enr } = await admin
         .from("ssra_enrollments")
         .select("status")
         .eq("id", enrollmentId)
         .single();
-      assertEquals(enr?.status, "cancelled");
+      assertEquals((enr as any)?.status, "cancelled");
     });
 
     // ------- 6. Paddle webhook flips status to `refunded` -------
@@ -238,10 +240,9 @@ Deno.test("E2E cancellation flow", async (t) => {
       const fakeAdjustmentId = `adj_e2e_${crypto.randomUUID()}`;
       await admin
         .from("ssra_cancellation_requests")
-        .update({ paddle_adjustment_id: fakeAdjustmentId })
+        .update({ paddle_adjustment_id: fakeAdjustmentId } as any)
         .eq("id", requestId);
 
-      // Simulate the verified Paddle event payload.
       await handleAdjustmentEvent(
         { id: fakeAdjustmentId, status: "approved" },
         "sandbox",
@@ -252,7 +253,7 @@ Deno.test("E2E cancellation flow", async (t) => {
         .select("status")
         .eq("id", requestId)
         .single();
-      assertEquals(row?.status, "refunded");
+      assertEquals((row as any)?.status, "refunded");
 
       // Idempotent: re-delivering the webhook is a no-op.
       await handleAdjustmentEvent(
@@ -264,13 +265,15 @@ Deno.test("E2E cancellation flow", async (t) => {
         .select("status")
         .eq("id", requestId)
         .single();
-      assertEquals(row2?.status, "refunded");
+      assertEquals((row2 as any)?.status, "refunded");
     });
 
     // ------- 7. reject path on a fresh request -------
     await t.step("admin can reject a separate request", async () => {
+      const rejectCourseId = await createCourse();
       const enr2 = await createEnrollment({
         userId: student.userId,
+        courseId: rejectCourseId,
         paidDaysAgo: 1,
       });
       const reqRes = await callFn(
@@ -294,11 +297,13 @@ Deno.test("E2E cancellation flow", async (t) => {
         .select("status")
         .eq("id", rejectId)
         .single();
-      assertEquals(row?.status, "rejected");
+      assertEquals((row as any)?.status, "rejected");
     });
   } finally {
     await cleanupUser(student.userId).catch(() => {});
     await cleanupUser(adminUser.userId).catch(() => {});
-    try { await admin.from("ssra_courses").delete().eq("id", COURSE_ID); } catch { /* noop */ }
+    if (CREATED_COURSE_IDS.length > 0) {
+      try { await admin.from("ssra_courses").delete().in("id", CREATED_COURSE_IDS); } catch { /* noop */ }
+    }
   }
 });
