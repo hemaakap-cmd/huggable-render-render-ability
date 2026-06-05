@@ -46,7 +46,7 @@ export default function TermsConditions() {
                   By accessing or using the SSRA Academy website and services, you agree to be bound by these Terms and Conditions and all applicable laws and regulations. You are contracting with SSRA academy. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
                 </p>
                 <p>
-                  SSRA Academy provides online educational content and resources designed for sports science graduates preparing for careers abroad. Our services include language courses, professional training materials, and career guidance resources.
+                  SSRA academy provides online educational content and resources designed for sports science graduates preparing for careers abroad. Our services include language courses, professional training materials, and career guidance resources.
                 </p>
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function TermsConditions() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">4. Payment & Subscriptions</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>SSRA Academy offers both one-time course purchases and paid subscription plans. By completing a purchase or selecting a paid subscription, you agree to pay all fees associated with the plan you select.</p>
+                <p>SSRA academy offers both one-time course purchases and paid subscription plans. By completing a purchase or selecting a paid subscription, you agree to pay all fees associated with the plan you select.</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders, processes payments, may appear on your bank or card statement, provides billing customer service, and handles returns and refunds.</li>
                   <li>Subscription fees are billed in advance on a monthly or annual basis depending on your selected plan.</li>
@@ -178,7 +178,7 @@ export default function TermsConditions() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">8. Changes to Terms</h2>
               </div>
               <p className="text-slate-600 leading-relaxed">
-                SSRA Academy reserves the right, at its sole discretion, to modify or replace these terms at any time. If a revision is material, we will try to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
+                SSRA academy reserves the right, at its sole discretion, to modify or replace these terms at any time. If a revision is material, we will try to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
               </p>
             </div>
 
