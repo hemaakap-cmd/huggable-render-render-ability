@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /ssra-admin
 Disallow: /dashboard
-Sitemap: https://ssra-academy.de/sitemap.xml
+Sitemap: https://ssracourses.com/sitemap.xml
