@@ -8,7 +8,8 @@
 // the exported `handleAdjustmentEvent` handler directly, bypassing Paddle
 // signature verification (which is covered by the SDK itself).
 
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import { load } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
+await load({ export: true, allowEmptyValues: true, examplePath: null });
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { handleAdjustmentEvent } from "../payments-webhook/handlers.ts";
