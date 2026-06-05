@@ -94,6 +94,14 @@ export default function AdminCourses() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const isNew = !form.id || !String(form.id).trim();
+    if (isNew) {
+      const slug = String(form.id || "").trim().toLowerCase();
+      if (!/^[a-z0-9][a-z0-9-]{1,60}$/.test(slug)) {
+        toast({ title: "Invalid Course ID", description: "Use lowercase letters, numbers, and hyphens only (e.g. medical-german).", variant: "destructive" });
+        return;
+      }
+    }
     const missing = missingSchedule(form);
     const saveAsDraft = Boolean(form.is_active && missing.length > 0);
     setSaving(true);
@@ -109,9 +117,10 @@ export default function AdminCourses() {
         start_date: form.start_date || null,
         start_time: form.start_time || null,
         duration: form.duration || null,
+        duration_weeks: form.duration_weeks || null,
         instructor_name: form.instructor_name || null,
         course_format: normalizeCourseFormat(form.course_format) || null,
-        id: form.id || undefined,
+        id: isNew ? String(form.id).trim().toLowerCase() : form.id,
       };
       await upsert.mutateAsync(payload);
       toast({
