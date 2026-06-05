@@ -84,6 +84,7 @@ async function signIn(email: string, password: string) {
 
 async function createEnrollment(opts: {
   userId: string;
+  courseId: string;
   paidDaysAgo: number;
   status?: string;
 }) {
@@ -94,7 +95,7 @@ async function createEnrollment(opts: {
     .from("ssra_enrollments")
     .insert({
       user_id: opts.userId,
-      course_id: COURSE_ID,
+      course_id: opts.courseId,
       status: opts.status ?? "active",
       paid_at: paidAt,
       enrolled_at: paidAt,
@@ -102,7 +103,7 @@ async function createEnrollment(opts: {
       course_title_snapshot: "E2E Cancellation Course",
       student_name_snapshot: "E2E Tester",
       student_email_snapshot: "e2e@example.com",
-    })
+    } as any)
     .select("id")
     .single();
   if (error) throw error;
