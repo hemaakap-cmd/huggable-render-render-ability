@@ -2,7 +2,6 @@ import { corsHeaders } from "../_shared/cors.ts";
 
 const REPO_CANDIDATES = [
   "hemaakap-cmd/huggable-render-render-ability",
-  "hemaakap-cmd/ssra-academy",
 ];
 
 Deno.serve(async (req: Request) => {
