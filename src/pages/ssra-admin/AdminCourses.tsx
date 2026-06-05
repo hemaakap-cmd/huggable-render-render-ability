@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
@@ -233,10 +234,19 @@ export default function AdminCourses() {
                       </button>
                     </td>
                     <td className="px-4 py-3.5 text-right">
-                      <button onClick={() => openEdit(c)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-                        <Edit2 className="w-3.5 h-3.5" /> Edit
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Link
+                          to={`/ssra-admin/sessions?course=${c.id}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:bg-slate-100 transition-colors"
+                          title="Manage sessions for this course"
+                        >
+                          <Video className="w-3.5 h-3.5" /> Sessions
+                        </Link>
+                        <button onClick={() => openEdit(c)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                          <Edit2 className="w-3.5 h-3.5" /> Edit
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

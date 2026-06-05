@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Video, Plus, Trash2, Edit2, ExternalLink, Calendar, Clock, Users } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminSessions, useUpsertSession, useDeleteSession, useAdminCourses } from "@/hooks/useSsraData";
@@ -24,9 +25,11 @@ export default function AdminSessions() {
   const remove                             = useDeleteSession();
   const { toast }                          = useToast();
 
-  const [open, setOpen]   = useState(false);
-  const [form, setForm]   = useState({ ...EMPTY });
+  const [searchParams] = useSearchParams();
+  const [open, setOpen]     = useState(false);
+  const [form, setForm]     = useState({ ...EMPTY });
   const [saving, setSaving] = useState(false);
+  const [filterCourse, setFilterCourse] = useState(searchParams.get("course") ?? "");
 
   function openNew() { setForm({ ...EMPTY }); setOpen(true); }
   function openEdit(s: any) {
@@ -77,8 +80,9 @@ export default function AdminSessions() {
   }
 
   const now = new Date();
-  const upcoming = (sessions as any[]).filter(s => new Date(s.scheduled_at) >= now && !s.is_cancelled);
-  const past     = (sessions as any[]).filter(s => new Date(s.scheduled_at) < now || s.is_cancelled);
+  const filtered  = filterCourse ? (sessions as any[]).filter(s => s.course_id === filterCourse) : (sessions as any[]);
+  const upcoming  = filtered.filter(s => new Date(s.scheduled_at) >= now && !s.is_cancelled);
+  const past      = filtered.filter(s => new Date(s.scheduled_at) < now || s.is_cancelled);
 
   return (
     <AdminLayout>
@@ -88,10 +92,22 @@ export default function AdminSessions() {
             <h1 className="font-display text-2xl font-bold text-slate-900">Zoom Sessions</h1>
             <p className="text-slate-500 text-sm mt-1">Schedule and manage live Zoom classes for Medical German and other courses.</p>
           </div>
-          <button onClick={openNew}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors">
-            <Plus className="w-4 h-4" /> New Session
-          </button>
+          <div className="flex items-center gap-3">
+            <select
+              value={filterCourse}
+              onChange={(e) => setFilterCourse(e.target.value)}
+              className="h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 bg-white"
+            >
+              <option value="">All courses</option>
+              {(courses as any[]).map((c: any) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+            <button onClick={openNew}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors">
+              <Plus className="w-4 h-4" /> New Session
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
