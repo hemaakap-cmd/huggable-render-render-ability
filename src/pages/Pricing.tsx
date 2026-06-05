@@ -165,7 +165,7 @@ export default function Pricing() {
             You Actually Need
           </h1>
           <p className="text-white/55 text-lg max-w-xl mx-auto mb-8">
-            One subscription for German language. Individual one-time payments for clinical and career courses. All secured by Stripe.
+            One subscription for German language. Individual one-time payments for clinical and career courses. All orders processed by Paddle.com, our Merchant of Record.
           </p>
           <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/8 border border-white/12 text-white/60 text-sm">
             <CreditCard className="w-4 h-4" />
