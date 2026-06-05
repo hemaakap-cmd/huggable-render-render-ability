@@ -41,7 +41,7 @@ export default function Legal() {
             <ul className="list-disc pl-5 space-y-1">
               <li>Account information: name, email address, country, academic degree</li>
               <li>Application data: German language level, course interest, motivation statement</li>
-              <li>Payment data: processed exclusively by Stripe — we do not store card details</li>
+              <li>Payment data: processed exclusively by Paddle.com (our Merchant of Record) — we do not store card details</li>
               <li>Usage data: session logs, page visits (anonymised)</li>
             </ul>
 
