@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Crown, UserCog, Search, Shield, ShieldCheck, User, AlertTriangle, Check } from "lucide-react";
+import { Crown, UserCog, Search, Shield, ShieldCheck, User, GraduationCap, AlertTriangle, Check } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminUsers, useSearchStudents, useSetUserRole } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
 
-type Role = "student" | "admin" | "super_admin";
+type Role = "student" | "instructor" | "admin" | "super_admin";
 
 const ROLE_CONFIG: Record<Role, { label: string; color: string; icon: React.ElementType }> = {
-  student:     { label: "Student",     color: "bg-slate-100 text-slate-600 border-slate-200",       icon: User },
-  admin:       { label: "Admin",       color: "bg-blue-50 text-[hsl(220,91%,54%)] border-blue-200", icon: Shield },
+  student:     { label: "Student",     color: "bg-slate-100 text-slate-600 border-slate-200",        icon: User },
+  instructor:  { label: "Instructor",  color: "bg-emerald-50 text-emerald-700 border-emerald-200",   icon: GraduationCap },
+  admin:       { label: "Admin",       color: "bg-blue-50 text-[hsl(220,91%,54%)] border-blue-200",  icon: Shield },
   super_admin: { label: "Super Admin", color: "bg-amber-50 text-amber-700 border-amber-200",         icon: Crown },
 };
 
@@ -104,16 +105,16 @@ export default function SuperAdminAdmins() {
             <UserCog className="w-5 h-5 text-[hsl(43,96%,50%)]" />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold text-slate-900">Admin Management</h1>
-            <p className="text-slate-500 text-sm">Promote or demote users — Super Admin only.</p>
+            <h1 className="font-display text-2xl font-bold text-slate-900">Team Management</h1>
+            <p className="text-slate-500 text-sm">Promote or demote admins, instructors and super admins — Super Admin only.</p>
           </div>
         </div>
 
-        {/* Current Admins */}
+        {/* Current team */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[hsl(220,91%,54%)]" /> Current Admins & Super Admins
+              <ShieldCheck className="w-4 h-4 text-[hsl(220,91%,54%)]" /> Current Admins, Instructors & Super Admins
             </h2>
             <span className="text-xs text-slate-400">{(admins as any[]).length} total</span>
           </div>
@@ -125,14 +126,17 @@ export default function SuperAdminAdmins() {
           ) : (
             <div className="divide-y divide-slate-50">
               {(admins as any[]).map((u: any) => {
-                const isSelf    = u.id === profile?.id;
-                const isSuper   = u.role === "super_admin";
-                const canDemote = !isSelf && !(isSuper && !isSuperAdmin);
+                const isSelf       = u.id === profile?.id;
+                const isSuper      = u.role === "super_admin";
+                const isInstructor = u.role === "instructor";
+                const canDemote    = !isSelf && !(isSuper && !isSuperAdmin);
 
                 return (
                   <div key={u.id} className="flex items-center gap-4 px-5 py-3.5">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                      isSuper ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-[hsl(220,91%,54%)]"
+                      isSuper      ? "bg-amber-100 text-amber-700" :
+                      isInstructor ? "bg-emerald-100 text-emerald-700" :
+                                     "bg-blue-100 text-[hsl(220,91%,54%)]"
                     }`}>
                       {u.full_name?.[0] ?? u.email?.[0] ?? "?"}
                     </div>
@@ -163,13 +167,13 @@ export default function SuperAdminAdmins() {
           )}
         </div>
 
-        {/* Promote a student */}
+        {/* Promote a user */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100">
             <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-              <Crown className="w-4 h-4 text-[hsl(43,96%,50%)]" /> Promote a Student
+              <Crown className="w-4 h-4 text-[hsl(43,96%,50%)]" /> Promote a User
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">Search for a registered student to grant admin or super admin access.</p>
+            <p className="text-xs text-slate-400 mt-0.5">Search any registered user to grant Instructor, Admin or Super Admin access.</p>
           </div>
 
           <div className="px-5 py-4 space-y-4">
@@ -196,7 +200,14 @@ export default function SuperAdminAdmins() {
                           <div className="text-xs text-slate-400 truncate">{u.email}</div>
                         </div>
                         <RoleBadge role={u.role as Role} />
-                        <div className="flex gap-2 shrink-0">
+                        <div className="flex gap-2 shrink-0 flex-wrap justify-end">
+                          {u.role !== "instructor" && u.role !== "admin" && u.role !== "super_admin" && (
+                            <button
+                              onClick={() => setConfirm({ userId: u.id, name: u.full_name ?? u.email, from: u.role, to: "instructor" })}
+                              className="text-xs font-semibold text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg hover:bg-emerald-50 transition-colors">
+                              → Instructor
+                            </button>
+                          )}
                           {u.role !== "admin" && u.role !== "super_admin" && (
                             <button
                               onClick={() => setConfirm({ userId: u.id, name: u.full_name ?? u.email, from: u.role, to: "admin" })}
