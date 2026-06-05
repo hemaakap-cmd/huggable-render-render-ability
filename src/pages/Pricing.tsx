@@ -146,9 +146,23 @@ export default function Pricing() {
         <title>Pricing — SSRA Academy</title>
         <meta name="description" content="Transparent pricing for all SSRA Academy courses. Medical German subscription from €19/month. One-time clinical and career courses from €29–€79." />
         <link rel="canonical" href="https://ssracourses.com/pricing" />
+        <meta property="og:title" content="Pricing — SSRA Academy" />
+        <meta property="og:description" content="Transparent pricing for SSRA Academy. Medical German from €19/month and clinical/career courses from €29–€79." />
+        <meta property="og:url" content="https://ssracourses.com/pricing" />
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "Why does the German language course require verification?", acceptedAnswer: { "@type": "Answer", text: "We keep it exclusively for sports science graduates and students to ensure the community stays relevant and the content serves real needs." } },
+            { "@type": "Question", name: "Can I pay from Egypt, Morocco, or Syria?", acceptedAnswer: { "@type": "Answer", text: "Yes — Paddle accepts cards and payment methods from virtually every country. If you have a Visa or Mastercard, you can enrol." } },
+            { "@type": "Question", name: "How do I cancel my subscription?", acceptedAnswer: { "@type": "Answer", text: "Visit paddle.net and enter the email you used at checkout. You can cancel in one click — no questions asked. We also offer a 14-day money-back guarantee." } },
+            { "@type": "Question", name: "Are there scholarships for students who cannot afford fees?", acceptedAnswer: { "@type": "Answer", text: "Yes — mention your situation in the application form. We review every case and offer full or partial waivers for demonstrated financial need." } },
+            { "@type": "Question", name: "Do I get a certificate?", acceptedAnswer: { "@type": "Answer", text: "Yes, every completed course includes a digital SSRA certificate of completion." } },
+          ],
+        })}</script>
       </Helmet>
       <Header />
 
