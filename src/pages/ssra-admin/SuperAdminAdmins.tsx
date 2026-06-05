@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Crown, UserCog, Search, Shield, ShieldCheck, User, GraduationCap, AlertTriangle, Check } from "lucide-react";
+import { Crown, UserCog, Search, Shield, ShieldCheck, User, GraduationCap, AlertTriangle, Check, Mail, Send, Loader2 } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminUsers, useSearchStudents, useSetUserRole } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 type Role = "student" | "instructor" | "admin" | "super_admin";
 
