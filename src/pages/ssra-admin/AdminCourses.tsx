@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video } from "lucide-react";
+import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video, AlertTriangle } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
@@ -167,6 +167,25 @@ export default function AdminCourses() {
           </button>
         </div>
 
+        {(() => {
+          const incomplete = (courses as any[]).filter(c => c.is_active && (!c.start_date || !c.start_time || !c.instructor_name || !c.course_format || !c.duration));
+          if (incomplete.length === 0) return null;
+          return (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <div className="font-semibold text-amber-900">
+                  {incomplete.length} كورس منشور ناقص بيانات حرجة
+                </div>
+                <div className="text-amber-700 mt-1">
+                  المفقود عادةً: تاريخ البداية، وقت البداية، اسم المدرس، نوع التقديم، أو المدة. اضغط Edit على أي صف بـ <span className="inline-flex items-center gap-1 font-semibold">⚠️</span> لاستكماله.
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           {isLoading ? (
             <div className="text-center py-16 text-slate-400 text-sm">Loading…</div>
@@ -199,9 +218,17 @@ export default function AdminCourses() {
                           </div>
                         )}
                         <div>
-                          <div className="font-medium text-slate-800">{c.title}</div>
+                          <div className="font-medium text-slate-800 flex items-center gap-1.5">
+                            {c.title}
+                            {c.is_active && (!c.start_date || !c.start_time || !c.instructor_name || !c.course_format || !c.duration) && (
+                              <span title="Missing required fields" className="text-amber-600">
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                              </span>
+                            )}
+                          </div>
                           {c.title_ar && <div className="text-xs text-slate-400 font-arabic">{c.title_ar}</div>}
                         </div>
+
                       </div>
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
