@@ -7,7 +7,7 @@ import {
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, SUBSCRIPTION_COURSE, type Course } from "@/lib/stripe";
+import { COURSES, SUBSCRIPTION_COURSE, type Course } from "@/lib/courseCatalog";
 import { useToast } from "@/hooks/use-toast";
 
 function useReveal() {

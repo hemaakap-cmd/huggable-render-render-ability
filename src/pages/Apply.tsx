@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { COURSES as STRIPE_COURSES } from "@/lib/stripe";
+import { COURSES as COURSE_CATALOG } from "@/lib/courseCatalog";
 
 function useReveal() {
   useEffect(() => {
@@ -30,7 +30,7 @@ const STEPS = [
   { n: "03", title: "Get Access",    desc: "Once approved, you'll receive an email to complete your subscription." },
 ];
 
-const COURSES = STRIPE_COURSES.map((c) => ({ id: c.id, label: c.titleAr ? `${c.title} (${c.titleAr})` : c.title }));
+const COURSES = COURSE_CATALOG.map((c) => ({ id: c.id, label: c.titleAr ? `${c.title} (${c.titleAr})` : c.title }));
 
 export default function Apply() {
   useReveal();

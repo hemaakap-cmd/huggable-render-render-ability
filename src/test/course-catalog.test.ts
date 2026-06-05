@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { COURSES, SUBSCRIPTION_COURSE, getCourse } from "@/lib/stripe";
+import { COURSES, SUBSCRIPTION_COURSE, getCourse } from "@/lib/courseCatalog";
 
-describe("Course catalogue (lib/stripe)", () => {
+describe("Course catalogue", () => {
   it("exposes the full set of courses", () => {
     expect(COURSES.length).toBeGreaterThanOrEqual(9);
   });

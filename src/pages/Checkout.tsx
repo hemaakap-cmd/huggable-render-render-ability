@@ -3,7 +3,7 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Tag, X } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { getCourse } from "@/lib/stripe";
+import { getCourse } from "@/lib/courseCatalog";
 import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
