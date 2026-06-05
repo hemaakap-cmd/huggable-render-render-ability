@@ -55,9 +55,18 @@ export async function initializePaddle(): Promise<void> {
   return initPromise;
 }
 
+/** Courses sold as recurring subscriptions instead of one-time purchases. */
+const SUBSCRIPTION_COURSES: Record<string, string> = {
+  "medical-german": "medical_german_monthly",
+};
+
+export function isSubscriptionCourse(courseId: string): boolean {
+  return courseId in SUBSCRIPTION_COURSES;
+}
+
 /** Map our course id (e.g. "medical-german") to the Paddle external price id */
 export function coursePriceId(courseId: string): string {
-  return `${courseId.replace(/-/g, "_")}_onetime`;
+  return SUBSCRIPTION_COURSES[courseId] ?? `${courseId.replace(/-/g, "_")}_onetime`;
 }
 
 export async function getPaddlePriceId(externalPriceId: string): Promise<string> {
