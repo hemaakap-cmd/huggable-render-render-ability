@@ -572,7 +572,7 @@ export function useAdminUsers() {
       const { data, error } = await supabase
         .from("ssra_profiles")
         .select("*")
-        .in("role", ["admin", "super_admin"])
+        .in("role", ["admin", "super_admin", "instructor"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -599,7 +599,7 @@ export function useSearchStudents(query: string) {
 export function useSetUserRole() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: "student" | "admin" | "super_admin" }) => {
+    mutationFn: async ({ userId, role }: { userId: string; role: "student" | "instructor" | "admin" | "super_admin" }) => {
       const { error } = await supabase
         .from("ssra_profiles")
         .update({ role })
