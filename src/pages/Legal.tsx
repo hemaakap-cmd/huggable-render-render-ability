@@ -34,7 +34,7 @@ export default function Legal() {
             <p><strong className="text-foreground">Last updated:</strong> May 2026</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">1. Data Controller</h3>
-            <p>SSRA — Sports Science &amp; Rehabilitation Academy<br />
+            <p>SSRA academy<br />
             Contact: info@ssracourses.com</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">2. Data We Collect</h3>
@@ -85,7 +85,7 @@ export default function Legal() {
             <p><strong className="text-foreground">Last updated:</strong> May 2026</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">1. Acceptance</h3>
-            <p>By creating an account or purchasing a course on SSRA Academy, you agree to these Terms of Use.</p>
+            <p>By creating an account or purchasing a course from SSRA academy, you agree to these Terms of Use.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">2. Eligibility</h3>
             <p>You must be at least 18 years old. The Medical German subscription requires a valid sports science diploma or proof of current enrolment.</p>
@@ -104,16 +104,16 @@ export default function Legal() {
               <li>Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> and enter the email address used at checkout to manage your order, or</li>
               <li>Email <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a> with subject "Refund Request" and your order number — we will forward your request to Paddle.</li>
             </ul>
-            <p>Approved refunds are returned to the original payment method within 5–14 business days. Subscriptions cancelled after the 14-day window remain active until the end of the current paid period and are not refunded for the remaining period.</p>
+            <p>Approved refunds are returned to the original payment method within 5–14 business days. Subscriptions cancelled after the 14-day window remain active until the end of the current paid period; any refund request is handled by Paddle under Paddle's Refund Policy and Buyer Terms.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">5. Intellectual Property</h3>
-            <p>All course content — videos, documents, exercises — is owned by SSRA Academy. You may not reproduce, distribute, or create derivative works without written permission.</p>
+            <p>All course content — videos, documents, exercises — is owned by SSRA academy. You may not reproduce, distribute, or create derivative works without written permission.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">6. Scholarships</h3>
-            <p>Scholarship awards are at the sole discretion of SSRA Academy and may be revoked if the application was found to contain false information.</p>
+            <p>Scholarship awards are at the sole discretion of SSRA academy and may be revoked if the application was found to contain false information.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">7. Limitation of Liability</h3>
-            <p>SSRA Academy is not liable for career outcomes, credential recognition decisions made by German authorities, or technical interruptions beyond our reasonable control.</p>
+            <p>SSRA academy is not liable for career outcomes, credential recognition decisions made by German authorities, or technical interruptions beyond our reasonable control.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">8. Governing Law</h3>
             <p>These terms are governed by German law. Disputes shall be submitted to the courts of Germany.</p>
@@ -131,7 +131,7 @@ export default function Legal() {
             </p>
 
             <div className="p-5 rounded-xl bg-muted border border-border space-y-2">
-              <p className="font-semibold text-foreground">SSRA — Sports Science &amp; Rehabilitation Academy</p>
+              <p className="font-semibold text-foreground">SSRA academy</p>
               <p>Germany</p>
               <p>Email: <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a></p>
             </div>
