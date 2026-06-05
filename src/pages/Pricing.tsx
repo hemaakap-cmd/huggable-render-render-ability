@@ -235,9 +235,9 @@ export default function Pricing() {
         <div className="container">
           <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {[
-              { icon: Shield,     title: "Secure Payments",   desc: "All payments processed by Stripe — PCI-DSS compliant, encrypted end-to-end." },
+              { icon: Shield,     title: "Secure Payments",   desc: "All payments processed by Paddle.com, our Merchant of Record — PCI-DSS compliant, encrypted end-to-end." },
               { icon: Globe2,     title: "Global Cards",      desc: "Accept Visa, Mastercard, AMEX, Apple Pay, Google Pay, and SEPA from any country." },
-              { icon: RefreshCcw, title: "Cancel Anytime",    desc: "Subscriptions can be cancelled at any time directly from your Stripe customer portal." },
+              { icon: RefreshCcw, title: "Cancel Anytime",    desc: "Subscriptions can be cancelled any time at paddle.net using your checkout email. 14-day money-back guarantee." },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="reveal text-center p-6 rounded-2xl bg-white border border-slate-200">
                 <div className="w-12 h-12 rounded-xl bg-[hsl(220,91%,54%)]/10 flex items-center justify-center mx-auto mb-4">
