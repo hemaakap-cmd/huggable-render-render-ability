@@ -1,0 +1,20 @@
+# SSRA Academy
+
+> Online academy for Arabic-speaking sports science graduates who want to build a clinical or rehabilitation career in Germany. Courses cover Medical German, sports rehabilitation, and career entry — all taught in Arabic.
+
+SSRA Academy (Sports Science & Rehabilitation Academy) helps Arabic-speaking sports scientists and physiotherapists relocate to and work in Germany. Programmes combine live online classes, recorded materials, mentorship, and degree-recognition guidance (Anerkennung).
+
+## Pages
+
+- [Home](/): Overview of SSRA Academy, featured courses, and how the programme works.
+- [Courses](/courses): Full catalogue of one-time clinical and career courses plus the Medical German subscription.
+- [Pricing](/pricing): Subscription and course pricing, plus answers to common questions about payment, refunds, and scholarships.
+- [About](/about): Mission, instructors, and the academy's approach to bilingual clinical training.
+- [Apply](/apply): Free application form for prospective students worldwide.
+- [Contact](/contact): How to reach the team for enquiries and support.
+
+## Legal
+
+- [Privacy Policy](/privacy-policy): How personal data is collected, processed, and shared (including Paddle as Merchant of Record).
+- [Terms of Service](/terms): Terms governing use of the site, courses, and subscriptions.
+- [Refund Policy](/refund-policy): 14-day money-back guarantee and refund process via Paddle.
