@@ -60,6 +60,10 @@ const AdminCoupons         = lazy(() => import("./pages/ssra-admin/AdminCoupons"
 const AdminAuditLog        = lazy(() => import("./pages/ssra-admin/AdminAuditLog"));
 const AdminReports         = lazy(() => import("./pages/ssra-admin/AdminReports"));
 const AdminInstructors     = lazy(() => import("./pages/ssra-admin/AdminInstructors"));
+const AdminBatches         = lazy(() => import("./pages/ssra-admin/AdminBatches"));
+const AdminHomework        = lazy(() => import("./pages/ssra-admin/AdminHomework"));
+const AdminFraud           = lazy(() => import("./pages/ssra-admin/AdminFraud"));
+const AdminSystemHealth    = lazy(() => import("./pages/ssra-admin/AdminSystemHealth"));
 
 /* ── Instructor dashboard ── */
 const InstructorDashboard  = lazy(() => import("./pages/instructor/InstructorDashboard"));
@@ -68,6 +72,10 @@ const InstructorStudents   = lazy(() => import("./pages/instructor/InstructorStu
 const InstructorAttendance = lazy(() => import("./pages/instructor/InstructorAttendance"));
 const InstructorSessions   = lazy(() => import("./pages/instructor/InstructorSessions"));
 const InstructorMaterials  = lazy(() => import("./pages/instructor/InstructorMaterials"));
+const InstructorHomework   = lazy(() => import("./pages/instructor/InstructorHomework"));
+
+/* ── Student dashboard extras ── */
+const MyHomework           = lazy(() => import("./pages/dashboard/MyHomework"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -160,6 +168,7 @@ function AppInner() {
                 <Route path="/dashboard/subscription" element={<RequireAuth><MySubscription /></RequireAuth>} />
                 <Route path="/dashboard/profile"       element={<RequireAuth><MyProfile /></RequireAuth>} />
                 <Route path="/dashboard/certificates" element={<RequireAuth><MyCertificates /></RequireAuth>} />
+                <Route path="/dashboard/homework"     element={<RequireAuth><MyHomework /></RequireAuth>} />
                 <Route path="/dashboard/*"            element={<RequireAuth><StudentDashboard /></RequireAuth>} />
 
                 {/* Admin — admin role required */}
@@ -178,6 +187,10 @@ function AppInner() {
                 <Route path="/ssra-admin/audit-log"         element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
                 <Route path="/ssra-admin/reports"           element={<RequireAdmin><AdminReports /></RequireAdmin>} />
                 <Route path="/ssra-admin/instructors"       element={<RequireAdmin><AdminInstructors /></RequireAdmin>} />
+                <Route path="/ssra-admin/batches"           element={<RequireAdmin><AdminBatches /></RequireAdmin>} />
+                <Route path="/ssra-admin/homework"          element={<RequireAdmin><AdminHomework /></RequireAdmin>} />
+                <Route path="/ssra-admin/fraud"             element={<RequireAdmin><AdminFraud /></RequireAdmin>} />
+                <Route path="/ssra-admin/system-health"     element={<RequireAdmin><AdminSystemHealth /></RequireAdmin>} />
 
                 {/* Instructor panel */}
                 <Route path="/instructor"                   element={<RequireInstructor><InstructorDashboard /></RequireInstructor>} />
@@ -186,6 +199,7 @@ function AppInner() {
                 <Route path="/instructor/attendance"        element={<RequireInstructor><InstructorAttendance /></RequireInstructor>} />
                 <Route path="/instructor/sessions"          element={<RequireInstructor><InstructorSessions /></RequireInstructor>} />
                 <Route path="/instructor/materials"         element={<RequireInstructor><InstructorMaterials /></RequireInstructor>} />
+                <Route path="/instructor/homework"          element={<RequireInstructor><InstructorHomework /></RequireInstructor>} />
 
                 {/* Super Admin only */}
                 <Route path="/ssra-admin/finance"           element={<RequireSuperAdmin><SuperAdminFinance /></RequireSuperAdmin>} />

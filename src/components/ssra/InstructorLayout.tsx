@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, Users, ClipboardList,
-  Video, FolderOpen, LogOut, Menu, X, ChevronDown, GraduationCap,
+  Video, FolderOpen, LogOut, Menu, X, ChevronDown, GraduationCap, BookCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
@@ -14,6 +14,7 @@ const NAV = [
   { icon: Video,           label: "Sessions",    href: "/instructor/sessions" },
   { icon: ClipboardList,   label: "Attendance",  href: "/instructor/attendance" },
   { icon: FolderOpen,      label: "Materials",   href: "/instructor/materials" },
+  { icon: BookCheck,       label: "Homework",    href: "/instructor/homework" },
 ];
 
 function NavItem({ icon: Icon, label, href, end = false, onClick }: {

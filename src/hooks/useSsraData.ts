@@ -948,3 +948,294 @@ export function useOperationalAlerts() {
     },
   });
 }
+
+/* ═══════════════════════════════════════════════════════════
+   BATCH MANAGEMENT
+   ═══════════════════════════════════════════════════════════ */
+
+export function useAdminBatches(courseId?: string) {
+  return useQuery({
+    queryKey: ["ssra-admin-batches", courseId ?? "all"],
+    queryFn: async () => {
+      let q = (supabase as any).from("ssra_batches").select("*, ssra_courses(title)").order("start_date", { ascending: false });
+      if (courseId) q = q.eq("course_id", courseId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useUpsertBatch() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (batch: Record<string, unknown>) => {
+      const { id, ...rest } = batch;
+      const db = (supabase as any).from("ssra_batches");
+      if (id) {
+        const { error } = await db.update({ ...rest, updated_at: new Date().toISOString() }).eq("id", id);
+        if (error) throw error;
+      } else {
+        const { error } = await db.insert(rest);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-batches"] }),
+  });
+}
+
+export function useDeleteBatch() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any).from("ssra_batches").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-batches"] }),
+  });
+}
+
+export function useBatchReport() {
+  return useQuery({
+    queryKey: ["ssra-batch-report"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("ssra_batch_report").select("*").order("start_date", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        batch_id: string; batch_name: string; batch_status: string;
+        start_date: string | null; end_date: string | null;
+        capacity: number; enrolled_count: number;
+        course_id: string; course_name: string;
+        total_enrollments: number; active_enrollments: number;
+        avg_attendance_pct: number; total_revenue_eur: number; certificates_issued: number;
+      }>;
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HOMEWORK / GRADING
+   ═══════════════════════════════════════════════════════════ */
+
+export function useAdminHomework(courseId?: string, status?: string) {
+  return useQuery({
+    queryKey: ["ssra-admin-homework", courseId ?? "all", status ?? "all"],
+    queryFn: async () => {
+      let q = (supabase as any)
+        .from("ssra_homework_submissions")
+        .select("*, ssra_course_materials(title, course_id, due_date), ssra_profiles(full_name, email)")
+        .order("submitted_at", { ascending: false });
+      if (courseId) q = q.eq("course_id", courseId);
+      if (status && status !== "all") q = q.eq("status", status);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useInstructorHomework(courseId?: string, status?: string) {
+  return useQuery({
+    queryKey: ["ssra-instructor-homework", courseId ?? "all", status ?? "all"],
+    queryFn: async () => {
+      let q = (supabase as any)
+        .from("ssra_homework_submissions")
+        .select("*, ssra_course_materials(title, course_id, due_date), ssra_profiles(full_name, email)")
+        .order("submitted_at", { ascending: false });
+      if (courseId) q = q.eq("course_id", courseId);
+      if (status && status !== "all") q = q.eq("status", status);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useGradeHomework() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, grade, feedback }: { id: string; grade: number; feedback?: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await (supabase as any).from("ssra_homework_submissions").update({
+        grade,
+        feedback: feedback ?? null,
+        graded_by: user?.id ?? null,
+        graded_at: new Date().toISOString(),
+        status: "graded",
+        updated_at: new Date().toISOString(),
+      }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-homework"] });
+      qc.invalidateQueries({ queryKey: ["ssra-instructor-homework"] });
+      qc.invalidateQueries({ queryKey: ["ssra-my-homework"] });
+    },
+  });
+}
+
+export function useMyHomework(courseId?: string) {
+  return useQuery({
+    queryKey: ["ssra-my-homework", courseId ?? "all"],
+    queryFn: async () => {
+      let q = (supabase as any)
+        .from("ssra_homework_submissions")
+        .select("*, ssra_course_materials(title, material_type, due_date, description)")
+        .order("submitted_at", { ascending: false });
+      if (courseId) q = q.eq("course_id", courseId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useSubmitHomework() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      materialId, courseId, batchId, fileUrl, textContent,
+    }: { materialId: string; courseId: string; batchId?: string; fileUrl?: string; textContent?: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await (supabase as any).from("ssra_homework_submissions").upsert({
+        material_id:  materialId,
+        user_id:      user.id,
+        course_id:    courseId,
+        batch_id:     batchId ?? null,
+        file_url:     fileUrl ?? null,
+        text_content: textContent ?? null,
+        status:       "submitted",
+        submitted_at: new Date().toISOString(),
+        updated_at:   new Date().toISOString(),
+      }, { onConflict: "material_id,user_id" });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-my-homework"] }),
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FRAUD DETECTION
+   ═══════════════════════════════════════════════════════════ */
+
+export function useFraudFlags(resolved?: boolean) {
+  return useQuery({
+    queryKey: ["ssra-fraud-flags", resolved],
+    queryFn: async () => {
+      let q = (supabase as any)
+        .from("ssra_fraud_flags")
+        .select("*, ssra_profiles(full_name, email)")
+        .order("created_at", { ascending: false });
+      if (resolved !== undefined) q = q.eq("resolved", resolved);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useResolveFraudFlag() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, note }: { id: string; note?: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await (supabase as any).from("ssra_fraud_flags").update({
+        resolved:        true,
+        resolved_by:     user?.id ?? null,
+        resolved_at:     new Date().toISOString(),
+        resolution_note: note ?? null,
+      }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-fraud-flags"] }),
+  });
+}
+
+export function useSessionAccessLog(sessionId?: string, userId?: string) {
+  return useQuery({
+    queryKey: ["ssra-session-access-log", sessionId ?? "all", userId ?? "all"],
+    queryFn: async () => {
+      let q = (supabase as any)
+        .from("ssra_session_access_log")
+        .select("*")
+        .order("accessed_at", { ascending: false })
+        .limit(200);
+      if (sessionId) q = q.eq("session_id", sessionId);
+      if (userId)    q = q.eq("user_id", userId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STUDENT PROGRESS VIEW
+   ═══════════════════════════════════════════════════════════ */
+
+export function useStudentProgress(courseId?: string) {
+  return useQuery({
+    queryKey: ["ssra-student-progress", courseId ?? "all"],
+    queryFn: async () => {
+      let q = (supabase as any).from("ssra_student_progress").select("*").order("attendance_pct", { ascending: false });
+      if (courseId) q = q.eq("course_id", courseId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useMyProgress(courseId?: string) {
+  return useQuery({
+    queryKey: ["ssra-my-progress", courseId ?? "all"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      let q = (supabase as any).from("ssra_student_progress").select("*").eq("user_id", user.id);
+      if (courseId) q = q.eq("course_id", courseId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SYSTEM HEALTH
+   ═══════════════════════════════════════════════════════════ */
+
+export function useSystemHealth() {
+  return useQuery({
+    queryKey: ["ssra-system-health"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+      const [enrollRes, fraudRes, pendingHwRes, unreadNotifRes, waitlistRes] = await Promise.all([
+        supabase.from("ssra_enrollments").select("id", { count: "exact", head: true }).gte("enrolled_at", since24h),
+        (supabase as any).from("ssra_fraud_flags").select("id, severity").eq("resolved", false),
+        (supabase as any).from("ssra_homework_submissions").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+        (supabase as any).from("ssra_notifications").select("id", { count: "exact", head: true }).eq("read", false),
+        supabase.from("ssra_waitlist").select("id", { count: "exact", head: true }).eq("status", "waiting"),
+      ]);
+
+      const fraudData = fraudRes.data ?? [];
+      const criticalFraud = fraudData.filter((f: any) => f.severity === "critical").length;
+      const highFraud     = fraudData.filter((f: any) => f.severity === "high").length;
+      const openFraudTotal = fraudData.length;
+
+      return {
+        enrollments24h:      enrollRes.count    ?? 0,
+        openFraudFlags:      openFraudTotal,
+        criticalFraud,
+        highFraud,
+        pendingHomework:     pendingHwRes.count  ?? 0,
+        unreadNotifications: unreadNotifRes.count ?? 0,
+        studentsOnWaitlist:  waitlistRes.count   ?? 0,
+        healthScore: Math.max(0, 100 - (criticalFraud * 25) - (highFraud * 10) - (openFraudTotal * 2)),
+      };
+    },
+  });
+}

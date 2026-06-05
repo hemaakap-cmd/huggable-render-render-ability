@@ -5,7 +5,8 @@ import {
   BookOpen, CreditCard, LogOut, Menu, X, Library, Video,
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
   GraduationCap, GitBranch, Wand2, Radio, FileCheck, Tag, ShieldAlert,
-  FileSpreadsheet, GraduationCap as InstructorIcon,
+  FileSpreadsheet, GraduationCap as InstructorIcon, Layers, BookCheck,
+  AlertOctagon, HeartPulse,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
@@ -21,9 +22,13 @@ const ADMIN_NAV = [
   { icon: FileSpreadsheet,  label: "Reports",          href: "/ssra-admin/reports" },
   { icon: InstructorIcon,   label: "Instructors",      href: "/ssra-admin/instructors" },
   { icon: ClipboardList,    label: "Attendance",       href: "/ssra-admin/attendance" },
-  { icon: Library,         label: "Courses",         href: "/ssra-admin/courses" },
-  { icon: Video,           label: "Sessions",        href: "/ssra-admin/sessions" },
-  { icon: BookOpen,        label: "Enrollments",     href: "/ssra-admin/enrollments" },
+  { icon: Library,          label: "Courses",          href: "/ssra-admin/courses" },
+  { icon: Layers,           label: "Batches",          href: "/ssra-admin/batches" },
+  { icon: Video,            label: "Sessions",         href: "/ssra-admin/sessions" },
+  { icon: BookOpen,         label: "Enrollments",      href: "/ssra-admin/enrollments" },
+  { icon: BookCheck,        label: "Homework",         href: "/ssra-admin/homework" },
+  { icon: AlertOctagon,     label: "Fraud Flags",      href: "/ssra-admin/fraud" },
+  { icon: HeartPulse,       label: "System Health",    href: "/ssra-admin/system-health" },
 ];
 
 const SUPER_NAV = [
