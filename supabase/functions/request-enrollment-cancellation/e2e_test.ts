@@ -165,6 +165,56 @@ Deno.test({
       assert(/14-day/i.test(res.json?.error ?? ""), res.raw);
     });
 
+    // ------- 1a. boundary: just inside the 14-day window -------
+    await t.step("accepts request just inside 14-day window (13.9 days)", async () => {
+      const courseId = await createCourse();
+      const enr = await createEnrollment({
+        userId: student.userId,
+        courseId,
+        paidDaysAgo: 13.9,
+      });
+      const res = await callFn("request-enrollment-cancellation", studentToken, {
+        enrollmentId: enr,
+        reason: "Inside the allowed window per Paddle policy",
+      });
+      assertEquals(res.status, 200, res.raw);
+      assert(res.json?.id, res.raw);
+    });
+
+    // ------- 1b. boundary: just outside the 14-day window -------
+    await t.step("rejects request just outside 14-day window (14.05 days)", async () => {
+      const courseId = await createCourse();
+      const enr = await createEnrollment({
+        userId: student.userId,
+        courseId,
+        paidDaysAgo: 14.05,
+      });
+      const res = await callFn("request-enrollment-cancellation", studentToken, {
+        enrollmentId: enr,
+        reason: "One hour past the Paddle window",
+      });
+      assertEquals(res.status, 409, res.raw);
+      assert(/14-day/i.test(res.json?.error ?? ""), res.raw);
+      assertEquals(typeof res.json?.daysSincePayment, "number");
+    });
+
+    // ------- 1c. unpaid / non-active enrollment cannot be cancelled -------
+    await t.step("rejects cancellation of a non-active enrollment", async () => {
+      const courseId = await createCourse();
+      const pendingEnr = await createEnrollment({
+        userId: student.userId,
+        courseId,
+        paidDaysAgo: 1,
+        status: "pending",
+      });
+      const res = await callFn("request-enrollment-cancellation", studentToken, {
+        enrollmentId: pendingEnr,
+        reason: "Should be blocked — not active",
+      });
+      assertEquals(res.status, 409, res.raw);
+      assert(/paid.*active/i.test(res.json?.error ?? ""), res.raw);
+    });
+
     // ------- 2. valid request creates pending row -------
     const mainCourseId = await createCourse();
     const enrollmentId = await createEnrollment({
