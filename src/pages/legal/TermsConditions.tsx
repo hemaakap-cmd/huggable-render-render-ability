@@ -123,14 +123,15 @@ export default function TermsConditions() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">5. Refunds & Cancellations</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>We want you to be satisfied with our services. Our refund policy is as follows:</p>
+                <p>SSRA academy offers a <strong>14-day money-back guarantee</strong> on all course purchases and the first billing period of any subscription. Refunds are handled by Paddle.com, our Merchant of Record.</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li>You may request a full refund within 14 days of your initial purchase if you have not accessed more than 25% of the course content.</li>
-                  <li>After 14 days or if more than 25% of content has been accessed, refunds are provided at our sole discretion.</li>
-                  <li>Subscription cancellations take effect at the end of the current billing period.</li>
-                  <li>No refunds are provided for partial months or unused portions of a subscription period.</li>
+                  <li>You may request a full refund within 14 days of your initial purchase or first subscription charge.</li>
+                  <li>Refunds are processed by Paddle. Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> with the email address you used at checkout to request a refund directly.</li>
+                  <li>You can also email us at <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a> with subject "Refund Request" and your order number and we will forward your request to Paddle.</li>
+                  <li>Subscription cancellations take effect at the end of the current billing period; the subscription remains active until then.</li>
+                  <li>Approved refunds are returned to the original payment method within 5–14 business days.</li>
                 </ul>
-                <p>To request a refund, please contact us at <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a>.</p>
+                <p>Refund and cancellation mechanics are ultimately governed by Paddle's <a href="https://www.paddle.com/legal/refund-policy" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">Refund Policy</a> and <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">Buyer Terms</a>.</p>
               </div>
             </div>
 
