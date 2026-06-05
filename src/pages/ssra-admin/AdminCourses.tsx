@@ -392,8 +392,8 @@ export default function AdminCourses() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Duration</label>
-                  <input placeholder="e.g. 6 weeks" value={form.weeks as string} onChange={(e) => field("weeks", e.target.value)}
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Weeks (legacy)</label>
+                  <input placeholder="e.g. 6 weeks" value={form.duration_weeks as string} onChange={(e) => field("duration_weeks", e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
                 </div>
                 <div>
