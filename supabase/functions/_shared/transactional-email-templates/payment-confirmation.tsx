@@ -1,12 +1,13 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Row, Column,
+  Body, Container, Head, Heading, Html, Img, Preview, Text, Section, Hr, Row, Column,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'SSRA Academy'
 const CONTACT_EMAIL = 'support@ssracourses.com'
 const CONTACT_URL = 'https://ssracourses.com/contact'
+const LOGO_URL = 'https://ssracourses.com/logo-mark-1024.png'
 
 interface PaymentConfirmationProps {
   studentName?: string
@@ -28,6 +29,10 @@ const PaymentConfirmationEmail = ({
     <Preview>Payment received — {courseName ?? 'your course'} · {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={brandRow}>
+          <Img src={LOGO_URL} width="56" height="56" alt={SITE_NAME} style={logo} />
+          <Text style={brandName}>{SITE_NAME}</Text>
+        </Section>
         <Section style={header}>
           <Heading style={h1}>Payment received ✓</Heading>
           <Text style={subhead}>Thank you for your purchase, {studentName ?? 'student'}.</Text>
@@ -85,3 +90,6 @@ const text = { fontSize: '15px', color: '#334155', lineHeight: '1.65', margin: '
 const hr = { border: 'none', borderTop: '1px solid #e2e8f0', margin: '24px 0' }
 const footer = { fontSize: '12px', color: '#64748b', margin: '0 0 6px' }
 const link = { color: '#2563eb', textDecoration: 'underline' }
+const brandRow = { textAlign: 'center' as const, marginBottom: '16px' }
+const logo = { display: 'block', margin: '0 auto 6px', borderRadius: '12px' }
+const brandName = { fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, textAlign: 'center' as const, letterSpacing: '0.5px' }
