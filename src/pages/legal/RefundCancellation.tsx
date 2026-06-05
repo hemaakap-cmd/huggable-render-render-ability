@@ -130,12 +130,11 @@ export default function RefundCancellation() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">4. How to Request a Refund</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>To request a refund, please follow these steps:</p>
+                <p>Our payments are processed by Paddle.com, our Merchant of Record. To request a refund, please follow these steps:</p>
                 <ol className="list-decimal list-inside space-y-2 ml-2">
-                  <li>Send an email to <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> with the subject line "Refund Request".</li>
-                  <li>Include your full name, email address used for registration, and order confirmation number.</li>
-                  <li>Provide a brief reason for the refund request (this helps us improve our courses).</li>
-                  <li>Allow up to 5-10 business days for our team to review and process your request.</li>
+                  <li>Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline font-medium">paddle.net</a> and enter the email address used at checkout to manage your order and request a refund directly.</li>
+                  <li>Or email us at <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> with subject "Refund Request" and your order number — we will forward to Paddle.</li>
+                  <li>Allow up to 5-10 business days for our team or Paddle to review your request.</li>
                 </ol>
                 <p>Approved refunds will be processed to the original payment method within 5-14 business days, depending on your bank or payment provider.</p>
               </div>
