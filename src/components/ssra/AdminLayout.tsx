@@ -6,7 +6,7 @@ import {
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
   GraduationCap, GitBranch, Wand2, Radio, FileCheck, Tag, ShieldAlert,
   FileSpreadsheet, GraduationCap as InstructorIcon, Layers, BookCheck,
-  AlertOctagon, HeartPulse, BarChart3,
+  AlertOctagon, HeartPulse, BarChart3, Award,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
