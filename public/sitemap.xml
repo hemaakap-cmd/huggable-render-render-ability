@@ -8,6 +8,13 @@
   <url><loc>https://ssracourses.com/contact</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://ssracourses.com/legal</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://ssracourses.com/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://ssracourses.com/privacy</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://ssracourses.com/privacy-policy.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://ssracourses.com/terms</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://ssracourses.com/terms-of-service</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://ssracourses.com/terms-and-conditions</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://ssracourses.com/terms.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://ssracourses.com/refund-policy</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://ssracourses.com/refund</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://ssracourses.com/refund-policy.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
 </urlset>
