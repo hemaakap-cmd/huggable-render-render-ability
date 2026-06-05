@@ -59,7 +59,7 @@ export default function Legal() {
             <h3 className="font-semibold text-foreground text-base mt-6">5. Data Sharing</h3>
             <p>We share data only with:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong className="text-foreground">Stripe</strong> — payment processing (USA, EU-US Data Privacy Framework)</li>
+              <li><strong className="text-foreground">Paddle.com</strong> — our Merchant of Record, handles checkout, payment processing, subscription management, tax compliance, invoicing, and refund requests (UK/USA, EU Standard Contractual Clauses and EU-US Data Privacy Framework)</li>
               <li><strong className="text-foreground">Supabase</strong> — database hosting (EU region)</li>
               <li><strong className="text-foreground">Resend</strong> — transactional email delivery</li>
             </ul>
