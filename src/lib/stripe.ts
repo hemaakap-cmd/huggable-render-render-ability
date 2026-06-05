@@ -29,13 +29,13 @@ if (import.meta.env.PROD) {
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 if (!publishableKey) {
-  throw new Error(
-    "[Stripe] VITE_STRIPE_PUBLISHABLE_KEY is not set. " +
-    "Check your deployment environment variables."
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[Stripe] VITE_STRIPE_PUBLISHABLE_KEY is not set. Checkout will be disabled."
   );
 }
 
-export const stripePromise = loadStripe(publishableKey);
+export const stripePromise = publishableKey ? loadStripe(publishableKey) : Promise.resolve(null);
 
 /* ── Course catalogue with pricing ── */
 export type CourseType = "subscription" | "one_time";
