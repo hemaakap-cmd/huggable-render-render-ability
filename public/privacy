@@ -25,7 +25,9 @@
         </ul>
         <h2>3. Purposes and Legal Basis</h2>
         <p>We process personal data to create and manage accounts, provide course access, verify eligibility for restricted courses, deliver customer support, secure the platform, send transactional messages, comply with legal obligations, and improve our services. The legal bases include contract performance, legitimate interests, consent where required, and legal obligation.</p>
-        <h2>4. Data Sharing</h2>
+        <h2>4. Payment-Related Data and Merchant of Record</h2>
+        <p>Payment-related checkout, billing, tax, invoicing, subscription management, and refund data is processed by Paddle.com as our Merchant of Record. Paddle may appear on your bank or card statement and handles billing-related customer service and refund requests.</p>
+        <h2>5. Data Sharing</h2>
         <p>We share personal data only where necessary with the following recipients:</p>
         <ul>
           <li><strong>Paddle.com</strong> — our Merchant of Record for checkout, payment processing, subscription management, tax compliance, invoicing, customer service related to billing, and refund requests. Where applicable, Paddle uses appropriate international transfer safeguards, including EU Standard Contractual Clauses and the EU-US Data Privacy Framework.</li>
@@ -34,11 +36,11 @@
           <li>Authorities where required by law or to protect legal rights.</li>
         </ul>
         <p>We do not sell your personal data.</p>
-        <h2>5. Retention</h2>
+        <h2>6. Retention</h2>
         <p>We retain personal data only for as long as needed for the purposes described above, including account operation, course access, legal, accounting, tax, security, and reporting obligations. When data is no longer needed, it is deleted or anonymised.</p>
-        <h2>6. Your Rights</h2>
+        <h2>7. Your Rights</h2>
         <p>Subject to applicable law, you may request access, rectification, erasure, restriction, portability, objection to processing, and withdrawal of consent. You may also lodge a complaint with a competent supervisory authority. Contact us at <a href="mailto:info@ssracourses.com">info@ssracourses.com</a> to exercise your rights.</p>
-        <h2>7. Security and Cookies</h2>
+        <h2>8. Security and Cookies</h2>
         <p>We use appropriate technical and organisational measures, including access controls, encryption in transit, and security monitoring. We use essential cookies for authentication, security, and service operation; analytics or marketing cookies are used only where permitted by law.</p>
       </section>
     </main>
