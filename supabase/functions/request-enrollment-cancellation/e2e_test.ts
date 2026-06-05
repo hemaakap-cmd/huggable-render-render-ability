@@ -294,6 +294,6 @@ Deno.test("E2E cancellation flow", async (t) => {
   } finally {
     await cleanupUser(student.userId).catch(() => {});
     await cleanupUser(adminUser.userId).catch(() => {});
-    await admin.from("ssra_courses").delete().eq("id", COURSE_ID).catch(() => {});
+    try { await admin.from("ssra_courses").delete().eq("id", COURSE_ID); } catch { /* noop */ }
   }
 });
