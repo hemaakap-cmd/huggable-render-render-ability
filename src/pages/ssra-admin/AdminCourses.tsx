@@ -414,7 +414,7 @@ export default function AdminCourses() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Type</label>
-                  <select value={form.type as string} onChange={(e) => field("type", e.target.value)}
+                  <select value={form.course_type as string} onChange={(e) => field("course_type", e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white">
                     {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
