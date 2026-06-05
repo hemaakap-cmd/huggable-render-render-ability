@@ -6,10 +6,11 @@ interface SsraProfile {
   id: string;
   full_name: string | null;
   email: string | null;
-  role: "student" | "admin" | "super_admin";
+  role: "student" | "admin" | "super_admin" | "instructor";
   country: string | null;
   degree: string | null;
   german_level: string | null;
+  phone_number: string | null;
 }
 
 interface AuthState {
@@ -19,11 +20,13 @@ interface AuthState {
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  isInstructor: boolean;
 }
 
 export function useSsraAuth(): AuthState {
   const [state, setState] = useState<AuthState>({
-    user: null, session: null, profile: null, loading: true, isAdmin: false, isSuperAdmin: false,
+    user: null, session: null, profile: null, loading: true,
+    isAdmin: false, isSuperAdmin: false, isInstructor: false,
   });
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export function useSsraAuth(): AuthState {
       if (session?.user) {
         fetchProfile(session.user.id, session);
       } else {
-        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false });
+        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false, isInstructor: false });
       }
     });
 
@@ -39,7 +42,7 @@ export function useSsraAuth(): AuthState {
       if (session?.user) {
         fetchProfile(session.user.id, session);
       } else {
-        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false });
+        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false, isInstructor: false });
       }
     });
 
@@ -60,6 +63,7 @@ export function useSsraAuth(): AuthState {
       loading:      false,
       isAdmin:      profile?.role === "admin" || profile?.role === "super_admin",
       isSuperAdmin: profile?.role === "super_admin",
+      isInstructor: profile?.role === "instructor",
     });
   }
 

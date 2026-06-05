@@ -58,6 +58,16 @@ const AdminLiveVisitors    = lazy(() => import("./pages/ssra-admin/AdminLiveVisi
 const AdminWaitlist        = lazy(() => import("./pages/ssra-admin/AdminWaitlist"));
 const AdminCoupons         = lazy(() => import("./pages/ssra-admin/AdminCoupons"));
 const AdminAuditLog        = lazy(() => import("./pages/ssra-admin/AdminAuditLog"));
+const AdminReports         = lazy(() => import("./pages/ssra-admin/AdminReports"));
+const AdminInstructors     = lazy(() => import("./pages/ssra-admin/AdminInstructors"));
+
+/* ── Instructor dashboard ── */
+const InstructorDashboard  = lazy(() => import("./pages/instructor/InstructorDashboard"));
+const InstructorCourses    = lazy(() => import("./pages/instructor/InstructorCourses"));
+const InstructorStudents   = lazy(() => import("./pages/instructor/InstructorStudents"));
+const InstructorAttendance = lazy(() => import("./pages/instructor/InstructorAttendance"));
+const InstructorSessions   = lazy(() => import("./pages/instructor/InstructorSessions"));
+const InstructorMaterials  = lazy(() => import("./pages/instructor/InstructorMaterials"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -88,6 +98,15 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
   if (loading) return <Spinner />;
   if (!user)    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
   if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
+function RequireInstructor({ children }: { children: React.ReactNode }) {
+  const { user, isInstructor, loading } = useSsraAuth();
+  const location = useLocation();
+  if (loading) return <Spinner />;
+  if (!user)          return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  if (!isInstructor)  return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -157,6 +176,17 @@ function AppInner() {
                 <Route path="/ssra-admin/waitlist"          element={<RequireAdmin><AdminWaitlist /></RequireAdmin>} />
                 <Route path="/ssra-admin/coupons"           element={<RequireAdmin><AdminCoupons /></RequireAdmin>} />
                 <Route path="/ssra-admin/audit-log"         element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
+                <Route path="/ssra-admin/reports"           element={<RequireAdmin><AdminReports /></RequireAdmin>} />
+                <Route path="/ssra-admin/instructors"       element={<RequireAdmin><AdminInstructors /></RequireAdmin>} />
+
+                {/* Instructor panel */}
+                <Route path="/instructor"                   element={<RequireInstructor><InstructorDashboard /></RequireInstructor>} />
+                <Route path="/instructor/courses"           element={<RequireInstructor><InstructorCourses /></RequireInstructor>} />
+                <Route path="/instructor/students"          element={<RequireInstructor><InstructorStudents /></RequireInstructor>} />
+                <Route path="/instructor/attendance"        element={<RequireInstructor><InstructorAttendance /></RequireInstructor>} />
+                <Route path="/instructor/sessions"          element={<RequireInstructor><InstructorSessions /></RequireInstructor>} />
+                <Route path="/instructor/materials"         element={<RequireInstructor><InstructorMaterials /></RequireInstructor>} />
+
                 {/* Super Admin only */}
                 <Route path="/ssra-admin/finance"           element={<RequireSuperAdmin><SuperAdminFinance /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/admins"            element={<RequireSuperAdmin><SuperAdminAdmins /></RequireSuperAdmin>} />

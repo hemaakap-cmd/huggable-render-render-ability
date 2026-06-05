@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import NotificationBell from "@/components/ssra/NotificationBell";
 
 const NAV = [
   { label: "Home",    href: "/" },
@@ -16,7 +17,7 @@ export default function Header() {
   const [open, setOpen]         = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pathname }            = useLocation();
-  const { user, profile, isAdmin, loading } = useSsraAuth();
+  const { user, profile, isAdmin, isInstructor, loading } = useSsraAuth();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 48);
@@ -76,6 +77,16 @@ export default function Header() {
                   </button>
                 </Link>
               )}
+              {isInstructor && (
+                <Link to="/instructor">
+                  <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    scrolled ? "text-emerald-700 bg-emerald-50 hover:bg-emerald-100" : "text-white/80 bg-white/10 hover:bg-white/20"
+                  }`}>
+                    <ShieldCheck className="w-3.5 h-3.5" /> Instructor
+                  </button>
+                </Link>
+              )}
+              <NotificationBell scheme={scrolled ? "dark" : "light"} />
               <Link to="/dashboard">
                 <button className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                   scrolled ? "text-slate-700 hover:bg-slate-100" : "text-white/80 hover:bg-white/10"
@@ -164,6 +175,11 @@ export default function Header() {
                   {isAdmin && (
                     <Link to="/ssra-admin" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 transition-colors">
                       <ShieldCheck className="w-4 h-4" /> Admin Panel
+                    </Link>
+                  )}
+                  {isInstructor && (
+                    <Link to="/instructor" className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-emerald-700 hover:bg-emerald-50 transition-colors">
+                      <ShieldCheck className="w-4 h-4" /> Instructor Panel
                     </Link>
                   )}
                   <button onClick={ssraSignOut} className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
