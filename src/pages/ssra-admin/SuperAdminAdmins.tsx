@@ -126,14 +126,17 @@ export default function SuperAdminAdmins() {
           ) : (
             <div className="divide-y divide-slate-50">
               {(admins as any[]).map((u: any) => {
-                const isSelf    = u.id === profile?.id;
-                const isSuper   = u.role === "super_admin";
-                const canDemote = !isSelf && !(isSuper && !isSuperAdmin);
+                const isSelf       = u.id === profile?.id;
+                const isSuper      = u.role === "super_admin";
+                const isInstructor = u.role === "instructor";
+                const canDemote    = !isSelf && !(isSuper && !isSuperAdmin);
 
                 return (
                   <div key={u.id} className="flex items-center gap-4 px-5 py-3.5">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                      isSuper ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-[hsl(220,91%,54%)]"
+                      isSuper      ? "bg-amber-100 text-amber-700" :
+                      isInstructor ? "bg-emerald-100 text-emerald-700" :
+                                     "bg-blue-100 text-[hsl(220,91%,54%)]"
                     }`}>
                       {u.full_name?.[0] ?? u.email?.[0] ?? "?"}
                     </div>
