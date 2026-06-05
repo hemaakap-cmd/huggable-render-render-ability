@@ -107,6 +107,26 @@ export default function PrivacyPolicy() {
 
             <div className="divider" />
 
+            {/* 4b. Data Sharing */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[hsl(220,91%,54%)]/10 flex items-center justify-center">
+                  <Database className="w-5 h-5 text-[hsl(220,91%,54%)]" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 font-display">5. Data Sharing</h2>
+              </div>
+              <div className="space-y-4 text-slate-600 leading-relaxed">
+                <p>We share personal data with the following categories of recipients only as needed to provide our services:</p>
+                <ul className="list-disc list-inside space-y-2 ml-2">
+                  <li><strong className="text-slate-800">Paddle.com</strong> — our Merchant of Record, which handles checkout, payments, subscription management, tax compliance, invoicing, and refund requests.</li>
+                  <li><strong className="text-slate-800">Hosting & infrastructure providers</strong> — for website hosting, database storage, and email delivery.</li>
+                  <li><strong className="text-slate-800">Authorities</strong> — where required by law or to protect our legal rights.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="divider" />
+
             {/* 5. Data Retention */}
             <div>
               <div className="flex items-center gap-3 mb-4">
