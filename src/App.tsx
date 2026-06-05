@@ -193,6 +193,7 @@ function AppInner() {
                 <Route path="/ssra-admin/homework"          element={<RequireAdmin><AdminHomework /></RequireAdmin>} />
                 <Route path="/ssra-admin/fraud"             element={<RequireAdmin><AdminFraud /></RequireAdmin>} />
                 <Route path="/ssra-admin/system-health"     element={<RequireAdmin><AdminSystemHealth /></RequireAdmin>} />
+                <Route path="/ssra-admin/certificates"      element={<RequireAdmin><AdminCertificates /></RequireAdmin>} />
 
                 {/* Instructor panel */}
                 <Route path="/instructor"                   element={<RequireInstructor><InstructorDashboard /></RequireInstructor>} />
