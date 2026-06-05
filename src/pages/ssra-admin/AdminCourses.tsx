@@ -108,8 +108,9 @@ export default function AdminCourses() {
     setSaving(true);
     try {
       const modules = modulesText.split("\n").map((s) => s.trim()).filter(Boolean);
+      const { _existing: _ex, ...cleanForm } = form as any;
       const payload = {
-        ...form,
+        ...cleanForm,
         is_active: saveAsDraft ? false : Boolean(form.is_active),
         price_eur: Number(form.price_eur),
         price_egp: Number(form.price_egp),
