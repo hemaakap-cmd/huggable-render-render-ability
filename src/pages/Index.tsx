@@ -244,7 +244,7 @@ export default function Index() {
                 <ol className="space-y-4">
                   {[
                     { n: "1", t: "Create free account", d: "Sign up in 30 seconds — no payment needed." },
-                    { n: "2", t: "Subscribe via Stripe",  d: "Pay securely from anywhere. €29/month, cancel anytime." },
+                    { n: "2", t: "Subscribe via Paddle",  d: "Pay securely from anywhere. €19/month, cancel anytime at paddle.net." },
                     { n: "3", t: "Start learning",        d: "Immediate access to all modules and live sessions." },
                   ].map(({ n, t, d }) => (
                     <li key={n} className="flex gap-4">
