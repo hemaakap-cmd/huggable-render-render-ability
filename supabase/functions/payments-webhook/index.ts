@@ -1,6 +1,7 @@
 // Paddle webhook — auto-enroll student on payment, send confirmation + admin notice.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { verifyWebhook, EventName, type PaddleEnv } from '../_shared/paddle.ts';
+import { handleAdjustmentEvent } from './handlers.ts';
 
 const ADMIN_NOTIFY_EMAIL = Deno.env.get('ADMIN_NOTIFY_EMAIL') ?? 'hemaakap@gmail.com';
 const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://ssracourses.com';
@@ -225,6 +226,7 @@ async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
   }
 }
 
+
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);
   console.log('paddle event:', event.eventType);
@@ -240,6 +242,10 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
       break;
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
+      break;
+    case 'adjustment.created' as any:
+    case 'adjustment.updated' as any:
+      await handleAdjustmentEvent(event.data, env);
       break;
     default:
       break;
