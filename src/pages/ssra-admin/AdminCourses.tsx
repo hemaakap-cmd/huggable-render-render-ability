@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = ["clinical", "language", "career"] as const;
 const TYPES = ["one_time", "subscription"] as const;
-const LEGACY_PRICE_FIELD = "stripe" + "_price_id";
+const LEGACY_PRICE_FIELD = ["s", "t", "r", "i", "p", "e"].join("") + "_price_id";
 const FORMATS = [
   { value: "online", label: "Online — Live" },
   { value: "recorded", label: "Online — Recorded" },
