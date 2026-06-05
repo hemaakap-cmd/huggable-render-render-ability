@@ -94,7 +94,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>SSRA Academy — Sports Science & Rehabilitation for Arabic Speakers</title>
+        <title>SSRA Academy — Sports Science for Arabic Speakers</title>
         <meta name="description" content="Work in Germany as a sports scientist. Medical German, clinical courses and career support — all taught in Arabic." />
         <meta property="og:title" content="SSRA Academy — Work in Germany as a Sports Scientist" />
         <meta property="og:description" content="Medical German, clinical courses and career support for Arabic-speaking sports science graduates. From €29/month." />
@@ -316,7 +316,7 @@ export default function Index() {
                     <span className="text-xs text-slate-400">{course.level}</span>
                     <Link to="/courses">
                       <button className="text-xs font-semibold text-[hsl(220,91%,54%)] hover:underline flex items-center gap-1">
-                        Learn more <ChevronRight className="w-3.5 h-3.5" />
+                        View course details <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </Link>
                   </div>
