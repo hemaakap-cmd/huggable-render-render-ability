@@ -105,16 +105,16 @@ export default function SuperAdminAdmins() {
             <UserCog className="w-5 h-5 text-[hsl(43,96%,50%)]" />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold text-slate-900">Admin Management</h1>
-            <p className="text-slate-500 text-sm">Promote or demote users — Super Admin only.</p>
+            <h1 className="font-display text-2xl font-bold text-slate-900">Team Management</h1>
+            <p className="text-slate-500 text-sm">Promote or demote admins, instructors and super admins — Super Admin only.</p>
           </div>
         </div>
 
-        {/* Current Admins */}
+        {/* Current team */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[hsl(220,91%,54%)]" /> Current Admins & Super Admins
+              <ShieldCheck className="w-4 h-4 text-[hsl(220,91%,54%)]" /> Current Admins, Instructors & Super Admins
             </h2>
             <span className="text-xs text-slate-400">{(admins as any[]).length} total</span>
           </div>
