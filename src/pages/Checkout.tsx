@@ -293,8 +293,8 @@ export default function Checkout() {
                 <button type="submit" disabled={loading}
                   className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Stripe…</>
-                    : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{couponApplied
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening secure checkout…</>
+                    : <><CreditCard className="w-4 h-4" /> Pay €{couponApplied
                         ? Math.max(0, course.price - couponApplied.finalDiscount).toFixed(2)
                         : course.price}{course.type === "subscription" ? "/mo" : ""}</>
                   }
