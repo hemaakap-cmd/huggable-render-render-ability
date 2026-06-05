@@ -29,6 +29,7 @@ const ADMIN_NAV = [
   { icon: BookCheck,        label: "Homework",         href: "/ssra-admin/homework" },
   { icon: AlertOctagon,     label: "Fraud Flags",      href: "/ssra-admin/fraud" },
   { icon: HeartPulse,       label: "System Health",    href: "/ssra-admin/system-health" },
+  { icon: Award,            label: "Certificates",     href: "/ssra-admin/certificates" },
 ];
 
 const SUPER_NAV = [
