@@ -1,23 +1,23 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-  LayoutDashboard, Users, ShieldCheck,
+  LayoutDashboard, Users,
   BookOpen, CreditCard, LogOut, Menu, X, Library, Video,
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
-  GraduationCap, GitBranch, Wand2, Radio,
+  GraduationCap, GitBranch, Wand2, Radio, FileCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
 const ADMIN_NAV = [
-  { icon: LayoutDashboard, label: "Dashboard",     href: "/ssra-admin" },
-  { icon: Radio,           label: "Live Visitors", href: "/ssra-admin/live" },
-  { icon: Users,           label: "Students",      href: "/ssra-admin/students" },
-  { icon: ClipboardList,   label: "Attendance",    href: "/ssra-admin/attendance" },
-  { icon: ShieldCheck,     label: "Verifications", href: "/ssra-admin/verifications" },
-  { icon: Library,         label: "Courses",       href: "/ssra-admin/courses" },
-  { icon: Video,           label: "Sessions",      href: "/ssra-admin/sessions" },
-  { icon: BookOpen,        label: "Enrollments",   href: "/ssra-admin/enrollments" },
+  { icon: LayoutDashboard, label: "Dashboard",       href: "/ssra-admin" },
+  { icon: Radio,           label: "Live Visitors",   href: "/ssra-admin/live" },
+  { icon: Users,           label: "Students",        href: "/ssra-admin/students" },
+  { icon: FileCheck,       label: "Verifications",   href: "/ssra-admin/verifications" },
+  { icon: ClipboardList,   label: "Attendance",      href: "/ssra-admin/attendance" },
+  { icon: Library,         label: "Courses",         href: "/ssra-admin/courses" },
+  { icon: Video,           label: "Sessions",        href: "/ssra-admin/sessions" },
+  { icon: BookOpen,        label: "Enrollments",     href: "/ssra-admin/enrollments" },
 ];
 
 const SUPER_NAV = [

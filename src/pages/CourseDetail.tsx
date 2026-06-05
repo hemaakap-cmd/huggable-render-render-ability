@@ -46,11 +46,7 @@ export default function CourseDetail() {
   }
 
   const handleEnrol = () => {
-    if (course.requires_verification) {
-      navigate(`/apply?course=${course.id}&intent=subscribe`);
-    } else {
-      navigate(`/checkout?courseId=${course.id}`);
-    }
+    navigate(`/checkout?courseId=${course.id}`);
   };
 
   const related = COURSES.filter((c) => c.category === course.category && c.id !== course.id).slice(0, 3);
@@ -92,11 +88,7 @@ export default function CourseDetail() {
             <span className="text-xs px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/20 capitalize">
               {course.category}
             </span>
-            {course.requires_verification && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-100 border border-amber-300/30 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> Verification required
-              </span>
-            )}
+
           </div>
 
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
@@ -230,9 +222,7 @@ export default function CourseDetail() {
                 disabled={hidden}
                 className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {hidden
-                  ? "Coming soon"
-                  : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+                {hidden ? "Coming soon" : "Enrol Now"}
                 <ArrowRight className="w-4 h-4" />
               </button>
 

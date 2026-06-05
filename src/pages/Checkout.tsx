@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, ShieldCheck, Calendar, Clock, User } from "lucide-react";
+import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
-import { useMyVerification, useCourseSchedule } from "@/hooks/useSsraData";
+import { useCourseSchedule } from "@/hooks/useSsraData";
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
@@ -24,7 +24,6 @@ export default function Checkout() {
   const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
-  const { data: verification, isLoading: vLoad } = useMyVerification();
 
   const [loading, setLoading] = useState(false);
 
@@ -80,7 +79,7 @@ export default function Checkout() {
   }
 
   /* loading state */
-  if (authLoading || vLoad) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -101,69 +100,6 @@ export default function Checkout() {
           <div className="text-center">
             <p className="text-slate-500 mb-4">Course not found.</p>
             <Link to="/pricing" className="text-[hsl(220,91%,54%)] font-semibold hover:underline">Back to pricing</Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  /* verification gate for subscription courses */
-  const needsVerification = course.requires_verification;
-  const isVerified        = verification?.status === "approved";
-  const isPending         = verification?.status === "pending";
-
-  if (needsVerification && !isVerified) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <Header />
-        <div className="flex-1 flex items-center justify-center py-32 px-4">
-          <div className="max-w-md w-full text-center">
-            <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-6">
-              <ShieldCheck className="w-8 h-8 text-amber-600" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-slate-900 mb-3">Verification Required</h1>
-            <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-              The <strong>{course.title}</strong> subscription is exclusively for sports science graduates and students.
-              We need to verify your diploma or student ID before you can subscribe.
-            </p>
-
-            {isPending ? (
-              <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 mb-6 flex items-start gap-3 text-left">
-                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
-                <div>
-                  <div className="text-sm font-semibold text-blue-800">Your application is under review</div>
-                  <div className="text-xs text-blue-700 mt-0.5">
-                    We'll email you within 24–48 hours. Once approved, come back here to subscribe.
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 mb-6 flex items-start gap-3 text-left">
-                <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-                <div>
-                  <div className="text-sm font-semibold text-amber-800">No active verification</div>
-                  <div className="text-xs text-amber-700 mt-0.5">
-                    Submit your application — it takes 5 minutes. We review within 3–5 days.
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-3">
-              {!isPending && (
-                <Link to={`/apply?course=${course.id}&intent=subscribe`}>
-                  <button className="w-full py-3 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors">
-                    Submit Verification Application
-                  </button>
-                </Link>
-              )}
-              <Link to="/dashboard/subscription">
-                <button className="w-full py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-100 transition-colors">
-                  Go to My Subscription
-                </button>
-              </Link>
-            </div>
           </div>
         </div>
         <Footer />
@@ -250,13 +186,11 @@ export default function Checkout() {
               </div>
 
               <form onSubmit={handlePay}>
-                <button type="submit" disabled={loading || !scheduleReady}
+                <button type="submit" disabled={loading}
                   className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Stripe…</>
-                    : !scheduleReady
-                      ? <>Enrollment unavailable — schedule pending</>
-                      : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{course.price}{course.type === "subscription" ? "/mo" : ""}</>
+                    : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{course.price}{course.type === "subscription" ? "/mo" : ""}</>
                   }
                 </button>
               </form>

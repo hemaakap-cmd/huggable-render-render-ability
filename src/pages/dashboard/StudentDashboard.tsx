@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { BookOpen, CreditCard, Clock, ArrowRight, CheckCircle2, AlertCircle, Crown, Video, ExternalLink, Calendar } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
-import { useMyEnrollments, useMySubscription, useMyVerification, useMyProfile, useUpcomingSessions } from "@/hooks/useSsraData";
+import { useMyEnrollments, useMySubscription, useMyProfile, useUpcomingSessions } from "@/hooks/useSsraData";
 
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
   return (
@@ -16,12 +16,9 @@ function StatCard({ label, value, sub, color }: { label: string; value: string |
 export default function StudentDashboard() {
   const { data: enrollments = [], isLoading: eLoading }  = useMyEnrollments();
   const { data: subscription, isLoading: sLoading }      = useMySubscription();
-  const { data: verification }                           = useMyVerification();
   const { data: profile }                                = useMyProfile();
   const { data: upcomingSessions = [] }                  = useUpcomingSessions();
 
-  const isVerified   = verification?.status === "approved";
-  const isPending    = verification?.status === "pending";
   const hasActiveSubscription = subscription?.status === "active" || subscription?.status === "trialing";
 
   return (
@@ -35,39 +32,6 @@ export default function StudentDashboard() {
           <p className="text-slate-500 text-sm mt-1">Here's your learning overview.</p>
         </div>
 
-        {/* Verification banner */}
-        {!isVerified && !isPending && (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-amber-800">Get your student profile verified</div>
-              <div className="text-xs text-amber-700 mt-0.5">Verified students may get access to exclusive community features and future courses.</div>
-            </div>
-            <Link to="/apply">
-              <button className="text-xs font-semibold text-amber-700 border border-amber-300 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors">
-                Learn more
-              </button>
-            </Link>
-          </div>
-        )}
-
-        {isPending && (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-50 border border-blue-200">
-            <Clock className="w-5 h-5 text-blue-600 shrink-0" />
-            <div>
-              <div className="text-sm font-semibold text-blue-800">Verification under review</div>
-              <div className="text-xs text-blue-700 mt-0.5">We'll email you within 24–48 hours.</div>
-            </div>
-          </div>
-        )}
-
-        {isVerified && (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-            <div className="text-sm font-semibold text-emerald-800">Student status verified ✓</div>
-          </div>
-        )}
-
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Courses enrolled"   value={eLoading ? "…" : enrollments.length} color="text-[hsl(220,91%,54%)]" />
@@ -75,9 +39,6 @@ export default function StudentDashboard() {
             value={sLoading ? "…" : hasActiveSubscription ? "Active" : "None"}
             sub={hasActiveSubscription ? "Medical German" : "€19/mo available"}
             color={hasActiveSubscription ? "text-emerald-600" : "text-slate-400"} />
-          <StatCard label="Verification"
-            value={isVerified ? "Approved" : isPending ? "Pending" : "Required"}
-            color={isVerified ? "text-emerald-600" : isPending ? "text-amber-600" : "text-slate-400"} />
           <StatCard label="Courses available" value="9" sub="Browse catalogue" color="text-slate-700" />
         </div>
 

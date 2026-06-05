@@ -1,9 +1,8 @@
 import { loadStripe } from "@stripe/stripe-js";
 
 /* ── Startup env validation ──
- * In production, missing Stripe env vars would silently fall back to
- * invalid placeholder price IDs and every checkout would fail with
- * "No such price". Fail loud instead. */
+ * In production, missing Stripe env vars would silently fail.
+ * Fail loud instead. */
 const REQUIRED_STRIPE_ENV = [
   "VITE_STRIPE_PUBLISHABLE_KEY",
   "VITE_STRIPE_PRICE_GERMAN_SUB",
@@ -28,9 +27,15 @@ if (import.meta.env.PROD) {
   }
 }
 
-export const stripePromise = loadStripe(
-  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? ""
-);
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+if (!publishableKey) {
+  throw new Error(
+    "[Stripe] VITE_STRIPE_PUBLISHABLE_KEY is not set. " +
+    "Check your deployment environment variables."
+  );
+}
+
+export const stripePromise = loadStripe(publishableKey);
 
 /* ── Course catalogue with pricing ── */
 export type CourseType = "subscription" | "one_time";
@@ -90,7 +95,7 @@ export const COURSES: Course[] = [
     category: "language",
     weeks: "Ongoing",
     level: "A0 → B1",
-    requires_verification: true,
+    requires_verification: false,
     modules: ["Body & movement vocabulary", "Clinic conversations", "Written report templates", "Patient explanation scripts", "B1 exam preparation"],
     color: "from-emerald-600 to-teal-800",
   },

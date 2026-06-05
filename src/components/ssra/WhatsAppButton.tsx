@@ -1,10 +1,18 @@
 import { MessageCircle } from "lucide-react";
 
-// Replace the number with the real WhatsApp number when known
-const WA_NUMBER = "491234567890"; // placeholder — will be configured via env
+// WhatsApp number from environment configuration
+const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER ?? "";
 const WA_MESSAGE = encodeURIComponent("Hi SSRA Academy! I'm interested in your courses.");
 
+// Log warning if not configured
+if (!WA_NUMBER && import.meta.env.PROD) {
+  console.warn("[WhatsApp] VITE_WHATSAPP_NUMBER is not configured. WhatsApp button will be hidden.");
+}
+
 export default function WhatsAppButton() {
+  // Hide button if WhatsApp number not configured
+  if (!WA_NUMBER) return null;
+
   const href = `https://wa.me/${WA_NUMBER}?text=${WA_MESSAGE}`;
   return (
     <a

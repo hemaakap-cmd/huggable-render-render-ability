@@ -66,25 +66,9 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // 3. Enforce verification gate server-side for restricted courses
-    if (course.requires_verification) {
-      const { data: verif } = await supabaseAdmin
-        .from("ssra_verifications")
-        .select("status")
-        .eq("user_id", user.id)
-        .eq("status", "approved")
-        .maybeSingle();
-      if (!verif) {
-        return new Response(JSON.stringify({ error: "Verification required" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
-
     const mode = course.course_type === "subscription" ? "subscription" : "payment";
 
-    // 4. Safe metadata — only allow UTM-style attribution fields from client
+    // 3. Safe metadata — only allow UTM-style attribution fields from client
     const safeUtm: Record<string, string> = {};
     if (clientMeta && typeof clientMeta === "object") {
       for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_content"]) {

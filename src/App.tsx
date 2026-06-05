@@ -32,15 +32,19 @@ const MyCourses         = lazy(() => import("./pages/dashboard/MyCourses"));
 const MySessions        = lazy(() => import("./pages/dashboard/MySessions"));
 const MySubscription    = lazy(() => import("./pages/dashboard/MySubscription"));
 const MyProfile         = lazy(() => import("./pages/dashboard/MyProfile"));
+const MyCertificates    = lazy(() => import("./pages/dashboard/MyCertificates"));
+
+/* ── Public ── */
+const VerifyCertificate   = lazy(() => import("./pages/VerifyCertificate"));
 
 /* ── Admin dashboard ── */
 const AdminDashboard      = lazy(() => import("./pages/ssra-admin/AdminDashboard"));
 const AdminOverview       = lazy(() => import("./pages/ssra-admin/AdminOverview"));
+const AdminVerifications  = lazy(() => import("./pages/ssra-admin/AdminVerifications"));
 const AdminCourses        = lazy(() => import("./pages/ssra-admin/AdminCourses"));
 const AdminSessions       = lazy(() => import("./pages/ssra-admin/AdminSessions"));
 const AdminStudents       = lazy(() => import("./pages/ssra-admin/AdminStudents"));
 const AdminAttendance     = lazy(() => import("./pages/ssra-admin/AdminAttendance"));
-const AdminVerifications  = lazy(() => import("./pages/ssra-admin/AdminVerifications"));
 const AdminEnrollments    = lazy(() => import("./pages/ssra-admin/AdminEnrollments"));
 const AdminRevenue        = lazy(() => import("./pages/ssra-admin/AdminRevenue"));
 /* ── Super Admin ── */
@@ -124,13 +128,16 @@ function AppInner() {
                 <Route path="/staff-login"      element={<AdminLogin />} />
                 <Route path="/reset-password"  element={<ResetPassword />} />
                 <Route path="/legal"           element={<Legal />} />
+                <Route path="/verify/:code"    element={<VerifyCertificate />} />
+                <Route path="/verify"          element={<VerifyCertificate />} />
 
                 {/* Student dashboard — auth required */}
                 <Route path="/dashboard"              element={<RequireAuth><StudentDashboard /></RequireAuth>} />
                 <Route path="/dashboard/courses"      element={<RequireAuth><MyCourses /></RequireAuth>} />
                 <Route path="/dashboard/sessions"     element={<RequireAuth><MySessions /></RequireAuth>} />
                 <Route path="/dashboard/subscription" element={<RequireAuth><MySubscription /></RequireAuth>} />
-                <Route path="/dashboard/profile"      element={<RequireAuth><MyProfile /></RequireAuth>} />
+                <Route path="/dashboard/profile"       element={<RequireAuth><MyProfile /></RequireAuth>} />
+                <Route path="/dashboard/certificates" element={<RequireAuth><MyCertificates /></RequireAuth>} />
                 <Route path="/dashboard/*"            element={<RequireAuth><StudentDashboard /></RequireAuth>} />
 
                 {/* Admin — admin role required */}
@@ -140,10 +147,10 @@ function AppInner() {
                 <Route path="/ssra-admin/sessions"          element={<RequireAdmin><AdminSessions /></RequireAdmin>} />
                 <Route path="/ssra-admin/attendance"        element={<RequireAdmin><AdminAttendance /></RequireAdmin>} />
                 <Route path="/ssra-admin/students"          element={<RequireAdmin><AdminStudents /></RequireAdmin>} />
-                <Route path="/ssra-admin/verifications"     element={<RequireAdmin><AdminVerifications /></RequireAdmin>} />
                 <Route path="/ssra-admin/enrollments"       element={<RequireAdmin><AdminEnrollments /></RequireAdmin>} />
                 <Route path="/ssra-admin/revenue"           element={<RequireAdmin><AdminRevenue /></RequireAdmin>} />
                 <Route path="/ssra-admin/live"              element={<RequireAdmin><AdminLiveVisitors /></RequireAdmin>} />
+                <Route path="/ssra-admin/verifications"     element={<RequireAdmin><AdminVerifications /></RequireAdmin>} />
                 {/* Super Admin only */}
                 <Route path="/ssra-admin/finance"           element={<RequireSuperAdmin><SuperAdminFinance /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/admins"            element={<RequireSuperAdmin><SuperAdminAdmins /></RequireSuperAdmin>} />
