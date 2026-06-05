@@ -119,6 +119,112 @@ async function handleTransactionCompleted(data: any, env: PaddleEnv) {
   });
 }
 
+async function handleSubscriptionCreated(data: any, _env: PaddleEnv) {
+  const custom = data.customData ?? {};
+  const userId = custom.userId as string | undefined;
+  const courseId = custom.courseId as string | undefined;
+  const enrollmentId = custom.enrollmentId as string | undefined;
+  if (!userId || !courseId) {
+    console.warn('subscription.created missing customData', { userId, courseId });
+    return;
+  }
+  const supabase = getSupabase();
+
+  await supabase.from('ssra_subscriptions').upsert({
+    user_id: userId,
+    course_id: courseId,
+    stripe_subscription_id: data.id,
+    stripe_customer_id: data.customerId,
+    status: data.status ?? 'active',
+    current_period_start: data.currentBillingPeriod?.startsAt,
+    current_period_end: data.currentBillingPeriod?.endsAt,
+    cancel_at_period_end: false,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'stripe_subscription_id' });
+
+  // Activate the pending enrollment so the student gets course access.
+  if (enrollmentId) {
+    const { data: enr } = await supabase
+      .from('ssra_enrollments')
+      .update({
+        status: 'active',
+        paid_at: new Date().toISOString(),
+        enrolled_at: new Date().toISOString(),
+      })
+      .eq('id', enrollmentId)
+      .select('student_email_snapshot, student_name_snapshot, course_title_snapshot, order_number')
+      .maybeSingle();
+
+    if (enr?.student_email_snapshot) {
+      await sendEmail('enrollment-confirmation', enr.student_email_snapshot, `paddle-sub-enr-${data.id}`, {
+        studentName: enr.student_name_snapshot ?? 'Student',
+        courseName: enr.course_title_snapshot ?? courseId,
+        orderNumber: enr.order_number ?? data.id,
+        dashboardUrl: `${SITE_URL}/dashboard`,
+      });
+      await sendEmail('admin-purchase-notification', ADMIN_NOTIFY_EMAIL, `paddle-sub-admin-${data.id}`, {
+        studentName: enr.student_name_snapshot ?? 'Student',
+        studentEmail: enr.student_email_snapshot,
+        courseName: enr.course_title_snapshot ?? courseId,
+        orderNumber: enr.order_number ?? data.id,
+        amountPaid: 'Monthly subscription',
+        environment: _env,
+        transactionId: data.id,
+      });
+    }
+
+    await supabase.from('ssra_notifications').insert({
+      user_id: userId,
+      type: 'enrollment',
+      title: `Welcome to ${enr?.course_title_snapshot ?? 'your course'}`,
+      body: `Your subscription is active. You can cancel anytime from your account.`,
+      link: '/dashboard',
+    });
+  }
+}
+
+async function handleSubscriptionUpdated(data: any, _env: PaddleEnv) {
+  await getSupabase().from('ssra_subscriptions').update({
+    status: data.status,
+    current_period_start: data.currentBillingPeriod?.startsAt,
+    current_period_end: data.currentBillingPeriod?.endsAt,
+    cancel_at_period_end: data.scheduledChange?.action === 'cancel',
+    updated_at: new Date().toISOString(),
+  }).eq('stripe_subscription_id', data.id);
+}
+
+async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
+  const supabase = getSupabase();
+  await supabase.from('ssra_subscriptions').update({
+    status: 'canceled',
+    cancel_at_period_end: false,
+    updated_at: new Date().toISOString(),
+  }).eq('stripe_subscription_id', data.id);
+
+  // Revoke course access once the subscription truly ends.
+  const { data: sub } = await supabase
+    .from('ssra_subscriptions')
+    .select('user_id, course_id')
+    .eq('stripe_subscription_id', data.id)
+    .maybeSingle();
+  if (sub) {
+    await supabase
+      .from('ssra_enrollments')
+      .update({ status: 'cancelled' })
+      .eq('user_id', sub.user_id)
+      .eq('course_id', sub.course_id)
+      .eq('status', 'active');
+
+    await supabase.from('ssra_notifications').insert({
+      user_id: sub.user_id,
+      type: 'subscription',
+      title: 'Subscription ended',
+      body: 'Your subscription has ended. You can resubscribe anytime to regain access.',
+      link: '/dashboard',
+    });
+  }
+}
+
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);
   console.log('paddle event:', event.eventType);
@@ -126,8 +232,16 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
     case EventName.TransactionCompleted:
       await handleTransactionCompleted(event.data, env);
       break;
+    case EventName.SubscriptionCreated:
+      await handleSubscriptionCreated(event.data, env);
+      break;
+    case EventName.SubscriptionUpdated:
+      await handleSubscriptionUpdated(event.data, env);
+      break;
+    case EventName.SubscriptionCanceled:
+      await handleSubscriptionCanceled(event.data, env);
+      break;
     default:
-      // subscription.* and transaction.payment_failed land here — not used yet.
       break;
   }
 }

@@ -208,12 +208,12 @@ export default function Checkout() {
                   </>
                 )}
                 {!couponApplied && course.type === "subscription" && (
-                  <p className="text-xs text-slate-400">Cancel anytime from your Stripe portal</p>
+                  <p className="text-xs text-slate-400">Cancel anytime from paddle.net using the email you check out with.</p>
                 )}
               </div>
               <div className="mt-5 flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-500">
                 <Shield className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
-                Payments secured by Stripe. Your card details are never stored on our servers.
+                Payments processed by Paddle, our Merchant of Record. Your card details are never stored on our servers.
               </div>
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function Checkout() {
             <div className="bg-white border border-slate-200 rounded-2xl p-8">
               <h2 className="font-display text-2xl font-bold text-slate-900 mb-1">Complete Enrolment</h2>
               <p className="text-slate-500 text-sm mb-6">
-                You'll be redirected to Stripe's secure checkout to complete your payment.
+                A secure Paddle checkout will open to complete your payment.
               </p>
 
               {/* Logged-in user info — read only */}

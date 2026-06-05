@@ -3,8 +3,16 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
+const SUBSCRIPTION_COURSES: Record<string, string> = {
+  'medical-german': 'medical_german_monthly',
+};
+
 function coursePriceId(courseId: string): string {
-  return `${courseId.replace(/-/g, '_')}_onetime`;
+  return SUBSCRIPTION_COURSES[courseId] ?? `${courseId.replace(/-/g, '_')}_onetime`;
+}
+
+function isSubscriptionCourse(courseId: string): boolean {
+  return courseId in SUBSCRIPTION_COURSES;
 }
 
 Deno.serve(async (req) => {
