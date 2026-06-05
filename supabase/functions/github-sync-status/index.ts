@@ -7,7 +7,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url);
-    const branch = url.searchParams.get("branch") ?? "main";
+    const requestedBranch = url.searchParams.get("branch");
 
     const ghToken = Deno.env.get("GITHUB_TOKEN");
     const headers: Record<string, string> = {
@@ -22,7 +22,7 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           repo: REPO,
-          branch,
+          branch: requestedBranch ?? "auto",
           error: `GitHub repo access failed (${repoRes.status})`,
           details: body,
           token_configured: Boolean(ghToken),
@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const repoData = await repoRes.json();
-    const targetBranch = branch || repoData.default_branch || "main";
+    const targetBranch = requestedBranch || repoData.default_branch || "main";
 
     const res = await fetch(
       `https://api.github.com/repos/${REPO}/commits/${encodeURIComponent(targetBranch)}`,
