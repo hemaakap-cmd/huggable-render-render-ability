@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Crown, UserCog, Search, Shield, ShieldCheck, User, AlertTriangle, Check } from "lucide-react";
+import { Crown, UserCog, Search, Shield, ShieldCheck, User, GraduationCap, AlertTriangle, Check } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminUsers, useSearchStudents, useSetUserRole } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
 
-type Role = "student" | "admin" | "super_admin";
+type Role = "student" | "instructor" | "admin" | "super_admin";
 
 const ROLE_CONFIG: Record<Role, { label: string; color: string; icon: React.ElementType }> = {
-  student:     { label: "Student",     color: "bg-slate-100 text-slate-600 border-slate-200",       icon: User },
-  admin:       { label: "Admin",       color: "bg-blue-50 text-[hsl(220,91%,54%)] border-blue-200", icon: Shield },
+  student:     { label: "Student",     color: "bg-slate-100 text-slate-600 border-slate-200",        icon: User },
+  instructor:  { label: "Instructor",  color: "bg-emerald-50 text-emerald-700 border-emerald-200",   icon: GraduationCap },
+  admin:       { label: "Admin",       color: "bg-blue-50 text-[hsl(220,91%,54%)] border-blue-200",  icon: Shield },
   super_admin: { label: "Super Admin", color: "bg-amber-50 text-amber-700 border-amber-200",         icon: Crown },
 };
 
