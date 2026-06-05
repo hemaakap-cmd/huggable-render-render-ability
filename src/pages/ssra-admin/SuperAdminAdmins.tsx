@@ -149,6 +149,68 @@ export default function SuperAdminAdmins() {
           </div>
         </div>
 
+        {/* Invite by email — direct add */}
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-100">
+            <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+              <Mail className="w-4 h-4 text-[hsl(220,91%,54%)]" /> Invite by Email
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Enter an email and assign a role. The user receives a confirmation link to set their password and sign in.
+            </p>
+          </div>
+
+          <form onSubmit={handleInvite} className="px-5 py-4 grid gap-3 md:grid-cols-[1fr_220px_140px_auto]">
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase tracking-wide font-semibold text-slate-500">Email *</label>
+              <input
+                type="email"
+                required
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                disabled={inviting}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase tracking-wide font-semibold text-slate-500">Full name</label>
+              <input
+                type="text"
+                value={inviteName}
+                onChange={(e) => setInviteName(e.target.value)}
+                placeholder="Optional"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                disabled={inviting}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase tracking-wide font-semibold text-slate-500">Role</label>
+              <select
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.target.value as "admin" | "instructor")}
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                disabled={inviting}
+              >
+                <option value="instructor">Instructor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                disabled={inviting || !inviteEmail.trim()}
+                className="h-10 w-full md:w-auto px-4 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[hsl(220,91%,46%)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {inviting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {inviting ? "Sending…" : "Send invite"}
+              </button>
+            </div>
+          </form>
+        </div>
+
+
+
         {/* Current team */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
