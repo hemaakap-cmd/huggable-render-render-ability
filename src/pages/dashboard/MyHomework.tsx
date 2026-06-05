@@ -37,10 +37,10 @@ export default function MyHomework() {
     setSaving(true);
     try {
       await submit.mutateAsync({
-        material_id: submitModal.material_id,
-        course_id:   submitModal.course_id,
-        text_content: text.trim() || null,
-        file_url:    fileUrl.trim() || null,
+        materialId:  submitModal.material_id,
+        courseId:    submitModal.course_id,
+        textContent: text.trim() || undefined,
+        fileUrl:     fileUrl.trim() || undefined,
       });
       toast({ title: "Homework submitted!" });
       setSubmitModal(null);

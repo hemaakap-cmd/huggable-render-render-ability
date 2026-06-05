@@ -200,6 +200,98 @@ export type Database = {
         }
         Relationships: []
       }
+      ssra_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      ssra_batches: {
+        Row: {
+          capacity: number
+          course_id: string
+          created_at: string
+          end_date: string | null
+          enrolled_count: number
+          id: string
+          name: string
+          notes: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          course_id: string
+          created_at?: string
+          end_date?: string | null
+          enrolled_count?: number
+          id?: string
+          name: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          course_id?: string
+          created_at?: string
+          end_date?: string | null
+          enrolled_count?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_batches_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ssra_certificates: {
         Row: {
           certificate_code: string
@@ -248,8 +340,113 @@ export type Database = {
         }
         Relationships: []
       }
+      ssra_coupon_uses: {
+        Row: {
+          coupon_id: string
+          discount_eur: number | null
+          enrollment_id: string | null
+          id: string
+          used_at: string
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          discount_eur?: number | null
+          enrollment_id?: string | null
+          id?: string
+          used_at?: string
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          discount_eur?: number | null
+          enrollment_id?: string | null
+          id?: string
+          used_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_coupon_uses_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ssra_coupon_uses_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ssra_coupons: {
+        Row: {
+          code: string
+          course_id: string | null
+          created_at: string
+          created_by: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          minimum_amount_eur: number | null
+          name: string | null
+          updated_at: string
+          uses_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          minimum_amount_eur?: number | null
+          name?: string | null
+          updated_at?: string
+          uses_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          minimum_amount_eur?: number | null
+          name?: string | null
+          updated_at?: string
+          uses_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_coupons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ssra_courses: {
         Row: {
+          capacity: number
           category: string
           course_format: string | null
           course_type: string
@@ -258,8 +455,10 @@ export type Database = {
           duration: string | null
           duration_weeks: string | null
           end_date: string | null
+          enrolled_count: number
           id: string
           image_url: string | null
+          instructor_id: string | null
           instructor_name: string | null
           is_active: boolean
           level: string | null
@@ -267,6 +466,7 @@ export type Database = {
           price_egp: number | null
           price_eur: number
           price_hidden: boolean
+          registration_open: boolean
           requires_verification: boolean
           sort_order: number
           start_date: string | null
@@ -276,8 +476,10 @@ export type Database = {
           title: string
           title_ar: string | null
           updated_at: string | null
+          waitlist_enabled: boolean
         }
         Insert: {
+          capacity?: number
           category: string
           course_format?: string | null
           course_type: string
@@ -286,8 +488,10 @@ export type Database = {
           duration?: string | null
           duration_weeks?: string | null
           end_date?: string | null
+          enrolled_count?: number
           id: string
           image_url?: string | null
+          instructor_id?: string | null
           instructor_name?: string | null
           is_active?: boolean
           level?: string | null
@@ -295,6 +499,7 @@ export type Database = {
           price_egp?: number | null
           price_eur: number
           price_hidden?: boolean
+          registration_open?: boolean
           requires_verification?: boolean
           sort_order?: number
           start_date?: string | null
@@ -304,8 +509,10 @@ export type Database = {
           title: string
           title_ar?: string | null
           updated_at?: string | null
+          waitlist_enabled?: boolean
         }
         Update: {
+          capacity?: number
           category?: string
           course_format?: string | null
           course_type?: string
@@ -314,8 +521,10 @@ export type Database = {
           duration?: string | null
           duration_weeks?: string | null
           end_date?: string | null
+          enrolled_count?: number
           id?: string
           image_url?: string | null
+          instructor_id?: string | null
           instructor_name?: string | null
           is_active?: boolean
           level?: string | null
@@ -323,6 +532,7 @@ export type Database = {
           price_egp?: number | null
           price_eur?: number
           price_hidden?: boolean
+          registration_open?: boolean
           requires_verification?: boolean
           sort_order?: number
           start_date?: string | null
@@ -332,12 +542,14 @@ export type Database = {
           title?: string
           title_ar?: string | null
           updated_at?: string | null
+          waitlist_enabled?: boolean
         }
         Relationships: []
       }
       ssra_enrollments: {
         Row: {
           amount_eur: number | null
+          batch_id: string | null
           course_id: string | null
           course_title_snapshot: string | null
           created_at: string | null
@@ -358,6 +570,7 @@ export type Database = {
         }
         Insert: {
           amount_eur?: number | null
+          batch_id?: string | null
           course_id?: string | null
           course_title_snapshot?: string | null
           created_at?: string | null
@@ -378,6 +591,7 @@ export type Database = {
         }
         Update: {
           amount_eur?: number | null
+          batch_id?: string | null
           course_id?: string | null
           course_title_snapshot?: string | null
           created_at?: string | null
@@ -398,6 +612,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "ssra_enrollments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_batches"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ssra_enrollments_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
@@ -405,6 +626,186 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ssra_fraud_flags: {
+        Row: {
+          created_at: string
+          details: Json | null
+          flag_type: string
+          id: string
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          flag_type: string
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          flag_type?: string
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ssra_homework_submissions: {
+        Row: {
+          batch_id: string | null
+          course_id: string
+          feedback: string | null
+          file_url: string | null
+          grade: number | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          material_id: string | null
+          status: string
+          submitted_at: string
+          text_content: string | null
+          user_id: string
+        }
+        Insert: {
+          batch_id?: string | null
+          course_id: string
+          feedback?: string | null
+          file_url?: string | null
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          material_id?: string | null
+          status?: string
+          submitted_at?: string
+          text_content?: string | null
+          user_id: string
+        }
+        Update: {
+          batch_id?: string | null
+          course_id?: string
+          feedback?: string | null
+          file_url?: string | null
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          material_id?: string | null
+          status?: string
+          submitted_at?: string
+          text_content?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_homework_submissions_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ssra_homework_submissions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ssra_homework_submissions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ssra_materials: {
+        Row: {
+          batch_id: string | null
+          course_id: string | null
+          created_at: string
+          description: string | null
+          file_url: string | null
+          id: string
+          title: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          batch_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          title: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          batch_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          title?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_materials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ssra_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       ssra_profiles: {
         Row: {
@@ -416,6 +817,7 @@ export type Database = {
           full_name: string | null
           german_level: string | null
           id: string
+          phone_number: string | null
           role: string
           updated_at: string | null
         }
@@ -428,6 +830,7 @@ export type Database = {
           full_name?: string | null
           german_level?: string | null
           id: string
+          phone_number?: string | null
           role?: string
           updated_at?: string | null
         }
@@ -440,10 +843,49 @@ export type Database = {
           full_name?: string | null
           german_level?: string | null
           id?: string
+          phone_number?: string | null
           role?: string
           updated_at?: string | null
         }
         Relationships: []
+      }
+      ssra_session_access_log: {
+        Row: {
+          accessed_at: string
+          device_fingerprint: string | null
+          id: string
+          ip_address: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_session_access_log_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ssra_session_attendance: {
         Row: {
@@ -639,6 +1081,53 @@ export type Database = {
           },
         ]
       }
+      ssra_waitlist: {
+        Row: {
+          course_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          notes: string | null
+          notified_at: string | null
+          position: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          notified_at?: string | null
+          position?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          notified_at?: string | null
+          position?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_waitlist_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -685,6 +1174,7 @@ export type Database = {
       }
     }
     Functions: {
+      course_has_seats: { Args: { _course_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -710,6 +1200,7 @@ export type Database = {
       }
       get_ssra_role: { Args: { _uid: string }; Returns: string }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
+      is_ssra_instructor: { Args: { _uid: string }; Returns: boolean }
       is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }
       move_to_dlq: {
         Args: {

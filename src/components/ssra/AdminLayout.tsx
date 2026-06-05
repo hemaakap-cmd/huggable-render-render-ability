@@ -6,7 +6,7 @@ import {
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
   GraduationCap, GitBranch, Wand2, Radio, FileCheck, Tag, ShieldAlert,
   FileSpreadsheet, GraduationCap as InstructorIcon, Layers, BookCheck,
-  AlertOctagon, HeartPulse,
+  AlertOctagon, HeartPulse, BarChart3,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
@@ -38,6 +38,7 @@ const SUPER_NAV = [
   { icon: UserCog,    label: "Manage Admins",     href: "/ssra-admin/admins" },
   { icon: GitBranch,  label: "Sync Status",       href: "/ssra-admin/sync-status" },
   { icon: Wand2,      label: "Manual Grant",      href: "/ssra-admin/manual-grant" },
+  { icon: BarChart3,  label: "Student Reports",   href: "/ssra-admin/student-reports" },
 ];
 
 function NavItem({ icon: Icon, label, href, end = false, onClick }: {

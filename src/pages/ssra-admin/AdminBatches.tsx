@@ -133,7 +133,9 @@ export default function AdminBatches() {
             No batches yet. Create one to start managing cohorts.
           </div>
         ) : (
-          Object.entries(grouped).map(([courseName, batchList]) => (
+          Object.entries(grouped).map(([courseName, batchListRaw]) => {
+            const batchList = batchListRaw as any[];
+            return (
             <div key={courseName} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
               <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
                 <div className="font-semibold text-slate-800 text-sm">{courseName}</div>
@@ -196,7 +198,7 @@ export default function AdminBatches() {
                 </tbody>
               </table>
             </div>
-          ))
+          );})
         )}
       </div>
 
