@@ -53,7 +53,7 @@ const FEATURES = [
   { icon: Shield,   title: "Verified Curriculum",   desc: "Every course reviewed by practising German sports scientists and physiotherapists." },
   { icon: Languages,title: "Arabic-First Support",  desc: "All modules explained in Arabic with German and English resources." },
   { icon: Zap,      title: "Job-Ready in Weeks",    desc: "Practical, scenario-based learning — not theory for theory's sake." },
-  { icon: CreditCard,title:"Secure Global Payments",desc: "Pay securely from anywhere in the world via Stripe — all major cards accepted." },
+  { icon: CreditCard,title:"Secure Global Payments",desc: "Pay securely from anywhere in the world via Paddle — all major cards accepted." },
 ];
 
 const TESTIMONIALS = [
@@ -174,7 +174,7 @@ export default function Index() {
             <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-white/40">
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Non-profit mission</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Arabic support</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Stripe secure payments</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Paddle secure payments</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
             </div>
           </div>
@@ -244,7 +244,7 @@ export default function Index() {
                 <ol className="space-y-4">
                   {[
                     { n: "1", t: "Create free account", d: "Sign up in 30 seconds — no payment needed." },
-                    { n: "2", t: "Subscribe via Stripe",  d: "Pay securely from anywhere. €29/month, cancel anytime." },
+                    { n: "2", t: "Subscribe via Paddle",  d: "Pay securely from anywhere. €19/month, cancel anytime at paddle.net." },
                     { n: "3", t: "Start learning",        d: "Immediate access to all modules and live sessions." },
                   ].map(({ n, t, d }) => (
                     <li key={n} className="flex gap-4">
@@ -401,7 +401,7 @@ export default function Index() {
             Start Learning Today
           </h2>
           <p className="text-white/55 text-lg max-w-xl mx-auto mb-10">
-            Applications are free. Pay only for the courses you choose. Cancel subscriptions anytime. We accept cards from all over the world via Stripe.
+            Applications are free. Pay only for the courses you choose. Cancel subscriptions anytime at paddle.net. We accept cards from all over the world via Paddle, our Merchant of Record.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/apply">
@@ -417,10 +417,10 @@ export default function Index() {
             </Link>
           </div>
 
-          {/* Stripe badge */}
+          {/* Paddle badge */}
           <div className="mt-10 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/12 text-white/50 text-xs">
             <CreditCard className="w-3.5 h-3.5" />
-            Payments secured by Stripe · Visa · Mastercard · Apple Pay · Google Pay
+            Payments processed by Paddle.com (Merchant of Record) · Visa · Mastercard · Apple Pay · Google Pay
           </div>
         </div>
       </section>

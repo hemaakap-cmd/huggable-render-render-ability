@@ -165,7 +165,7 @@ export default function Pricing() {
             You Actually Need
           </h1>
           <p className="text-white/55 text-lg max-w-xl mx-auto mb-8">
-            One subscription for German language. Individual one-time payments for clinical and career courses. All secured by Stripe.
+            One subscription for German language. Individual one-time payments for clinical and career courses. All orders processed by Paddle.com, our Merchant of Record.
           </p>
           <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/8 border border-white/12 text-white/60 text-sm">
             <CreditCard className="w-4 h-4" />
@@ -235,9 +235,9 @@ export default function Pricing() {
         <div className="container">
           <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {[
-              { icon: Shield,     title: "Secure Payments",   desc: "All payments processed by Stripe — PCI-DSS compliant, encrypted end-to-end." },
+              { icon: Shield,     title: "Secure Payments",   desc: "All payments processed by Paddle.com, our Merchant of Record — PCI-DSS compliant, encrypted end-to-end." },
               { icon: Globe2,     title: "Global Cards",      desc: "Accept Visa, Mastercard, AMEX, Apple Pay, Google Pay, and SEPA from any country." },
-              { icon: RefreshCcw, title: "Cancel Anytime",    desc: "Subscriptions can be cancelled at any time directly from your Stripe customer portal." },
+              { icon: RefreshCcw, title: "Cancel Anytime",    desc: "Subscriptions can be cancelled any time at paddle.net using your checkout email. 14-day money-back guarantee." },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="reveal text-center p-6 rounded-2xl bg-white border border-slate-200">
                 <div className="w-12 h-12 rounded-xl bg-[hsl(220,91%,54%)]/10 flex items-center justify-center mx-auto mb-4">
@@ -258,8 +258,8 @@ export default function Pricing() {
           <div className="space-y-4">
             {[
               { q: "Why does the German language course require verification?", a: "We keep it exclusively for sports science graduates and students to ensure the community stays relevant and the content serves real needs." },
-              { q: "Can I pay from Egypt, Morocco, or Syria?", a: "Yes — Stripe accepts cards and payment methods from virtually every country. If you have a Visa or Mastercard, you can enrol." },
-              { q: "How do I cancel my subscription?", a: "You'll receive a link to your Stripe Customer Portal after subscribing. Cancel in one click, no questions asked." },
+              { q: "Can I pay from Egypt, Morocco, or Syria?", a: "Yes — Paddle accepts cards and payment methods from virtually every country. If you have a Visa or Mastercard, you can enrol." },
+              { q: "How do I cancel my subscription?", a: "Visit paddle.net and enter the email you used at checkout. You can cancel in one click — no questions asked. We also offer a 14-day money-back guarantee." },
               { q: "Are there scholarships for students who cannot afford fees?", a: "Yes — mention your situation in the application form. We review every case and offer full or partial waivers for demonstrated financial need." },
               { q: "Do I get a certificate?", a: "Yes, every completed course includes a digital SSRA certificate of completion." },
             ].map(({ q, a }) => (

@@ -95,7 +95,7 @@ export default function MySubscription() {
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors disabled:opacity-60">
                 {portalLoading
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening portal…</>
-                  : <><ExternalLink className="w-4 h-4" /> Manage Billing on Stripe</>}
+                  : <><ExternalLink className="w-4 h-4" /> Manage Billing at paddle.net</>}
               </button>
               <p className="text-xs text-white/30 text-center mt-2">Update card, cancel subscription, or download invoices</p>
             </div>
@@ -104,9 +104,9 @@ export default function MySubscription() {
             <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
               <h3 className="font-semibold text-slate-800 text-sm">Need help?</h3>
               <div className="text-xs text-slate-500 space-y-1.5">
-                <p>• To <strong>cancel</strong> your subscription, click "Manage Billing on Stripe" above.</p>
+                <p>• To <strong>cancel</strong> your subscription, click "Manage Billing at paddle.net" above.</p>
                 <p>• You keep access until the end of the current billing period.</p>
-                <p>• To <strong>update your payment method</strong>, use the Stripe portal above.</p>
+                <p>• To <strong>update your payment method</strong>, use the Paddle portal above.</p>
                 <p>• For any other issues, <Link to="/contact" className="text-[hsl(220,91%,54%)] hover:underline">contact us</Link>.</p>
               </div>
             </div>
@@ -117,7 +117,7 @@ export default function MySubscription() {
             <Crown className="w-10 h-10 text-[hsl(43,96%,50%)] mx-auto mb-4" />
             <div className="font-display text-xl font-bold text-slate-900 mb-2">Medical German</div>
             <div className="text-slate-500 text-sm mb-1">Monthly subscription · <strong>€19/month</strong></div>
-            <div className="text-slate-400 text-xs mb-6">Cancel anytime from your Stripe portal.</div>
+            <div className="text-slate-400 text-xs mb-6">Cancel anytime at paddle.net. 14-day money-back guarantee.</div>
             <Link to="/checkout?courseId=medical-german">
               <button className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors">
                 <Crown className="w-4 h-4" /> Subscribe Now
