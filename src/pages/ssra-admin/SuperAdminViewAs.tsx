@@ -386,7 +386,7 @@ export default function SuperAdminViewAs() {
                     { label: "Status",       value: subscription.status },
                     { label: "Period start", value: (subscription as any).current_period_start ? fmt((subscription as any).current_period_start) : "—" },
                     { label: "Period end",   value: (subscription as any).current_period_end   ? fmt((subscription as any).current_period_end)   : "—" },
-                    { label: "Stripe ID",    value: (subscription as any).stripe_subscription_id ? (subscription as any).stripe_subscription_id.slice(0, 20) + "…" : "—" },
+                    { label: "Payment ID",   value: (subscription as any).stripe_subscription_id ? (subscription as any).stripe_subscription_id.slice(0, 20) + "…" : "—" },
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">{label}</div>
