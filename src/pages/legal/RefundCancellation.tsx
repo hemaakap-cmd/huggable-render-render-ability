@@ -176,7 +176,7 @@ export default function RefundCancellation() {
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li><strong className="text-slate-800">Account Settings:</strong> Log into your SSRA Academy account, go to "My Subscription," and click "Cancel Subscription."</li>
                   <li><strong className="text-slate-800">Email:</strong> Send a cancellation request to <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> from your registered email address.</li>
-                  <li><strong className="text-slate-800">Stripe Customer Portal:</strong> Access the billing portal directly from your payment confirmation email.</li>
+                  <li><strong className="text-slate-800">Paddle Customer Portal:</strong> Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> with the email used at checkout to cancel directly.</li>
                 </ul>
                 <p className="text-sm text-slate-500 italic">Cancellation requests are typically processed within 24-48 hours. You will receive a confirmation email once your cancellation is complete.</p>
               </div>
