@@ -373,6 +373,40 @@ export function useUpcomingSessions() {
   });
 }
 
+/* ── Sessions: upcoming filtered to the user's enrolled/subscribed courses ── */
+export function useMyUpcomingSessions() {
+  return useQuery({
+    queryKey: ["ssra-sessions-mine-upcoming"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const [{ data: enrollments }, { data: subscriptions }] = await Promise.all([
+        supabase.from("ssra_enrollments").select("course_id").eq("user_id", user.id).eq("status", "active"),
+        supabase.from("ssra_subscriptions").select("course_id").eq("user_id", user.id).in("status", ["active", "trialing"]),
+      ]);
+
+      const courseIds = [
+        ...(enrollments ?? []).map((e) => e.course_id),
+        ...(subscriptions ?? []).map((s) => s.course_id),
+      ].filter((id): id is string => Boolean(id));
+
+      if (courseIds.length === 0) return [];
+
+      const { data, error } = await supabase
+        .from("ssra_sessions")
+        .select("*, ssra_courses(title)")
+        .eq("is_cancelled", false)
+        .in("course_id", courseIds)
+        .gte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: true })
+        .limit(10);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export function usePastSessions() {
   return useQuery({
     queryKey: ["ssra-sessions-past"],
@@ -851,5 +885,66 @@ export function useEnrollmentBySession(sessionId: string) {
       return data;
     },
     refetchInterval: (q: any) => (q?.state?.data ? false : 2500),
+  });
+}
+
+
+/* ── Operational health: admin-level alerts ── */
+export function useOperationalAlerts() {
+  return useQuery({
+    queryKey: ["ssra-operational-alerts"],
+    staleTime: 300_000,
+    queryFn: async () => {
+      const now = new Date();
+      const in30d = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      const [coursesRes, sessionsRes, waitlistRes] = await Promise.all([
+        supabase.from("ssra_courses").select("id, title, is_active, enrolled_count, capacity, registration_open").eq("is_active", true),
+        supabase.from("ssra_sessions").select("id, course_id, title, zoom_link, scheduled_at, is_cancelled")
+          .eq("is_cancelled", false)
+          .gte("scheduled_at", now.toISOString())
+          .lte("scheduled_at", in30d.toISOString()),
+        supabase.from("ssra_waitlist").select("course_id").eq("status", "waiting"),
+      ]);
+
+      const courses = coursesRes.data ?? [];
+      const sessions = sessionsRes.data ?? [];
+      const waitlist = waitlistRes.data ?? [];
+
+      const courseSessionCount = new Map<string, number>();
+      const courseMissingZoom = new Map<string, string[]>();
+
+      for (const s of sessions) {
+        courseSessionCount.set(s.course_id, (courseSessionCount.get(s.course_id) ?? 0) + 1);
+        if (!s.zoom_link) {
+          const list = courseMissingZoom.get(s.course_id) ?? [];
+          list.push(s.title);
+          courseMissingZoom.set(s.course_id, list);
+        }
+      }
+
+      const waitlistByCourse = new Map<string, number>();
+      for (const w of waitlist) {
+        waitlistByCourse.set(w.course_id, (waitlistByCourse.get(w.course_id) ?? 0) + 1);
+      }
+
+      const alerts: Array<{ level: "warn" | "info"; message: string; href?: string }> = [];
+
+      for (const c of courses) {
+        if ((courseSessionCount.get(c.id) ?? 0) === 0) {
+          alerts.push({ level: "warn", message: `"${c.title}" has no sessions scheduled in the next 30 days.`, href: "/ssra-admin/sessions" });
+        }
+        const missingZoom = courseMissingZoom.get(c.id) ?? [];
+        if (missingZoom.length > 0) {
+          alerts.push({ level: "warn", message: `${missingZoom.length} session(s) in "${c.title}" are missing a Zoom link.`, href: "/ssra-admin/sessions" });
+        }
+        const wCount = waitlistByCourse.get(c.id) ?? 0;
+        if (wCount > 0 && c.enrolled_count < c.capacity) {
+          alerts.push({ level: "info", message: `${wCount} student(s) on waitlist for "${c.title}" — seats are now available.`, href: "/ssra-admin/waitlist" });
+        }
+      }
+
+      return alerts;
+    },
   });
 }

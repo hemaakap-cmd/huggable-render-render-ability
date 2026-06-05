@@ -1,9 +1,50 @@
 import { useState } from "react";
-import { Video, Clock, ExternalLink, Calendar, Loader2, AlertCircle } from "lucide-react";
+import { Video, Clock, ExternalLink, Calendar, Loader2, AlertCircle, Download } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
-import { useUpcomingSessions, usePastSessions } from "@/hooks/useSsraData";
+import { useMyUpcomingSessions, usePastSessions } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+function formatIcsDate(dateStr: string): string {
+  return new Date(dateStr).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+}
+
+function downloadIcs(sessions: any[]) {
+  const events = sessions.map((s) => {
+    const start = formatIcsDate(s.scheduled_at);
+    const endMs = new Date(s.scheduled_at).getTime() + (s.duration_minutes ?? 60) * 60000;
+    const end = formatIcsDate(new Date(endMs).toISOString());
+    const title = `${s.title}${s.ssra_courses?.title ? ` — ${s.ssra_courses.title}` : ""}`;
+    const desc = s.description ? s.description.replace(/\n/g, "\\n") : "";
+    return [
+      "BEGIN:VEVENT",
+      `UID:ssra-session-${s.id}@ssra.academy`,
+      `DTSTART:${start}`,
+      `DTEND:${end}`,
+      `SUMMARY:${title}`,
+      desc ? `DESCRIPTION:${desc}` : "",
+      "END:VEVENT",
+    ].filter(Boolean).join("\r\n");
+  });
+
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//SSRA Academy//Sessions//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    ...events,
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ssra-sessions.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function JoinZoomButton({ sessionId }: { sessionId: string }) {
   const [loading, setLoading] = useState(false);
@@ -89,7 +130,16 @@ function SessionCard({ s, isPast = false }: { s: any; isPast?: boolean }) {
         )}
       </div>
 
-      <div className="shrink-0 flex items-start">
+      <div className="shrink-0 flex items-start gap-2">
+        {!isPast && (
+          <button
+            onClick={() => downloadIcs([s])}
+            title="Add to calendar"
+            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </button>
+        )}
         {!isPast && s.is_cancelled ? (
           <span className="flex items-center gap-1 text-xs text-red-500 font-medium px-3 py-2 bg-red-50 rounded-lg border border-red-100">
             <AlertCircle className="w-3.5 h-3.5" /> Cancelled
@@ -105,15 +155,26 @@ function SessionCard({ s, isPast = false }: { s: any; isPast?: boolean }) {
 }
 
 export default function MySessions() {
-  const { data: upcoming = [], isLoading: uLoading } = useUpcomingSessions();
+  const { data: upcoming = [], isLoading: uLoading } = useMyUpcomingSessions();
   const { data: past = [],     isLoading: pLoading } = usePastSessions();
 
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-8">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-slate-900">Live Zoom Sessions</h1>
-          <p className="text-slate-500 text-sm mt-1">Your upcoming and past Medical German live classes.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-slate-900">Live Zoom Sessions</h1>
+            <p className="text-slate-500 text-sm mt-1">Your upcoming and past live classes.</p>
+          </div>
+          {(upcoming as any[]).length > 0 && (
+            <button
+              onClick={() => downloadIcs(upcoming as any[])}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Export to Calendar
+            </button>
+          )}
         </div>
 
         {/* Upcoming */}

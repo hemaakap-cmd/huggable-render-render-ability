@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   Users, ShieldCheck, Clock, CheckCircle2, XCircle,
-  ArrowRight, Video, TrendingUp, BookOpen, UserCheck,
+  ArrowRight, Video, TrendingUp, BookOpen, UserCheck, AlertTriangle, Info,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -11,7 +11,7 @@ import {
 import AdminLayout from "@/components/ssra/AdminLayout";
 import {
   useAdminStats, useAdminVerifications, useAdminEnrollments,
-  useStudentGrowth, useAdminSessions,
+  useStudentGrowth, useAdminSessions, useOperationalAlerts,
 } from "@/hooks/useSsraData";
 
 const PIE_COLORS = {
@@ -61,6 +61,7 @@ export default function AdminDashboard() {
   const { data: enrollments = [] }               = useAdminEnrollments();
   const { data: growth = [] }                    = useStudentGrowth();
   const { data: sessions = [] }                  = useAdminSessions();
+  const { data: opAlerts = [] }                  = useOperationalAlerts();
   const verifications = verificationsPage?.rows ?? [];
   const pendingVerif = pendingVerifPage?.rows ?? [];
 
@@ -124,6 +125,27 @@ export default function AdminDashboard() {
           <KpiCard icon={UserCheck} label="Active Subscriptions"  value={activeSubs}   color="bg-emerald-100 text-emerald-600" href="/ssra-admin/enrollments" />
           <KpiCard icon={Video}     label="Upcoming Sessions"     value={upcomingSessions.length} color="bg-violet-100 text-violet-600" href="/ssra-admin/sessions" />
         </div>
+
+        {/* Operational alerts */}
+        {opAlerts.length > 0 && (
+          <div className="space-y-2">
+            {opAlerts.map((alert, i) => (
+              <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-sm ${
+                alert.level === "warn"
+                  ? "bg-amber-50 border-amber-200 text-amber-800"
+                  : "bg-blue-50 border-blue-200 text-blue-800"
+              }`}>
+                {alert.level === "warn"
+                  ? <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  : <Info className="w-4 h-4 shrink-0 mt-0.5" />}
+                <span className="flex-1">{alert.message}</span>
+                {alert.href && (
+                  <Link to={alert.href} className="font-semibold hover:underline shrink-0">Fix →</Link>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Charts row */}
         <div className="grid lg:grid-cols-3 gap-6">

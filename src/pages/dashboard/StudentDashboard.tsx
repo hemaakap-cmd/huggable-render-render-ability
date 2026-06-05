@@ -1,7 +1,32 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, CreditCard, Clock, ArrowRight, CheckCircle2, AlertCircle, Crown, Video, ExternalLink, Calendar } from "lucide-react";
+import { BookOpen, CreditCard, Clock, ArrowRight, Crown, Video, Calendar, Bell } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
-import { useMyEnrollments, useMySubscription, useMyProfile, useUpcomingSessions } from "@/hooks/useSsraData";
+import { useMyEnrollments, useMySubscription, useMyProfile, useMyUpcomingSessions } from "@/hooks/useSsraData";
+
+function useCountdown(target: string | null) {
+  const [ms, setMs] = useState(() => (target ? new Date(target).getTime() - Date.now() : 0));
+  useEffect(() => {
+    if (!target) return;
+    const tick = () => setMs(new Date(target).getTime() - Date.now());
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [target]);
+  return ms;
+}
+
+function formatCountdown(ms: number): string {
+  if (ms <= 0) return "Live now";
+  const s = Math.floor(ms / 1000);
+  const days = Math.floor(s / 86400);
+  const hours = Math.floor((s % 86400) / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  const secs = s % 60;
+  if (days > 0) return `${days}d ${hours}h ${mins}m`;
+  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
+  return `${mins}m ${secs}s`;
+}
 
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
   return (
@@ -13,13 +38,51 @@ function StatCard({ label, value, sub, color }: { label: string; value: string |
   );
 }
 
+function NextSessionBanner({ session }: { session: { title: string; scheduled_at: string; ssra_courses?: { title: string } | null } }) {
+  const ms = useCountdown(session.scheduled_at);
+  const isLive = ms <= 0;
+  const isImminent = ms > 0 && ms < 15 * 60 * 1000;
+
+  return (
+    <div className={`rounded-2xl p-5 ${isLive ? "bg-emerald-600" : isImminent ? "bg-amber-500" : "bg-hero"} text-white relative overflow-hidden`}>
+      <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+      <div className="relative flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isLive ? "bg-white/20" : "bg-white/15"}`}>
+            <Video className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-semibold text-white/60 uppercase tracking-wide mb-0.5 flex items-center gap-1.5">
+              <Bell className="w-3 h-3" />
+              {isLive ? "Session is live!" : "Next session"}
+            </div>
+            <div className="font-semibold truncate">{session.title}</div>
+            <div className="text-xs text-white/60 mt-0.5">{session.ssra_courses?.title}</div>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className={`font-mono font-bold text-xl tabular-nums ${isLive ? "animate-pulse" : ""}`}>
+            {formatCountdown(ms)}
+          </div>
+          <Link to="/dashboard/sessions">
+            <button className="text-xs font-semibold bg-white/20 hover:bg-white/30 transition-colors px-3 py-1.5 rounded-lg">
+              {isLive || isImminent ? "Join Now" : "View Details"}
+            </button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function StudentDashboard() {
-  const { data: enrollments = [], isLoading: eLoading }  = useMyEnrollments();
-  const { data: subscription, isLoading: sLoading }      = useMySubscription();
-  const { data: profile }                                = useMyProfile();
-  const { data: upcomingSessions = [] }                  = useUpcomingSessions();
+  const { data: enrollments = [], isLoading: eLoading }     = useMyEnrollments();
+  const { data: subscription, isLoading: sLoading }         = useMySubscription();
+  const { data: profile }                                   = useMyProfile();
+  const { data: upcomingSessions = [] }                     = useMyUpcomingSessions();
 
   const hasActiveSubscription = subscription?.status === "active" || subscription?.status === "trialing";
+  const nextSession = (upcomingSessions as any[])[0] ?? null;
 
   return (
     <DashboardLayout>
@@ -32,17 +95,20 @@ export default function StudentDashboard() {
           <p className="text-slate-500 text-sm mt-1">Here's your learning overview.</p>
         </div>
 
+        {/* Next session countdown banner */}
+        {nextSession && <NextSessionBanner session={nextSession} />}
+
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <StatCard label="Courses enrolled"   value={eLoading ? "…" : enrollments.length} color="text-[hsl(220,91%,54%)]" />
           <StatCard label="Subscription"
             value={sLoading ? "…" : hasActiveSubscription ? "Active" : "None"}
             sub={hasActiveSubscription ? "Medical German" : "€19/mo available"}
             color={hasActiveSubscription ? "text-emerald-600" : "text-slate-400"} />
-          <StatCard label="Courses available" value="9" sub="Browse catalogue" color="text-slate-700" />
+          <StatCard label="Upcoming sessions"  value={(upcomingSessions as any[]).length} sub="Your courses only" color="text-purple-600" />
         </div>
 
-        {/* Active subscription */}
+        {/* Active subscription card */}
         {hasActiveSubscription && subscription && (
           <div className="bg-hero rounded-2xl p-6 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-blue-500/15 blur-2xl" />
@@ -109,11 +175,11 @@ export default function StudentDashboard() {
           )}
         </div>
 
-        {/* Upcoming Zoom sessions — only shown for active subscribers */}
-        {hasActiveSubscription && (upcomingSessions as any[]).length > 0 && (
+        {/* Upcoming sessions list — only courses user has access to, no direct Zoom links */}
+        {(upcomingSessions as any[]).length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-slate-900">Upcoming Zoom Sessions</h2>
+              <h2 className="font-semibold text-slate-900">Upcoming Sessions</h2>
               <Link to="/dashboard/sessions" className="text-xs text-[hsl(220,91%,54%)] font-semibold hover:underline flex items-center gap-1">
                 View all <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -135,10 +201,10 @@ export default function StudentDashboard() {
                         {dateStr} · {timeStr} · {s.duration_minutes} min
                       </div>
                     </div>
-                    <a href={s.zoom_link} target="_blank" rel="noopener noreferrer"
+                    <Link to="/dashboard/sessions"
                       className="flex items-center gap-1 text-xs font-semibold text-[hsl(220,91%,54%)] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors shrink-0">
-                      <ExternalLink className="w-3 h-3" /> Join
-                    </a>
+                      <Clock className="w-3 h-3" /> Join
+                    </Link>
                   </div>
                 );
               })}
@@ -152,9 +218,9 @@ export default function StudentDashboard() {
           <div className="grid sm:grid-cols-3 gap-4">
             {[
               { icon: BookOpen,   label: "Browse Courses",     href: "/courses",                color: "bg-blue-50 text-[hsl(220,91%,54%)]" },
-              ...(hasActiveSubscription
-                ? [{ icon: Video,       label: "Live Sessions",      href: "/dashboard/sessions",    color: "bg-emerald-50 text-emerald-600" }]
-                : [{ icon: Crown,      label: "Subscribe to German", href: "/pricing",               color: "bg-amber-50 text-amber-600" }]
+              ...(hasActiveSubscription || enrollments.length > 0
+                ? [{ icon: Video,  label: "Live Sessions",      href: "/dashboard/sessions",    color: "bg-emerald-50 text-emerald-600" }]
+                : [{ icon: Crown,  label: "Subscribe to German", href: "/pricing",               color: "bg-amber-50 text-amber-600" }]
               ),
               { icon: CreditCard, label: "Manage Billing",      href: "/dashboard/subscription", color: "bg-slate-100 text-slate-600" },
             ].map(({ icon: Icon, label, href, color }) => (

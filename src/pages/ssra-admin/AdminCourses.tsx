@@ -19,6 +19,7 @@ const EMPTY: Record<string, unknown> = {
   is_active: true, price_hidden: false, sort_order: 99, stripe_price_id: "",
   image_url: "", modules: [],
   start_date: "", start_time: "", duration: "", instructor_name: "", course_format: "online",
+  capacity: 50, waitlist_enabled: true, registration_open: true,
 };
 
 function normalizeCourseFormat(value: unknown) {
@@ -178,6 +179,7 @@ export default function AdminCourses() {
                   <th className="text-left px-4 py-3 hidden md:table-cell">Category</th>
                   <th className="text-right px-4 py-3">EUR</th>
                   <th className="text-right px-4 py-3 hidden sm:table-cell">EGP</th>
+                  <th className="text-center px-4 py-3 hidden lg:table-cell">Seats</th>
                   <th className="text-center px-4 py-3">Show Price</th>
                   <th className="text-center px-4 py-3">Active</th>
                   <th className="text-right px-4 py-3"></th>
@@ -209,6 +211,11 @@ export default function AdminCourses() {
                     <td className="px-4 py-3.5 text-right font-bold text-slate-800">€{c.price_eur}</td>
                     <td className="px-4 py-3.5 text-right text-slate-500 text-xs hidden sm:table-cell">
                       {c.price_egp ? `${Number(c.price_egp).toLocaleString()} ج.م` : "—"}
+                    </td>
+                    <td className="px-4 py-3.5 text-center text-xs hidden lg:table-cell">
+                      <span className={`font-semibold ${c.enrolled_count >= c.capacity ? "text-red-600" : "text-slate-700"}`}>
+                        {c.enrolled_count ?? 0}/{c.capacity ?? 50}
+                      </span>
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <button onClick={() => handleTogglePrice(c)} title={c.price_hidden ? "Price hidden — click to show" : "Price visible — click to hide"}
@@ -409,6 +416,33 @@ export default function AdminCourses() {
                 <textarea rows={5} value={modulesText} onChange={(e) => setModulesText(e.target.value)}
                   placeholder={"Anatomical foundations\nMovement pathology\nRehabilitation planning"}
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] resize-none font-mono" />
+              </div>
+
+              {/* Capacity & Registration */}
+              <div className="border-t border-slate-100 pt-5">
+                <h3 className="text-sm font-semibold text-slate-900 mb-3">Capacity & Registration</h3>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Max Seats</label>
+                    <input type="number" min="1" max="9999"
+                      value={form.capacity as number} onChange={(e) => field("capacity", Number(e.target.value))}
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
+                  </div>
+                  <div className="flex flex-col justify-end gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.registration_open as boolean}
+                        onChange={(e) => field("registration_open", e.target.checked)}
+                        className="w-4 h-4 rounded accent-emerald-500" />
+                      <span className="text-sm text-slate-700">Registration open</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.waitlist_enabled as boolean}
+                        onChange={(e) => field("waitlist_enabled", e.target.checked)}
+                        className="w-4 h-4 rounded accent-blue-500" />
+                      <span className="text-sm text-slate-700">Enable waitlist when full</span>
+                    </label>
+                  </div>
+                </div>
               </div>
 
               {/* Checkboxes */}
