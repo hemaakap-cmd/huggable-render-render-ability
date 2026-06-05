@@ -65,6 +65,7 @@ const AdminBatches         = lazy(() => import("./pages/ssra-admin/AdminBatches"
 const AdminHomework        = lazy(() => import("./pages/ssra-admin/AdminHomework"));
 const AdminFraud           = lazy(() => import("./pages/ssra-admin/AdminFraud"));
 const AdminSystemHealth    = lazy(() => import("./pages/ssra-admin/AdminSystemHealth"));
+const AdminCertificates    = lazy(() => import("./pages/ssra-admin/AdminCertificates"));
 
 /* ── Instructor dashboard ── */
 const InstructorDashboard  = lazy(() => import("./pages/instructor/InstructorDashboard"));
