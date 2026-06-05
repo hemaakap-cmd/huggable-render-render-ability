@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown } from "lucide-react";
+import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown, AlertCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, type Course } from "@/lib/stripe";
+import { useCoursesCapacityMap } from "@/hooks/useSsraData";
 
 function useReveal() {
   useEffect(() => {
@@ -27,16 +28,14 @@ const TABS: { label: string; value: Category }[] = [
   { label: "Career",      value: "career" },
 ];
 
-function CourseRow({ course }: { course: Course }) {
+function CourseRow({
+  course,
+  isFull = false,
+}: {
+  course: Course;
+  isFull?: boolean;
+}) {
   const navigate = useNavigate();
-
-  const handleEnrol = () => {
-    if (course.requires_verification) {
-      navigate("/apply?course=" + course.id + "&intent=subscribe");
-    } else {
-      navigate("/checkout?courseId=" + course.id);
-    }
-  };
 
   return (
     <div className="card-lift reveal bg-white border border-slate-200 rounded-2xl overflow-hidden">
@@ -69,9 +68,9 @@ function CourseRow({ course }: { course: Course }) {
               ) : (
                 <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> €{course.price} one-time</span>
               )}
-              {course.requires_verification && (
-                <span className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                  Verification required
+              {!course.price_hidden && isFull && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200">
+                  <AlertCircle className="w-3 h-3" /> Sold Out
                 </span>
               )}
             </div>
@@ -96,13 +95,20 @@ function CourseRow({ course }: { course: Course }) {
               <Link to="/contact" className="btn-outline px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-500">
                 Get Notified <ArrowRight className="w-4 h-4" />
               </Link>
+            ) : isFull ? (
+              <Link
+                to={`/courses/${course.id}`}
+                className="btn-outline px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600"
+              >
+                Join Waitlist <ArrowRight className="w-4 h-4" />
+              </Link>
             ) : (
               <>
                 <button
-                  onClick={handleEnrol}
+                  onClick={() => navigate(`/checkout?courseId=${course.id}`)}
                   className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2"
                 >
-                  {course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+                  Enrol Now
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <Link to="/pricing" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
@@ -120,6 +126,7 @@ function CourseRow({ course }: { course: Course }) {
 export default function Courses() {
   useReveal();
   const [active, setActive] = useState<Category>("all");
+  const { data: capacityMap = {} } = useCoursesCapacityMap();
 
   const filtered = active === "all" ? COURSES : COURSES.filter((c) => c.category === active);
 
@@ -173,7 +180,9 @@ export default function Courses() {
       {/* Course list */}
       <section className="py-12">
         <div className="container space-y-6">
-          {filtered.map((c) => <CourseRow key={c.id} course={c} />)}
+          {filtered.map((c) => (
+            <CourseRow key={c.id} course={c} isFull={capacityMap[c.id]?.isFull ?? false} />
+          ))}
         </div>
       </section>
 

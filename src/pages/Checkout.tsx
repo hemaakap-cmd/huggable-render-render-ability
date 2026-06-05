@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User } from "lucide-react";
+import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Tag, X } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/stripe";
@@ -27,6 +27,13 @@ export default function Checkout() {
 
   const [loading, setLoading] = useState(false);
 
+  const [couponCode,    setCouponCode]    = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError,   setCouponError]   = useState<string | null>(null);
+  const [couponApplied, setCouponApplied] = useState<{
+    code: string; discountType: string; discountValue: number; finalDiscount: number;
+  } | null>(null);
+
   const scheduleReady = !!(schedule?.start_date && schedule?.start_time && schedule?.duration);
 
   const displayName  = profile?.full_name  ?? user?.user_metadata?.full_name ?? "";
@@ -45,6 +52,34 @@ export default function Checkout() {
     const out: Record<string, string> = {};
     keys.forEach((k) => { const v = sessionStorage.getItem(k); if (v) out[k] = v; });
     return out;
+  }
+
+  async function handleApplyCoupon() {
+    if (!couponCode.trim() || !course) return;
+    setCouponLoading(true);
+    setCouponError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("validate-coupon", {
+        body: { code: couponCode.trim().toUpperCase(), courseId: course.id, amountEur: course.price },
+      });
+      if (error) throw new Error(error.message);
+      if (!data?.valid) {
+        setCouponError(data?.errorReason ?? "Invalid coupon code.");
+        setCouponApplied(null);
+      } else {
+        setCouponApplied({
+          code:          couponCode.trim().toUpperCase(),
+          discountType:  data.discountType,
+          discountValue: data.discountValue,
+          finalDiscount: data.finalDiscount,
+        });
+        setCouponError(null);
+      }
+    } catch (err: unknown) {
+      setCouponError((err as Error).message);
+    } finally {
+      setCouponLoading(false);
+    }
   }
 
   async function handlePay(e: React.FormEvent) {
@@ -67,6 +102,7 @@ export default function Checkout() {
           successUrl: `${origin}/payment-success?courseId=${course.id}&session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl:  `${origin}/checkout?courseId=${course.id}`,
           metadata:   getUtmMeta(),
+          ...(couponApplied ? { couponCode: couponApplied.code } : {}),
         },
       });
       if (error) throw new Error(error.message);
@@ -137,18 +173,33 @@ export default function Checkout() {
                   <span>This course is missing schedule details (start date, time, or duration). Enrollment is disabled until the admin completes the setup.</span>
                 </div>
               )}
-              <div className="border-t border-slate-100 pt-4">
+              <div className="border-t border-slate-100 pt-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
                     {course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
                   </span>
-                  <span className="font-bold text-slate-900 font-display text-xl">
+                  <span className={`font-bold font-display text-xl ${couponApplied ? "line-through text-slate-400 text-base" : "text-slate-900"}`}>
                     €{course.price}
-                    {course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
+                    {!couponApplied && course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
                   </span>
                 </div>
-                {course.type === "subscription" && (
-                  <p className="text-xs text-slate-400 mt-1">Cancel anytime from your Stripe portal</p>
+                {couponApplied && (
+                  <>
+                    <div className="flex items-center justify-between text-emerald-700 text-sm">
+                      <span>Discount ({couponApplied.code})</span>
+                      <span>− €{couponApplied.finalDiscount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between font-bold text-slate-900">
+                      <span className="text-sm">Total</span>
+                      <span className="font-display text-xl">
+                        €{Math.max(0, course.price - couponApplied.finalDiscount).toFixed(2)}
+                        {course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
+                      </span>
+                    </div>
+                  </>
+                )}
+                {!couponApplied && course.type === "subscription" && (
+                  <p className="text-xs text-slate-400">Cancel anytime from your Stripe portal</p>
                 )}
               </div>
               <div className="mt-5 flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-500">
@@ -185,12 +236,58 @@ export default function Checkout() {
                 </div>
               </div>
 
+              {/* Coupon code */}
+              <div className="mb-5">
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
+                  <Tag className="w-3.5 h-3.5" /> Coupon code
+                </label>
+                {couponApplied ? (
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="text-sm text-emerald-700 font-semibold flex-1">{couponApplied.code} applied</span>
+                    <button
+                      type="button"
+                      onClick={() => { setCouponApplied(null); setCouponCode(""); }}
+                      className="text-emerald-500 hover:text-emerald-700"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleApplyCoupon(); }}}
+                      placeholder="Enter code"
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void handleApplyCoupon()}
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                    >
+                      {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                    </button>
+                  </div>
+                )}
+                {couponError && (
+                  <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5" /> {couponError}
+                  </p>
+                )}
+              </div>
+
               <form onSubmit={handlePay}>
                 <button type="submit" disabled={loading}
                   className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Stripe…</>
-                    : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{course.price}{course.type === "subscription" ? "/mo" : ""}</>
+                    : <><CreditCard className="w-4 h-4" /> Continue to Secure Payment — €{couponApplied
+                        ? Math.max(0, course.price - couponApplied.finalDiscount).toFixed(2)
+                        : course.price}{course.type === "subscription" ? "/mo" : ""}</>
                   }
                 </button>
               </form>

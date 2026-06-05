@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft, ArrowRight, BookOpen, Clock, Globe2, CheckCircle2,
-  CreditCard, Crown, ShieldCheck, Calendar, User, Tv,
+  CreditCard, Crown, Calendar, User, Tv, Users, AlertCircle, Loader2,
 } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, getCourse } from "@/lib/stripe";
-import { usePriceHiddenMap, useCourseSchedule } from "@/hooks/useSsraData";
+import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlist } from "@/hooks/useSsraData";
+import { useSsraAuth } from "@/hooks/useSsraAuth";
+import { useToast } from "@/hooks/use-toast";
 
 function formatDate(d?: string | null) {
   if (!d) return null;
@@ -22,13 +24,31 @@ function formatTime(t?: string | null) {
 
 export default function CourseDetail() {
   const { id = "" } = useParams();
-  const navigate = useNavigate();
-  const course = getCourse(id);
+  const navigate   = useNavigate();
+  const { user }   = useSsraAuth();
+  const { toast }  = useToast();
+  const course     = getCourse(id);
   const { data: priceHidden = {} } = usePriceHiddenMap();
-  const { data: schedule } = useCourseSchedule(id);
-  const hidden = !!priceHidden[id];
+  const { data: schedule }         = useCourseSchedule(id);
+  const { data: capacity }         = useCourseCapacity(id);
+  const joinWaitlist               = useJoinWaitlist();
+  const [joiningWaitlist, setJoiningWaitlist] = useState(false);
+  const hidden   = !!priceHidden[id];
+  const isFull   = capacity ? capacity.enrolled_count >= capacity.capacity : false;
+  const seatsLeft = capacity ? Math.max(0, capacity.capacity - capacity.enrolled_count) : null;
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
+
+  const handleWaitlist = async () => {
+    if (!user) { navigate(`/login?redirect=/courses/${id}`); return; }
+    setJoiningWaitlist(true);
+    try {
+      await joinWaitlist.mutateAsync(id);
+      toast({ title: "Added to waitlist", description: "We'll notify you when a seat opens up." });
+    } catch (e: unknown) {
+      toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
+    } finally { setJoiningWaitlist(false); }
+  };
 
   if (!course) {
     return (
@@ -215,16 +235,51 @@ export default function CourseDetail() {
                 <div className="flex justify-between"><span>Level</span><span className="font-medium text-slate-800">{course.level}</span></div>
                 <div className="flex justify-between"><span>Modules</span><span className="font-medium text-slate-800">{course.modules.length}</span></div>
                 <div className="flex justify-between"><span>Format</span><span className="font-medium text-slate-800 capitalize">{course.type.replace("_", " ")}</span></div>
+                {seatsLeft !== null && !hidden && (
+                  <div className="flex justify-between items-center">
+                    <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Seats</span>
+                    <span className={`font-medium ${isFull ? "text-red-600" : seatsLeft <= 5 ? "text-amber-600" : "text-emerald-600"}`}>
+                      {isFull ? "Sold out" : `${seatsLeft} remaining`}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <button
-                onClick={handleEnrol}
-                disabled={hidden}
-                className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {hidden ? "Coming soon" : "Enrol Now"}
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              {/* Capacity warning */}
+              {!hidden && seatsLeft !== null && seatsLeft <= 10 && !isFull && (
+                <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  Only {seatsLeft} seat{seatsLeft !== 1 ? "s" : ""} left — enrol now before it fills.
+                </div>
+              )}
+
+              {isFull && !hidden ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 font-semibold">
+                    <AlertCircle className="w-4 h-4" /> Course is full
+                  </div>
+                  {capacity?.waitlist_enabled && (
+                    <button
+                      onClick={handleWaitlist}
+                      disabled={joiningWaitlist}
+                      className="w-full py-3 rounded-xl text-sm font-semibold border border-[hsl(220,91%,54%)] text-[hsl(220,91%,54%)] hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      {joiningWaitlist
+                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Joining…</>
+                        : <><Users className="w-4 h-4" /> Join Waitlist</>}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={handleEnrol}
+                  disabled={hidden}
+                  className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {hidden ? "Coming soon" : "Enrol Now"}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
 
               <Link
                 to="/contact"

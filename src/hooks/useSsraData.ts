@@ -752,6 +752,90 @@ export function useCourseSchedule(courseId: string) {
   });
 }
 
+/* ── Course capacity & waitlist (public) ── */
+export function useCourseCapacity(courseId: string) {
+  return useQuery({
+    enabled: !!courseId,
+    queryKey: ["ssra-course-capacity", courseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_courses")
+        .select("id, capacity, enrolled_count, waitlist_enabled, registration_open")
+        .eq("id", courseId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as {
+        id: string;
+        capacity: number;
+        enrolled_count: number;
+        waitlist_enabled: boolean;
+        registration_open: boolean;
+      } | null;
+    },
+  });
+}
+
+export function useJoinWaitlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (courseId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await (supabase.from("ssra_waitlist" as never) as any)
+        .insert({ user_id: user.id, course_id: courseId, status: "waiting" });
+      if (error) {
+        if (error.code === "23505") throw new Error("You are already on the waitlist for this course.");
+        throw error;
+      }
+    },
+    onSuccess: (_d, courseId) => {
+      qc.invalidateQueries({ queryKey: ["ssra-waitlist-status", courseId] });
+      qc.invalidateQueries({ queryKey: ["ssra-admin-waitlist"] });
+    },
+  });
+}
+
+export function useCoursesCapacityMap() {
+  return useQuery({
+    queryKey: ["ssra-courses-capacity-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_courses")
+        .select("id, capacity, enrolled_count, waitlist_enabled, registration_open");
+      if (error) throw error;
+      const map: Record<string, { isFull: boolean; seatsLeft: number; waitlistEnabled: boolean }> = {};
+      for (const c of data ?? []) {
+        const cap = c.capacity ?? 50;
+        const enrolled = c.enrolled_count ?? 0;
+        map[c.id] = {
+          isFull: enrolled >= cap,
+          seatsLeft: Math.max(0, cap - enrolled),
+          waitlistEnabled: !!c.waitlist_enabled,
+        };
+      }
+      return map;
+    },
+  });
+}
+
+export function useMyWaitlistStatus(courseId: string) {
+  return useQuery({
+    enabled: !!courseId,
+    queryKey: ["ssra-waitlist-status", courseId],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data, error } = await (supabase.from("ssra_waitlist" as never) as any)
+        .select("id, position, status, created_at")
+        .eq("user_id", user.id)
+        .eq("course_id", courseId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; position: number; status: string; created_at: string } | null;
+    },
+  });
+}
+
 /* ── Fetch enrollment by Stripe session id (for confirmation page) ── */
 export function useEnrollmentBySession(sessionId: string) {
   return useQuery({

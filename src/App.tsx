@@ -55,6 +55,9 @@ const SuperAdminViewAs    = lazy(() => import("./pages/ssra-admin/SuperAdminView
 const SuperAdminSyncStatus = lazy(() => import("./pages/ssra-admin/SuperAdminSyncStatus"));
 const SuperAdminManualGrant = lazy(() => import("./pages/ssra-admin/SuperAdminManualGrant"));
 const AdminLiveVisitors    = lazy(() => import("./pages/ssra-admin/AdminLiveVisitors"));
+const AdminWaitlist        = lazy(() => import("./pages/ssra-admin/AdminWaitlist"));
+const AdminCoupons         = lazy(() => import("./pages/ssra-admin/AdminCoupons"));
+const AdminAuditLog        = lazy(() => import("./pages/ssra-admin/AdminAuditLog"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -151,6 +154,9 @@ function AppInner() {
                 <Route path="/ssra-admin/revenue"           element={<RequireAdmin><AdminRevenue /></RequireAdmin>} />
                 <Route path="/ssra-admin/live"              element={<RequireAdmin><AdminLiveVisitors /></RequireAdmin>} />
                 <Route path="/ssra-admin/verifications"     element={<RequireAdmin><AdminVerifications /></RequireAdmin>} />
+                <Route path="/ssra-admin/waitlist"          element={<RequireAdmin><AdminWaitlist /></RequireAdmin>} />
+                <Route path="/ssra-admin/coupons"           element={<RequireAdmin><AdminCoupons /></RequireAdmin>} />
+                <Route path="/ssra-admin/audit-log"         element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
                 {/* Super Admin only */}
                 <Route path="/ssra-admin/finance"           element={<RequireSuperAdmin><SuperAdminFinance /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/admins"            element={<RequireSuperAdmin><SuperAdminAdmins /></RequireSuperAdmin>} />

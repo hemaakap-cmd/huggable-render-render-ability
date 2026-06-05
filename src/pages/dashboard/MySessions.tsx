@@ -1,6 +1,53 @@
-import { Video, Clock, ExternalLink, Calendar } from "lucide-react";
+import { useState } from "react";
+import { Video, Clock, ExternalLink, Calendar, Loader2, AlertCircle } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useUpcomingSessions, usePastSessions } from "@/hooks/useSsraData";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+function JoinZoomButton({ sessionId }: { sessionId: string }) {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleJoin = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-session-access", {
+        body: { sessionId },
+      });
+
+      if (error) throw error;
+
+      if (data?.zoom_link) {
+        window.open(data.zoom_link, "_blank", "noopener,noreferrer");
+      } else if (data?.minutesUntilOpen !== undefined) {
+        toast({
+          title: "Session not open yet",
+          description: `Zoom access opens ${data.minutesUntilOpen} minute${data.minutesUntilOpen !== 1 ? "s" : ""} before the session starts.`,
+        });
+      } else {
+        toast({ title: "Access unavailable", description: data?.error ?? "Could not retrieve session link.", variant: "destructive" });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to retrieve session link";
+      toast({ title: "Error", description: msg, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleJoin}
+      disabled={loading}
+      className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[hsl(220,91%,54%)] px-4 py-2 rounded-lg hover:bg-[hsl(220,91%,46%)] transition-colors disabled:opacity-60"
+    >
+      {loading
+        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading…</>
+        : <><ExternalLink className="w-3.5 h-3.5" /> Join Zoom</>}
+    </button>
+  );
+}
 
 function SessionCard({ s, isPast = false }: { s: any; isPast?: boolean }) {
   const date = new Date(s.scheduled_at);
@@ -43,13 +90,13 @@ function SessionCard({ s, isPast = false }: { s: any; isPast?: boolean }) {
       </div>
 
       <div className="shrink-0 flex items-start">
-        {!isPast && (
-          <a href={s.zoom_link} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[hsl(220,91%,54%)] px-4 py-2 rounded-lg hover:bg-[hsl(220,91%,46%)] transition-colors">
-            <ExternalLink className="w-3.5 h-3.5" /> Join Zoom
-          </a>
-        )}
-        {isPast && s.zoom_password && (
+        {!isPast && s.is_cancelled ? (
+          <span className="flex items-center gap-1 text-xs text-red-500 font-medium px-3 py-2 bg-red-50 rounded-lg border border-red-100">
+            <AlertCircle className="w-3.5 h-3.5" /> Cancelled
+          </span>
+        ) : !isPast ? (
+          <JoinZoomButton sessionId={s.id} />
+        ) : (
           <span className="text-xs text-slate-400">Past session</span>
         )}
       </div>
