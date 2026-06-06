@@ -23,25 +23,15 @@ export interface Course {
   paymentLink?: string;
 }
 
+/**
+ * NOTE: The €1 "test-course" exists ONLY in the database (ssra_courses) for
+ * admin/QA testing of the checkout flow via the direct URL
+ * `/checkout?courseId=test-course`. It is intentionally NOT listed in this
+ * public catalogue so it never appears on the homepage, /courses, /pricing,
+ * or anywhere else a customer can see it.
+ */
 export const COURSES: Course[] = [
-  /* ── TEST COURSE — internal checkout test ── */
-  {
-    id: "test-course",
-    title: "Test Course (€1/mo)",
-    titleAr: "كورس تجريبي",
-    subtitle: "End-to-end checkout test — €1/month",
-    desc: "Internal test subscription for verifying checkout flow. After payment, use Manual Grant to provision access (webhook cannot auto-link payment links).",
-    price: 1,
-    interval: "month" as const,
-    type: "subscription" as const,
-    priceId: coursePriceId("test-course"),
-    category: "language" as const,
-    weeks: "Ongoing",
-    level: "Test",
-    requires_verification: false,
-    modules: ["Sandbox module"],
-    color: "from-slate-500 to-slate-700",
-  },
+
 
   /* ── LANGUAGE (subscription) ── */
   {
