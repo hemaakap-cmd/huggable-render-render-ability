@@ -251,9 +251,9 @@ async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
 }
 
 
-async function handleWebhook(req: Request, env: PaddleEnv) {
-  const event = await verifyWebhook(req, env);
-  console.log('paddle event:', event.eventType);
+async function handleWebhook(req: Request) {
+  const { event, env } = await verifyAndDetectEnv(req);
+  console.log('paddle event:', event.eventType, 'env:', env);
   switch (event.eventType) {
     case EventName.TransactionCompleted:
       await handleTransactionCompleted(event.data, env);
@@ -278,10 +278,8 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-  const url = new URL(req.url);
-  const env = (url.searchParams.get('env') || 'sandbox') as PaddleEnv;
   try {
-    await handleWebhook(req, env);
+    await handleWebhook(req);
     return new Response(JSON.stringify({ received: true }), {
       status: 200, headers: { 'Content-Type': 'application/json' },
     });
