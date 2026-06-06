@@ -136,10 +136,17 @@ export default function Courses() {
         <title>Courses — SSRA Academy</title>
         <meta name="description" content="9 courses for Arabic-speaking sports science graduates. Medical German, clinical rehabilitation, movement analysis, career entry in Germany. From €29." />
         <link rel="canonical" href="https://ssracourses.com/courses" />
+        <meta property="og:title" content="SSRA Courses — Medical German & Rehabilitation in Arabic" />
+        <meta property="og:description" content="9 specialised courses: Medical German, rehab, movement analysis, and career entry in Germany. From €29." />
+        <meta property="og:url" content="https://ssracourses.com/courses" />
+        <meta property="og:type" content="website" />
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="SSRA Courses Catalogue" />
+        <meta name="twitter:description" content="Medical German, rehab, movement analysis & career entry in Germany — taught in Arabic." />
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
       </Helmet>
+
       <Header />
 
       {/* Hero */}
