@@ -3,7 +3,7 @@ import { CheckCircle2, ArrowRight, Mail, Calendar, Clock, User, Loader2 } from "
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/courseCatalog";
-import { useEnrollmentBySession } from "@/hooks/useSsraData";
+import { useEnrollmentById, useEnrollmentBySession } from "@/hooks/useSsraData";
 
 function formatDate(d?: string | null) {
   if (!d) return "—";
@@ -17,11 +17,16 @@ function formatTime(t?: string | null) {
 
 export default function PaymentSuccess() {
   const [params] = useSearchParams();
-  const sessionId = params.get("session_id") ?? "";
-  const courseId  = params.get("courseId");
+  const enrollmentId = params.get("enrollmentId") ?? "";
+  const sessionId    = params.get("session_id") ?? "";
+  const courseId     = params.get("courseId");
   const fallbackCourse = courseId ? getCourse(courseId) : null;
 
-  const { data: enrollment, isLoading } = useEnrollmentBySession(sessionId);
+  // Paddle flow: look up by enrollmentId; legacy Stripe flow: look up by stripe session_id
+  const byId      = useEnrollmentById(enrollmentId);
+  const bySession = useEnrollmentBySession(enrollmentId ? "" : sessionId);
+  const enrollment = byId.data ?? bySession.data;
+  const isLoading  = (enrollmentId ? byId.isLoading : bySession.isLoading) && !enrollment;
 
   const courseTitle = enrollment?.course_title_snapshot ?? fallbackCourse?.title ?? "Your course";
   const isSubscription = fallbackCourse?.type === "subscription";
@@ -44,7 +49,7 @@ export default function PaymentSuccess() {
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-            {sessionId && isLoading && !enrollment ? (
+            {isLoading ? (
               <div className="flex items-center justify-center gap-2 py-6 text-slate-400 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" /> Finalising your enrollment…
               </div>

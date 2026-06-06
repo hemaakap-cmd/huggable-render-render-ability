@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useCourseSchedule } from "@/hooks/useSsraData";
+import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
@@ -39,14 +40,12 @@ export default function Checkout() {
   const displayName  = profile?.full_name  ?? user?.user_metadata?.full_name ?? "";
   const displayEmail = profile?.email      ?? user?.email ?? "";
 
-  /* redirect to login if not authenticated */
   useEffect(() => {
     if (!authLoading && !user) {
       navigate(`/login?redirect=${encodeURIComponent(`/checkout?courseId=${courseId}`)}`);
     }
   }, [authLoading, user, navigate, courseId]);
 
-  // Read UTM params stored on landing (set by App.tsx)
   function getUtmMeta(): Record<string, string> {
     const keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content"];
     const out: Record<string, string> = {};
@@ -87,30 +86,41 @@ export default function Checkout() {
     if (!course || !user) return;
     setLoading(true);
     try {
-      const successUrl = `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}&courseId=${course.id}`;
-      const cancelUrl  = `${window.location.origin}/checkout?courseId=${course.id}`;
+      // 1. Create pending enrollment row and get Paddle external price ID
+      const { data, error } = await supabase.functions.invoke("paddle-prepare-checkout", {
+        body: { courseId: course.id, metadata: getUtmMeta() },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.alreadyEnrolled) throw new Error("You are already enrolled in this course.");
+      if (!data?.paddlePriceId) throw new Error("Could not prepare checkout. Please try again.");
 
-      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: {
-          courseId: course.id,
+      const enrollmentId: string | undefined = data.customData?.enrollmentId;
+
+      // 2. Init Paddle.js (cached after first call)
+      await initializePaddle();
+
+      // 3. Resolve external price ID → Paddle internal price ID (pri_xxx)
+      const internalPriceId = await getPaddlePriceId(data.paddlePriceId);
+
+      // 4. Open Paddle checkout overlay
+      const successUrl = `${window.location.origin}/payment-success?courseId=${course.id}${enrollmentId ? `&enrollmentId=${enrollmentId}` : ""}`;
+
+      window.Paddle.Checkout.open({
+        items: [{ priceId: internalPriceId, quantity: 1 }],
+        customData: data.customData,
+        customer: { email: user.email ?? undefined },
+        settings: {
           successUrl,
-          cancelUrl,
-          metadata: getUtmMeta(),
-          ...(couponApplied ? { couponCode: couponApplied.code } : {}),
+          allowedPaymentMethods: ["card", "paypal"],
         },
       });
-
-      if (error) throw new Error(error.message);
-      if (!data?.url) throw new Error("Could not create checkout session.");
-
-      window.location.href = data.url;
     } catch (err: unknown) {
       toast({ title: "Payment error", description: (err as Error).message, variant: "destructive" });
+    } finally {
       setLoading(false);
     }
   }
 
-  /* loading state */
   if (authLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -123,7 +133,6 @@ export default function Checkout() {
     );
   }
 
-  /* course not found */
   if (!course) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -166,7 +175,7 @@ export default function Checkout() {
               {!scheduleReady && (
                 <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>This course is missing schedule details (start date, time, or duration). Enrollment is disabled until the admin completes the setup.</span>
+                  <span>This course is missing schedule details. Enrollment is disabled until the admin completes the setup.</span>
                 </div>
               )}
               <div className="border-t border-slate-100 pt-4 space-y-2">
@@ -195,12 +204,12 @@ export default function Checkout() {
                   </>
                 )}
                 {!couponApplied && course.type === "subscription" && (
-                  <p className="text-xs text-slate-400">Cancel anytime from your Stripe customer portal or contact us.</p>
+                  <p className="text-xs text-slate-400">Cancel anytime at paddle.net. 14-day money-back guarantee.</p>
                 )}
               </div>
               <div className="mt-5 flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-500">
                 <Shield className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
-                Payments processed securely by Stripe. Your card details are never stored on our servers.
+                Payments processed securely by Paddle.com (Merchant of Record). Your card details are never stored on our servers.
               </div>
             </div>
           </div>
@@ -210,10 +219,10 @@ export default function Checkout() {
             <div className="bg-white border border-slate-200 rounded-2xl p-8">
               <h2 className="font-display text-2xl font-bold text-slate-900 mb-1">Complete Enrolment</h2>
               <p className="text-slate-500 text-sm mb-6">
-                You'll be redirected to a secure Stripe checkout to complete your payment.
+                A secure Paddle checkout will open to complete your payment.
               </p>
 
-              {/* Logged-in user info — read only */}
+              {/* Logged-in user info */}
               <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   <Lock className="w-3.5 h-3.5" /> Enrolling as
@@ -280,12 +289,12 @@ export default function Checkout() {
                 <button type="submit" disabled={loading || !scheduleReady}
                   className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening secure checkout…</>
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Preparing checkout…</>
                     : !scheduleReady
                       ? "Setup incomplete — contact admin"
                       : <><CreditCard className="w-4 h-4" /> Pay €{couponApplied
                           ? Math.max(0, course.price - couponApplied.finalDiscount).toFixed(2)
-                          : course.price}{course.type === "subscription" ? "/mo" : ""}</>
+                          : course.price}{course.type === "subscription" ? "/mo" : ""} via Paddle</>
                   }
                 </button>
               </form>
@@ -296,7 +305,7 @@ export default function Checkout() {
                 <span>American Express</span>
                 <span>Apple Pay</span>
                 <span>Google Pay</span>
-                <span>SEPA</span>
+                <span>PayPal</span>
               </div>
             </div>
           </div>

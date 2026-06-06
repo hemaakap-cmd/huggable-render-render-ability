@@ -870,7 +870,25 @@ export function useMyWaitlistStatus(courseId: string) {
   });
 }
 
-/* ── Fetch enrollment by Stripe session id (for confirmation page) ── */
+/* ── Fetch enrollment by Paddle enrollment ID (primary — payment-success page) ── */
+export function useEnrollmentById(enrollmentId: string) {
+  return useQuery({
+    enabled: !!enrollmentId,
+    queryKey: ["ssra-enrollment-by-id", enrollmentId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_enrollments")
+        .select("*")
+        .eq("id", enrollmentId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: (q: any) => (q?.state?.data?.status === "active" ? false : 2500),
+  });
+}
+
+/* ── Fetch enrollment by Stripe session id (legacy fallback) ── */
 export function useEnrollmentBySession(sessionId: string) {
   return useQuery({
     enabled: !!sessionId,

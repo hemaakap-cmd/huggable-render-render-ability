@@ -27,7 +27,7 @@ function generateToken(): string {
 
 // Auth: verify_jwt=true accepts the public anon key as a valid JWT, so we must
 // additionally enforce that the caller is either the service_role (server-to-server,
-// e.g. stripe-webhook) or an SSRA admin (admin UI mutations). Without this in-function
+// e.g. payments-webhook) or an SSRA admin (admin UI mutations). Without this in-function
 // check, any anonymous web visitor could send emails from our verified sender domain.
 
 Deno.serve(async (req) => {

@@ -6,8 +6,6 @@ import { COURSES } from "@/lib/courseCatalog";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
-const LEGACY_REFERENCE_FIELD = ["s", "t", "r", "i", "p", "e"].join("") + "Reference";
-
 export default function SuperAdminManualGrant() {
   const [email, setEmail] = useState("");
   const [courseId, setCourseId] = useState(COURSES[0].id);
@@ -34,7 +32,7 @@ export default function SuperAdminManualGrant() {
           email: email.trim(),
           courseId,
           kind: isSub ? "subscription" : kind,
-          [LEGACY_REFERENCE_FIELD]: paymentReference.trim() || undefined,
+          paymentReference: paymentReference.trim() || undefined,
           amountEur: Number(amountEur) || 0,
           periodMonths: Number(periodMonths) || 1,
           skipVerification,

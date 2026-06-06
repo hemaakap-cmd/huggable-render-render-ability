@@ -1,7 +1,7 @@
 /**
  * validate-coupon — Check a coupon code before checkout
  * Returns discount details without consuming the coupon.
- * The coupon is only consumed when payment succeeds (via stripe-webhook).
+ * The coupon is only consumed when payment succeeds (via payments-webhook).
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";

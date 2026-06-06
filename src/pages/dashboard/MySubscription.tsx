@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Crown, CheckCircle2, XCircle, Clock, AlertCircle,
-  ExternalLink, Loader2, ArrowRight,
+  ExternalLink, ArrowRight,
 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMySubscription } from "@/hooks/useSsraData";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; cls: string }> = {
   active:     { label: "Active",     icon: CheckCircle2, cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -20,26 +17,8 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; cl
 export default function MySubscription() {
   const { data: subscription, isLoading } = useMySubscription();
   const { toast }                         = useToast();
-  const [portalLoading, setPortalLoading] = useState(false);
-
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
-
-  async function openBillingPortal() {
-    setPortalLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-portal-session", {
-        body: { returnUrl: window.location.href },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.url) window.location.href = data.url;
-      else throw new Error("No portal URL returned.");
-    } catch (err: unknown) {
-      toast({ title: "Could not open billing portal", description: (err as Error).message, variant: "destructive" });
-    } finally {
-      setPortalLoading(false);
-    }
-  }
 
   return (
     <DashboardLayout>
@@ -89,14 +68,13 @@ export default function MySubscription() {
                 </div>
               )}
 
-              <button
-                onClick={openBillingPortal}
-                disabled={portalLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors disabled:opacity-60">
-                {portalLoading
-                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening portal…</>
-                  : <><ExternalLink className="w-4 h-4" /> Manage Billing at paddle.net</>}
-              </button>
+              <a
+                href="https://customer.paddle.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors">
+                <ExternalLink className="w-4 h-4" /> Manage Billing at paddle.net
+              </a>
               <p className="text-xs text-white/30 text-center mt-2">Update card, cancel subscription, or download invoices</p>
             </div>
 
