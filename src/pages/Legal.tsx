@@ -18,7 +18,12 @@ export default function Legal() {
         <title>Legal — SSRA Academy</title>
         <meta name="description" content="Privacy Policy, Terms of Use, and Impressum for SSRA Academy." />
         <link rel="canonical" href="https://ssracourses.com/legal" />
+        <meta property="og:title" content="Legal — Privacy, Terms & Impressum | SSRA Academy" />
+        <meta property="og:description" content="Privacy Policy, Terms of Use, refund policy, and German Impressum for SSRA Academy." />
+        <meta property="og:url" content="https://ssracourses.com/legal" />
+        <meta property="og:type" content="website" />
       </Helmet>
+
       <Header />
 
       <div className="container max-w-3xl py-32">

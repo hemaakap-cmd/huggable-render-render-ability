@@ -71,16 +71,19 @@ export default function CourseDetail() {
 
   const related = COURSES.filter((c) => c.category === course.category && c.id !== course.id).slice(0, 3);
 
+  const shortTitle = (course.subtitle.length > 45 ? course.subtitle.slice(0, 44).trimEnd() + "…" : course.subtitle) + " · SSRA";
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Helmet>
-        <title>{course.subtitle} | SSRA Academy</title>
+        <title>{shortTitle}</title>
         <meta name="description" content={course.desc.slice(0, 155)} />
         <link rel="canonical" href={`https://ssracourses.com/courses/${course.id}`} />
-        <meta property="og:title" content={`${course.subtitle} | SSRA Academy`} />
+        <meta property="og:title" content={shortTitle} />
         <meta property="og:description" content={course.desc.slice(0, 155)} />
         <meta property="og:url" content={`https://ssracourses.com/courses/${course.id}`} />
         <meta property="og:type" content="article" />
+
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Course",
@@ -95,6 +98,7 @@ export default function CourseDetail() {
           inLanguage: ["ar", "de"],
         })}</script>
       </Helmet>
+
       <Header />
 
       {/* Hero */}

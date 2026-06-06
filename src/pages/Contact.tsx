@@ -53,11 +53,18 @@ export default function Contact() {
       <Helmet>
         <title>Contact — SSRA Academy</title>
         <meta name="description" content="Get in touch with SSRA Academy. We're here to help Arabic-speaking sports science graduates build their career in Germany." />
+        <link rel="canonical" href="https://ssracourses.com/contact" />
+        <meta property="og:title" content="Contact SSRA Academy — Questions & Support" />
+        <meta property="og:description" content="Reach our team for admissions, course questions, partnerships, or support — typically within one business day." />
+        <meta property="og:url" content="https://ssracourses.com/contact" />
+        <meta property="og:type" content="website" />
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Contact SSRA Academy" />
+        <meta name="twitter:description" content="Admissions, course questions, partnerships and support." />
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
-        <link rel="canonical" href="https://ssracourses.com/contact" />
       </Helmet>
+
       <Header />
 
       {/* Page hero */}
