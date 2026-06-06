@@ -376,10 +376,11 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Phone Number *</label>
+                    <label htmlFor="signup-phone" className="text-sm font-medium text-slate-700 block mb-1.5">Phone Number *</label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input
+                        id="signup-phone"
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
