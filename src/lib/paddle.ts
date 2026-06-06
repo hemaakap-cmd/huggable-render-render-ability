@@ -58,6 +58,7 @@ export async function initializePaddle(): Promise<void> {
 /** Courses sold as recurring subscriptions instead of one-time purchases. */
 const SUBSCRIPTION_COURSES: Record<string, string> = {
   "medical-german": "medical_german_monthly",
+  "test-course": "test_course_monthly",
 };
 
 export function isSubscriptionCourse(courseId: string): boolean {
