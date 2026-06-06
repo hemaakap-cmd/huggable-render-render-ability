@@ -1,7 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { corsHeaders } from '../_shared/cors.ts'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
@@ -69,8 +69,8 @@ Deno.serve(async (req) => {
       const userClient = createClient(supabaseUrl, supabaseAnonKey ?? supabaseServiceKey, {
         global: { headers: { Authorization: `Bearer ${token}` } },
       })
-      const { data: claimsData } = await userClient.auth.getClaims(token)
-      const userId = claimsData?.claims?.sub
+      const { data: userData } = await userClient.auth.getUser()
+      const userId = userData?.user?.id
       if (userId) {
         const adminClient = createClient(supabaseUrl, supabaseServiceKey)
         const { data: isAdmin } = await adminClient.rpc('is_ssra_admin', { _uid: userId })

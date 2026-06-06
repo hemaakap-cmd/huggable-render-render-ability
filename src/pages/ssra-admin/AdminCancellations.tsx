@@ -4,7 +4,6 @@ import { Check, X, Loader2, AlertCircle } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { getPaddleEnvironment } from "@/lib/paddle";
 
 type Row = {
   id: string;
@@ -49,7 +48,6 @@ export default function AdminCancellations() {
         decision,
         adminNotes: notes[id]?.trim() || null,
         issueRefund,
-        environment: getPaddleEnvironment(),
       },
     });
     setBusy(null);
@@ -130,7 +128,7 @@ export default function AdminCancellations() {
                           onClick={() => process(r.id, "approve", true)}
                           className="px-3.5 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1.5">
                           {busy === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                          Approve & refund via Paddle
+                          Approve & refund
                         </button>
                       </div>
                     </div>
@@ -151,7 +149,7 @@ export default function AdminCancellations() {
                         <th className="text-left px-4 py-2">Course</th>
                         <th className="text-left px-4 py-2">Status</th>
                         <th className="text-left px-4 py-2">Amount</th>
-                        <th className="text-left px-4 py-2">Paddle Adj.</th>
+                        <th className="text-left px-4 py-2">Refund ID</th>
                         <th className="text-left px-4 py-2">Reviewed</th>
                       </tr>
                     </thead>

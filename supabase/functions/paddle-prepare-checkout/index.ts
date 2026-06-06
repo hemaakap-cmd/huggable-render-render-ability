@@ -1,7 +1,7 @@
 // Validates a course purchase and creates a pending enrollment row,
 // then returns the Paddle external price ID + custom data for the overlay.
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { corsHeaders } from '../_shared/cors.ts';
 
 const SUBSCRIPTION_COURSES: Record<string, string> = {
   'medical-german': 'medical_german_monthly',

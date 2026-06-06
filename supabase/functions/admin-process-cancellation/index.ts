@@ -1,8 +1,14 @@
 // Admin approves/rejects a cancellation request.
-// On approve: cancels enrollment + (optionally) creates Paddle refund adjustment.
+// On approve: cancels enrollment + (optionally) issues a refund via Stripe (pi_) or Paddle (txn_).
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { corsHeaders } from '../_shared/cors.ts';
+import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno';
 import { gatewayFetch, type PaddleEnv } from '../_shared/paddle.ts';
+
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
+  apiVersion: '2024-06-20',
+  httpClient: Stripe.createFetchHttpClient(),
+});
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -105,44 +111,62 @@ Deno.serve(async (req) => {
     }).eq('id', cancelReq.enrollment_id);
 
     let paddleAdjustmentId: string | null = null;
+    let stripeRefundId: string | null = null;
     let refundError: string | null = null;
 
     if (issueRefund && enrollment?.stripe_payment_intent) {
-      try {
-        const txnId = enrollment.stripe_payment_intent;
-        // Fetch transaction to get the item id required by /adjustments
-        const txnRes = await gatewayFetch(environment, `/transactions/${encodeURIComponent(txnId)}`);
-        const txnJson = await txnRes.json();
-        const items = txnJson?.data?.details?.line_items
-          ?? txnJson?.data?.items
-          ?? [];
-        const item = Array.isArray(items) && items.length > 0 ? items[0] : null;
-        const itemId = item?.id ?? item?.item_id ?? null;
+      const txnId = enrollment.stripe_payment_intent as string;
+      const isStripe = txnId.startsWith('pi_');
 
-        if (!itemId) throw new Error('Could not resolve transaction item to refund');
+      if (isStripe) {
+        // Stripe payment — issue refund via Stripe API
+        try {
+          const refund = await stripe.refunds.create({
+            payment_intent: txnId,
+            reason: 'requested_by_customer',
+          });
+          stripeRefundId = refund.id;
+          console.log('stripe refund created', stripeRefundId);
+        } catch (e) {
+          refundError = (e as Error).message;
+          console.error('stripe refund failed', e);
+        }
+      } else {
+        // Paddle payment — issue refund via Paddle adjustments API
+        try {
+          const txnRes = await gatewayFetch(environment, `/transactions/${encodeURIComponent(txnId)}`);
+          const txnJson = await txnRes.json();
+          const items = txnJson?.data?.details?.line_items ?? txnJson?.data?.items ?? [];
+          const item = Array.isArray(items) && items.length > 0 ? items[0] : null;
+          const itemId = item?.id ?? item?.item_id ?? null;
 
-        const adjRes = await gatewayFetch(environment, '/adjustments', {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'refund',
-            transaction_id: txnId,
-            reason: 'Customer cancelled within 14-day window',
-            items: [{ item_id: itemId, type: 'full' }],
-          }),
-        });
-        const adjJson = await adjRes.json();
-        if (!adjRes.ok) throw new Error(adjJson?.error?.detail ?? `Paddle refund failed (${adjRes.status})`);
-        paddleAdjustmentId = adjJson?.data?.id ?? null;
-      } catch (e) {
-        refundError = (e as Error).message;
-        console.error('paddle refund failed', e);
+          if (!itemId) throw new Error('Could not resolve transaction item to refund');
+
+          const adjRes = await gatewayFetch(environment, '/adjustments', {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'refund',
+              transaction_id: txnId,
+              reason: 'Customer cancelled within 14-day window',
+              items: [{ item_id: itemId, type: 'full' }],
+            }),
+          });
+          const adjJson = await adjRes.json();
+          if (!adjRes.ok) throw new Error(adjJson?.error?.detail ?? `Paddle refund failed (${adjRes.status})`);
+          paddleAdjustmentId = adjJson?.data?.id ?? null;
+        } catch (e) {
+          refundError = (e as Error).message;
+          console.error('paddle refund failed', e);
+        }
       }
     }
 
+    const refundIssued = !!(stripeRefundId || paddleAdjustmentId);
+
     await admin.from('ssra_cancellation_requests').update({
-      status: refundError ? 'approved' : (paddleAdjustmentId ? 'refunded' : 'approved'),
+      status: refundIssued ? 'refunded' : 'approved',
       admin_notes: adminNotes ?? (refundError ? `Refund must be issued manually: ${refundError}` : null),
-      paddle_adjustment_id: paddleAdjustmentId,
+      paddle_adjustment_id: paddleAdjustmentId ?? stripeRefundId,
       reviewed_by: user.id,
       reviewed_at: new Date().toISOString(),
     }).eq('id', requestId);
@@ -151,15 +175,16 @@ Deno.serve(async (req) => {
       user_id: cancelReq.user_id,
       type: 'cancellation',
       title: 'Cancellation approved',
-      body: paddleAdjustmentId
-        ? `Your enrollment was cancelled and a refund has been issued via Paddle. It may take 5–10 business days to appear on your statement.`
+      body: refundIssued
+        ? `Your enrollment was cancelled and a refund has been issued. It may take 5–10 business days to appear on your statement.`
         : `Your enrollment was cancelled. ${refundError ? 'Our team will process the refund manually and contact you shortly.' : ''}`,
       link: '/dashboard/courses',
     });
 
     return new Response(JSON.stringify({
       ok: true,
-      status: paddleAdjustmentId ? 'refunded' : 'approved',
+      status: refundIssued ? 'refunded' : 'approved',
+      stripeRefundId,
       paddleAdjustmentId,
       refundError,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

@@ -238,6 +238,25 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     if (error) throw new Error(`Subscription upsert failed: ${error.message}`);
     console.log(`Subscription created for ${customerEmail} → ${courseId}`);
 
+    // Record coupon use for subscription (same reuse prevention as one-time payments)
+    const subCouponId = session.metadata?.couponId;
+    if (subCouponId && userId) {
+      const discountEur = session.total_details?.amount_discount
+        ? session.total_details.amount_discount / 100
+        : null;
+      const { error: couponUseErr } = await supabase.from("ssra_coupon_uses").insert({
+        coupon_id:    subCouponId,
+        user_id:      userId,
+        discount_eur: discountEur,
+        used_at:      paidAtIso,
+      });
+      if (couponUseErr && couponUseErr.code !== "23505") {
+        console.error("[webhook] subscription coupon_use insert failed:", couponUseErr.message);
+      } else {
+        await supabase.rpc("increment_coupon_uses", { _coupon_id: subCouponId });
+      }
+    }
+
     if (customerEmail) {
       const emailData = {
         studentName: studentName ?? "",
