@@ -5,6 +5,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
 const SUBSCRIPTION_COURSES: Record<string, string> = {
   'medical-german': 'medical_german_monthly',
+  'test-course': 'test_course_monthly',
 };
 
 function coursePriceId(courseId: string): string {
