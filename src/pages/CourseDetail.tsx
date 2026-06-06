@@ -71,11 +71,10 @@ export default function CourseDetail() {
 
   const related = COURSES.filter((c) => c.category === course.category && c.id !== course.id).slice(0, 3);
 
+  const shortTitle = (course.subtitle.length > 45 ? course.subtitle.slice(0, 44).trimEnd() + "…" : course.subtitle) + " · SSRA";
+
   return (
     <div className="min-h-screen bg-slate-50">
-      {(() => {
-        const shortTitle = (course.subtitle.length > 45 ? course.subtitle.slice(0, 44).trimEnd() + "…" : course.subtitle) + " · SSRA";
-        return (
       <Helmet>
         <title>{shortTitle}</title>
         <meta name="description" content={course.desc.slice(0, 155)} />
@@ -99,6 +98,7 @@ export default function CourseDetail() {
           inLanguage: ["ar", "de"],
         })}</script>
       </Helmet>
+
       <Header />
 
       {/* Hero */}
