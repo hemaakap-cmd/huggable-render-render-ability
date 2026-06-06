@@ -392,10 +392,11 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Country *</label>
+                    <label htmlFor="signup-country" className="text-sm font-medium text-slate-700 block mb-1.5">Country *</label>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <select
+                        id="signup-country"
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
                         required
