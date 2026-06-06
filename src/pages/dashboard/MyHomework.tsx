@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, Upload, CheckCircle2, Clock, X, Loader2 } from "lucide-react";
+import { BookOpen, Upload, CheckCircle2, X, Loader2 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMyHomework, useSubmitHomework } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";

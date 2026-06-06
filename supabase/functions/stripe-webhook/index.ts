@@ -179,6 +179,26 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     if (error) throw new Error(`Enrollment upsert failed: ${error.message}`);
     console.log(`Enrollment upserted for ${customerEmail} → ${courseId} (order=${enrollment?.order_number})`);
 
+    // Record coupon use to prevent reuse and keep uses_count accurate
+    const couponId = session.metadata?.couponId;
+    if (couponId && userId) {
+      const discountEur = session.total_details?.amount_discount
+        ? session.total_details.amount_discount / 100
+        : null;
+      // IGNORE duplicate — onConflict(coupon_id,user_id) is handled by DB unique constraint
+      const { error: couponUseErr } = await supabase.from("ssra_coupon_uses").insert({
+        coupon_id:    couponId,
+        user_id:      userId,
+        discount_eur: discountEur,
+        used_at:      paidAtIso,
+      });
+      if (couponUseErr && couponUseErr.code !== "23505") {
+        console.error("[webhook] coupon_use insert failed:", couponUseErr.message);
+      } else {
+        await supabase.rpc("increment_coupon_uses", { _coupon_id: couponId });
+      }
+    }
+
     if (customerEmail) {
       const emailData = {
         studentName: studentName ?? "",

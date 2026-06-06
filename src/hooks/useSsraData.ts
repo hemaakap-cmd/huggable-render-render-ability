@@ -1023,7 +1023,7 @@ export function useAdminHomework(courseId?: string, status?: string) {
     queryFn: async () => {
       let q = (supabase as any)
         .from("ssra_homework_submissions")
-        .select("*, ssra_course_materials(title, course_id, due_date), ssra_profiles(full_name, email)")
+        .select("*, ssra_course_materials(title, due_date), ssra_courses(title), ssra_profiles(full_name, email)")
         .order("submitted_at", { ascending: false });
       if (courseId) q = q.eq("course_id", courseId);
       if (status && status !== "all") q = q.eq("status", status);
@@ -1040,7 +1040,7 @@ export function useInstructorHomework(courseId?: string, status?: string) {
     queryFn: async () => {
       let q = (supabase as any)
         .from("ssra_homework_submissions")
-        .select("*, ssra_course_materials(title, course_id, due_date), ssra_profiles(full_name, email)")
+        .select("*, ssra_course_materials(title, due_date), ssra_courses(title), ssra_profiles(full_name, email)")
         .order("submitted_at", { ascending: false });
       if (courseId) q = q.eq("course_id", courseId);
       if (status && status !== "all") q = q.eq("status", status);
@@ -1080,7 +1080,7 @@ export function useMyHomework(courseId?: string) {
     queryFn: async () => {
       let q = (supabase as any)
         .from("ssra_homework_submissions")
-        .select("*, ssra_course_materials(title, material_type, due_date, description)")
+        .select("*, ssra_course_materials(title, material_type, due_date, description), ssra_courses(title)")
         .order("submitted_at", { ascending: false });
       if (courseId) q = q.eq("course_id", courseId);
       const { data, error } = await q;

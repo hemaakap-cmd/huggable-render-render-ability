@@ -27,9 +27,9 @@ const ADMIN_NAV = [
   { icon: Video,            label: "Sessions",         href: "/ssra-admin/sessions" },
   { icon: BookOpen,         label: "Enrollments",      href: "/ssra-admin/enrollments" },
   { icon: BookCheck,        label: "Homework",         href: "/ssra-admin/homework" },
+  { icon: Award,            label: "Certificates",     href: "/ssra-admin/certificates" },
   { icon: AlertOctagon,     label: "Fraud Flags",      href: "/ssra-admin/fraud" },
   { icon: HeartPulse,       label: "System Health",    href: "/ssra-admin/system-health" },
-  { icon: Award,            label: "Certificates",     href: "/ssra-admin/certificates" },
   { icon: RotateCcw,        label: "Cancellations",    href: "/ssra-admin/cancellations" },
 ];
 

@@ -16,6 +16,7 @@ import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
 /* ── Public ── */
 const Courses         = lazy(() => import("./pages/Courses"));
 const CourseDetail    = lazy(() => import("./pages/CourseDetail"));
+const VerifyOtp       = lazy(() => import("./pages/VerifyOtp"));
 const About           = lazy(() => import("./pages/About"));
 const Apply           = lazy(() => import("./pages/Apply"));
 const Contact         = lazy(() => import("./pages/Contact"));
@@ -39,7 +40,7 @@ const MySubscription    = lazy(() => import("./pages/dashboard/MySubscription"))
 const MyProfile         = lazy(() => import("./pages/dashboard/MyProfile"));
 const MyCertificates    = lazy(() => import("./pages/dashboard/MyCertificates"));
 
-/* ── Public ── */
+/* ── Verify ── */
 const VerifyCertificate   = lazy(() => import("./pages/VerifyCertificate"));
 
 /* ── Admin dashboard ── */
@@ -165,6 +166,7 @@ function AppInner() {
                 <Route path="/payment-success"  element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/login"            element={<StudentLogin />} />
+                <Route path="/verify-otp"       element={<VerifyOtp />} />
                 <Route path="/staff-login"      element={<AdminLogin />} />
                 <Route path="/reset-password"  element={<ResetPassword />} />
                 <Route path="/legal"           element={<Legal />} />
