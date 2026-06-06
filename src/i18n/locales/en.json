@@ -45,8 +45,8 @@
     },
     "faq": {
       "title": "Looking for answers?",
-      "description": "Check out our About page to learn more about MASSAVO and how we work.",
-      "button": "Learn More"
+      "description": "Check out our About page to learn more about SSRA Academy and how we work.",
+      "button": "Read our FAQ"
     }
   },
   "hero": {
@@ -61,7 +61,7 @@
     "title": "Tailored Massage",
     "titleHighlight": "For Every Need",
     "subtitle": "Your body deserves the best – right after your workout, exactly where you train.",
-    "learnMore": "Learn More",
+    "learnMore": "Read our FAQ",
     "viewAll": "View All Services",
     "sports": {
       "title": "Sports Massage",
@@ -84,7 +84,7 @@
     "subtitle": "The fastest way to book a massage. No app download required.",
     "step1": {
       "title": "Scan QR Code",
-      "description": "Find the MASSAVO QR code at your gym and scan it with your phone's camera."
+      "description": "Find the SSRA Academy QR code at your gym and scan it with your phone's camera."
     },
     "step2": {
       "title": "Choose & Book",
@@ -104,7 +104,7 @@
     "titleHighlight": "Amazing?",
     "subtitle": "Join gym-goers across Germany who've discovered the convenience of on-site massage therapy.",
     "button": "Book Your First Session",
-    "secondary": "Learn More About Us"
+    "secondary": "Read about SSRA Academy"
   },
   "footer": {
     "description": "Premium massage therapy at your local gym. Book your session in seconds with our QR code system.",
@@ -154,15 +154,15 @@
     "viewAndBook": "View & Book"
   },
   "about": {
-    "badge": "About MASSAVO",
+    "badge": "About SSRA Academy",
     "title": "Wellness Meets",
     "titleHighlight": "Convenience",
     "subtitle": "A fresh approach to gym-based massage therapy, since 2026.",
     "story": {
       "title": "Our Story",
-      "p1": "MASSAVO was born from a simple observation: fitness enthusiasts deserve accessible, high-quality massage therapy exactly where they train.",
+      "p1": "SSRA Academy was born from a simple observation: fitness enthusiasts deserve accessible, high-quality massage therapy exactly where they train.",
       "p2": "Founded in 2026, we bring professional massage therapy to where you need it most—inside gyms and now also in selected hotels. We currently operate in four cities across Germany: Köln, Leverkusen, Bergisch Gladbach, and newly in Düsseldorf.",
-      "p3": "With our hotel service, we deliver the full MASSAVO experience directly to business travelers and wellness guests, in-room or in the spa. Our dream is to expand throughout all of Germany—in gyms and hotels alike—giving you instant access to real recovery in seconds through our QR-code booking system."
+      "p3": "With our hotel service, we deliver the full SSRA Academy experience directly to business travelers and wellness guests, in-room or in the spa. Our dream is to expand throughout all of Germany—in gyms and hotels alike—giving you instant access to real recovery in seconds through our QR-code booking system."
     },
     "mission": {
       "title": "Our Mission",
@@ -591,7 +591,7 @@
     "s1Title": "1. Scope",
     "s1Text": "By using SSRA academy services, you agree to these Terms of Service. If you do not agree to these terms, please do not use our services.",
     "s2Title": "2. Service Description",
-    "s2Text": "MASSAVO provides an online booking platform for massage services at partner locations (gyms and hotels). Our services include booking management, payment processing and scheduling for sports and classic massages — on-site at the gym or directly in your hotel room.",
+    "s2Text": "SSRA Academy provides an online booking platform for massage services at partner locations (gyms and hotels). Our services include booking management, payment processing and scheduling for sports and classic massages — on-site at the gym or directly in your hotel room.",
     "s3Title": "3. Booking and Payment",
     "s3Items": [
       "All bookings are subject to availability",
@@ -625,9 +625,9 @@
       "Bring your own towel to your appointment"
     ],
     "s7Title": "7. Intellectual Property",
-    "s7Text": "All content on this website, including text, graphics, logos and images, is the property of MASSAVO and protected by copyright. Reproduction, distribution or use of our content without prior written permission is not permitted.",
+    "s7Text": "All content on this website, including text, graphics, logos and images, is the property of SSRA Academy and protected by copyright. Reproduction, distribution or use of our content without prior written permission is not permitted.",
     "s8Title": "8. Limitation of Liability",
-    "s8Text": "MASSAVO is not liable for indirect, incidental, special or consequential damages arising from the use of our services. Our total liability is limited to the amount you paid for the specific service giving rise to the claim.",
+    "s8Text": "SSRA Academy is not liable for indirect, incidental, special or consequential damages arising from the use of our services. Our total liability is limited to the amount you paid for the specific service giving rise to the claim.",
     "s9Title": "9. Third Parties",
     "s9Text": "Our platform uses third-party services, including Paddle.com as Merchant of Record for payment processing, billing, taxes, cancellations and refunds. Your use of these services is subject to their respective terms of service and privacy policies.",
     "s10Title": "10. Changes to Terms",
@@ -787,7 +787,7 @@
     "resendCodeIn": "Resend code in {{seconds}}s",
     "resendCode": "Didn't receive a code? Resend",
     "useDifferentEmail": "Use a different email",
-    "securityNote": "Never share your verification code. MASSAVO will never ask for it."
+    "securityNote": "Never share your verification code. SSRA Academy will never ask for it."
   },
   "passwordStrength": {
     "label": "Password strength",
@@ -846,7 +846,7 @@
     "sectionBadge": "Where we treat you",
     "sectionTitle": "Massage — wherever you are",
     "sectionTitleHighlight": "gym or hotel",
-    "sectionSubtitle": "After a workout or after a long travel day — MASSAVO comes to you on site.",
+    "sectionSubtitle": "After a workout or after a long travel day — SSRA Academy comes to you on site.",
     "gym": {
       "title": "In the Gym",
       "description": "Premium sports and classic massage right in your favorite gym. Scan the QR code at reception and book in 30 seconds.",
@@ -860,13 +860,13 @@
   },
   "hotels": {
     "pageTitle": "Find a Hotel",
-    "pageDescription": "Choose your city to discover MASSAVO partner hotels.",
-    "seoTitle": "Book In-Hotel Massage — Partner Hotels | MASSAVO",
-    "seoDescription": "Book professional massage therapy directly in your hotel. Explore MASSAVO partner hotels and reserve your appointment online.",
-    "seoKeywords": "hotel massage, in-hotel massage, wellness hotel, mobile massage, MASSAVO hotels",
-    "detailSeoTitle": "Book a Massage at {{hotel}} | MASSAVO",
+    "pageDescription": "Choose your city to discover SSRA Academy partner hotels.",
+    "seoTitle": "Book In-Hotel Massage — Partner Hotels | SSRA Academy",
+    "seoDescription": "Book professional massage therapy directly in your hotel. Explore SSRA Academy partner hotels and reserve your appointment online.",
+    "seoKeywords": "hotel massage, in-hotel massage, wellness hotel, mobile massage, SSRA Academy hotels",
+    "detailSeoTitle": "Book a Massage at {{hotel}} | SSRA Academy",
     "detailSeoDescription": "Reserve your massage at {{hotel}}{{citySuffix}}. Book online in seconds — service delivered straight to your hotel room.",
-    "detailSeoKeywords": "{{hotel}} massage, hotel massage {{city}}, wellness {{hotel}}, MASSAVO",
+    "detailSeoKeywords": "{{hotel}} massage, hotel massage {{city}}, wellness {{hotel}}, SSRA Academy",
     "loading": "Loading hotels…",
     "noHotels": "No hotels are currently available.",
     "stars": "Stars",
