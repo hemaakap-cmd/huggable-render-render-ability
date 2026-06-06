@@ -95,9 +95,12 @@ export default function Header() {
                 </button>
               </Link>
               <div className="relative group">
-                <button className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold transition-all ${
-                  scrolled ? "bg-[hsl(220,91%,54%)]" : "bg-white/20 border border-white/30"
-                }`}>
+                <button
+                  aria-label="Open user menu"
+                  className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold transition-all ${
+                    scrolled ? "bg-[hsl(220,91%,54%)]" : "bg-white/20 border border-white/30"
+                  }`}
+                >
                   {initial}
                 </button>
                 {/* Dropdown */}
