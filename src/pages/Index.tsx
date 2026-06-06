@@ -152,7 +152,7 @@ export default function Index() {
               Rehabilitation
             </h1>
 
-            <p className="text-white/60 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
+            <p className="text-white/85 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
               Evidence-based online courses for sports science graduates. Learn in Arabic, study German, and land your first job in Germany — all in one academy.
             </p>
 
