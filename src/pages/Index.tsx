@@ -171,7 +171,7 @@ export default function Index() {
             </div>
 
             {/* Trust row */}
-            <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-white/40">
+            <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-white/75">
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Non-profit mission</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Arabic support</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Paddle secure payments</span>
