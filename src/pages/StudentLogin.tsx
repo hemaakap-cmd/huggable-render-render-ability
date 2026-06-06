@@ -263,7 +263,9 @@ export default function StudentLogin() {
             </p>
 
             <form onSubmit={handleVerify} className="space-y-4">
+              <label htmlFor="student-otp" className="sr-only">6-digit verification code</label>
               <input
+                id="student-otp"
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
