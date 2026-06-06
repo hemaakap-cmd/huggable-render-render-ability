@@ -144,7 +144,9 @@ export default function AdminLogin() {
             </div>
 
             <form onSubmit={handleVerify} className="space-y-4">
+              <label htmlFor="admin-otp" className="sr-only">6-digit verification code</label>
               <input
+                id="admin-otp"
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
