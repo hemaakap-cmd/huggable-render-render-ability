@@ -322,6 +322,7 @@ export default function StudentLogin() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
+        <h1 className="sr-only">Student Portal — sign in or register</h1>
         <Link to="/" className="flex items-center justify-center mb-8">
           <SsraLogo size={36} scheme="dark" />
         </Link>
