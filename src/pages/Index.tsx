@@ -152,7 +152,7 @@ export default function Index() {
               Rehabilitation
             </h1>
 
-            <p className="text-white/60 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
+            <p className="text-white/85 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
               Evidence-based online courses for sports science graduates. Learn in Arabic, study German, and land your first job in Germany — all in one academy.
             </p>
 
@@ -171,7 +171,7 @@ export default function Index() {
             </div>
 
             {/* Trust row */}
-            <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-white/40">
+            <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-white/75">
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Non-profit mission</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Arabic support</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Paddle secure payments</span>
