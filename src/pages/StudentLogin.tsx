@@ -409,10 +409,11 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Degree / Qualification *</label>
+                    <label htmlFor="signup-degree" className="text-sm font-medium text-slate-700 block mb-1.5">Degree / Qualification *</label>
                     <div className="relative">
                       <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <select
+                        id="signup-degree"
                         value={degree}
                         onChange={(e) => setDegree(e.target.value)}
                         required
