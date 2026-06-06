@@ -83,10 +83,10 @@ export default function ResetPassword() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 block mb-1.5">New Password</label>
+                  <label htmlFor="reset-new-password" className="text-sm font-medium text-slate-700 block mb-1.5">New Password</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                    <input id="reset-new-password" type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
                       placeholder="Min. 8 characters" required className={inputClass} />
                     <button type="button" onClick={() => setShow(!show)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -95,10 +95,10 @@ export default function ResetPassword() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700 block mb-1.5">Confirm Password</label>
+                  <label htmlFor="reset-confirm-password" className="text-sm font-medium text-slate-700 block mb-1.5">Confirm Password</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type={show ? "text" : "password"} value={confirm} onChange={(e) => setConfirm(e.target.value)}
+                    <input id="reset-confirm-password" type={show ? "text" : "password"} value={confirm} onChange={(e) => setConfirm(e.target.value)}
                       placeholder="Repeat your password" required className={inputClass} />
                   </div>
                 </div>

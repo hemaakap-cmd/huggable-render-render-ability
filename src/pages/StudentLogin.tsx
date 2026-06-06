@@ -239,6 +239,7 @@ export default function StudentLogin() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
+          <h1 className="sr-only">Student Portal — verify email</h1>
           <Link to="/" className="flex items-center justify-center mb-8">
             <SsraLogo size={36} scheme="dark" />
           </Link>
@@ -262,7 +263,9 @@ export default function StudentLogin() {
             </p>
 
             <form onSubmit={handleVerify} className="space-y-4">
+              <label htmlFor="student-otp" className="sr-only">6-digit verification code</label>
               <input
+                id="student-otp"
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
@@ -319,6 +322,7 @@ export default function StudentLogin() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
+        <h1 className="sr-only">Student Portal — sign in or register</h1>
         <Link to="/" className="flex items-center justify-center mb-8">
           <SsraLogo size={36} scheme="dark" />
         </Link>
@@ -356,10 +360,11 @@ export default function StudentLogin() {
               {tab === "signup" && (
                 <>
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Full Name *</label>
+                    <label htmlFor="signup-name" className="text-sm font-medium text-slate-700 block mb-1.5">Full Name *</label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input
+                        id="signup-name"
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -371,10 +376,11 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Phone Number *</label>
+                    <label htmlFor="signup-phone" className="text-sm font-medium text-slate-700 block mb-1.5">Phone Number *</label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input
+                        id="signup-phone"
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
@@ -386,10 +392,11 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Country *</label>
+                    <label htmlFor="signup-country" className="text-sm font-medium text-slate-700 block mb-1.5">Country *</label>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <select
+                        id="signup-country"
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
                         required
@@ -402,10 +409,11 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">Degree / Qualification *</label>
+                    <label htmlFor="signup-degree" className="text-sm font-medium text-slate-700 block mb-1.5">Degree / Qualification *</label>
                     <div className="relative">
                       <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <select
+                        id="signup-degree"
                         value={degree}
                         onChange={(e) => setDegree(e.target.value)}
                         required
@@ -418,10 +426,11 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1.5">German Level *</label>
+                    <label htmlFor="signup-german-level" className="text-sm font-medium text-slate-700 block mb-1.5">German Level *</label>
                     <div className="relative">
                       <Languages className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <select
+                        id="signup-german-level"
                         value={germanLevel}
                         onChange={(e) => setGermanLevel(e.target.value)}
                         required
@@ -436,10 +445,11 @@ export default function StudentLogin() {
               )}
 
               <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1.5">Email Address *</label>
+                <label htmlFor="login-email" className="text-sm font-medium text-slate-700 block mb-1.5">Email Address *</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
+                    id="login-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

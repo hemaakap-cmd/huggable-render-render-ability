@@ -144,7 +144,9 @@ export default function AdminLogin() {
             </div>
 
             <form onSubmit={handleVerify} className="space-y-4">
+              <label htmlFor="admin-otp" className="sr-only">6-digit verification code</label>
               <input
+                id="admin-otp"
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
@@ -211,10 +213,11 @@ export default function AdminLogin() {
           <div className="p-8">
             <form onSubmit={handleSendCode} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-slate-300 block mb-1.5">Staff Email</label>
+                <label htmlFor="admin-email" className="text-sm font-medium text-slate-300 block mb-1.5">Staff Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
+                    id="admin-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
