@@ -1,7 +1,31 @@
 // Paddle webhook — auto-enroll student on payment, send confirmation + admin notice.
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { verifyWebhook, EventName, type PaddleEnv } from '../_shared/paddle.ts';
+import { EventName, getPaddleClient, getWebhookSecret, type PaddleEnv } from '../_shared/paddle.ts';
 import { handleAdjustmentEvent } from './handlers.ts';
+
+// Verify the signature against BOTH environment secrets and derive env from
+// whichever one succeeds. This prevents an attacker from spoofing the
+// environment via a caller-controlled query parameter — only Paddle, which
+// holds the secrets, can determine which environment a valid event came from.
+async function verifyAndDetectEnv(req: Request): Promise<{ event: any; env: PaddleEnv }> {
+  const signature = req.headers.get('paddle-signature');
+  const body = await req.text();
+  if (!signature || !body) throw new Error('Missing signature or body');
+
+  const envs: PaddleEnv[] = ['live', 'sandbox'];
+  let lastErr: unknown = null;
+  for (const env of envs) {
+    try {
+      const secret = getWebhookSecret(env);
+      const paddle = getPaddleClient(env);
+      const event = await paddle.webhooks.unmarshal(body, secret, signature);
+      return { event, env };
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw new Error(`Webhook signature verification failed: ${(lastErr as Error)?.message ?? 'unknown'}`);
+}
 
 const ADMIN_NOTIFY_EMAIL = Deno.env.get('ADMIN_NOTIFY_EMAIL') ?? 'hemaakap@gmail.com';
 const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://ssracourses.com';
@@ -227,9 +251,9 @@ async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
 }
 
 
-async function handleWebhook(req: Request, env: PaddleEnv) {
-  const event = await verifyWebhook(req, env);
-  console.log('paddle event:', event.eventType);
+async function handleWebhook(req: Request) {
+  const { event, env } = await verifyAndDetectEnv(req);
+  console.log('paddle event:', event.eventType, 'env:', env);
   switch (event.eventType) {
     case EventName.TransactionCompleted:
       await handleTransactionCompleted(event.data, env);
@@ -254,10 +278,8 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-  const url = new URL(req.url);
-  const env = (url.searchParams.get('env') || 'sandbox') as PaddleEnv;
   try {
-    await handleWebhook(req, env);
+    await handleWebhook(req);
     return new Response(JSON.stringify({ received: true }), {
       status: 200, headers: { 'Content-Type': 'application/json' },
     });
