@@ -1,7 +1,31 @@
 // Paddle webhook — auto-enroll student on payment, send confirmation + admin notice.
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { verifyWebhook, EventName, type PaddleEnv } from '../_shared/paddle.ts';
+import { EventName, getPaddleClient, getWebhookSecret, type PaddleEnv } from '../_shared/paddle.ts';
 import { handleAdjustmentEvent } from './handlers.ts';
+
+// Verify the signature against BOTH environment secrets and derive env from
+// whichever one succeeds. This prevents an attacker from spoofing the
+// environment via a caller-controlled query parameter — only Paddle, which
+// holds the secrets, can determine which environment a valid event came from.
+async function verifyAndDetectEnv(req: Request): Promise<{ event: any; env: PaddleEnv }> {
+  const signature = req.headers.get('paddle-signature');
+  const body = await req.text();
+  if (!signature || !body) throw new Error('Missing signature or body');
+
+  const envs: PaddleEnv[] = ['live', 'sandbox'];
+  let lastErr: unknown = null;
+  for (const env of envs) {
+    try {
+      const secret = getWebhookSecret(env);
+      const paddle = getPaddleClient(env);
+      const event = await paddle.webhooks.unmarshal(body, secret, signature);
+      return { event, env };
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw new Error(`Webhook signature verification failed: ${(lastErr as Error)?.message ?? 'unknown'}`);
+}
 
 const ADMIN_NOTIFY_EMAIL = Deno.env.get('ADMIN_NOTIFY_EMAIL') ?? 'hemaakap@gmail.com';
 const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://ssracourses.com';
