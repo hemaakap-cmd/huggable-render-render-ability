@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useSsraAuth } from "./hooks/useSsraAuth";
 import { useVisitorTracker } from "./hooks/useVisitorTracker";
+import { isProfileComplete } from "./lib/profileCompletion";
 import Index from "./pages/Index";
 import WhatsAppButton from "./components/ssra/WhatsAppButton";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
@@ -114,11 +115,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   if (
     isStudent &&
     profile &&
-    (!profile.full_name?.trim() ||
-      !profile.phone_number?.trim() ||
-      !profile.country?.trim() ||
-      !profile.degree?.trim() ||
-      !profile.german_level?.trim()) &&
+    !isProfileComplete(profile) &&
     location.pathname !== "/complete-profile"
   ) {
     return <Navigate to="/complete-profile" replace state={{ from: location.pathname }} />;

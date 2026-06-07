@@ -274,7 +274,7 @@ export default function StudentLogin() {
     } else {
       const { data: prof } = await supabase
         .from("ssra_profiles")
-        .select("full_name, phone_number, country, degree, german_level")
+        .select("full_name, phone_number, country, city, address, degree, german_level")
         .eq("id", userId)
         .maybeSingle();
       if (!isProfileComplete(prof)) {
