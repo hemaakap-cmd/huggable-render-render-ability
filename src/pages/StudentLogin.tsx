@@ -77,6 +77,7 @@ export default function StudentLogin() {
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     dismiss();
+    const normalizedEmail = email.trim().toLowerCase();
     if (tab === "signup") {
       if (!name.trim()) {
         toast({ title: "Please enter your full name", variant: "destructive" });
@@ -102,7 +103,7 @@ export default function StudentLogin() {
       const { data: existingProfile } = await supabase
         .from("ssra_profiles")
         .select("id")
-        .eq("email", email.trim().toLowerCase())
+        .eq("email", normalizedEmail)
         .maybeSingle();
       if (existingProfile) {
         toast({
@@ -112,10 +113,24 @@ export default function StudentLogin() {
         });
         return;
       }
+    } else {
+      const { data: existingProfile } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+      if (!existingProfile) {
+        toast({
+          title: "Account not found",
+          description: "This email is not registered. Please register first from New Student.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: normalizedEmail,
       options: {
         shouldCreateUser: tab === "signup",
         data: tab === "signup" ? { full_name: name.trim() } : undefined,
@@ -248,11 +263,12 @@ export default function StudentLogin() {
     dismiss();
     setLoading(true);
     setOtp("");
+    const normalizedEmail = email.trim().toLowerCase();
     if (tab === "signup") {
       const { data: existingProfile } = await supabase
         .from("ssra_profiles")
         .select("id")
-        .eq("email", email.trim().toLowerCase())
+        .eq("email", normalizedEmail)
         .maybeSingle();
       if (existingProfile) {
         setLoading(false);
@@ -263,9 +279,24 @@ export default function StudentLogin() {
         });
         return;
       }
+    } else {
+      const { data: existingProfile } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+      if (!existingProfile) {
+        setLoading(false);
+        toast({
+          title: "Account not found",
+          description: "This email is not registered. Please register first from New Student.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: normalizedEmail,
       options: {
         shouldCreateUser: tab === "signup",
         data: tab === "signup" ? { full_name: name.trim() } : undefined,
