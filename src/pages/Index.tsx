@@ -307,7 +307,7 @@ export default function Index() {
                         ? "bg-amber-50 text-amber-700 border border-amber-200"
                         : "bg-slate-100 text-slate-600"
                     }`}>
-                      {course.type === "subscription" ? `€${course.price}/mo` : `€${course.price}`}
+                      {course.price_hidden ? "Coming Soon" : course.type === "subscription" ? `€${course.price}/mo` : `€${course.price}`}
                     </span>
                     <span className="text-xs text-slate-400">{course.weeks}</span>
                   </div>
