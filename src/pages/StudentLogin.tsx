@@ -604,10 +604,13 @@ export default function StudentLogin() {
                     <Loader2 className="w-3 h-3 animate-spin" /> Checking email…
                   </p>
                 )}
-                {emailCheckStatus === "exists" && tab === "signup" && (
+                {emailCheckStatus === "registered" && tab === "signup" && (
                   <p className="mt-1.5 text-xs text-red-600">
                     This email is already registered. Switch to <button type="button" onClick={() => switchTab("login")} className="underline font-medium">Sign In</button>.
                   </p>
+                )}
+                {emailCheckStatus === "incomplete" && tab === "signup" && (
+                  <p className="mt-1.5 text-xs text-amber-600">This email has an unfinished registration. Continue to complete it.</p>
                 )}
                 {emailCheckStatus === "available" && tab === "login" && (
                   <p className="mt-1.5 text-xs text-red-600">
@@ -617,7 +620,7 @@ export default function StudentLogin() {
                 {emailCheckStatus === "available" && tab === "signup" && (
                   <p className="mt-1.5 text-xs text-emerald-600">✓ Email is available</p>
                 )}
-                {emailCheckStatus === "exists" && tab === "login" && (
+                {(emailCheckStatus === "registered" || emailCheckStatus === "incomplete") && tab === "login" && (
                   <p className="mt-1.5 text-xs text-emerald-600">✓ Account found</p>
                 )}
               </div>
@@ -628,7 +631,7 @@ export default function StudentLogin() {
                   loading || !email ||
                   emailCheckStatus === "checking" ||
                   emailCheckStatus === "invalid" ||
-                  (tab === "signup" && emailCheckStatus === "exists") ||
+                  (tab === "signup" && emailCheckStatus === "registered") ||
                   (tab === "login" && emailCheckStatus === "available")
                 }
                 className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2"
