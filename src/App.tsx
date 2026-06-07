@@ -25,6 +25,7 @@ const Checkout        = lazy(() => import("./pages/Checkout"));
 const PaymentSuccess  = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled"));
 const StudentLogin    = lazy(() => import("./pages/StudentLogin"));
+const CompleteProfile = lazy(() => import("./pages/CompleteProfile"));
 const AdminLogin      = lazy(() => import("./pages/AdminLogin"));
 const ResetPassword   = lazy(() => import("./pages/ResetPassword"));
 const Legal           = lazy(() => import("./pages/Legal"));
@@ -104,10 +105,24 @@ const Spinner = () => (
 
 /* ── Auth guards ── */
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useSsraAuth();
+  const { user, profile, loading, isAdmin, isInstructor } = useSsraAuth();
   const location = useLocation();
   if (loading) return <Spinner />;
   if (!user) return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  // Force students to complete profile before doing anything (admins/instructors exempt)
+  const isStudent = !isAdmin && !isInstructor;
+  if (
+    isStudent &&
+    profile &&
+    (!profile.full_name?.trim() ||
+      !profile.phone_number?.trim() ||
+      !profile.country?.trim() ||
+      !profile.degree?.trim() ||
+      !profile.german_level?.trim()) &&
+    location.pathname !== "/complete-profile"
+  ) {
+    return <Navigate to="/complete-profile" replace state={{ from: location.pathname }} />;
+  }
   return <>{children}</>;
 }
 
@@ -181,6 +196,9 @@ function AppInner() {
                 <Route path="/refund"          element={<RefundCancellation />} />
                 <Route path="/verify/:code"    element={<VerifyCertificate />} />
                 <Route path="/verify"          element={<VerifyCertificate />} />
+
+                {/* Forced profile-completion gate (auth required, no profile gate) */}
+                <Route path="/complete-profile" element={<CompleteProfile />} />
 
                 {/* Student dashboard — auth required */}
                 <Route path="/dashboard"              element={<RequireAuth><StudentDashboard /></RequireAuth>} />
