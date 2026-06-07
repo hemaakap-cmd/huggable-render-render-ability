@@ -131,7 +131,10 @@ export default function Checkout() {
       <div className="min-h-screen flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+          <div className="text-center">
+            <BackButton className="mb-4" />
+            <Loader2 className="w-6 h-6 animate-spin text-slate-300 mx-auto" />
+          </div>
         </div>
         <Footer />
       </div>
