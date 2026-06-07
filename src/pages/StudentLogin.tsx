@@ -238,7 +238,9 @@ export default function StudentLogin() {
 
 
     setOtpLoading(false);
+    navigate(redirect, { replace: true });
   };
+
 
   /* ── Resend ── */
   const handleResend = async () => {
