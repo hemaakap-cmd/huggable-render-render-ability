@@ -36,6 +36,8 @@ export default function StudentLogin() {
   const [name, setName]     = useState("");
   const [phone, setPhone]   = useState("");
   const [country, setCountry] = useState("");
+  const [city, setCity]       = useState("");
+  const [address, setAddress] = useState("");
   const [degree, setDegree] = useState("");
   const [germanLevel, setGermanLevel] = useState("");
   const [loading, setLoading] = useState(false);
