@@ -45,6 +45,12 @@ function useUpdateSessionLink() {
         .update({ zoom_link, zoom_password: zoom_password ?? null })
         .eq("id", id);
       if (error) throw error;
+      // Notify enrolled students (in-app + email). Best-effort; don't fail the save.
+      const { data: notifyData, error: notifyErr } = await supabase.functions.invoke(
+        "notify-session-link-updated",
+        { body: { sessionId: id } },
+      );
+      return notifyData as { notified?: number; emailsSent?: number } | null;
     },
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["instructor-all-sessions"] });
@@ -75,8 +81,13 @@ function EditLinkForm({ session, onClose }: { session: any; onClose: () => void 
       });
       return;
     }
-    await update.mutateAsync({ id: session.id, zoom_link: url, zoom_password: pass.trim() });
-    toast({ title: "Zoom link updated" });
+    const result = await update.mutateAsync({ id: session.id, zoom_link: url, zoom_password: pass.trim() });
+    const sent = (result as any)?.emailsSent ?? 0;
+    const count = (result as any)?.notified ?? 0;
+    toast({
+      title: "Zoom link updated",
+      description: count > 0 ? `Notified ${count} student${count === 1 ? "" : "s"} (${sent} email${sent === 1 ? "" : "s"} sent).` : undefined,
+    });
     onClose();
   };
 
