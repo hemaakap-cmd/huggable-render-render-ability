@@ -161,9 +161,7 @@ export default function Checkout() {
     <div className="min-h-screen bg-slate-50">
       <Header />
       <div className="container max-w-4xl pt-28 pb-20">
-        <Link to="/pricing" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to pricing
-        </Link>
+        <BackButton className="mb-8" />
 
         <div className="grid md:grid-cols-5 gap-8">
           {/* Order summary */}
