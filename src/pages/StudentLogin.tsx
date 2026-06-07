@@ -46,6 +46,27 @@ export default function StudentLogin() {
   const [otpLoading, setOtpLoading]     = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Live email existence check
+  const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "checking" | "exists" | "available" | "invalid">("idle");
+  useEffect(() => {
+    const trimmed = email.trim().toLowerCase();
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    if (!isValid) {
+      setEmailCheckStatus(trimmed.length > 0 ? "invalid" : "idle");
+      return;
+    }
+    setEmailCheckStatus("checking");
+    const handle = setTimeout(async () => {
+      const { data } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", trimmed)
+        .maybeSingle();
+      setEmailCheckStatus(data ? "exists" : "available");
+    }, 500);
+    return () => clearTimeout(handle);
+  }, [email]);
+
   // Auto-redirect when Supabase detects session (magic link click)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -539,11 +560,38 @@ export default function StudentLogin() {
                     className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
                   />
                 </div>
+                {emailCheckStatus === "checking" && (
+                  <p className="mt-1.5 text-xs text-slate-400 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Checking email…
+                  </p>
+                )}
+                {emailCheckStatus === "exists" && tab === "signup" && (
+                  <p className="mt-1.5 text-xs text-red-600">
+                    This email is already registered. Switch to <button type="button" onClick={() => switchTab("login")} className="underline font-medium">Sign In</button>.
+                  </p>
+                )}
+                {emailCheckStatus === "available" && tab === "login" && (
+                  <p className="mt-1.5 text-xs text-red-600">
+                    No account found. Switch to <button type="button" onClick={() => switchTab("signup")} className="underline font-medium">New Student</button> to register.
+                  </p>
+                )}
+                {emailCheckStatus === "available" && tab === "signup" && (
+                  <p className="mt-1.5 text-xs text-emerald-600">✓ Email is available</p>
+                )}
+                {emailCheckStatus === "exists" && tab === "login" && (
+                  <p className="mt-1.5 text-xs text-emerald-600">✓ Account found</p>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={loading || !email}
+                disabled={
+                  loading || !email ||
+                  emailCheckStatus === "checking" ||
+                  emailCheckStatus === "invalid" ||
+                  (tab === "signup" && emailCheckStatus === "exists") ||
+                  (tab === "login" && emailCheckStatus === "available")
+                }
                 className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2"
               >
                 {loading
