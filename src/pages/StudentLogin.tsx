@@ -211,7 +211,8 @@ export default function StudentLogin() {
       return;
     }
     setOtpLoading(true);
-    const { data: verifyData, error } = await verifyOtpCode({ email, token: otp, type: tab === "signup" ? "signup" : "magiclink" });
+    const normalizedEmail = normalizeEmail(email);
+    const { data: verifyData, error } = await verifyOtpCode({ email: normalizedEmail, token: otp, type: verificationType });
     if (error || verifyData?.error || !verifyData?.user || !verifyData?.session) {
       setOtpLoading(false);
       toast({
@@ -227,31 +228,12 @@ export default function StudentLogin() {
     const userId = verifyData.user.id;
 
     if (tab === "signup") {
-      // Guard: if this email already has a completed profile, refuse to overwrite
-      const { data: profCheck } = await supabase
-        .from("ssra_profiles")
-        .select("phone_number, country, degree, german_level")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (profCheck && (profCheck.phone_number || profCheck.country || profCheck.degree || profCheck.german_level)) {
-        setOtpLoading(false);
-        toast({
-          title: "Account already exists",
-          description: "This email already has an account. Please use Sign In instead.",
-          variant: "destructive",
-        });
-        await supabase.auth.signOut();
-        setOtpStep(false);
-        return;
-      }
-
       // Save all profile data collected before OTP
       const { error: upErr } = await supabase
         .from("ssra_profiles")
         .update({
           full_name: name.trim(),
-          email,
+          email: normalizedEmail,
           phone_number: phone.trim(),
           country,
           city: city.trim(),
@@ -313,14 +295,10 @@ export default function StudentLogin() {
     dismiss();
     setLoading(true);
     setOtp("");
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
+    const status = await getEmailStatus(normalizedEmail);
     if (tab === "signup") {
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (existingProfile) {
+      if (status === "registered") {
         setLoading(false);
         toast({
           title: "Email already registered",
@@ -330,12 +308,7 @@ export default function StudentLogin() {
         return;
       }
     } else {
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (!existingProfile) {
+      if (status === "available") {
         setLoading(false);
         toast({
           title: "Account not found",
@@ -345,10 +318,12 @@ export default function StudentLogin() {
         return;
       }
     }
+    const nextVerificationType: OtpVerificationType = tab === "signup" && status === "available" ? "signup" : "magiclink";
+    setVerificationType(nextVerificationType);
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
-        shouldCreateUser: tab === "signup",
+        shouldCreateUser: nextVerificationType === "signup",
         data: tab === "signup" ? { full_name: name.trim() } : undefined,
         emailRedirectTo: `${window.location.origin}/login`,
       },
