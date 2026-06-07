@@ -6,7 +6,7 @@ import {
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
   GraduationCap, GitBranch, Wand2, Radio, FileCheck, Tag, ShieldAlert,
   FileSpreadsheet, GraduationCap as InstructorIcon, Layers, BookCheck,
-  AlertOctagon, HeartPulse, BarChart3, Award, RotateCcw,
+  AlertOctagon, HeartPulse, BarChart3, Award, RotateCcw, Zap,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
@@ -29,11 +29,12 @@ const ADMIN_NAV = [
   { icon: BookCheck,        label: "Homework",         href: "/ssra-admin/homework" },
   { icon: Award,            label: "Certificates",     href: "/ssra-admin/certificates" },
   { icon: AlertOctagon,     label: "Fraud Flags",      href: "/ssra-admin/fraud" },
-  { icon: HeartPulse,       label: "System Health",    href: "/ssra-admin/system-health" },
   { icon: RotateCcw,        label: "Cancellations",    href: "/ssra-admin/cancellations" },
 ];
 
 const SUPER_NAV = [
+  { icon: HeartPulse, label: "System Health",    href: "/ssra-admin/system-health" },
+  { icon: Zap,        label: "Failed Ops",       href: "/ssra-admin/operations" },
   { icon: Activity,   label: "Activity Monitor", href: "/ssra-admin/activity" },
   { icon: TrendingUp, label: "Finance",           href: "/ssra-admin/finance" },
   { icon: CreditCard, label: "Revenue",           href: "/ssra-admin/revenue" },

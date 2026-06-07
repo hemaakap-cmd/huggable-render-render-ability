@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
@@ -56,14 +57,20 @@ export function useSsraAuth(): AuthState {
       .eq("id", userId)
       .single();
 
+    const ssraProfile = profile as SsraProfile | null;
+    Sentry.setUser(ssraProfile ? {
+      id:       userId,
+      email:    ssraProfile.email ?? session.user.email ?? undefined,
+      username: ssraProfile.full_name ?? undefined,
+    } : { id: userId });
     setState({
       user:         session.user,
       session,
-      profile:      profile as SsraProfile | null,
+      profile:      ssraProfile,
       loading:      false,
-      isAdmin:      profile?.role === "admin" || profile?.role === "super_admin",
-      isSuperAdmin: profile?.role === "super_admin",
-      isInstructor: profile?.role === "instructor",
+      isAdmin:      ssraProfile?.role === "admin" || ssraProfile?.role === "super_admin",
+      isSuperAdmin: ssraProfile?.role === "super_admin",
+      isInstructor: ssraProfile?.role === "instructor",
     });
   }
 
@@ -71,6 +78,7 @@ export function useSsraAuth(): AuthState {
 }
 
 export async function ssraSignOut() {
+  Sentry.setUser(null);
   await supabase.auth.signOut();
   window.location.href = "/login";
 }

@@ -1221,6 +1221,116 @@ export function useMyProgress(courseId?: string) {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   MONITORING — SERVICE HEALTH, FAILED OPS, WEBHOOK EVENTS
+   ═══════════════════════════════════════════════════════════ */
+
+export function useServiceHealth() {
+  return useQuery({
+    queryKey: ["ssra-service-health"],
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const res = await supabase.functions.invoke("health-check", { method: "GET" } as any);
+      if (res.error) throw new Error(res.error.message);
+      return res.data as {
+        status: "ok" | "degraded" | "down";
+        services: Record<string, { status: string; latencyMs?: number; detail?: string }>;
+        metrics: {
+          failedEmails24h: number;
+          dlqEmails24h: number;
+          enrollments24h: number;
+          webhookSuccess24h: number;
+          webhookFailed24h: number;
+        };
+        responseTimeMs: number;
+        timestamp: string;
+      };
+    },
+  });
+}
+
+export function useFailedEmails(limit = 100) {
+  return useQuery({
+    queryKey: ["ssra-failed-emails", limit],
+    staleTime: 30_000,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("email_send_log")
+        .select("id, recipient_email, template_name, subject, status, error_message, retry_count, created_at, sent_at")
+        .in("status", ["failed", "bounced", "dlq"])
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Array<{
+        id: string;
+        recipient_email: string;
+        template_name: string;
+        subject: string | null;
+        status: string;
+        error_message: string | null;
+        retry_count: number;
+        created_at: string;
+        sent_at: string | null;
+      }>;
+    },
+  });
+}
+
+export function useStaleEnrollments(staleHours = 2, limit = 100) {
+  return useQuery({
+    queryKey: ["ssra-stale-enrollments", staleHours, limit],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const since = new Date(Date.now() - staleHours * 60 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from("ssra_enrollments")
+        .select("id, user_id, course_id, status, amount_eur, course_title_snapshot, student_name_snapshot, student_email_snapshot, created_at, stripe_payment_intent")
+        .eq("status", "pending")
+        .lt("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Array<{
+        id: string;
+        user_id: string;
+        course_id: string;
+        status: string;
+        amount_eur: number | null;
+        course_title_snapshot: string | null;
+        student_name_snapshot: string | null;
+        student_email_snapshot: string | null;
+        created_at: string;
+        stripe_payment_intent: string | null;
+      }>;
+    },
+  });
+}
+
+export function useWebhookEvents(limit = 200) {
+  return useQuery({
+    queryKey: ["ssra-webhook-events", limit],
+    staleTime: 30_000,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("ssra_webhook_events")
+        .select("id, event_type, event_id, environment, status, error_message, processed_at")
+        .order("processed_at", { ascending: false })
+        .limit(limit);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Array<{
+        id: string;
+        event_type: string;
+        event_id: string | null;
+        environment: string;
+        status: "processed" | "failed" | "skipped";
+        error_message: string | null;
+        processed_at: string;
+      }>;
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
    SYSTEM HEALTH
    ═══════════════════════════════════════════════════════════ */
 

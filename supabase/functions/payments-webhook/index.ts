@@ -275,10 +275,12 @@ async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
 }
 
 
-async function handleWebhook(req: Request) {
+async function handleWebhook(req: Request): Promise<{ eventType: string; eventId: string | undefined; env: string }> {
   const { event, env } = await verifyAndDetectEnv(req);
-  console.log('paddle event:', event.eventType, 'env:', env);
-  switch (event.eventType) {
+  const eventType = event.eventType as string;
+  const eventId   = (event.notificationId ?? event.id) as string | undefined;
+  console.log('paddle event:', eventType, 'env:', env);
+  switch (eventType) {
     case EventName.TransactionCompleted:
       await handleTransactionCompleted(event.data, env);
       break;
@@ -291,24 +293,56 @@ async function handleWebhook(req: Request) {
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
       break;
-    case 'adjustment.created' as any:
-    case 'adjustment.updated' as any:
+    case 'adjustment.created':
+    case 'adjustment.updated':
       await handleAdjustmentEvent(event.data, env);
       break;
     default:
       break;
   }
+  return { eventType, eventId, env };
+}
+
+async function logWebhookEvent(
+  eventType: string,
+  eventId: string | undefined,
+  env: string,
+  status: 'processed' | 'failed' | 'skipped',
+  errorMessage?: string,
+  payload?: unknown,
+) {
+  try {
+    await getSupabase().from('ssra_webhook_events').insert({
+      event_type:    eventType,
+      event_id:      eventId ?? null,
+      environment:   env,
+      status,
+      error_message: errorMessage ?? null,
+      payload:       payload ? JSON.parse(JSON.stringify(payload)) : null,
+    });
+  } catch (e) {
+    console.error('Failed to log webhook event:', e);
+  }
 }
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+  let eventType = 'unknown';
+  let eventId: string | undefined;
+  let env = 'unknown';
   try {
-    await handleWebhook(req);
+    const result = await handleWebhook(req);
+    // result carries env + event info after successful verification
+    eventType = result?.eventType ?? 'unknown';
+    eventId   = result?.eventId;
+    env       = result?.env ?? 'unknown';
+    await logWebhookEvent(eventType, eventId, env, 'processed');
     return new Response(JSON.stringify({ received: true }), {
       status: 200, headers: { 'Content-Type': 'application/json' },
     });
   } catch (e) {
     console.error('Webhook error:', e);
+    await logWebhookEvent(eventType, eventId, env, 'failed', (e as Error).message);
     return new Response('Webhook error', { status: 400 });
   }
 });
