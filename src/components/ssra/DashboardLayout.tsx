@@ -120,6 +120,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-4">
+            <BackButton />
+          </div>
           {needsCompletion && onProfilePage && (
             <div className="max-w-2xl mx-auto mb-4 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
               <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
