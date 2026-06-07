@@ -98,6 +98,20 @@ export default function StudentLogin() {
         toast({ title: "Please select your German level", variant: "destructive" });
         return;
       }
+      // Prevent duplicate registration
+      const { data: existingProfile } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", email.trim().toLowerCase())
+        .maybeSingle();
+      if (existingProfile) {
+        toast({
+          title: "Email already registered",
+          description: "This email already has an account. Please switch to Sign In.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
@@ -150,6 +164,25 @@ export default function StudentLogin() {
     const userId = verifyData.user.id;
 
     if (tab === "signup") {
+      // Guard: if this email already has a completed profile, refuse to overwrite
+      const { data: profCheck } = await supabase
+        .from("ssra_profiles")
+        .select("phone_number, country, degree, german_level")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profCheck && (profCheck.phone_number || profCheck.country || profCheck.degree || profCheck.german_level)) {
+        setOtpLoading(false);
+        toast({
+          title: "Account already exists",
+          description: "This email already has an account. Please use Sign In instead.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        setOtpStep(false);
+        return;
+      }
+
       // Save all profile data collected before OTP
       const { error: upErr } = await supabase
         .from("ssra_profiles")
@@ -213,6 +246,22 @@ export default function StudentLogin() {
     dismiss();
     setLoading(true);
     setOtp("");
+    if (tab === "signup") {
+      const { data: existingProfile } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", email.trim().toLowerCase())
+        .maybeSingle();
+      if (existingProfile) {
+        setLoading(false);
+        toast({
+          title: "Email already registered",
+          description: "This email already has an account. Please switch to Sign In.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
