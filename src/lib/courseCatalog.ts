@@ -196,7 +196,30 @@ export const COURSES: Course[] = [
   },
 ];
 
+/**
+ * Hidden €1 QA test course — NOT listed in COURSES so it never appears on
+ * public pages. Reachable only via the direct URL `/checkout?courseId=test-course`.
+ */
+const TEST_COURSE: Course = {
+  id: "test-course",
+  title: "Test Course (€1/mo)",
+  titleAr: "كورس تجريبي",
+  subtitle: "Internal QA checkout test — €1/month",
+  desc: "Hidden test course used only for QA of the checkout flow.",
+  price: 1,
+  interval: "month",
+  type: "subscription",
+  priceId: coursePriceId("test-course"),
+  category: "clinical",
+  weeks: "Ongoing",
+  level: "QA",
+  requires_verification: false,
+  modules: ["QA checkout test"],
+  color: "from-slate-600 to-slate-800",
+};
+
 export function getCourse(id: string) {
+  if (id === "test-course") return TEST_COURSE;
   return COURSES.find((c) => c.id === id);
 }
 
