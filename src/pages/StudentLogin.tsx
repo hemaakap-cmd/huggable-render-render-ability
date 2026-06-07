@@ -259,7 +259,7 @@ export default function StudentLogin() {
 
       const { data: confirmRow, error: confirmErr } = await supabase
         .from("ssra_profiles")
-        .select("full_name, phone_number, country, degree, german_level")
+        .select("full_name, phone_number, country, city, address, degree, german_level")
         .eq("id", userId)
         .maybeSingle();
       if (confirmErr || !isProfileComplete(confirmRow)) {
