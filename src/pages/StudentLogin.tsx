@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import { verifyOtpCode } from "@/lib/verifyOtpCode";
+import { isProfileComplete, missingProfileFields } from "@/lib/profileCompletion";
 
 type Tab = "signup" | "login";
 
