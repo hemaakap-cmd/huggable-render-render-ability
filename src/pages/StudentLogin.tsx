@@ -46,6 +46,27 @@ export default function StudentLogin() {
   const [otpLoading, setOtpLoading]     = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Live email existence check
+  const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "checking" | "exists" | "available" | "invalid">("idle");
+  useEffect(() => {
+    const trimmed = email.trim().toLowerCase();
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    if (!isValid) {
+      setEmailCheckStatus(trimmed.length > 0 ? "invalid" : "idle");
+      return;
+    }
+    setEmailCheckStatus("checking");
+    const handle = setTimeout(async () => {
+      const { data } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", trimmed)
+        .maybeSingle();
+      setEmailCheckStatus(data ? "exists" : "available");
+    }, 500);
+    return () => clearTimeout(handle);
+  }, [email]);
+
   // Auto-redirect when Supabase detects session (magic link click)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
