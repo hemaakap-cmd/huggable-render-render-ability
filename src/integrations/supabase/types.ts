@@ -601,6 +601,7 @@ export type Database = {
         Row: {
           amount_eur: number | null
           batch_id: string | null
+          coupon_code: string | null
           course_id: string | null
           course_title_snapshot: string | null
           created_at: string | null
@@ -622,6 +623,7 @@ export type Database = {
         Insert: {
           amount_eur?: number | null
           batch_id?: string | null
+          coupon_code?: string | null
           course_id?: string | null
           course_title_snapshot?: string | null
           created_at?: string | null
@@ -643,6 +645,7 @@ export type Database = {
         Update: {
           amount_eur?: number | null
           batch_id?: string | null
+          coupon_code?: string | null
           course_id?: string | null
           course_title_snapshot?: string | null
           created_at?: string | null
