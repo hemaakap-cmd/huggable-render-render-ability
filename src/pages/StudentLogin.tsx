@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Mail, Loader2, CheckCircle2, ArrowLeft, User, Phone, Globe, GraduationCap, Languages } from "lucide-react";
+import { Mail, Loader2, CheckCircle2, ArrowLeft, User, Phone, Globe, GraduationCap, Languages, MapPin, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
