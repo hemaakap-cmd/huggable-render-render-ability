@@ -197,6 +197,9 @@ function AppInner() {
                 <Route path="/verify/:code"    element={<VerifyCertificate />} />
                 <Route path="/verify"          element={<VerifyCertificate />} />
 
+                {/* Forced profile-completion gate (auth required, no profile gate) */}
+                <Route path="/complete-profile" element={<CompleteProfile />} />
+
                 {/* Student dashboard — auth required */}
                 <Route path="/dashboard"              element={<RequireAuth><StudentDashboard /></RequireAuth>} />
                 <Route path="/dashboard/courses"      element={<RequireAuth><MyCourses /></RequireAuth>} />
