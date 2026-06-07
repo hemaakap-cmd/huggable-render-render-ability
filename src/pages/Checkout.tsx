@@ -147,6 +147,7 @@ export default function Checkout() {
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
+            <BackButton className="mb-4" />
             <p className="text-slate-500 mb-4">Course not found.</p>
             <Link to="/pricing" className="text-[hsl(220,91%,54%)] font-semibold hover:underline">Back to pricing</Link>
           </div>
