@@ -1,0 +1,1 @@
+UPDATE public.ssra_enrollments SET status='cancelled' WHERE id='f3c7e9a6-a877-4a15-907d-b0696ae434ff';
