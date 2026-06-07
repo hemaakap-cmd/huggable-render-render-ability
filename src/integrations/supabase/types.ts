@@ -443,6 +443,7 @@ export type Database = {
           max_uses: number | null
           minimum_amount_eur: number | null
           name: string | null
+          paddle_discount_id: string | null
           updated_at: string
           uses_count: number
           valid_from: string | null
@@ -460,6 +461,7 @@ export type Database = {
           max_uses?: number | null
           minimum_amount_eur?: number | null
           name?: string | null
+          paddle_discount_id?: string | null
           updated_at?: string
           uses_count?: number
           valid_from?: string | null
@@ -477,6 +479,7 @@ export type Database = {
           max_uses?: number | null
           minimum_amount_eur?: number | null
           name?: string | null
+          paddle_discount_id?: string | null
           updated_at?: string
           uses_count?: number
           valid_from?: string | null
