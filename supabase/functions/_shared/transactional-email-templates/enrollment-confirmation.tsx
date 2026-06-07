@@ -1,13 +1,13 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Button, Row, Column,
+  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Button, Row, Column, Img,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'SSRA Academy'
 const CONTACT_EMAIL = 'support@ssracourses.com'
 const DASHBOARD_URL = 'https://ssracourses.com/dashboard/courses'
-const LOGO_URL = 'https://ssracourses.com/logo-mark-1024.png'
+const LOGO_URL = 'https://vffcarzhfxlqzfwrhzau.supabase.co/storage/v1/object/public/ssra-course-images/brand/ssra-logo.png'
 
 interface EnrollmentConfirmationProps {
   studentName?: string
@@ -41,7 +41,9 @@ const EnrollmentConfirmationEmail = ({
       <Container style={container}>
         <Section style={brandBar}>
           <Row>
-            <Column style={brandBadge}>S</Column>
+            <Column style={{ width: '72px', verticalAlign: 'middle' as const }}>
+              <Img src={LOGO_URL} width="56" height="56" alt={SITE_NAME} style={{ borderRadius: '12px', display: 'block' }} />
+            </Column>
             <Column style={brandTextCell}>
               <Text style={brandName}>{SITE_NAME}</Text>
               <Text style={brandTag}>SPORTS SCIENCE &amp; REHABILITATION</Text>
