@@ -20,6 +20,7 @@ type Coupon = {
   valid_until: string | null;
   course_id: string | null;
   minimum_amount_eur: number | null;
+  paddle_discount_id: string | null;
   is_active: boolean;
   created_at: string;
 };
@@ -27,7 +28,8 @@ type Coupon = {
 const EMPTY: Partial<Coupon> = {
   code: "", name: "", discount_type: "percent", discount_value: 10,
   max_uses: null, valid_from: null, valid_until: null,
-  course_id: null, minimum_amount_eur: null, is_active: true,
+  course_id: null, minimum_amount_eur: null, paddle_discount_id: null,
+  is_active: true,
 };
 
 function useCoupons() {
