@@ -29,9 +29,14 @@ const PaymentConfirmationEmail = ({
     <Preview>Payment received — {courseName ?? 'your course'} · {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={brandRow}>
-          <Img src={LOGO_URL} width="56" height="56" alt={SITE_NAME} style={logo} />
-          <Text style={brandName}>{SITE_NAME}</Text>
+        <Section style={brandBar}>
+          <Row>
+            <Column style={brandBadge}>S</Column>
+            <Column style={brandTextCell}>
+              <Text style={brandName}>{SITE_NAME}</Text>
+              <Text style={brandTag}>SPORTS SCIENCE &amp; REHABILITATION</Text>
+            </Column>
+          </Row>
         </Section>
         <Section style={header}>
           <Heading style={h1}>Payment received ✓</Heading>
