@@ -178,12 +178,13 @@ export default function StudentLogin() {
         .select("full_name, phone_number, country, degree, german_level")
         .eq("id", userId)
         .maybeSingle();
-      if (confirmErr || !confirmRow || !confirmRow.full_name?.trim()) {
+      if (confirmErr || !isProfileComplete(confirmRow)) {
         await supabase.auth.signOut();
         setOtpLoading(false);
+        const missing = missingProfileFields(confirmRow).join(", ");
         toast({
-          title: "Verification failed",
-          description: "Your data could not be confirmed. Please try again.",
+          title: "Registration incomplete",
+          description: `These fields are required: ${missing}. Please try again.`,
           variant: "destructive",
         });
         setOtpStep(false);
@@ -192,22 +193,15 @@ export default function StudentLogin() {
     } else {
       const { data: prof } = await supabase
         .from("ssra_profiles")
-        .select("full_name")
+        .select("full_name, phone_number, country, degree, german_level")
         .eq("id", userId)
         .maybeSingle();
-      if (!prof || !prof.full_name || prof.full_name.trim() === "") {
-        await supabase.auth.signOut();
-        setOtpLoading(false);
-        toast({
-          title: "Account not registered",
-          description: "Please use 'New Student' to complete your registration first.",
-          variant: "destructive",
-        });
-        setOtpStep(false);
-        setTab("signup");
-        return;
+      if (!isProfileComplete(prof)) {
+        // Allow them through — the global RequireAuth gate will redirect them to /complete-profile
+        // so they can finish, then continue. This avoids dead-ends for users mid-registration.
       }
     }
+
 
     setOtpLoading(false);
   };
