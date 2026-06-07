@@ -112,6 +112,7 @@ export default function Checkout() {
 
       window.Paddle.Checkout.open({
         items: [{ priceId: internalPriceId, quantity: 1 }],
+        ...(data.paddleDiscountId ? { discountId: data.paddleDiscountId } : {}),
         customData: data.customData,
         customer: { email: user.email ?? undefined },
         settings: {

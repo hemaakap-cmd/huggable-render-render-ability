@@ -1,0 +1,1 @@
+ALTER TABLE public.ssra_coupons ADD COLUMN IF NOT EXISTS paddle_discount_id TEXT;

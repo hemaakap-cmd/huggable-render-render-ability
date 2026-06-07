@@ -20,6 +20,7 @@ type Coupon = {
   valid_until: string | null;
   course_id: string | null;
   minimum_amount_eur: number | null;
+  paddle_discount_id: string | null;
   is_active: boolean;
   created_at: string;
 };
@@ -27,7 +28,8 @@ type Coupon = {
 const EMPTY: Partial<Coupon> = {
   code: "", name: "", discount_type: "percent", discount_value: 10,
   max_uses: null, valid_from: null, valid_until: null,
-  course_id: null, minimum_amount_eur: null, is_active: true,
+  course_id: null, minimum_amount_eur: null, paddle_discount_id: null,
+  is_active: true,
 };
 
 function useCoupons() {
@@ -57,6 +59,7 @@ function useUpsertCoupon() {
         valid_until: c.valid_until || null,
         course_id: c.course_id || null,
         minimum_amount_eur: c.minimum_amount_eur ? Number(c.minimum_amount_eur) : null,
+        paddle_discount_id: c.paddle_discount_id?.trim() ? c.paddle_discount_id.trim() : null,
         is_active: c.is_active ?? true,
         updated_at: new Date().toISOString(),
       };
@@ -107,6 +110,9 @@ export default function AdminCoupons() {
     if (!editing.code?.trim()) { toast({ title: "Code is required", variant: "destructive" }); return; }
     if (!editing.discount_value || Number(editing.discount_value) <= 0) {
       toast({ title: "Discount value must be > 0", variant: "destructive" }); return;
+    }
+    if (!editing.paddle_discount_id?.trim() || !/^dsc_/i.test(editing.paddle_discount_id.trim())) {
+      toast({ title: "Paddle Discount ID is required", description: "Must start with 'dsc_'. Create the discount in Paddle first.", variant: "destructive" }); return;
     }
     setSaving(true);
     try {
@@ -240,6 +246,21 @@ export default function AdminCoupons() {
                     <option key={c.id} value={c.id}>{c.title}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Paddle Discount ID <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={editing.paddle_discount_id ?? ""}
+                  onChange={(e) => setEditing({ ...editing, paddle_discount_id: e.target.value })}
+                  placeholder="dsc_01h..."
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-amber-600 mt-1">
+                  Required. Create a matching discount in the Paddle dashboard and paste its ID here. Without it the discount will NOT be applied at checkout (customer would be charged the full price).
+                </p>
               </div>
             </div>
 

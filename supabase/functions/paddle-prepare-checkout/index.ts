@@ -127,8 +127,22 @@ Deno.serve(async (req) => {
       enrollmentId = inserted.id;
     }
 
+    // Resolve Paddle discount id from coupon code (if one was applied)
+    let paddleDiscountId: string | null = null;
+    if (sanitizedCouponCode) {
+      const { data: couponRow } = await admin
+        .from('ssra_coupons')
+        .select('paddle_discount_id, is_active')
+        .eq('code', sanitizedCouponCode)
+        .maybeSingle();
+      if (couponRow?.is_active && couponRow.paddle_discount_id) {
+        paddleDiscountId = couponRow.paddle_discount_id;
+      }
+    }
+
     return new Response(JSON.stringify({
       paddlePriceId: coursePriceId(courseId),
+      paddleDiscountId,
       customData: {
         userId: user.id,
         courseId,

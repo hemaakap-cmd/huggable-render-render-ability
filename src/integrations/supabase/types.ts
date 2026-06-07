@@ -443,6 +443,7 @@ export type Database = {
           max_uses: number | null
           minimum_amount_eur: number | null
           name: string | null
+          paddle_discount_id: string | null
           updated_at: string
           uses_count: number
           valid_from: string | null
@@ -460,6 +461,7 @@ export type Database = {
           max_uses?: number | null
           minimum_amount_eur?: number | null
           name?: string | null
+          paddle_discount_id?: string | null
           updated_at?: string
           uses_count?: number
           valid_from?: string | null
@@ -477,6 +479,7 @@ export type Database = {
           max_uses?: number | null
           minimum_amount_eur?: number | null
           name?: string | null
+          paddle_discount_id?: string | null
           updated_at?: string
           uses_count?: number
           valid_from?: string | null
@@ -1256,6 +1259,10 @@ export type Database = {
         }[]
       }
       get_ssra_role: { Args: { _uid: string }; Returns: string }
+      increment_coupon_uses: {
+        Args: { _coupon_id: string }
+        Returns: undefined
+      }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
       is_ssra_instructor: { Args: { _uid: string }; Returns: boolean }
       is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }
@@ -1274,6 +1281,22 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      validate_coupon: {
+        Args: {
+          _amount_eur: number
+          _code: string
+          _course_id: string
+          _user_id: string
+        }
+        Returns: {
+          coupon_id: string
+          discount_type: string
+          discount_value: number
+          error_reason: string
+          final_discount: number
+          is_valid: boolean
         }[]
       }
       verify_ssra_certificate: {
