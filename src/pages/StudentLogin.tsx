@@ -116,6 +116,14 @@ export default function StudentLogin() {
         toast({ title: "Please select your country", variant: "destructive" });
         return;
       }
+      if (!city.trim()) {
+        toast({ title: "Please enter your city", variant: "destructive" });
+        return;
+      }
+      if (!address.trim() || address.trim().length < 5) {
+        toast({ title: "Please enter your full address", variant: "destructive" });
+        return;
+      }
       if (!degree) {
         toast({ title: "Please select your degree", variant: "destructive" });
         return;
