@@ -84,12 +84,36 @@ async function handleTransactionCompleted(data: any, env: PaddleEnv) {
       stripe_payment_intent: data.id, // reuse column for Paddle transaction id
     })
     .eq('id', enrollmentId)
-    .select('id, order_number, amount_eur, course_title_snapshot, student_name_snapshot, student_email_snapshot, start_date_snapshot, start_time_snapshot, duration_snapshot, instructor_snapshot')
+    .select('id, order_number, amount_eur, course_title_snapshot, student_name_snapshot, student_email_snapshot, start_date_snapshot, start_time_snapshot, duration_snapshot, instructor_snapshot, coupon_code')
     .maybeSingle();
 
   if (updateErr || !enrollment) {
     console.error('enrollment update failed', updateErr, enrollmentId);
     return;
+  }
+
+  // Consume coupon if one was applied (best-effort — must not block enrollment activation)
+  const couponCode = (enrollment as any).coupon_code as string | null;
+  if (couponCode) {
+    try {
+      const { data: couponRows } = await supabase
+        .from('ssra_coupons')
+        .select('id')
+        .eq('code', couponCode)
+        .maybeSingle();
+      if (couponRows?.id) {
+        await Promise.all([
+          supabase.rpc('increment_coupon_uses', { _coupon_id: couponRows.id }),
+          supabase.from('ssra_coupon_uses').insert({
+            coupon_id: couponRows.id,
+            user_id: userId,
+            enrollment_id: enrollmentId,
+          }),
+        ]);
+      }
+    } catch (e) {
+      console.error('coupon tracking failed (non-blocking):', e);
+    }
   }
 
   const totalAmount = data.details?.totals?.total

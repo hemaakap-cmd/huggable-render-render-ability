@@ -88,7 +88,11 @@ export default function Checkout() {
     try {
       // 1. Create pending enrollment row and get Paddle external price ID
       const { data, error } = await supabase.functions.invoke("paddle-prepare-checkout", {
-        body: { courseId: course.id, metadata: getUtmMeta() },
+        body: {
+          courseId: course.id,
+          couponCode: couponApplied?.code ?? null,
+          metadata: getUtmMeta(),
+        },
       });
       if (error) throw new Error(error.message);
       if (data?.alreadyEnrolled) throw new Error("You are already enrolled in this course.");

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Crown, CheckCircle2, XCircle, Clock, AlertCircle,
-  ExternalLink, ArrowRight,
+  ExternalLink, ArrowRight, Loader2,
 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMySubscription } from "@/hooks/useSsraData";
@@ -16,7 +16,6 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; cl
 
 export default function MySubscription() {
   const { data: subscription, isLoading } = useMySubscription();
-  const { toast }                         = useToast();
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
 
@@ -94,7 +93,7 @@ export default function MySubscription() {
           <div className="bg-white border border-slate-200 rounded-2xl p-7 text-center">
             <Crown className="w-10 h-10 text-[hsl(43,96%,50%)] mx-auto mb-4" />
             <div className="font-display text-xl font-bold text-slate-900 mb-2">Medical German</div>
-            <div className="text-slate-500 text-sm mb-1">Monthly subscription · <strong>€19/month</strong></div>
+            <div className="text-slate-500 text-sm mb-1">Monthly subscription · <strong>€29/month</strong></div>
             <div className="text-slate-400 text-xs mb-6">Cancel anytime at paddle.net. 14-day money-back guarantee.</div>
             <Link to="/checkout?courseId=medical-german">
               <button className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors">

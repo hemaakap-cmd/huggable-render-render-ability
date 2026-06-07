@@ -44,12 +44,13 @@ Deno.serve(async (req) => {
     }
     const user = userData.user;
 
-    const { courseId, metadata } = await req.json();
+    const { courseId, couponCode, metadata } = await req.json();
     if (!courseId || typeof courseId !== 'string') {
       return new Response(JSON.stringify({ error: 'courseId required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    const sanitizedCouponCode = couponCode && typeof couponCode === 'string' ? couponCode.trim().toUpperCase() : null;
 
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -88,6 +89,10 @@ Deno.serve(async (req) => {
     }
 
     let enrollmentId = existing?.id;
+    if (enrollmentId && sanitizedCouponCode) {
+      // Update coupon_code on the existing pending enrollment in case the student added a coupon on retry
+      await admin.from('ssra_enrollments').update({ coupon_code: sanitizedCouponCode }).eq('id', enrollmentId);
+    }
     if (!enrollmentId) {
       const { data: profile } = await admin
         .from('ssra_profiles')
@@ -109,6 +114,7 @@ Deno.serve(async (req) => {
           instructor_snapshot: course.instructor_name,
           student_name_snapshot: profile?.full_name ?? user.user_metadata?.full_name ?? null,
           student_email_snapshot: profile?.email ?? user.email ?? null,
+          coupon_code: sanitizedCouponCode ?? null,
         })
         .select('id')
         .single();
