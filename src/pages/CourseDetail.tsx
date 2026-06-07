@@ -56,6 +56,7 @@ export default function CourseDetail() {
       <div className="min-h-screen bg-slate-50 flex flex-col">
         <Header />
         <div className="flex-1 container py-32 text-center">
+          <BackButton className="mb-4" />
           <h1 className="font-display text-3xl font-bold text-slate-900 mb-4">Course not found</h1>
           <Link to="/courses" className="text-[hsl(220,91%,54%)] font-medium inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" /> Back to all courses
@@ -106,12 +107,7 @@ export default function CourseDetail() {
       <section className={`bg-gradient-to-br ${course.color} pt-32 pb-20 relative overflow-hidden`}>
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-white/10 blur-[80px] pointer-events-none" />
         <div className="container max-w-4xl relative">
-          <Link
-            to="/courses"
-            className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" /> All courses
-          </Link>
+          <BackButton className="text-white/70 hover:text-white mb-6" />
 
           <div className="flex flex-wrap items-center gap-2 mb-5">
             {hidden ? (

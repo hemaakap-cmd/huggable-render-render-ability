@@ -109,6 +109,7 @@ export default function Apply() {
         <Header />
         <div className="flex-1 flex items-center justify-center py-32">
           <div className="text-center max-w-md px-6 reveal">
+            <BackButton className="mb-4" />
             <div className="w-20 h-20 rounded-full bg-[hsl(43,96%,50%)] bg-opacity-15 flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="w-10 h-10 text-[hsl(43,96%,50%)]" />
             </div>
@@ -141,6 +142,7 @@ export default function Apply() {
       {/* Hero */}
       <section className="bg-[hsl(222,47%,9%)] pt-32 pb-20">
         <div className="container max-w-2xl text-center reveal">
+          <BackButton className="text-white/70 hover:text-white mb-4" />
           <span className="inline-block text-xs font-semibold tracking-widest uppercase text-[hsl(43,96%,50%)] mb-4">Apply to SSRA</span>
           <h1 className="font-display text-5xl font-bold text-white mb-4">
             Start Your Journey
