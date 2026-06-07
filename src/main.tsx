@@ -12,7 +12,7 @@ if (sentryDsn) {
     release: import.meta.env.VITE_APP_VERSION as string | undefined,
     integrations: [
       Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+      Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
     ],
     tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
     replaysSessionSampleRate: 0.05,

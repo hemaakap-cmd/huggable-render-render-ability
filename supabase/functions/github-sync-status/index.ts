@@ -1,6 +1,7 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const REPO_CANDIDATES = [
+const ALLOWED_REPOS = [
   "hemaakap-cmd/huggable-render-render-ability",
 ];
 
@@ -8,6 +9,40 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Require auth + super_admin
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: isSuper, error: roleErr } = await supabase.rpc("is_ssra_super_admin", {
+      _uid: claimsData.claims.sub,
+    });
+    if (roleErr || !isSuper) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const url = new URL(req.url);
     const requestedBranch = url.searchParams.get("branch");
     const requestedRepo = url.searchParams.get("repo");
@@ -19,23 +54,19 @@ Deno.serve(async (req: Request) => {
     };
     if (ghToken) headers["Authorization"] = `Bearer ${ghToken}`;
 
-    // Identify the token owner so we can fall back to <owner>/<repo>
-    let tokenLogin: string | null = null;
-    if (ghToken) {
-      const meRes = await fetch("https://api.github.com/user", { headers });
-      if (meRes.ok) {
-        const me = await meRes.json();
-        tokenLogin = me?.login ?? null;
-      }
+    // Only allow repos from allowlist
+    const candidates = requestedRepo
+      ? (ALLOWED_REPOS.includes(requestedRepo) ? [requestedRepo] : [])
+      : ALLOWED_REPOS;
+
+    if (candidates.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Repository not allowed" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const tried: { repo: string; status: number }[] = [];
-    const candidates = requestedRepo
-      ? [requestedRepo]
-      : Array.from(new Set([
-          ...REPO_CANDIDATES,
-          ...(tokenLogin ? REPO_CANDIDATES.map((r) => `${tokenLogin}/${r.split("/")[1]}`) : []),
-        ]));
 
     for (const repo of candidates) {
       const repoRes = await fetch(`https://api.github.com/repos/${repo}`, { headers });
@@ -51,14 +82,11 @@ Deno.serve(async (req: Request) => {
       );
 
       if (!res.ok) {
-        const body = await res.text();
         return new Response(
           JSON.stringify({
             repo,
             branch: targetBranch,
             error: `GitHub commit access failed (${res.status})`,
-            details: body,
-            default_branch: repoData.default_branch ?? null,
             fetched_at: new Date().toISOString(),
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -87,9 +115,8 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         error: "GitHub repo not accessible to the configured token",
         token_configured: Boolean(ghToken),
-        token_login: tokenLogin,
         tried,
-        hint: "Open Lovable Cloud → Secrets and update GITHUB_TOKEN with a Personal Access Token that has 'repo' (Contents: Read) access to the synced repository.",
+        hint: "Update GITHUB_TOKEN secret with a PAT that has Contents: Read access to the synced repository.",
         fetched_at: new Date().toISOString(),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -97,7 +124,7 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     console.error("github-sync-status error:", (err as Error).message);
     return new Response(
-      JSON.stringify({ error: "Internal error", message: (err as Error).message }),
+      JSON.stringify({ error: "Internal error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
