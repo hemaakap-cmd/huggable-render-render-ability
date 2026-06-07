@@ -857,9 +857,12 @@ export type Database = {
       }
       ssra_profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          city: string | null
           country: string | null
           created_at: string | null
+          date_of_birth: string | null
           degree: string | null
           email: string | null
           full_name: string | null
@@ -870,9 +873,12 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
           country?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           degree?: string | null
           email?: string | null
           full_name?: string | null
@@ -883,9 +889,12 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
           country?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           degree?: string | null
           email?: string | null
           full_name?: string | null

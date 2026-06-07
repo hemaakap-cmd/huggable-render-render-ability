@@ -91,12 +91,13 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
       // Step 1: get distinct user_ids that have at least one enrollment
       const { data: enrollRows, error: eErr } = await supabase
         .from("ssra_enrollments")
-        .select("user_id, status, course_id");
+        .select("user_id, status, course_id, enrolled_at, created_at");
       if (eErr) throw eErr;
 
       const enrollmentCounts = new Map<string, number>();
       const activeCounts = new Map<string, number>();
       const courseSets = new Map<string, Set<string>>();
+      const firstEnrolledAt = new Map<string, string>();
       for (const e of enrollRows ?? []) {
         if (!e.user_id) continue;
         enrollmentCounts.set(e.user_id, (enrollmentCounts.get(e.user_id) ?? 0) + 1);
@@ -106,6 +107,13 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
         if (e.course_id) {
           if (!courseSets.has(e.user_id)) courseSets.set(e.user_id, new Set());
           courseSets.get(e.user_id)!.add(e.course_id);
+        }
+        const when = (e.enrolled_at ?? e.created_at) as string | null;
+        if (when) {
+          const prev = firstEnrolledAt.get(e.user_id);
+          if (!prev || new Date(when).getTime() < new Date(prev).getTime()) {
+            firstEnrolledAt.set(e.user_id, when);
+          }
         }
       }
       const studentIds = Array.from(enrollmentCounts.keys());
@@ -146,6 +154,8 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
           ssra_enrollments: [{ count: enrollmentCounts.get(s.id) ?? 0 }],
           ssra_active_enrollments: activeCounts.get(s.id) ?? 0,
           ssra_unique_courses: courseSets.get(s.id)?.size ?? 0,
+          ssra_course_ids: Array.from(courseSets.get(s.id) ?? []),
+          ssra_first_enrolled_at: firstEnrolledAt.get(s.id) ?? null,
           ssra_subscriptions: latestSubscription.get(s.id) ? [latestSubscription.get(s.id)!] : [],
         })),
         total: count ?? 0,
@@ -153,6 +163,7 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
     },
   });
 }
+
 
 /* ── Admin: paginated LEADS (students with ZERO enrollments) ── */
 export function useAdminLeads(search = "", page = 0, pageSize = 25) {

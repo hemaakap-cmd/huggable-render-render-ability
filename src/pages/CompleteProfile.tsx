@@ -32,6 +32,9 @@ export default function CompleteProfile() {
   const [fullName, setFullName]       = useState("");
   const [phone, setPhone]             = useState("");
   const [country, setCountry]         = useState("");
+  const [city, setCity]               = useState("");
+  const [address, setAddress]         = useState("");
+  const [dob, setDob]                 = useState("");
   const [degree, setDegree]           = useState("");
   const [germanLevel, setGermanLevel] = useState("");
   const [saving, setSaving]           = useState(false);
@@ -41,18 +44,13 @@ export default function CompleteProfile() {
       setFullName(profile.full_name ?? "");
       setPhone(profile.phone_number ?? "");
       setCountry(profile.country ?? "");
+      setCity((profile as any).city ?? "");
+      setAddress((profile as any).address ?? "");
+      setDob((profile as any).date_of_birth ?? "");
       setDegree(profile.degree ?? "");
       setGermanLevel(profile.german_level ?? "");
     }
   }, [profile]);
-
-  useEffect(() => {
-    // If already complete, bounce back where they came from
-    if (!authLoading && profile && isProfileComplete(profile)) {
-      const next = (location.state as { from?: string } | null)?.from ?? "/dashboard";
-      navigate(next, { replace: true });
-    }
-  }, [authLoading, profile, location.state, navigate]);
 
   if (authLoading || !user) {
     return (
@@ -67,6 +65,8 @@ export default function CompleteProfile() {
     if (!fullName.trim()) return toast({ title: "Please enter your full name", variant: "destructive" });
     if (!phone.trim() || phone.trim().length < 6) return toast({ title: "Please enter a valid phone number", variant: "destructive" });
     if (!country) return toast({ title: "Please select your country", variant: "destructive" });
+    if (!city.trim()) return toast({ title: "Please enter your city", variant: "destructive" });
+    if (!address.trim() || address.trim().length < 5) return toast({ title: "Please enter your address", variant: "destructive" });
     if (!degree) return toast({ title: "Please select your degree", variant: "destructive" });
     if (!germanLevel) return toast({ title: "Please select your German level", variant: "destructive" });
 
@@ -77,10 +77,13 @@ export default function CompleteProfile() {
         full_name: fullName.trim(),
         phone_number: phone.trim(),
         country,
+        city: city.trim(),
+        address: address.trim(),
+        date_of_birth: dob || null,
         degree,
         german_level: germanLevel,
         updated_at: new Date().toISOString(),
-      })
+      } as any)
       .eq("id", user.id);
     setSaving(false);
 
@@ -128,6 +131,21 @@ export default function CompleteProfile() {
                 {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
+            <Field label="City *">
+              <input value={city} onChange={(e) => setCity(e.target.value)} maxLength={100}
+                placeholder="e.g. Cairo"
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30" />
+            </Field>
+            <Field label="Full Address *">
+              <textarea value={address} onChange={(e) => setAddress(e.target.value)} maxLength={300} rows={2}
+                placeholder="Street, building, apartment…"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 resize-none" />
+            </Field>
+            <Field label="Date of Birth">
+              <input type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30" />
+            </Field>
+
             <Field label="Degree / Qualification *">
               <select value={degree} onChange={(e) => setDegree(e.target.value)}
                 className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30">
