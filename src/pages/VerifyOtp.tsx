@@ -84,11 +84,12 @@ export default function VerifyOtp() {
 
   const resend = async () => {
     if (cooldown > 0) return;
+    const normalizedEmail = email.trim().toLowerCase();
     if (mode === "signup") {
       const { data: existingProfile } = await supabase
         .from("ssra_profiles")
         .select("id")
-        .eq("email", email.trim().toLowerCase())
+        .eq("email", normalizedEmail)
         .maybeSingle();
       if (existingProfile) {
         toast({
@@ -98,10 +99,24 @@ export default function VerifyOtp() {
         });
         return;
       }
+    } else {
+      const { data: existingProfile } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+      if (!existingProfile) {
+        toast({
+          title: "Account not found",
+          description: "This email is not registered. Please register first.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     setResending(true);
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: normalizedEmail,
       options: { shouldCreateUser: mode === "signup" },
     });
     setResending(false);
