@@ -90,6 +90,8 @@ export default function StudentLogin() {
     setName("");
     setPhone("");
     setCountry("");
+    setCity("");
+    setAddress("");
     setDegree("");
     setGermanLevel("");
     setOtpStep(false);
