@@ -45,6 +45,12 @@ function useUpdateSessionLink() {
         .update({ zoom_link, zoom_password: zoom_password ?? null })
         .eq("id", id);
       if (error) throw error;
+      // Notify enrolled students (in-app + email). Best-effort; don't fail the save.
+      const { data: notifyData, error: notifyErr } = await supabase.functions.invoke(
+        "notify-session-link-updated",
+        { body: { sessionId: id } },
+      );
+      return notifyData as { notified?: number; emailsSent?: number } | null;
     },
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["instructor-all-sessions"] });
