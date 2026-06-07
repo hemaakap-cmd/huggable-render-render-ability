@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { FileText, UserCheck, BookOpen, CreditCard, Ban, AlertTriangle, Scale } from "lucide-react";
+import BackButton from "@/components/ssra/BackButton";
 
 export default function TermsConditions() {
   return (
@@ -14,6 +15,7 @@ export default function TermsConditions() {
       <section className="relative overflow-hidden bg-hero pt-28 pb-16">
         <div className="absolute inset-0 bg-[hsl(220,91%,54%)]/10" />
         <div className="container relative z-10 text-center">
+          <BackButton className="text-white/70 hover:text-white mb-4" />
           <div className="inline-flex items-center gap-2 badge-blue mb-4">
             <FileText className="w-3.5 h-3.5" />
             <span>Please Read Carefully</span>

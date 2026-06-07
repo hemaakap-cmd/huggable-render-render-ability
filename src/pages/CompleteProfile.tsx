@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 import { isProfileComplete } from "@/lib/profileCompletion";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import BackButton from "@/components/ssra/BackButton";
 
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
