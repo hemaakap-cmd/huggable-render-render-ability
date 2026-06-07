@@ -88,13 +88,13 @@ export default function MySubscription() {
                 </div>
               )}
 
-              <a
-                href="https://customer.paddle.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors">
-                <ExternalLink className="w-4 h-4" /> Manage Billing at paddle.net
-              </a>
+              <button
+                onClick={openBillingPortal}
+                disabled={portalLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors disabled:opacity-60">
+                {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                Manage Billing
+              </button>
               <p className="text-xs text-white/30 text-center mt-2">Update card, cancel subscription, or download invoices</p>
             </div>
 
