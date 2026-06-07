@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Mail, Loader2, CheckCircle2, ArrowLeft, User, Phone, Globe, GraduationCap, Languages } from "lucide-react";
+import { Mail, Loader2, CheckCircle2, ArrowLeft, User, Phone, Globe, GraduationCap, Languages, MapPin, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
@@ -36,6 +36,8 @@ export default function StudentLogin() {
   const [name, setName]     = useState("");
   const [phone, setPhone]   = useState("");
   const [country, setCountry] = useState("");
+  const [city, setCity]       = useState("");
+  const [address, setAddress] = useState("");
   const [degree, setDegree] = useState("");
   const [germanLevel, setGermanLevel] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,6 +90,8 @@ export default function StudentLogin() {
     setName("");
     setPhone("");
     setCountry("");
+    setCity("");
+    setAddress("");
     setDegree("");
     setGermanLevel("");
     setOtpStep(false);
@@ -110,6 +114,14 @@ export default function StudentLogin() {
       }
       if (!country) {
         toast({ title: "Please select your country", variant: "destructive" });
+        return;
+      }
+      if (!city.trim()) {
+        toast({ title: "Please enter your city", variant: "destructive" });
+        return;
+      }
+      if (!address.trim() || address.trim().length < 5) {
+        toast({ title: "Please enter your full address", variant: "destructive" });
         return;
       }
       if (!degree) {
@@ -227,9 +239,11 @@ export default function StudentLogin() {
           email,
           phone_number: phone.trim(),
           country,
+          city: city.trim(),
+          address: address.trim(),
           degree,
           german_level: germanLevel,
-        })
+        } as any)
         .eq("id", userId);
       if (upErr) {
         await supabase.auth.signOut();
@@ -245,7 +259,7 @@ export default function StudentLogin() {
 
       const { data: confirmRow, error: confirmErr } = await supabase
         .from("ssra_profiles")
-        .select("full_name, phone_number, country, degree, german_level")
+        .select("full_name, phone_number, country, city, address, degree, german_level")
         .eq("id", userId)
         .maybeSingle();
       if (confirmErr || !isProfileComplete(confirmRow)) {
@@ -508,6 +522,41 @@ export default function StudentLogin() {
                       </select>
                     </div>
                   </div>
+
+                  <div>
+                    <label htmlFor="signup-city" className="text-sm font-medium text-slate-700 block mb-1.5">City *</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        id="signup-city"
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        required
+                        maxLength={100}
+                        placeholder="e.g. Cairo"
+                        className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="signup-address" className="text-sm font-medium text-slate-700 block mb-1.5">Full Address *</label>
+                    <div className="relative">
+                      <Home className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                      <textarea
+                        id="signup-address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        required
+                        maxLength={300}
+                        rows={2}
+                        placeholder="Street, building, apartment…"
+                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] resize-none"
+                      />
+                    </div>
+                  </div>
+
 
                   <div>
                     <label htmlFor="signup-degree" className="text-sm font-medium text-slate-700 block mb-1.5">Degree / Qualification *</label>
