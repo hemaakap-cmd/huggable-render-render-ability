@@ -524,6 +524,41 @@ export default function StudentLogin() {
                   </div>
 
                   <div>
+                    <label htmlFor="signup-city" className="text-sm font-medium text-slate-700 block mb-1.5">City *</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        id="signup-city"
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        required
+                        maxLength={100}
+                        placeholder="e.g. Cairo"
+                        className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="signup-address" className="text-sm font-medium text-slate-700 block mb-1.5">Full Address *</label>
+                    <div className="relative">
+                      <Home className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                      <textarea
+                        id="signup-address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        required
+                        maxLength={300}
+                        rows={2}
+                        placeholder="Street, building, apartment…"
+                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] resize-none"
+                      />
+                    </div>
+                  </div>
+
+
+                  <div>
                     <label htmlFor="signup-degree" className="text-sm font-medium text-slate-700 block mb-1.5">Degree / Qualification *</label>
                     <div className="relative">
                       <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
