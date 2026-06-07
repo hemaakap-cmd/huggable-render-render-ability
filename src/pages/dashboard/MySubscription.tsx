@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
   Crown, CheckCircle2, XCircle, Clock, AlertCircle,
   ExternalLink, ArrowRight, Loader2,
 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMySubscription } from "@/hooks/useSsraData";
+import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { toast } from "@/hooks/use-toast";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; cls: string }> = {
   active:     { label: "Active",     icon: CheckCircle2, cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -18,6 +22,23 @@ export default function MySubscription() {
   const { data: subscription, isLoading } = useMySubscription();
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("paddle-portal-session", {
+        body: { environment: getPaddleEnvironment() },
+      });
+      if (error || !data?.url) throw new Error(error?.message || "Could not open billing portal");
+      window.open(data.url as string, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast({ title: "Billing portal", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
 
   return (
     <DashboardLayout>
@@ -67,13 +88,13 @@ export default function MySubscription() {
                 </div>
               )}
 
-              <a
-                href="https://customer.paddle.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors">
-                <ExternalLink className="w-4 h-4" /> Manage Billing at paddle.net
-              </a>
+              <button
+                onClick={openBillingPortal}
+                disabled={portalLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors disabled:opacity-60">
+                {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                Manage Billing
+              </button>
               <p className="text-xs text-white/30 text-center mt-2">Update card, cancel subscription, or download invoices</p>
             </div>
 
