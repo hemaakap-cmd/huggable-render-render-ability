@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Img, Preview, Text, Section, Hr, Button, Row, Column,
+  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Button, Row, Column,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
@@ -39,9 +39,14 @@ const EnrollmentConfirmationEmail = ({
     <Preview>You're enrolled in {courseName ?? 'your course'} — starts {startDate ?? 'soon'}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={brandRow}>
-          <Img src={LOGO_URL} width="56" height="56" alt={SITE_NAME} style={logo} />
-          <Text style={brandName}>{SITE_NAME}</Text>
+        <Section style={brandBar}>
+          <Row>
+            <Column style={brandBadge}>S</Column>
+            <Column style={brandTextCell}>
+              <Text style={brandName}>{SITE_NAME}</Text>
+              <Text style={brandTag}>SPORTS SCIENCE &amp; REHABILITATION</Text>
+            </Column>
+          </Row>
         </Section>
         <Section style={header}>
           <Heading style={h1}>You're enrolled 🎉</Heading>
@@ -113,6 +118,8 @@ const btn = { background: '#2563eb', color: '#ffffff', padding: '12px 28px', bor
 const hr = { border: 'none', borderTop: '1px solid #e2e8f0', margin: '24px 0' }
 const footer = { fontSize: '12px', color: '#64748b', margin: '0 0 6px' }
 const link = { color: '#2563eb', textDecoration: 'underline' }
-const brandRow = { textAlign: 'center' as const, marginBottom: '16px' }
-const logo = { display: 'block', margin: '0 auto 6px', borderRadius: '12px' }
-const brandName = { fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, textAlign: 'center' as const, letterSpacing: '0.5px' }
+const brandBar = { background: '#0f172a', borderRadius: '12px', padding: '18px 22px', marginBottom: '20px' }
+const brandBadge = { background: '#f59e0b', color: '#0f172a', fontWeight: 'bold' as const, fontSize: '20px', width: '44px', height: '44px', borderRadius: '10px', textAlign: 'center' as const, verticalAlign: 'middle' as const, lineHeight: '44px' }
+const brandTextCell = { paddingLeft: '14px', verticalAlign: 'middle' as const }
+const brandName = { fontSize: '17px', fontWeight: 700 as const, color: '#ffffff', margin: 0, letterSpacing: '0.3px' }
+const brandTag = { fontSize: '10px', color: 'rgba(255,255,255,0.55)', margin: '2px 0 0', letterSpacing: '1.2px' }
