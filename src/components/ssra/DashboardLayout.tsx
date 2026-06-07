@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { ssraSignOut, useSsraAuth } from "@/hooks/useSsraAuth";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import BackButton from "@/components/ssra/BackButton";
 
 const NAV = [
   { icon: LayoutDashboard, label: "Overview",      href: "/dashboard" },
