@@ -1,0 +1,1 @@
+ALTER TABLE public.ssra_enrollments ADD COLUMN IF NOT EXISTS coupon_code text;
