@@ -1,38 +1,88 @@
 import { useState, useMemo } from "react";
-import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
-import { useAdminStudents } from "@/hooks/useSsraData";
+import { useAdminStudents, useLeadStudentStats } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
+import { exportToCSV, exportToExcel, type ExportColumn } from "@/lib/exportUtils";
 
 type SubFilter = "all" | "active" | "none";
 const PAGE_SIZE = 25;
+
+type StudentRow = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  phone_number: string | null;
+  country: string | null;
+  degree: string | null;
+  created_at: string;
+  ssra_enrollments: { count: number }[];
+  ssra_active_enrollments: number;
+  ssra_unique_courses: number;
+  ssra_subscriptions: { status: string }[];
+};
+
+const exportColumns: ExportColumn<StudentRow>[] = [
+  { header: "Full Name",          accessor: (r) => r.full_name ?? "" },
+  { header: "Email",              accessor: (r) => r.email ?? "" },
+  { header: "Phone",              accessor: (r) => r.phone_number ?? "" },
+  { header: "Country",            accessor: (r) => r.country ?? "" },
+  { header: "Degree",             accessor: (r) => r.degree ?? "" },
+  { header: "Enrollments",        accessor: (r) => r.ssra_enrollments?.[0]?.count ?? 0 },
+  { header: "Active Enrollments", accessor: (r) => r.ssra_active_enrollments ?? 0 },
+  { header: "Unique Courses",     accessor: (r) => r.ssra_unique_courses ?? 0 },
+  { header: "Subscription",       accessor: (r) => r.ssra_subscriptions?.[0]?.status ?? "" },
+  { header: "Joined",             accessor: (r) => new Date(r.created_at).toISOString().slice(0, 10) },
+];
 
 export default function AdminStudents() {
   const [search, setSearch]       = useState("");
   const [subFilter, setSubFilter] = useState<SubFilter>("all");
   const [page, setPage]           = useState(0);
   const { data, isLoading }       = useAdminStudents(search, page, PAGE_SIZE);
-  const rows = data?.rows ?? [];
+  const { data: stats }           = useLeadStudentStats();
+  const rows  = (data?.rows ?? []) as StudentRow[];
   const total = data?.total ?? 0;
   const { isSuperAdmin }          = useSsraAuth();
   const navigate                  = useNavigate();
 
   const filtered = useMemo(() => {
     if (subFilter === "all") return rows;
-    if (subFilter === "active") return rows.filter((s: any) => s.ssra_subscriptions?.[0]?.status === "active");
-    return rows.filter((s: any) => !s.ssra_subscriptions?.[0]?.status);
+    if (subFilter === "active") return rows.filter((s) => s.ssra_subscriptions?.[0]?.status === "active");
+    return rows.filter((s) => !s.ssra_subscriptions?.[0]?.status);
   }, [rows, subFilter]);
+
+  const stamp = new Date().toISOString().slice(0, 10);
+  const onCSV  = () => exportToCSV(filtered, exportColumns, `ssra-students-${stamp}`);
+  const onXLSX = () => exportToExcel(filtered, exportColumns, `ssra-students-${stamp}`, "Students");
 
   return (
     <AdminLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold text-slate-900">Students</h1>
-            <p className="text-slate-500 text-sm mt-1">All registered students on SSRA.</p>
+            <h1 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <Users className="w-6 h-6 text-emerald-500" /> Students
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">Paying customers with at least one enrollment.</p>
           </div>
-          <div className="text-2xl font-bold font-display text-slate-400">{total}</div>
+          <div className="flex gap-2">
+            <button onClick={onCSV} className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50">
+              <Download className="w-3.5 h-3.5" /> CSV
+            </button>
+            <button onClick={onXLSX} className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 border border-emerald-200 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100">
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
+            </button>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="Total Students"     value={stats?.totalStudents ?? "—"} hint="At least 1 enrollment" />
+          <StatCard label="New This Month"     value={stats?.newStudentsThisMonth ?? "—"} hint="Enrolled in current month" />
+          <StatCard label="Conversion Rate"    value={stats ? `${stats.conversionRate.toFixed(1)}%` : "—"} hint="Leads → Students" icon={<TrendingUp className="w-4 h-4 text-emerald-500" />} />
+          <StatCard label="Revenue / Student"  value={stats ? `€${stats.revenuePerStudent.toFixed(0)}` : "—"} hint="Lifetime avg" />
         </div>
 
         {/* Search + filters */}
@@ -50,21 +100,13 @@ export default function AdminStudents() {
           <div className="relative flex-1 min-w-[180px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-              placeholder="Search by name…"
+              placeholder="Search by name or email…"
               className="w-full pl-9 pr-4 h-10 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)] bg-white" />
           </div>
         </div>
 
         {/* Table */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-          <div className={`grid gap-4 px-4 py-3 border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wide ${isSuperAdmin ? "grid-cols-13" : "grid-cols-12"}`}>
-            <span className={isSuperAdmin ? "col-span-4" : "col-span-4"}>Student</span>
-            <span className={isSuperAdmin ? "col-span-3" : "col-span-3"}>Country · Degree</span>
-            <span className={`col-span-2 text-center`}>Enrollments</span>
-            <span className={`${isSuperAdmin ? "col-span-2" : "col-span-3"} text-center`}>Subscription</span>
-            {isSuperAdmin && <span className="col-span-2 text-center">View As</span>}
-          </div>
-
           {isLoading ? (
             <div className="text-center py-12 text-slate-400 text-sm">Loading…</div>
           ) : filtered.length === 0 ? (
@@ -73,58 +115,80 @@ export default function AdminStudents() {
               <div className="text-slate-400 text-sm">No students found.</div>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
-              {filtered.map((s: any) => {
-                const subStatus = s.ssra_subscriptions?.[0]?.status;
-                return (
-                  <div key={s.id} className={`grid gap-4 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors ${isSuperAdmin ? "grid-cols-13" : "grid-cols-12"}`}>
-                    <div className="col-span-4 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[hsl(220,91%,54%)]/10 flex items-center justify-center text-[hsl(220,91%,54%)] font-bold text-xs shrink-0">
-                        {s.full_name?.[0] ?? s.email?.[0] ?? "?"}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-slate-800 truncate">{s.full_name ?? "—"}</div>
-                        <div className="text-xs text-slate-400 truncate flex items-center gap-1">
-                          <Mail className="w-3 h-3" /> {s.email}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-span-3 text-sm text-slate-600">
-                      <div className="flex items-center gap-1 text-xs text-slate-500">
-                        <Globe2 className="w-3 h-3" /> {s.country ?? "—"}
-                      </div>
-                      <div className="text-xs text-slate-400 truncate">{s.degree ?? "—"}</div>
-                    </div>
-                    <div className="col-span-2 text-center">
-                      <span className="inline-block bg-[hsl(220,91%,54%)]/10 text-[hsl(220,91%,54%)] text-xs font-semibold px-2 py-0.5 rounded-full">
-                        {s.ssra_enrollments?.[0]?.count ?? 0}
-                      </span>
-                    </div>
-                    <div className={`${isSuperAdmin ? "col-span-2" : "col-span-3"} text-center`}>
-                      {subStatus ? (
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
-                          subStatus === "active"   ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                          subStatus === "past_due" ? "bg-red-50 text-red-700 border-red-200"             :
-                          "bg-slate-100 text-slate-500 border-slate-200"
-                        }`}>
-                          {subStatus}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-300">—</span>
-                      )}
-                    </div>
-                    {isSuperAdmin && (
-                      <div className="col-span-2 flex justify-center">
-                        <button
-                          onClick={() => navigate(`/ssra-admin/view-as/${s.id}`)}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors">
-                          <Eye className="w-3 h-3" /> View as
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                  <tr>
+                    <th className="text-left px-4 py-3">Student</th>
+                    <th className="text-left px-4 py-3">Contact</th>
+                    <th className="text-left px-4 py-3">Country</th>
+                    <th className="text-center px-4 py-3">Enrollments</th>
+                    <th className="text-center px-4 py-3">Courses</th>
+                    <th className="text-center px-4 py-3">Subscription</th>
+                    {isSuperAdmin && <th className="text-center px-4 py-3">View As</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filtered.map((s) => {
+                    const subStatus = s.ssra_subscriptions?.[0]?.status;
+                    return (
+                      <tr key={s.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-[hsl(220,91%,54%)]/10 flex items-center justify-center text-[hsl(220,91%,54%)] font-bold text-xs shrink-0">
+                              {(s.full_name?.[0] ?? s.email?.[0] ?? "?").toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-slate-800 truncate max-w-[160px]">{s.full_name ?? "—"}</div>
+                              <div className="text-[11px] text-slate-400">{s.degree ?? "—"}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="text-xs text-slate-600 flex items-center gap-1"><Mail className="w-3 h-3 text-slate-400" /> {s.email ?? "—"}</div>
+                          <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5"><Phone className="w-3 h-3" /> {s.phone_number ?? "—"}</div>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-600">
+                          <span className="flex items-center gap-1"><Globe2 className="w-3 h-3 text-slate-400" /> {s.country ?? "—"}</span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="inline-block bg-[hsl(220,91%,54%)]/10 text-[hsl(220,91%,54%)] text-xs font-semibold px-2 py-0.5 rounded-full">
+                            {s.ssra_enrollments?.[0]?.count ?? 0}
+                          </span>
+                          {s.ssra_active_enrollments > 0 && (
+                            <div className="text-[10px] text-emerald-600 mt-0.5">{s.ssra_active_enrollments} active</div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="text-xs font-semibold text-slate-700">{s.ssra_unique_courses ?? 0}</span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {subStatus ? (
+                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                              subStatus === "active"   ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                              subStatus === "past_due" ? "bg-red-50 text-red-700 border-red-200"             :
+                              "bg-slate-100 text-slate-500 border-slate-200"
+                            }`}>
+                              {subStatus}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-300">—</span>
+                          )}
+                        </td>
+                        {isSuperAdmin && (
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => navigate(`/ssra-admin/view-as/${s.id}`)}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors">
+                              <Eye className="w-3 h-3" /> View as
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -147,5 +211,18 @@ export default function AdminStudents() {
         )}
       </div>
     </AdminLayout>
+  );
+}
+
+function StatCard({ label, value, hint, icon }: { label: string; value: number | string; hint?: string; icon?: React.ReactNode }) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl p-4">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-400">{label}</span>
+        {icon}
+      </div>
+      <div className="font-display text-2xl font-bold text-slate-900">{value}</div>
+      {hint && <div className="text-[11px] text-slate-400 mt-0.5">{hint}</div>}
+    </div>
   );
 }

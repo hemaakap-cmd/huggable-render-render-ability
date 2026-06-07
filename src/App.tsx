@@ -50,6 +50,7 @@ const AdminVerifications  = lazy(() => import("./pages/ssra-admin/AdminVerificat
 const AdminCourses        = lazy(() => import("./pages/ssra-admin/AdminCourses"));
 const AdminSessions       = lazy(() => import("./pages/ssra-admin/AdminSessions"));
 const AdminStudents       = lazy(() => import("./pages/ssra-admin/AdminStudents"));
+const AdminLeads          = lazy(() => import("./pages/ssra-admin/AdminLeads"));
 const AdminAttendance     = lazy(() => import("./pages/ssra-admin/AdminAttendance"));
 const AdminEnrollments    = lazy(() => import("./pages/ssra-admin/AdminEnrollments"));
 const AdminRevenue        = lazy(() => import("./pages/ssra-admin/AdminRevenue"));
@@ -198,6 +199,7 @@ function AppInner() {
                 <Route path="/ssra-admin/sessions"          element={<RequireAdmin><AdminSessions /></RequireAdmin>} />
                 <Route path="/ssra-admin/attendance"        element={<RequireAdmin><AdminAttendance /></RequireAdmin>} />
                 <Route path="/ssra-admin/students"          element={<RequireAdmin><AdminStudents /></RequireAdmin>} />
+                <Route path="/ssra-admin/leads"             element={<RequireAdmin><AdminLeads /></RequireAdmin>} />
                 <Route path="/ssra-admin/enrollments"       element={<RequireAdmin><AdminEnrollments /></RequireAdmin>} />
                 <Route path="/ssra-admin/revenue"           element={<RequireAdmin><AdminRevenue /></RequireAdmin>} />
                 <Route path="/ssra-admin/live"              element={<RequireAdmin><AdminLiveVisitors /></RequireAdmin>} />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-  LayoutDashboard, Users,
+  LayoutDashboard, Users, UserPlus,
   BookOpen, CreditCard, LogOut, Menu, X, Library, Video,
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
   GraduationCap, GitBranch, Wand2, Radio, FileCheck, Tag, ShieldAlert,
@@ -15,6 +15,7 @@ const ADMIN_NAV = [
   { icon: LayoutDashboard, label: "Dashboard",       href: "/ssra-admin" },
   { icon: Radio,           label: "Live Visitors",   href: "/ssra-admin/live" },
   { icon: Users,           label: "Students",        href: "/ssra-admin/students" },
+  { icon: UserPlus,        label: "Leads",            href: "/ssra-admin/leads" },
   { icon: FileCheck,       label: "Verifications",   href: "/ssra-admin/verifications" },
   { icon: Users,           label: "Waitlist",         href: "/ssra-admin/waitlist" },
   { icon: Tag,             label: "Coupons",          href: "/ssra-admin/coupons" },
