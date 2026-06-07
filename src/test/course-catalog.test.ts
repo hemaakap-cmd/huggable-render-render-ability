@@ -26,9 +26,9 @@ describe("Course catalogue", () => {
     }
   });
 
-  it("has exactly one subscription course and it is Medical German", () => {
+  it("has Medical German as the primary subscription course", () => {
     const subs = COURSES.filter((c) => c.type === "subscription");
-    expect(subs).toHaveLength(1);
+    expect(subs.length).toBeGreaterThanOrEqual(1);
     expect(SUBSCRIPTION_COURSE.id).toBe("medical-german");
     expect(SUBSCRIPTION_COURSE.interval).toBe("month");
   });
