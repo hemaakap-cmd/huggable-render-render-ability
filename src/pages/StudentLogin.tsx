@@ -9,6 +9,8 @@ import { verifyOtpCode } from "@/lib/verifyOtpCode";
 import { isProfileComplete, missingProfileFields } from "@/lib/profileCompletion";
 
 type Tab = "signup" | "login";
+type EmailStatus = "idle" | "checking" | "registered" | "available" | "incomplete" | "invalid";
+type OtpVerificationType = "signup" | "magiclink";
 
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
@@ -24,6 +26,28 @@ const DEGREES = [
   "Other",
 ];
 const GERMAN_LEVELS = ["None / A0", "A1", "A2", "B1", "B2", "C1", "C2"];
+
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+async function getEmailStatus(email: string): Promise<Exclude<EmailStatus, "idle" | "checking">> {
+  const normalizedEmail = normalizeEmail(email);
+  if (!isValidEmail(normalizedEmail)) return "invalid";
+
+  const { data, error } = await supabase.rpc("get_ssra_email_status", { _email: normalizedEmail });
+  if (error) {
+    const { data: existingProfile } = await supabase
+      .from("ssra_profiles")
+      .select("id, full_name, phone_number, country, city, address, degree, german_level")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+
+    if (!existingProfile) return "available";
+    return isProfileComplete(existingProfile) ? "registered" : "incomplete";
+  }
+
+  return data === "registered" || data === "incomplete" || data === "available" ? data : "invalid";
+}
 
 export default function StudentLogin() {
   const navigate  = useNavigate();
@@ -49,22 +73,17 @@ export default function StudentLogin() {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Live email existence check
-  const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "checking" | "exists" | "available" | "invalid">("idle");
+  const [emailCheckStatus, setEmailCheckStatus] = useState<EmailStatus>("idle");
+  const [verificationType, setVerificationType] = useState<OtpVerificationType>("magiclink");
   useEffect(() => {
-    const trimmed = email.trim().toLowerCase();
-    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-    if (!isValid) {
+    const trimmed = normalizeEmail(email);
+    if (!isValidEmail(trimmed)) {
       setEmailCheckStatus(trimmed.length > 0 ? "invalid" : "idle");
       return;
     }
     setEmailCheckStatus("checking");
     const handle = setTimeout(async () => {
-      const { data } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", trimmed)
-        .maybeSingle();
-      setEmailCheckStatus(data ? "exists" : "available");
+      setEmailCheckStatus(await getEmailStatus(trimmed));
     }, 500);
     return () => clearTimeout(handle);
   }, [email]);
@@ -102,7 +121,12 @@ export default function StudentLogin() {
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     dismiss();
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
+    const status = await getEmailStatus(normalizedEmail);
+    if (status === "invalid") {
+      toast({ title: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
     if (tab === "signup") {
       if (!name.trim()) {
         toast({ title: "Please enter your full name", variant: "destructive" });
@@ -132,13 +156,7 @@ export default function StudentLogin() {
         toast({ title: "Please select your German level", variant: "destructive" });
         return;
       }
-      // Prevent duplicate registration
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (existingProfile) {
+      if (status === "registered") {
         toast({
           title: "Email already registered",
           description: "This email already has an account. Please switch to Sign In.",
@@ -147,12 +165,7 @@ export default function StudentLogin() {
         return;
       }
     } else {
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (!existingProfile) {
+      if (status === "available") {
         toast({
           title: "Account not found",
           description: "This email is not registered. Please register first from New Student.",
@@ -161,11 +174,13 @@ export default function StudentLogin() {
         return;
       }
     }
+    const nextVerificationType: OtpVerificationType = tab === "signup" && status === "available" ? "signup" : "magiclink";
+    setVerificationType(nextVerificationType);
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
-        shouldCreateUser: tab === "signup",
+        shouldCreateUser: nextVerificationType === "signup",
         data: tab === "signup" ? { full_name: name.trim() } : undefined,
         emailRedirectTo: `${window.location.origin}/login?redirect=${encodeURIComponent(redirect)}`,
       },
@@ -196,7 +211,8 @@ export default function StudentLogin() {
       return;
     }
     setOtpLoading(true);
-    const { data: verifyData, error } = await verifyOtpCode({ email, token: otp, type: tab === "signup" ? "signup" : "magiclink" });
+    const normalizedEmail = normalizeEmail(email);
+    const { data: verifyData, error } = await verifyOtpCode({ email: normalizedEmail, token: otp, type: verificationType });
     if (error || verifyData?.error || !verifyData?.user || !verifyData?.session) {
       setOtpLoading(false);
       toast({
@@ -212,31 +228,12 @@ export default function StudentLogin() {
     const userId = verifyData.user.id;
 
     if (tab === "signup") {
-      // Guard: if this email already has a completed profile, refuse to overwrite
-      const { data: profCheck } = await supabase
-        .from("ssra_profiles")
-        .select("phone_number, country, degree, german_level")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (profCheck && (profCheck.phone_number || profCheck.country || profCheck.degree || profCheck.german_level)) {
-        setOtpLoading(false);
-        toast({
-          title: "Account already exists",
-          description: "This email already has an account. Please use Sign In instead.",
-          variant: "destructive",
-        });
-        await supabase.auth.signOut();
-        setOtpStep(false);
-        return;
-      }
-
       // Save all profile data collected before OTP
       const { error: upErr } = await supabase
         .from("ssra_profiles")
         .update({
           full_name: name.trim(),
-          email,
+          email: normalizedEmail,
           phone_number: phone.trim(),
           country,
           city: city.trim(),
@@ -277,7 +274,7 @@ export default function StudentLogin() {
     } else {
       const { data: prof } = await supabase
         .from("ssra_profiles")
-        .select("full_name, phone_number, country, degree, german_level")
+        .select("full_name, phone_number, country, city, address, degree, german_level")
         .eq("id", userId)
         .maybeSingle();
       if (!isProfileComplete(prof)) {
@@ -298,14 +295,10 @@ export default function StudentLogin() {
     dismiss();
     setLoading(true);
     setOtp("");
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
+    const status = await getEmailStatus(normalizedEmail);
     if (tab === "signup") {
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (existingProfile) {
+      if (status === "registered") {
         setLoading(false);
         toast({
           title: "Email already registered",
@@ -315,12 +308,7 @@ export default function StudentLogin() {
         return;
       }
     } else {
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (!existingProfile) {
+      if (status === "available") {
         setLoading(false);
         toast({
           title: "Account not found",
@@ -330,10 +318,12 @@ export default function StudentLogin() {
         return;
       }
     }
+    const nextVerificationType: OtpVerificationType = tab === "signup" && status === "available" ? "signup" : "magiclink";
+    setVerificationType(nextVerificationType);
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
-        shouldCreateUser: tab === "signup",
+        shouldCreateUser: nextVerificationType === "signup",
         data: tab === "signup" ? { full_name: name.trim() } : undefined,
         emailRedirectTo: `${window.location.origin}/login`,
       },
@@ -614,10 +604,13 @@ export default function StudentLogin() {
                     <Loader2 className="w-3 h-3 animate-spin" /> Checking email…
                   </p>
                 )}
-                {emailCheckStatus === "exists" && tab === "signup" && (
+                {emailCheckStatus === "registered" && tab === "signup" && (
                   <p className="mt-1.5 text-xs text-red-600">
                     This email is already registered. Switch to <button type="button" onClick={() => switchTab("login")} className="underline font-medium">Sign In</button>.
                   </p>
+                )}
+                {emailCheckStatus === "incomplete" && tab === "signup" && (
+                  <p className="mt-1.5 text-xs text-amber-600">This email has an unfinished registration. Continue to complete it.</p>
                 )}
                 {emailCheckStatus === "available" && tab === "login" && (
                   <p className="mt-1.5 text-xs text-red-600">
@@ -627,7 +620,7 @@ export default function StudentLogin() {
                 {emailCheckStatus === "available" && tab === "signup" && (
                   <p className="mt-1.5 text-xs text-emerald-600">✓ Email is available</p>
                 )}
-                {emailCheckStatus === "exists" && tab === "login" && (
+                {(emailCheckStatus === "registered" || emailCheckStatus === "incomplete") && tab === "login" && (
                   <p className="mt-1.5 text-xs text-emerald-600">✓ Account found</p>
                 )}
               </div>
@@ -638,7 +631,7 @@ export default function StudentLogin() {
                   loading || !email ||
                   emailCheckStatus === "checking" ||
                   emailCheckStatus === "invalid" ||
-                  (tab === "signup" && emailCheckStatus === "exists") ||
+                  (tab === "signup" && emailCheckStatus === "registered") ||
                   (tab === "login" && emailCheckStatus === "available")
                 }
                 className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2"

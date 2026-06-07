@@ -9,6 +9,8 @@ interface SsraProfile {
   email: string | null;
   role: "student" | "admin" | "super_admin" | "instructor";
   country: string | null;
+  city: string | null;
+  address: string | null;
   degree: string | null;
   german_level: string | null;
   phone_number: string | null;

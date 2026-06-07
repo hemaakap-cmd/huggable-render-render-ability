@@ -1258,6 +1258,7 @@ export type Database = {
           students_count: number
         }[]
       }
+      get_ssra_email_status: { Args: { _email: string }; Returns: string }
       get_ssra_role: { Args: { _uid: string }; Returns: string }
       increment_coupon_uses: {
         Args: { _coupon_id: string }
