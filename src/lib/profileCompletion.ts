@@ -6,6 +6,8 @@ export const REQUIRED_PROFILE_FIELDS = [
   "full_name",
   "phone_number",
   "country",
+  "city",
+  "address",
   "degree",
   "german_level",
 ] as const;

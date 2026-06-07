@@ -58,10 +58,17 @@ export function profileCompletion(p: {
   email?: string | null;
   phone_number?: string | null;
   country?: string | null;
+  city?: string | null;
+  address?: string | null;
   degree?: string | null;
   german_level?: string | null;
+  date_of_birth?: string | null;
 }): number {
-  const fields = [p.full_name, p.email, p.phone_number, p.country, p.degree, p.german_level];
+  const fields = [
+    p.full_name, p.email, p.phone_number, p.country, p.city, p.address,
+    p.degree, p.german_level, p.date_of_birth,
+  ];
   const filled = fields.filter((v) => v && String(v).trim() !== "").length;
   return Math.round((filled / fields.length) * 100);
 }
+
