@@ -7,7 +7,10 @@ import Footer from "@/components/ssra/Footer";
 export default function PaymentCanceled() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+<Header />
+<div className="container pt-20 pb-0">
+  <BackButton />
+</div>
       <div className="flex-1 flex items-center justify-center py-32 px-4">
         <div className="text-center max-w-md">
           <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-6">

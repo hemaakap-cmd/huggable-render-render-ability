@@ -51,7 +51,10 @@ export default function VerifyCertificate() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+<Header />
+<div className="container pt-20 pb-0">
+  <BackButton />
+</div>
 
       <section className="bg-[hsl(222,47%,9%)] pt-32 pb-16">
         <div className="container max-w-2xl text-center">

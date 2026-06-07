@@ -147,8 +147,10 @@ export default function Courses() {
         <meta name="twitter:description" content="Medical German, rehab, movement analysis & career entry in Germany — taught in Arabic." />
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
       </Helmet>
-
-      <Header />
+<Header />
+<div className="container pt-20 pb-0">
+  <BackButton />
+</div>
 
       {/* Hero */}
       <section className="bg-hero pt-32 pb-20 relative overflow-hidden">

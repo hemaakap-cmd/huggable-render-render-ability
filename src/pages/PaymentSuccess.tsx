@@ -34,7 +34,10 @@ export default function PaymentSuccess() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+<Header />
+<div className="container pt-20 pb-0">
+  <BackButton />
+</div>
       <div className="flex-1 flex items-center justify-center py-20 px-4">
         <div className="max-w-xl w-full">
           <div className="text-center mb-8">
