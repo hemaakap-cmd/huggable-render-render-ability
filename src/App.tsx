@@ -101,11 +101,30 @@ const queryClient = new QueryClient({
   },
 });
 
-const Spinner = () => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50">
-    <Loader2 className="w-8 h-8 animate-spin text-[hsl(220,91%,54%)]" />
-  </div>
-);
+const Spinner = () => {
+  const [showRefresh, setShowRefresh] = (require("react") as typeof import("react")).useState(false);
+  (require("react") as typeof import("react")).useEffect(() => {
+    const t = setTimeout(() => setShowRefresh(true), 12000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4 px-4 text-center">
+      <Loader2 className="w-8 h-8 animate-spin text-[hsl(220,91%,54%)]" />
+      {showRefresh && (
+        <>
+          <p className="text-sm text-slate-600">Taking longer than expected…</p>
+          <button
+            onClick={() => { try { sessionStorage.removeItem("lovable:chunk-reloaded"); } catch {} window.location.reload(); }}
+            className="px-4 py-2 rounded-lg bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors"
+          >
+            Refresh page
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
 
 /* ── Auth guards ── */
 function RequireAuth({ children }: { children: React.ReactNode }) {
