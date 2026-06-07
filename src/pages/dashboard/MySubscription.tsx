@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
   Crown, CheckCircle2, XCircle, Clock, AlertCircle,
   ExternalLink, ArrowRight, Loader2,
 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMySubscription } from "@/hooks/useSsraData";
+import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { toast } from "@/hooks/use-toast";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; cls: string }> = {
   active:     { label: "Active",     icon: CheckCircle2, cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
