@@ -9,6 +9,8 @@ import { verifyOtpCode } from "@/lib/verifyOtpCode";
 import { isProfileComplete, missingProfileFields } from "@/lib/profileCompletion";
 
 type Tab = "signup" | "login";
+type EmailStatus = "idle" | "checking" | "registered" | "available" | "incomplete" | "invalid";
+type OtpVerificationType = "signup" | "magiclink";
 
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
@@ -24,6 +26,28 @@ const DEGREES = [
   "Other",
 ];
 const GERMAN_LEVELS = ["None / A0", "A1", "A2", "B1", "B2", "C1", "C2"];
+
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+async function getEmailStatus(email: string): Promise<Exclude<EmailStatus, "idle" | "checking">> {
+  const normalizedEmail = normalizeEmail(email);
+  if (!isValidEmail(normalizedEmail)) return "invalid";
+
+  const { data, error } = await supabase.rpc("get_ssra_email_status", { _email: normalizedEmail });
+  if (error) {
+    const { data: existingProfile } = await supabase
+      .from("ssra_profiles")
+      .select("id, full_name, phone_number, country, city, address, degree, german_level")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+
+    if (!existingProfile) return "available";
+    return isProfileComplete(existingProfile) ? "registered" : "incomplete";
+  }
+
+  return data === "registered" || data === "incomplete" || data === "available" ? data : "invalid";
+}
 
 export default function StudentLogin() {
   const navigate  = useNavigate();
@@ -49,22 +73,17 @@ export default function StudentLogin() {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Live email existence check
-  const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "checking" | "exists" | "available" | "invalid">("idle");
+  const [emailCheckStatus, setEmailCheckStatus] = useState<EmailStatus>("idle");
+  const [verificationType, setVerificationType] = useState<OtpVerificationType>("magiclink");
   useEffect(() => {
-    const trimmed = email.trim().toLowerCase();
-    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-    if (!isValid) {
+    const trimmed = normalizeEmail(email);
+    if (!isValidEmail(trimmed)) {
       setEmailCheckStatus(trimmed.length > 0 ? "invalid" : "idle");
       return;
     }
     setEmailCheckStatus("checking");
     const handle = setTimeout(async () => {
-      const { data } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", trimmed)
-        .maybeSingle();
-      setEmailCheckStatus(data ? "exists" : "available");
+      setEmailCheckStatus(await getEmailStatus(trimmed));
     }, 500);
     return () => clearTimeout(handle);
   }, [email]);
@@ -102,7 +121,12 @@ export default function StudentLogin() {
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     dismiss();
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
+    const status = await getEmailStatus(normalizedEmail);
+    if (status === "invalid") {
+      toast({ title: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
     if (tab === "signup") {
       if (!name.trim()) {
         toast({ title: "Please enter your full name", variant: "destructive" });
@@ -132,13 +156,7 @@ export default function StudentLogin() {
         toast({ title: "Please select your German level", variant: "destructive" });
         return;
       }
-      // Prevent duplicate registration
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (existingProfile) {
+      if (status === "registered") {
         toast({
           title: "Email already registered",
           description: "This email already has an account. Please switch to Sign In.",
@@ -147,12 +165,7 @@ export default function StudentLogin() {
         return;
       }
     } else {
-      const { data: existingProfile } = await supabase
-        .from("ssra_profiles")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-      if (!existingProfile) {
+      if (status === "available") {
         toast({
           title: "Account not found",
           description: "This email is not registered. Please register first from New Student.",
@@ -161,11 +174,13 @@ export default function StudentLogin() {
         return;
       }
     }
+    const nextVerificationType: OtpVerificationType = tab === "signup" && status === "available" ? "signup" : "magiclink";
+    setVerificationType(nextVerificationType);
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
-        shouldCreateUser: tab === "signup",
+        shouldCreateUser: nextVerificationType === "signup",
         data: tab === "signup" ? { full_name: name.trim() } : undefined,
         emailRedirectTo: `${window.location.origin}/login?redirect=${encodeURIComponent(redirect)}`,
       },
