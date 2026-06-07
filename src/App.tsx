@@ -50,6 +50,7 @@ const AdminVerifications  = lazy(() => import("./pages/ssra-admin/AdminVerificat
 const AdminCourses        = lazy(() => import("./pages/ssra-admin/AdminCourses"));
 const AdminSessions       = lazy(() => import("./pages/ssra-admin/AdminSessions"));
 const AdminStudents       = lazy(() => import("./pages/ssra-admin/AdminStudents"));
+const AdminLeads          = lazy(() => import("./pages/ssra-admin/AdminLeads"));
 const AdminAttendance     = lazy(() => import("./pages/ssra-admin/AdminAttendance"));
 const AdminEnrollments    = lazy(() => import("./pages/ssra-admin/AdminEnrollments"));
 const AdminRevenue        = lazy(() => import("./pages/ssra-admin/AdminRevenue"));
