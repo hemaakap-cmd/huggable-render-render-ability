@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
 
     if (existing?.status === 'active') {
       return new Response(JSON.stringify({ error: 'Already enrolled', alreadyEnrolled: true }), {
-        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
