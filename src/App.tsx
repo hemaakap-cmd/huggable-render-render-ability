@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,9 +10,11 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { useSsraAuth } from "./hooks/useSsraAuth";
 import { useVisitorTracker } from "./hooks/useVisitorTracker";
 import { isProfileComplete } from "./lib/profileCompletion";
+import { lazyWithRetry as lazy } from "./lib/lazyWithRetry";
 import Index from "./pages/Index";
 import WhatsAppButton from "./components/ssra/WhatsAppButton";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
+
 
 /* ── Public ── */
 const Courses         = lazy(() => import("./pages/Courses"));
@@ -99,11 +101,34 @@ const queryClient = new QueryClient({
   },
 });
 
-const Spinner = () => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50">
-    <Loader2 className="w-8 h-8 animate-spin text-[hsl(220,91%,54%)]" />
-  </div>
-);
+const Spinner = () => {
+  const [showRefresh, setShowRefresh] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShowRefresh(true), 12000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4 px-4 text-center">
+      <Loader2 className="w-8 h-8 animate-spin text-[hsl(220,91%,54%)]" />
+      {showRefresh && (
+        <>
+          <p className="text-sm text-slate-600">Taking longer than expected…</p>
+          <button
+            onClick={() => {
+              try { sessionStorage.removeItem("lovable:chunk-reloaded"); } catch {}
+              window.location.reload();
+            }}
+            className="px-4 py-2 rounded-lg bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors"
+          >
+            Refresh page
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
+
 
 /* ── Auth guards ── */
 function RequireAuth({ children }: { children: React.ReactNode }) {
