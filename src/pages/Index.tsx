@@ -138,6 +138,7 @@ export default function Index() {
         />
 
         <div className="container relative z-10 pt-28 pb-20">
+          <BackButton className="text-white/70 hover:text-white mb-6" />
           <div className="max-w-4xl mx-auto text-center">
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/15 text-white/80 text-xs font-medium mb-8 backdrop-blur-sm">
