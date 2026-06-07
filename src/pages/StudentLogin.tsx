@@ -585,7 +585,13 @@ export default function StudentLogin() {
 
               <button
                 type="submit"
-                disabled={loading || !email}
+                disabled={
+                  loading || !email ||
+                  emailCheckStatus === "checking" ||
+                  emailCheckStatus === "invalid" ||
+                  (tab === "signup" && emailCheckStatus === "exists") ||
+                  (tab === "login" && emailCheckStatus === "available")
+                }
                 className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2"
               >
                 {loading
