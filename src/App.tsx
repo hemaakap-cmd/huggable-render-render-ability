@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,9 +10,11 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { useSsraAuth } from "./hooks/useSsraAuth";
 import { useVisitorTracker } from "./hooks/useVisitorTracker";
 import { isProfileComplete } from "./lib/profileCompletion";
+import { lazyWithRetry as lazy } from "./lib/lazyWithRetry";
 import Index from "./pages/Index";
 import WhatsAppButton from "./components/ssra/WhatsAppButton";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
+
 
 /* ── Public ── */
 const Courses         = lazy(() => import("./pages/Courses"));
