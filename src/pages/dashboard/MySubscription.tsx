@@ -22,6 +22,23 @@ export default function MySubscription() {
   const { data: subscription, isLoading } = useMySubscription();
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("paddle-portal-session", {
+        body: { environment: getPaddleEnvironment() },
+      });
+      if (error || !data?.url) throw new Error(error?.message || "Could not open billing portal");
+      window.open(data.url as string, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast({ title: "Billing portal", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
 
   return (
     <DashboardLayout>
