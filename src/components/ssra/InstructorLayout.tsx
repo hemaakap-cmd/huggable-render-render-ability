@@ -5,6 +5,7 @@ import {
   Video, FolderOpen, LogOut, Menu, X, ChevronDown, GraduationCap, BookCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import BackButton from "@/components/ssra/BackButton";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
 const NAV = [
@@ -103,7 +104,12 @@ export default function InstructorLayout({ children }: { children: React.ReactNo
             <span className="text-emerald-600 font-semibold">Instructor Portal</span>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-4">
+            <BackButton />
+          </div>
+          {children}
+        </main>
       </div>
     </div>
   );

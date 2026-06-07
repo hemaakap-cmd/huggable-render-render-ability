@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, Globe2, GraduationCap, Target, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { Button } from "@/components/ui/button";
 
@@ -72,6 +73,7 @@ export default function About() {
       {/* Page hero */}
       <section className="bg-[hsl(222,47%,9%)] pt-32 pb-20">
         <div className="container max-w-3xl text-center reveal">
+          <BackButton className="text-white/70 hover:text-white mb-4" />
           <span className="inline-block text-xs font-semibold tracking-widest uppercase text-[hsl(43,96%,50%)] mb-4">About SSRA</span>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-6">
             Our Mission

@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ArrowRight, Mail, Calendar, Clock, User, Loader2 } from "lucide-react";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/courseCatalog";
 import { useEnrollmentById, useEnrollmentBySession } from "@/hooks/useSsraData";
@@ -33,7 +34,10 @@ export default function PaymentSuccess() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header />
+<Header />
+<div className="container pt-20 pb-0">
+  <BackButton />
+</div>
       <div className="flex-1 flex items-center justify-center py-20 px-4">
         <div className="max-w-xl w-full">
           <div className="text-center mb-8">

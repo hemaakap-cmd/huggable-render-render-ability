@@ -4,6 +4,7 @@ import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import BackButton from "@/components/ssra/BackButton";
 
 export default function ResetPassword() {
   const navigate    = useNavigate();
@@ -49,6 +50,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
+        <BackButton className="mb-4" />
         <Link to="/" className="flex items-center justify-center mb-8">
           <SsraLogo size={36} scheme="dark" />
         </Link>

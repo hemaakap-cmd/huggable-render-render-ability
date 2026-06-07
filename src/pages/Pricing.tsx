@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE, type Course } from "@/lib/courseCatalog";
 import { useToast } from "@/hooks/use-toast";
@@ -164,7 +165,10 @@ export default function Pricing() {
           ],
         })}</script>
       </Helmet>
-      <Header />
+<Header />
+<div className="container pt-20 pb-0">
+  <BackButton />
+</div>
 
       {/* Hero */}
       <section className="bg-hero pt-32 pb-20 relative overflow-hidden">

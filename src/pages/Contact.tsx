@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +71,7 @@ export default function Contact() {
       {/* Page hero */}
       <section className="bg-[hsl(222,47%,9%)] pt-32 pb-20">
         <div className="container max-w-2xl text-center reveal">
+          <BackButton className="text-white/70 hover:text-white mb-4" />
           <span className="inline-block text-xs font-semibold tracking-widest uppercase text-[hsl(43,96%,50%)] mb-4">Get in Touch</span>
           <h1 className="font-display text-5xl font-bold text-white mb-4">Contact Us</h1>
           <p className="text-white opacity-60 leading-relaxed">

@@ -4,6 +4,7 @@ import { Mail, Loader2, CheckCircle2, ArrowLeft, User, Phone, Globe, GraduationC
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import BackButton from "@/components/ssra/BackButton";
 import { verifyOtpCode } from "@/lib/verifyOtpCode";
 import { isProfileComplete, missingProfileFields } from "@/lib/profileCompletion";
 
@@ -234,6 +235,7 @@ export default function StudentLogin() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
+          <BackButton className="mb-4" />
           <h1 className="sr-only">Student Portal — verify email</h1>
           <Link to="/" className="flex items-center justify-center mb-8">
             <SsraLogo size={36} scheme="dark" />
@@ -317,6 +319,7 @@ export default function StudentLogin() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
+        <BackButton className="mb-4" />
         <h1 className="sr-only">Student Portal — sign in or register</h1>
         <Link to="/" className="flex items-center justify-center mb-8">
           <SsraLogo size={36} scheme="dark" />

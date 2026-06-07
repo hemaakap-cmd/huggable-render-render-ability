@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 import { isProfileComplete } from "@/lib/profileCompletion";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import BackButton from "@/components/ssra/BackButton";
 
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
@@ -96,6 +97,7 @@ export default function CompleteProfile() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
+        <BackButton className="mb-4" />
         <div className="flex flex-col items-center mb-6">
           <SsraLogo size={40} />
           <div className="mt-4 flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full text-xs font-semibold">

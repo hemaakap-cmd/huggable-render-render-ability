@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Tag, X } from "lucide-react";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/courseCatalog";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,7 +131,10 @@ export default function Checkout() {
       <div className="min-h-screen flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+          <div className="text-center">
+            <BackButton className="mb-4" />
+            <Loader2 className="w-6 h-6 animate-spin text-slate-300 mx-auto" />
+          </div>
         </div>
         <Footer />
       </div>
@@ -143,6 +147,7 @@ export default function Checkout() {
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
+            <BackButton className="mb-4" />
             <p className="text-slate-500 mb-4">Course not found.</p>
             <Link to="/pricing" className="text-[hsl(220,91%,54%)] font-semibold hover:underline">Back to pricing</Link>
           </div>
@@ -156,9 +161,7 @@ export default function Checkout() {
     <div className="min-h-screen bg-slate-50">
       <Header />
       <div className="container max-w-4xl pt-28 pb-20">
-        <Link to="/pricing" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to pricing
-        </Link>
+        <BackButton className="mb-8" />
 
         <div className="grid md:grid-cols-5 gap-8">
           {/* Order summary */}
