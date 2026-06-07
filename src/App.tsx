@@ -89,6 +89,7 @@ const InstructorHomework   = lazy(() => import("./pages/instructor/InstructorHom
 
 /* ── Student dashboard extras ── */
 const MyHomework           = lazy(() => import("./pages/dashboard/MyHomework"));
+const OrderStatus          = lazy(() => import("./pages/dashboard/OrderStatus"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -205,6 +206,7 @@ function AppInner() {
                 <Route path="/dashboard/profile"       element={<RequireAuth><MyProfile /></RequireAuth>} />
                 <Route path="/dashboard/certificates" element={<RequireAuth><MyCertificates /></RequireAuth>} />
                 <Route path="/dashboard/homework"     element={<RequireAuth><MyHomework /></RequireAuth>} />
+                <Route path="/dashboard/orders"       element={<RequireAuth><OrderStatus /></RequireAuth>} />
                 <Route path="/dashboard/*"            element={<RequireAuth><StudentDashboard /></RequireAuth>} />
 
                 {/* Admin — admin role required */}
