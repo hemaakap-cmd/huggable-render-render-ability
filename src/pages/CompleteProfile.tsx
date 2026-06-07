@@ -131,6 +131,21 @@ export default function CompleteProfile() {
                 {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
+            <Field label="City *">
+              <input value={city} onChange={(e) => setCity(e.target.value)} maxLength={100}
+                placeholder="e.g. Cairo"
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30" />
+            </Field>
+            <Field label="Full Address *">
+              <textarea value={address} onChange={(e) => setAddress(e.target.value)} maxLength={300} rows={2}
+                placeholder="Street, building, apartment…"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 resize-none" />
+            </Field>
+            <Field label="Date of Birth">
+              <input type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30" />
+            </Field>
+
             <Field label="Degree / Qualification *">
               <select value={degree} onChange={(e) => setDegree(e.target.value)}
                 className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30">
