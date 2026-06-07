@@ -1,0 +1,4 @@
+ALTER TABLE public.ssra_profiles
+  ADD COLUMN IF NOT EXISTS address TEXT,
+  ADD COLUMN IF NOT EXISTS city TEXT,
+  ADD COLUMN IF NOT EXISTS date_of_birth DATE;
