@@ -244,6 +244,21 @@ export default function AdminCoupons() {
                   ))}
                 </select>
               </div>
+
+              <div className="sm:col-span-2">
+                <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Paddle Discount ID <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={editing.paddle_discount_id ?? ""}
+                  onChange={(e) => setEditing({ ...editing, paddle_discount_id: e.target.value })}
+                  placeholder="dsc_01h..."
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-amber-600 mt-1">
+                  Required. Create a matching discount in the Paddle dashboard and paste its ID here. Without it the discount will NOT be applied at checkout (customer would be charged the full price).
+                </p>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-2">
