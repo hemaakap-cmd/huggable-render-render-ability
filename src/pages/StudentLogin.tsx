@@ -239,9 +239,11 @@ export default function StudentLogin() {
           email,
           phone_number: phone.trim(),
           country,
+          city: city.trim(),
+          address: address.trim(),
           degree,
           german_level: germanLevel,
-        })
+        } as any)
         .eq("id", userId);
       if (upErr) {
         await supabase.auth.signOut();
