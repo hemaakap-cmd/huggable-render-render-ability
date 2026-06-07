@@ -9,6 +9,7 @@ import {
   AlertOctagon, HeartPulse, BarChart3, Award, RotateCcw, Zap,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
+import BackButton from "@/components/ssra/BackButton";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
 const ADMIN_NAV = [
@@ -169,7 +170,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               : "SSRA Admin Portal"}
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="mb-4">
+            <BackButton />
+          </div>
+          {children}
+        </main>
       </div>
     </div>
   );
