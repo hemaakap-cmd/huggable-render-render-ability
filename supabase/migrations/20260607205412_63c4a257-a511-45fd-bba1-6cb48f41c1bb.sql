@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Deny direct enrollment writes" ON public.ssra_enrollments;
