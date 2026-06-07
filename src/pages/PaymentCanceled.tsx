@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { XCircle } from "lucide-react";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 
 export default function PaymentCanceled() {

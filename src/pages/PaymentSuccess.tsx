@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ArrowRight, Mail, Calendar, Clock, User, Loader2 } from "lucide-react";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/courseCatalog";
 import { useEnrollmentById, useEnrollmentBySession } from "@/hooks/useSsraData";

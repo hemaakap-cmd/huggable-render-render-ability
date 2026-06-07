@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { GraduationCap, ArrowLeft } from "lucide-react";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { Button } from "@/components/ui/button";
 

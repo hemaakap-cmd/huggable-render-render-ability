@@ -6,6 +6,7 @@ import {
   CreditCard, Crown, Calendar, User, Tv, Users, AlertCircle, Loader2,
 } from "lucide-react";
 import Header from "@/components/ssra/Header";
+import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, getCourse } from "@/lib/courseCatalog";
 import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlist } from "@/hooks/useSsraData";
