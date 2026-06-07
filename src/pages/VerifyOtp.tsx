@@ -84,6 +84,21 @@ export default function VerifyOtp() {
 
   const resend = async () => {
     if (cooldown > 0) return;
+    if (mode === "signup") {
+      const { data: existingProfile } = await supabase
+        .from("ssra_profiles")
+        .select("id")
+        .eq("email", email.trim().toLowerCase())
+        .maybeSingle();
+      if (existingProfile) {
+        toast({
+          title: "Email already registered",
+          description: "Please sign in instead.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     setResending(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
