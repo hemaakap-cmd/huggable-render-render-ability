@@ -102,8 +102,8 @@ const queryClient = new QueryClient({
 });
 
 const Spinner = () => {
-  const [showRefresh, setShowRefresh] = (require("react") as typeof import("react")).useState(false);
-  (require("react") as typeof import("react")).useEffect(() => {
+  const [showRefresh, setShowRefresh] = useState(false);
+  useEffect(() => {
     const t = setTimeout(() => setShowRefresh(true), 12000);
     return () => clearTimeout(t);
   }, []);
@@ -114,7 +114,10 @@ const Spinner = () => {
         <>
           <p className="text-sm text-slate-600">Taking longer than expected…</p>
           <button
-            onClick={() => { try { sessionStorage.removeItem("lovable:chunk-reloaded"); } catch {} window.location.reload(); }}
+            onClick={() => {
+              try { sessionStorage.removeItem("lovable:chunk-reloaded"); } catch {}
+              window.location.reload();
+            }}
             className="px-4 py-2 rounded-lg bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] transition-colors"
           >
             Refresh page
@@ -124,6 +127,7 @@ const Spinner = () => {
     </div>
   );
 };
+
 
 
 /* ── Auth guards ── */
