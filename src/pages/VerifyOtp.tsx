@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GraduationCap, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import BackButton from "@/components/ssra/BackButton";
 
 const CODE_LEN = 6;
 const RESEND_COOLDOWN = 60;
@@ -100,6 +101,7 @@ export default function VerifyOtp() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
+        <BackButton className="mb-4" />
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 rounded-xl bg-[hsl(220,91%,54%)] flex items-center justify-center">
             <GraduationCap className="w-5 h-5 text-white" />
