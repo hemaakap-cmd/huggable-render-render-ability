@@ -560,6 +560,27 @@ export default function StudentLogin() {
                     className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]"
                   />
                 </div>
+                {emailCheckStatus === "checking" && (
+                  <p className="mt-1.5 text-xs text-slate-400 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Checking email…
+                  </p>
+                )}
+                {emailCheckStatus === "exists" && tab === "signup" && (
+                  <p className="mt-1.5 text-xs text-red-600">
+                    This email is already registered. Switch to <button type="button" onClick={() => switchTab("login")} className="underline font-medium">Sign In</button>.
+                  </p>
+                )}
+                {emailCheckStatus === "available" && tab === "login" && (
+                  <p className="mt-1.5 text-xs text-red-600">
+                    No account found. Switch to <button type="button" onClick={() => switchTab("signup")} className="underline font-medium">New Student</button> to register.
+                  </p>
+                )}
+                {emailCheckStatus === "available" && tab === "signup" && (
+                  <p className="mt-1.5 text-xs text-emerald-600">✓ Email is available</p>
+                )}
+                {emailCheckStatus === "exists" && tab === "login" && (
+                  <p className="mt-1.5 text-xs text-emerald-600">✓ Account found</p>
+                )}
               </div>
 
               <button
