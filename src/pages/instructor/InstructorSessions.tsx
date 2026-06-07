@@ -81,8 +81,13 @@ function EditLinkForm({ session, onClose }: { session: any; onClose: () => void 
       });
       return;
     }
-    await update.mutateAsync({ id: session.id, zoom_link: url, zoom_password: pass.trim() });
-    toast({ title: "Zoom link updated" });
+    const result = await update.mutateAsync({ id: session.id, zoom_link: url, zoom_password: pass.trim() });
+    const sent = (result as any)?.emailsSent ?? 0;
+    const count = (result as any)?.notified ?? 0;
+    toast({
+      title: "Zoom link updated",
+      description: count > 0 ? `Notified ${count} student${count === 1 ? "" : "s"} (${sent} email${sent === 1 ? "" : "s"} sent).` : undefined,
+    });
     onClose();
   };
 
