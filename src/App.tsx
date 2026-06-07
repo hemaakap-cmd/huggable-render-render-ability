@@ -25,6 +25,7 @@ const Checkout        = lazy(() => import("./pages/Checkout"));
 const PaymentSuccess  = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled"));
 const StudentLogin    = lazy(() => import("./pages/StudentLogin"));
+const CompleteProfile = lazy(() => import("./pages/CompleteProfile"));
 const AdminLogin      = lazy(() => import("./pages/AdminLogin"));
 const ResetPassword   = lazy(() => import("./pages/ResetPassword"));
 const Legal           = lazy(() => import("./pages/Legal"));
