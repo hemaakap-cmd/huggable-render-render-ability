@@ -83,60 +83,160 @@ export function useUpdateProfile() {
   });
 }
 
-/* ── Admin: paginated students ── */
+/* ── Admin: paginated CUSTOMERS (students with ≥1 enrollment) ── */
 export function useAdminStudents(search = "", page = 0, pageSize = 25) {
   return useQuery({
-    queryKey: ["ssra-admin-students", search, page, pageSize],
+    queryKey: ["ssra-admin-students-paying", search, page, pageSize],
     queryFn: async () => {
+      // Step 1: get distinct user_ids that have at least one enrollment
+      const { data: enrollRows, error: eErr } = await supabase
+        .from("ssra_enrollments")
+        .select("user_id, status, course_id");
+      if (eErr) throw eErr;
+
+      const enrollmentCounts = new Map<string, number>();
+      const activeCounts = new Map<string, number>();
+      const courseSets = new Map<string, Set<string>>();
+      for (const e of enrollRows ?? []) {
+        if (!e.user_id) continue;
+        enrollmentCounts.set(e.user_id, (enrollmentCounts.get(e.user_id) ?? 0) + 1);
+        if (e.status === "active") {
+          activeCounts.set(e.user_id, (activeCounts.get(e.user_id) ?? 0) + 1);
+        }
+        if (e.course_id) {
+          if (!courseSets.has(e.user_id)) courseSets.set(e.user_id, new Set());
+          courseSets.get(e.user_id)!.add(e.course_id);
+        }
+      }
+      const studentIds = Array.from(enrollmentCounts.keys());
+      if (studentIds.length === 0) return { rows: [], total: 0 };
+
+      // Step 2: page profiles within those ids
       const from = page * pageSize;
       const to   = from + pageSize - 1;
       let q = supabase
         .from("ssra_profiles")
         .select("*", { count: "exact" })
         .eq("role", "student")
+        .in("id", studentIds)
         .order("created_at", { ascending: false })
         .range(from, to);
-      if (search) q = q.ilike("full_name", `%${search}%`);
+      if (search) q = q.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
       const { data, error, count } = await q;
       if (error) throw error;
 
       const rows = data ?? [];
       const ids = rows.map((s) => s.id);
-      if (ids.length === 0) return { rows, total: count ?? 0 };
 
-      const [enrollments, subscriptions] = await Promise.all([
-        supabase.from("ssra_enrollments").select("user_id").in("user_id", ids),
-        supabase.from("ssra_subscriptions").select("user_id, status, created_at").in("user_id", ids).order("created_at", { ascending: false }),
-      ]);
-      if (enrollments.error) throw enrollments.error;
-      if (subscriptions.error) throw subscriptions.error;
-
-      const enrollmentCounts = new Map<string, number>();
-      for (const e of enrollments.data ?? []) {
-        if (!e.user_id) continue;
-        enrollmentCounts.set(e.user_id, (enrollmentCounts.get(e.user_id) ?? 0) + 1);
-      }
+      const { data: subs } = await supabase
+        .from("ssra_subscriptions")
+        .select("user_id, status, created_at")
+        .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"])
+        .order("created_at", { ascending: false });
 
       const latestSubscription = new Map<string, { status: string }>();
-      for (const s of subscriptions.data ?? []) {
+      for (const s of subs ?? []) {
         if (!s.user_id) continue;
         if (!latestSubscription.has(s.user_id)) latestSubscription.set(s.user_id, { status: s.status });
       }
 
       return {
-        rows: rows.map((s) => {
-          const subscription = latestSubscription.get(s.id);
-          return {
-            ...s,
-            ssra_enrollments: [{ count: enrollmentCounts.get(s.id) ?? 0 }],
-            ssra_subscriptions: subscription ? [subscription] : [],
-          };
-        }),
+        rows: rows.map((s) => ({
+          ...s,
+          ssra_enrollments: [{ count: enrollmentCounts.get(s.id) ?? 0 }],
+          ssra_active_enrollments: activeCounts.get(s.id) ?? 0,
+          ssra_unique_courses: courseSets.get(s.id)?.size ?? 0,
+          ssra_subscriptions: latestSubscription.get(s.id) ? [latestSubscription.get(s.id)!] : [],
+        })),
         total: count ?? 0,
       };
     },
   });
 }
+
+/* ── Admin: paginated LEADS (students with ZERO enrollments) ── */
+export function useAdminLeads(search = "", page = 0, pageSize = 25) {
+  return useQuery({
+    queryKey: ["ssra-admin-leads", search, page, pageSize],
+    queryFn: async () => {
+      // Step 1: collect user_ids that have any enrollment (to exclude)
+      const { data: enrollRows, error: eErr } = await supabase
+        .from("ssra_enrollments")
+        .select("user_id");
+      if (eErr) throw eErr;
+      const enrolledIds = new Set(
+        (enrollRows ?? []).map((e: any) => e.user_id).filter(Boolean) as string[],
+      );
+
+      // Step 2: page profiles excluding those ids
+      const from = page * pageSize;
+      const to   = from + pageSize - 1;
+      let q = supabase
+        .from("ssra_profiles")
+        .select("*", { count: "exact" })
+        .eq("role", "student")
+        .order("created_at", { ascending: false });
+      if (enrolledIds.size > 0) {
+        // exclude paying users
+        q = q.not("id", "in", `(${Array.from(enrolledIds).join(",")})`);
+      }
+      if (search) q = q.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+      const { data, error, count } = await q.range(from, to);
+      if (error) throw error;
+
+      return { rows: data ?? [], total: count ?? 0 };
+    },
+  });
+}
+
+/* ── Admin: leads/students summary stats ── */
+export function useLeadStudentStats() {
+  return useQuery({
+    queryKey: ["ssra-admin-leads-students-stats"],
+    queryFn: async () => {
+      const [{ data: profiles }, { data: enrolls }] = await Promise.all([
+        supabase.from("ssra_profiles").select("id, created_at").eq("role", "student"),
+        supabase.from("ssra_enrollments").select("user_id, amount_eur, created_at, status"),
+      ]);
+      const paid = new Set((enrolls ?? []).map((e: any) => e.user_id).filter(Boolean));
+      const totalStudents = paid.size;
+      const totalProfiles = (profiles ?? []).length;
+      const totalLeads = totalProfiles - totalStudents;
+
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+
+      const newLeadsThisMonth = (profiles ?? []).filter(
+        (p: any) => !paid.has(p.id) && new Date(p.created_at) >= monthStart,
+      ).length;
+
+      const newStudentsThisMonth = new Set(
+        (enrolls ?? [])
+          .filter((e: any) => new Date(e.created_at) >= monthStart)
+          .map((e: any) => e.user_id),
+      ).size;
+
+      const conversionRate = totalProfiles > 0 ? (totalStudents / totalProfiles) * 100 : 0;
+
+      const totalRevenue = (enrolls ?? [])
+        .filter((e: any) => e.status === "active")
+        .reduce((sum: number, e: any) => sum + (Number(e.amount_eur) || 0), 0);
+      const revenuePerStudent = totalStudents > 0 ? totalRevenue / totalStudents : 0;
+
+      return {
+        totalLeads,
+        totalStudents,
+        newLeadsThisMonth,
+        newStudentsThisMonth,
+        conversionRate,
+        totalRevenue,
+        revenuePerStudent,
+      };
+    },
+  });
+}
+
 
 /* ── Admin: paginated verification queue ── */
 export function useAdminVerifications(status?: string, page = 0, pageSize = 25) {
