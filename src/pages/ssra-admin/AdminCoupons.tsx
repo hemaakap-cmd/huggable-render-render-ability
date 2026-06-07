@@ -59,6 +59,7 @@ function useUpsertCoupon() {
         valid_until: c.valid_until || null,
         course_id: c.course_id || null,
         minimum_amount_eur: c.minimum_amount_eur ? Number(c.minimum_amount_eur) : null,
+        paddle_discount_id: c.paddle_discount_id?.trim() ? c.paddle_discount_id.trim() : null,
         is_active: c.is_active ?? true,
         updated_at: new Date().toISOString(),
       };
