@@ -114,6 +114,7 @@ export default function AdminCoupons() {
     if (!editing.paddle_discount_id?.trim() || !/^dsc_/i.test(editing.paddle_discount_id.trim())) {
       toast({ title: "Paddle Discount ID is required", description: "Must start with 'dsc_'. Create the discount in Paddle first.", variant: "destructive" }); return;
     }
+    setSaving(true);
     try {
       await upsert.mutateAsync(editing);
       toast({ title: editing.id ? "Coupon updated" : "Coupon created" });
