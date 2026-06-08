@@ -79,14 +79,28 @@ const EnrollmentConfirmationEmail = ({
         </Section>
 
         <Hr style={hr} />
-        <Text style={footer}>
-          Questions? Email <a href={`mailto:${CONTACT_EMAIL}`} style={link}>{CONTACT_EMAIL}</a>.
-        </Text>
-        <Text style={footer}>{SITE_NAME} · ssracourses.com</Text>
+
+        <Section style={contactCard}>
+          <Row>
+            <Column style={{ width: '56px', verticalAlign: 'middle' as const }}>
+              <Img src={LOGO_URL} width="44" height="44" alt={SITE_NAME} style={{ borderRadius: '10px', display: 'block' }} />
+            </Column>
+            <Column style={{ paddingLeft: '12px', verticalAlign: 'middle' as const }}>
+              <Text style={contactName}>{SITE_NAME}</Text>
+              <Text style={contactMeta}>
+                <Link href={SITE_URL} style={link}>{SITE_URL.replace('https://', '')}</Link>
+                {'  ·  '}
+                <Link href={`mailto:${CONTACT_EMAIL}`} style={link}>{CONTACT_EMAIL}</Link>
+              </Text>
+              <Text style={contactMeta}>{SITE_ADDRESS}</Text>
+            </Column>
+          </Row>
+        </Section>
       </Container>
     </Body>
   </Html>
 )
+
 
 export const template = {
   component: EnrollmentConfirmationEmail,
