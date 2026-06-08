@@ -1,31 +1,37 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
-  plugins: [react()],
   test: {
-    environment: "jsdom",
     globals: true,
+    environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
+    css: false,
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["node_modules", "e2e", "dist"],
+    testTimeout: 15000,
     coverage: {
       provider: "v8",
-      reporter: ["text", "json-summary", "html"],
-      reportsDirectory: "./coverage",
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
-        "src/**/*.{test,spec}.{ts,tsx}",
         "src/test/**",
-        "src/integrations/supabase/types.ts",
+        "src/**/*.test.{ts,tsx}",
+        "src/**/*.spec.{ts,tsx}",
         "src/main.tsx",
         "src/vite-env.d.ts",
-        "src/components/ui/**",
       ],
+      reporter: ["text", "lcov", "json-summary"],
+      thresholds: {
+        lines: 20,
+        functions: 20,
+        branches: 20,
+        statements: 20,
+      },
     },
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
 });

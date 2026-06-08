@@ -92,10 +92,9 @@ describe("Public pages render without crashing", () => {
 describe("Key page content", () => {
   afterEach(cleanup);
 
-  it("shows a euro price on Pricing", () => {
+  it("shows the Medical German subscription price on Pricing", () => {
     renderPage(<Pricing />, "/pricing");
-    // Don't pin to a specific number — the catalog price evolves.
-    expect(screen.getAllByText(/€\s?\d+/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/€19/).length).toBeGreaterThan(0);
   });
 
   it("shows the application form heading on Apply", () => {
@@ -103,12 +102,8 @@ describe("Key page content", () => {
     expect(screen.getAllByText(/Start Your Journey/i).length).toBeGreaterThan(0);
   });
 
-  it("renders a payment status panel on PaymentSuccess", () => {
+  it("shows a payment confirmation on PaymentSuccess", () => {
     renderPage(<PaymentSuccess />, "/payment-success?courseId=medical-german");
-    // Without a real session, the page sits in the "checking" state — assert the panel
-    // is rendered (any of the three terminal/intermediate states is acceptable).
-    expect(
-      screen.queryAllByText(/Confirming your payment|Payment successful|verifying|enrolled/i).length
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Confirming your payment/i).length).toBeGreaterThan(0);
   });
 });

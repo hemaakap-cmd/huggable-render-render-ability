@@ -4,66 +4,120 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
+    branches: [main]
 
 jobs:
+  # ── Unit / integration tests ──────────────────────────────────────────────
   unit:
-    name: Vitest (unit + coverage)
+    name: Unit tests + coverage
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
-      - run: bun install --frozen-lockfile
-      - run: bunx vitest run --coverage
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage
-          path: coverage/
 
-  e2e:
-    name: Playwright E2E
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Vitest — run with coverage
+        run: npx vitest run --coverage
+        env:
+          # Vite env vars required for modules that import from @/lib/paddle etc.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_PADDLE_CLIENT_TOKEN: ${{ secrets.VITE_PADDLE_CLIENT_TOKEN }}
+          VITE_PADDLE_PRICE_MEDICAL_GERMAN: ${{ secrets.VITE_PADDLE_PRICE_MEDICAL_GERMAN }}
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+
+  # ── Build ──────────────────────────────────────────────────────────────────
+  build:
+    name: Production build
     runs-on: ubuntu-latest
     needs: unit
-    env:
-      E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      PADDLE_SANDBOX_WEBHOOK_SECRET: ${{ secrets.PADDLE_SANDBOX_WEBHOOK_SECRET }}
-      E2E_STUDENT_EMAIL: ${{ secrets.E2E_STUDENT_EMAIL }}
-      E2E_STUDENT_PASSWORD: ${{ secrets.E2E_STUDENT_PASSWORD }}
-      E2E_INSTRUCTOR_EMAIL: ${{ secrets.E2E_INSTRUCTOR_EMAIL }}
-      E2E_INSTRUCTOR_PASSWORD: ${{ secrets.E2E_INSTRUCTOR_PASSWORD }}
-      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-      E2E_SUPER_ADMIN_EMAIL: ${{ secrets.E2E_SUPER_ADMIN_EMAIL }}
-      E2E_SUPER_ADMIN_PASSWORD: ${{ secrets.E2E_SUPER_ADMIN_PASSWORD }}
+
     steps:
       - uses: actions/checkout@v4
-      - name: Guard required secrets
-        run: |
-          missing=0
-          for v in E2E_BASE_URL SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY \
-                   PADDLE_SANDBOX_WEBHOOK_SECRET \
-                   E2E_STUDENT_EMAIL E2E_STUDENT_PASSWORD \
-                   E2E_INSTRUCTOR_EMAIL E2E_INSTRUCTOR_PASSWORD \
-                   E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD \
-                   E2E_SUPER_ADMIN_EMAIL E2E_SUPER_ADMIN_PASSWORD; do
-            if [ -z "${!v}" ]; then echo "Missing required secret: $v"; missing=1; fi
-          done
-          [ "$missing" = "0" ] || exit 1
-      - uses: oven-sh/setup-bun@v2
-        with: { bun-version: latest }
-      - run: bun install --frozen-lockfile
-      - run: bunx playwright install --with-deps chromium
-      - run: bunx playwright test
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_PADDLE_CLIENT_TOKEN: ${{ secrets.VITE_PADDLE_CLIENT_TOKEN }}
+          VITE_PADDLE_PRICE_MEDICAL_GERMAN: ${{ secrets.VITE_PADDLE_PRICE_MEDICAL_GERMAN }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # ── E2E (Playwright) — requires live Supabase + test accounts ─────────────
+  # This job is skipped when the required secrets are not available.
+  # See e2e/SETUP.md for how to provision test accounts and set the secrets.
+  e2e:
+    name: E2E tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: build
+    if: |
+      github.event_name == 'push' &&
+      secrets.E2E_STUDENT_EMAIL != ''
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_PADDLE_CLIENT_TOKEN: ${{ secrets.VITE_PADDLE_CLIENT_TOKEN }}
+          VITE_PADDLE_PRICE_MEDICAL_GERMAN: ${{ secrets.VITE_PADDLE_PRICE_MEDICAL_GERMAN }}
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_STUDENT_EMAIL: ${{ secrets.E2E_STUDENT_EMAIL }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_SUPER_ADMIN_EMAIL: ${{ secrets.E2E_SUPER_ADMIN_EMAIL }}
+          E2E_INSTRUCTOR_EMAIL: ${{ secrets.E2E_INSTRUCTOR_EMAIL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Upload Playwright report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: |
-            playwright-report/
-            test-results/
+          path: playwright-report/
+          retention-days: 14
