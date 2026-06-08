@@ -205,6 +205,7 @@ async function handleSubscriptionCreated(data: any, _env: PaddleEnv) {
         enrolled_at: new Date().toISOString(),
       })
       .eq('id', enrollmentId)
+      .eq('user_id', userId)
       .select('student_email_snapshot, student_name_snapshot, course_title_snapshot, order_number')
       .maybeSingle();
 
