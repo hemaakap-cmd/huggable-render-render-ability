@@ -23,11 +23,24 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { session_id, path, referrer, utm, user_id } = body ?? {};
+    // SECURITY: Ignore any user_id sent in the request body — clients used to
+    // pass it explicitly, which let unauthenticated callers spoof another
+    // user's UUID into analytics. Derive user_id ONLY from the verified JWT.
+    const { session_id, path, referrer, utm } = body ?? {};
     if (!session_id || typeof session_id !== 'string') {
       return new Response(JSON.stringify({ error: 'session_id required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    let resolvedUserId: string | null = null;
+    const authHeader = req.headers.get('Authorization') ?? '';
+    if (authHeader.toLowerCase().startsWith('bearer ')) {
+      const token = authHeader.slice(7).trim();
+      // Service-role / anon keys are JWTs but not user JWTs — getUser returns
+      // an error for those, which we treat as "no user".
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user?.id) resolvedUserId = user.id;
     }
 
     // Cloudflare / proxy geo headers
