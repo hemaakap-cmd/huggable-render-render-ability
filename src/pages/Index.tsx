@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, BookOpen, Activity, Languages, GraduationCap,
-  CheckCircle2, Star, Users, Globe2, Zap, Shield,
+  CheckCircle2, Users, Globe2, Zap, Shield,
   CreditCard, Play, ChevronRight,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
