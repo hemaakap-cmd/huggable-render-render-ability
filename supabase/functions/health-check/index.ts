@@ -99,7 +99,20 @@ async function checkAuth(): Promise<ServiceResult> {
     return { status: 'ok', latencyMs: Date.now() - t0 };
   } catch (e) {
     return { status: 'degraded', detail: (e as Error).message };
+}
+
+async function checkPaddleGateway(): Promise<ServiceResult> {
+  try {
+    // Probe the live gateway; sandbox key is missing in some self-hosted setups.
+    const env = Deno.env.get('PADDLE_LIVE_API_KEY') ? 'live' : 'sandbox';
+    const r = await pingPaddleGateway(env as 'live' | 'sandbox');
+    if (!r.ok) return { status: 'down', latencyMs: r.latencyMs, detail: r.error ?? `HTTP ${r.status}` };
+    if (r.latencyMs > 3000) return { status: 'degraded', latencyMs: r.latencyMs, detail: 'High gateway latency' };
+    return { status: 'ok', latencyMs: r.latencyMs };
+  } catch (e) {
+    return { status: 'degraded', detail: (e as Error).message };
   }
+}
 }
 
 async function getMetrics() {
