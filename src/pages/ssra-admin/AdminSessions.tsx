@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Video, Plus, Trash2, Edit2, ExternalLink, Calendar, Clock, Users } from "lucide-react";
+import { Video, Plus, Trash2, Edit2, ExternalLink, Calendar, Clock, Users, Lock } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminSessions, useUpsertSession, useDeleteSession, useAdminCourses } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const EMPTY = {
   id: "",
@@ -32,13 +33,22 @@ export default function AdminSessions() {
   const [filterCourse, setFilterCourse] = useState(searchParams.get("course") ?? "");
 
   function openNew() { setForm({ ...EMPTY }); setOpen(true); }
-  function openEdit(s: any) {
+  async function openEdit(s: any) {
     setForm({
       ...EMPTY,
       ...s,
       scheduled_at: s.scheduled_at ? new Date(s.scheduled_at).toISOString().slice(0, 16) : "",
+      zoom_link: "",
+      zoom_password: "",
     });
     setOpen(true);
+    // Lazy-load existing credentials via the secure edge function.
+    const { data } = await supabase.functions.invoke("manage-session-credentials", {
+      body: { action: "get", sessionId: s.id },
+    });
+    if (data) {
+      setForm((f) => ({ ...f, zoom_link: data.zoom_link ?? "", zoom_password: data.zoom_password ?? "" }));
+    }
   }
 
   async function save() {
@@ -48,18 +58,31 @@ export default function AdminSessions() {
     }
     setSaving(true);
     try {
-      await upsert.mutateAsync({
+      // 1. Upsert the session row (no credential columns anymore).
+      const id = await upsert.mutateAsync({
         ...(form.id ? { id: form.id } : {}),
         course_id:        form.course_id,
         title:            form.title,
         description:      form.description || null,
-        zoom_link:        form.zoom_link,
-        zoom_password:    form.zoom_password || null,
         scheduled_at:     new Date(form.scheduled_at).toISOString(),
         duration_minutes: Number(form.duration_minutes),
         recording_url:    form.recording_url || null,
         is_cancelled:     form.is_cancelled,
       });
+      // 2. Push credentials through the locked-down edge function.
+      const sessionId = (id as string) || form.id;
+      if (sessionId && !form.is_cancelled) {
+        const { error } = await supabase.functions.invoke("manage-session-credentials", {
+          body: {
+            action: "upsert",
+            sessionId,
+            zoom_link: form.zoom_link,
+            zoom_password: form.zoom_password || null,
+            notify: !!form.id, // notify on edits only
+          },
+        });
+        if (error) throw error;
+      }
       toast({ title: form.id ? "Session updated" : "Session created" });
       setOpen(false);
     } catch (e: any) {
@@ -78,6 +101,7 @@ export default function AdminSessions() {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     }
   }
+
 
   const now = new Date();
   const filtered  = filterCourse ? (sessions as any[]).filter(s => s.course_id === filterCourse) : (sessions as any[]);
@@ -284,10 +308,9 @@ function SessionRow({ s, onEdit, onDelete, isPast = false }: {
         )}
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <a href={s.zoom_link} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs font-semibold text-[hsl(220,91%,54%)] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
-          <ExternalLink className="w-3 h-3" /> Zoom
-        </a>
+        <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg">
+          <Lock className="w-3 h-3" /> Zoom in vault
+        </span>
         <button onClick={() => onEdit(s)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
           <Edit2 className="w-3.5 h-3.5" />
         </button>

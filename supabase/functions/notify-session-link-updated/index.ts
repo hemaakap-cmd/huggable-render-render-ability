@@ -38,12 +38,18 @@ Deno.serve(async (req: Request) => {
     // Load session + course
     const { data: session } = await adminClient
       .from("ssra_sessions")
-      .select("id, title, course_id, scheduled_at, duration_minutes, zoom_link, ssra_courses(title, instructor_id, instructor_name)")
+      .select("id, title, course_id, scheduled_at, duration_minutes, ssra_courses(title, instructor_id, instructor_name)")
       .eq("id", sessionId)
       .maybeSingle();
 
-    if (!session)         return json({ error: "Session not found" }, 404);
-    if (!session.zoom_link) return json({ error: "Session has no link to announce" }, 400);
+    if (!session) return json({ error: "Session not found" }, 404);
+
+    const { data: creds } = await adminClient
+      .from("ssra_session_credentials")
+      .select("zoom_link")
+      .eq("session_id", sessionId)
+      .maybeSingle();
+    if (!creds?.zoom_link) return json({ error: "Session has no link to announce" }, 400);
 
     // Authorize: admin OR instructor assigned to this course
     const { data: isAdmin } = await adminClient.rpc("is_ssra_admin", { _uid: user.id });

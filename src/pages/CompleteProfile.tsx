@@ -60,9 +60,17 @@ export default function CompleteProfile() {
     );
   }
 
+  const LATIN_NAME = /^[A-Za-z][A-Za-z\s'\-\.]*$/;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) return toast({ title: "Please enter your full name", variant: "destructive" });
+    if (!LATIN_NAME.test(fullName.trim())) {
+      return toast({
+        title: "English characters only",
+        description: "Full name may only contain English letters, spaces, hyphens, and apostrophes.",
+        variant: "destructive",
+      });
+    }
     if (!phone.trim() || phone.trim().length < 6) return toast({ title: "Please enter a valid phone number", variant: "destructive" });
     if (!country) return toast({ title: "Please select your country", variant: "destructive" });
     if (!city.trim()) return toast({ title: "Please enter your city", variant: "destructive" });
