@@ -6,6 +6,38 @@ import { useAdminSessions, useUpsertSession, useDeleteSession, useAdminCourses }
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+const AUTH_ERROR_PATTERN = /(unauthorized|jwt|session|auth)/i;
+
+async function invokeSessionCredentials(body: Record<string, unknown>) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) {
+    throw new Error("Your login session expired. Please sign in again, then save the Zoom link.");
+  }
+
+  const { error: userError } = await supabase.auth.getUser(accessToken);
+  if (userError) {
+    await supabase.auth.signOut();
+    throw new Error("Your login session expired. Please sign in again, then save the Zoom link.");
+  }
+
+  const result = await supabase.functions.invoke("manage-session-credentials", {
+    body,
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (result.error) {
+    const message = result.error.message || "Could not save Zoom credentials.";
+    if (AUTH_ERROR_PATTERN.test(message)) {
+      await supabase.auth.signOut();
+      throw new Error("Your login session expired. Please sign in again, then save the Zoom link.");
+    }
+    throw result.error;
+  }
+
+  return result.data;
+}
+
 const EMPTY = {
   id: "",
   course_id: "",
@@ -43,11 +75,14 @@ export default function AdminSessions() {
     });
     setOpen(true);
     // Lazy-load existing credentials via the secure edge function.
-    const { data } = await supabase.functions.invoke("manage-session-credentials", {
-      body: { action: "get", sessionId: s.id },
-    });
-    if (data) {
-      setForm((f) => ({ ...f, zoom_link: data.zoom_link ?? "", zoom_password: data.zoom_password ?? "" }));
+    try {
+      const data = await invokeSessionCredentials({ action: "get", sessionId: s.id });
+      if (data) {
+        setForm((f) => ({ ...f, zoom_link: data.zoom_link ?? "", zoom_password: data.zoom_password ?? "" }));
+      }
+    } catch (e: any) {
+      toast({ title: "Login expired", description: e.message, variant: "destructive" });
+      if (AUTH_ERROR_PATTERN.test(e.message)) window.location.href = `/login?redirect=${encodeURIComponent("/ssra-admin/sessions")}`;
     }
   }
 
@@ -72,21 +107,19 @@ export default function AdminSessions() {
       // 2. Push credentials through the locked-down edge function.
       const sessionId = (id as string) || form.id;
       if (sessionId && !form.is_cancelled) {
-        const { error } = await supabase.functions.invoke("manage-session-credentials", {
-          body: {
-            action: "upsert",
-            sessionId,
-            zoom_link: form.zoom_link,
-            zoom_password: form.zoom_password || null,
-            notify: !!form.id, // notify on edits only
-          },
+        await invokeSessionCredentials({
+          action: "upsert",
+          sessionId,
+          zoom_link: form.zoom_link,
+          zoom_password: form.zoom_password || null,
+          notify: !!form.id, // notify on edits only
         });
-        if (error) throw error;
       }
       toast({ title: form.id ? "Session updated" : "Session created" });
       setOpen(false);
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
+      if (AUTH_ERROR_PATTERN.test(e.message)) window.location.href = `/login?redirect=${encodeURIComponent("/ssra-admin/sessions")}`;
     } finally {
       setSaving(false);
     }
