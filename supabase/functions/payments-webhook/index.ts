@@ -74,7 +74,10 @@ async function handleTransactionCompleted(data: any, env: PaddleEnv) {
 
   const supabase = getSupabase();
 
-  // Activate enrollment
+  // Activate enrollment — scoped to BOTH the enrollment id AND the paying
+  // user's id to prevent customData-injection attacks where a malicious
+  // payer puts a victim's enrollment UUID into customData. The eq on
+  // user_id makes the update a no-op when ownership doesn't match.
   const { data: enrollment, error: updateErr } = await supabase
     .from('ssra_enrollments')
     .update({
@@ -84,11 +87,12 @@ async function handleTransactionCompleted(data: any, env: PaddleEnv) {
       stripe_payment_intent: data.id, // reuse column for Paddle transaction id
     })
     .eq('id', enrollmentId)
-    .select('id, order_number, amount_eur, course_title_snapshot, student_name_snapshot, student_email_snapshot, start_date_snapshot, start_time_snapshot, duration_snapshot, instructor_snapshot, coupon_code')
+    .eq('user_id', userId)
+    .select('id, user_id, order_number, amount_eur, course_title_snapshot, student_name_snapshot, student_email_snapshot, start_date_snapshot, start_time_snapshot, duration_snapshot, instructor_snapshot, coupon_code')
     .maybeSingle();
 
   if (updateErr || !enrollment) {
-    console.error('enrollment update failed', updateErr, enrollmentId);
+    console.error('enrollment update failed or ownership mismatch', updateErr, { enrollmentId, userId });
     return;
   }
 
