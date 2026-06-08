@@ -15,6 +15,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { pingPaddleGateway } from '../_shared/paddle.ts';
 
 const VERSION = '1.0.0';
 
