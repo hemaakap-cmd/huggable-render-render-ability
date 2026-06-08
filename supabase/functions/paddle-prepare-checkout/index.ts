@@ -157,14 +157,20 @@ Deno.serve(async (req) => {
       paddleDiscountId = couponRow.paddle_discount_id as string;
     }
 
+    // Strip reserved keys from client-supplied metadata so callers cannot
+    // override userId / courseId / enrollmentId and hijack another user's
+    // enrollment activation via the webhook handler.
+    const rawMeta = (metadata && typeof metadata === 'object') ? metadata as Record<string, unknown> : {};
+    const { userId: _u, courseId: _c, enrollmentId: _e, ...safeMeta } = rawMeta;
+
     return new Response(JSON.stringify({
       paddlePriceId: coursePriceId(courseId),
       paddleDiscountId,
       customData: {
+        ...safeMeta,
         userId: user.id,
         courseId,
         enrollmentId,
-        ...(metadata ?? {}),
       },
       customerEmail: user.email ?? undefined,
     }), {
