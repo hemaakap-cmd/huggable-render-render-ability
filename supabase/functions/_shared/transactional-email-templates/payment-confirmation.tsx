@@ -62,11 +62,27 @@ const PaymentConfirmationEmail = ({
         </Text>
 
         <Hr style={hr} />
-        <Text style={footer}>
-          Need help? Contact us at <a href={`mailto:${CONTACT_EMAIL}`} style={link}>{CONTACT_EMAIL}</a> or
-          via <a href={CONTACT_URL} style={link}>ssracourses.com/contact</a>.
-        </Text>
-        <Text style={footer}>{SITE_NAME} · ssracourses.com</Text>
+
+        <Section style={contactCard}>
+          <Row>
+            <Column style={{ width: '56px', verticalAlign: 'middle' as const }}>
+              <Img src={LOGO_URL} width="44" height="44" alt={SITE_NAME} style={{ borderRadius: '10px', display: 'block' }} />
+            </Column>
+            <Column style={{ paddingLeft: '12px', verticalAlign: 'middle' as const }}>
+              <Text style={contactName}>{SITE_NAME}</Text>
+              <Text style={contactMeta}>
+                <Link href={SITE_URL} style={link}>{SITE_URL.replace('https://', '')}</Link>
+                {'  ·  '}
+                <Link href={`mailto:${CONTACT_EMAIL}`} style={link}>{CONTACT_EMAIL}</Link>
+                {'  ·  '}
+                <Link href={CONTACT_URL} style={link}>Contact</Link>
+              </Text>
+              <Text style={contactMeta}>{SITE_ADDRESS}</Text>
+              <Text style={contactMeta}>Invoice issued by {SITE_NAME} via Paddle (Merchant of Record).</Text>
+            </Column>
+          </Row>
+        </Section>
+
       </Container>
     </Body>
   </Html>
