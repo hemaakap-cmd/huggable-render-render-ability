@@ -53,7 +53,23 @@ async function reachOtpScreen(tab: "signup" | "login", name = "Test User") {
   setup();
   if (tab === "signup") {
     fireEvent.click(screen.getByRole("button", { name: /new student/i }));
+    // signup flow: email must be unregistered
+    rpc.mockResolvedValue({ data: "available", error: null });
     fireEvent.change(screen.getByPlaceholderText(/your full name/i), { target: { value: name } });
+    fireEvent.change(screen.getByPlaceholderText(/\+20/i), { target: { value: "+201234567890" } });
+    fireEvent.change(screen.getByLabelText(/country/i), { target: { value: "Egypt" } });
+    fireEvent.change(screen.getByPlaceholderText(/cairo/i), { target: { value: "Cairo" } });
+    fireEvent.change(screen.getByPlaceholderText(/street, building/i), { target: { value: "123 Main Street, Apt 4" } });
+    // Pick any non-empty option from the degree + german-level selects.
+    const degreeSelect = screen.getByLabelText(/degree/i) as HTMLSelectElement;
+    const degreeOpt = Array.from(degreeSelect.options).find((o) => o.value && o.value !== "");
+    if (degreeOpt) fireEvent.change(degreeSelect, { target: { value: degreeOpt.value } });
+    const langSelect = screen.getByLabelText(/german level/i) as HTMLSelectElement;
+    const langOpt = Array.from(langSelect.options).find((o) => o.value && o.value !== "");
+    if (langOpt) fireEvent.change(langSelect, { target: { value: langOpt.value } });
+  } else {
+    // login flow: email must be registered
+    rpc.mockResolvedValue({ data: "registered", error: null });
   }
   fireEvent.change(screen.getByPlaceholderText(/you@email\.com/i), { target: { value: "u@test.com" } });
   fireEvent.click(screen.getByRole("button", { name: /send verification code/i }));
