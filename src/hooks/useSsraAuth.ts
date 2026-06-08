@@ -33,12 +33,21 @@ export function useSsraAuth(): AuthState {
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchProfile(session.user.id, session);
-      } else {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.user) {
         setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false, isInstructor: false });
+        return;
       }
+
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        Sentry.setUser(null);
+        await supabase.auth.signOut();
+        setState({ user: null, session: null, profile: null, loading: false, isAdmin: false, isSuperAdmin: false, isInstructor: false });
+        return;
+      }
+
+      fetchProfile(user.id, session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
