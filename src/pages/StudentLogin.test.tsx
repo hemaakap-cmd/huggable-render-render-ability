@@ -18,6 +18,7 @@ const eqSelect     = vi.fn();
 const maybeSingle  = vi.fn();
 const updateFn     = vi.fn(() => ({ eq: eqUpdate }));
 const selectFn     = vi.fn(() => ({ eq: eqSelect }));
+const rpc          = vi.fn();
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
@@ -28,6 +29,7 @@ vi.mock("@/integrations/supabase/client", () => ({
       onAuthStateChange:  (...a: unknown[]) => onAuthStateChange(...a),
     },
     from: vi.fn(() => ({ update: updateFn, select: selectFn })),
+    rpc: (...a: unknown[]) => rpc(...a),
   },
 }));
 
@@ -68,6 +70,9 @@ beforeEach(() => {
   eqUpdate.mockReset();
   eqSelect.mockReset();
   maybeSingle.mockReset();
+  rpc.mockReset();
+  // Default: email is "available" so signup flow proceeds; tests can override per case.
+  rpc.mockResolvedValue({ data: "available", error: null });
   eqSelect.mockReturnValue({ maybeSingle });
   verifyOtpCode.mockResolvedValue({ data: { user: { id: "u-1" }, session: { access_token: "token", refresh_token: "refresh" } }, error: null });
 });
