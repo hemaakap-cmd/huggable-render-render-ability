@@ -23,6 +23,8 @@ export default function MySubscription() {
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
   const [portalLoading, setPortalLoading] = useState(false);
+  const [devCancelLoading, setDevCancelLoading] = useState(false);
+  const isTestCourse = (subscription as any)?.course_id === "test-course";
 
   const openBillingPortal = async () => {
     setPortalLoading(true);
@@ -36,6 +38,28 @@ export default function MySubscription() {
       toast({ title: "Billing portal", description: (e as Error).message, variant: "destructive" });
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const devCancelTestSub = async () => {
+    if (!confirm("Cancel the TEST subscription immediately and free the seat so you can re-enroll?")) return;
+    setDevCancelLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("dev-cancel-test-subscription", {
+        body: { environment: getPaddleEnvironment() },
+      });
+      if (error) throw new Error(error.message);
+      toast({
+        title: "Test subscription cancelled",
+        description: data?.paddleErrors?.length
+          ? "DB cleared. Paddle reported: " + data.paddleErrors.join("; ")
+          : "You can now re-enroll in the test course.",
+      });
+      setTimeout(() => window.location.reload(), 800);
+    } catch (e) {
+      toast({ title: "Cancel failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setDevCancelLoading(false);
     }
   };
 
