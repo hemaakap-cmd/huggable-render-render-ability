@@ -23,6 +23,8 @@ export default function MySubscription() {
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
   const [portalLoading, setPortalLoading] = useState(false);
+  const [devCancelLoading, setDevCancelLoading] = useState(false);
+  const isTestCourse = (subscription as any)?.course_id === "test-course";
 
   const openBillingPortal = async () => {
     setPortalLoading(true);
@@ -36,6 +38,28 @@ export default function MySubscription() {
       toast({ title: "Billing portal", description: (e as Error).message, variant: "destructive" });
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const devCancelTestSub = async () => {
+    if (!confirm("Cancel the TEST subscription immediately and free the seat so you can re-enroll?")) return;
+    setDevCancelLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("dev-cancel-test-subscription", {
+        body: { environment: getPaddleEnvironment() },
+      });
+      if (error) throw new Error(error.message);
+      toast({
+        title: "Test subscription cancelled",
+        description: data?.paddleErrors?.length
+          ? "DB cleared. Paddle reported: " + data.paddleErrors.join("; ")
+          : "You can now re-enroll in the test course.",
+      });
+      setTimeout(() => window.location.reload(), 800);
+    } catch (e) {
+      toast({ title: "Cancel failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setDevCancelLoading(false);
     }
   };
 
@@ -96,6 +120,16 @@ export default function MySubscription() {
                 Manage Billing
               </button>
               <p className="text-xs text-white/30 text-center mt-2">Update card, cancel subscription, or download invoices</p>
+
+              {isTestCourse && (
+                <button
+                  onClick={devCancelTestSub}
+                  disabled={devCancelLoading}
+                  className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-500/15 text-red-200 border border-red-500/30 font-semibold text-xs hover:bg-red-500/25 transition-colors disabled:opacity-60">
+                  {devCancelLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                  TEST ONLY · Cancel immediately & free seat
+                </button>
+              )}
             </div>
 
             {/* Help info */}
