@@ -5,6 +5,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from "recharts";
 import AdminLayout from "@/components/ssra/AdminLayout";
+import RevenueLedgerWidget from "@/components/ssra/RevenueLedgerWidget";
 import { useAdminEnrollments, useAdminSubscriptions, useAdminStats, useRevenueSummary } from "@/hooks/useSsraData";
 
 const COLORS = ["hsl(220,91%,54%)", "hsl(43,96%,50%)", "hsl(160,84%,39%)", "hsl(262,83%,58%)", "hsl(15,86%,56%)", "hsl(200,98%,39%)"];
