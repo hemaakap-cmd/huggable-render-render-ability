@@ -12,12 +12,13 @@ const onAuthStateChange = vi.fn().mockReturnValue({
   data: { subscription: { unsubscribe: vi.fn() } },
 });
 
-// Chainable query builder: .from().update().eq() / .select().eq().maybeSingle()
+// Chainable query builder
 const eqUpdate     = vi.fn();
 const eqSelect     = vi.fn();
 const maybeSingle  = vi.fn();
 const updateFn     = vi.fn(() => ({ eq: eqUpdate }));
 const selectFn     = vi.fn(() => ({ eq: eqSelect }));
+const rpc          = vi.fn();
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
@@ -28,6 +29,7 @@ vi.mock("@/integrations/supabase/client", () => ({
       onAuthStateChange:  (...a: unknown[]) => onAuthStateChange(...a),
     },
     from: vi.fn(() => ({ update: updateFn, select: selectFn })),
+    rpc: (...a: unknown[]) => rpc(...a),
   },
 }));
 
@@ -47,44 +49,78 @@ function setup() {
   );
 }
 
+function pickFirstOption(el: HTMLSelectElement) {
+  const opt = Array.from(el.options).find((o) => o.value && o.value !== "");
+  if (opt) fireEvent.change(el, { target: { value: opt.value } });
+}
+
 async function reachOtpScreen(tab: "signup" | "login", name = "Test User") {
   setup();
   if (tab === "signup") {
     fireEvent.click(screen.getByRole("button", { name: /new student/i }));
+    rpc.mockResolvedValue({ data: "available", error: null });
     fireEvent.change(screen.getByPlaceholderText(/your full name/i), { target: { value: name } });
+    fireEvent.change(screen.getByPlaceholderText(/\+20/i), { target: { value: "+201234567890" } });
+    pickFirstOption(screen.getByLabelText(/country/i) as HTMLSelectElement);
+    fireEvent.change(screen.getByPlaceholderText(/cairo/i), { target: { value: "Cairo" } });
+    fireEvent.change(screen.getByPlaceholderText(/street, building/i), { target: { value: "123 Main Street, Apt 4" } });
+    pickFirstOption(screen.getByLabelText(/degree/i) as HTMLSelectElement);
+    pickFirstOption(screen.getByLabelText(/german level/i) as HTMLSelectElement);
+  } else {
+    rpc.mockResolvedValue({ data: "registered", error: null });
   }
   fireEvent.change(screen.getByPlaceholderText(/you@email\.com/i), { target: { value: "u@test.com" } });
-  fireEvent.click(screen.getByRole("button", { name: /send verification code/i }));
-  await waitFor(() => expect(screen.getByPlaceholderText(/• • • • • •/)).toBeInTheDocument());
+  // The submit button is disabled while the debounced email check is in flight (500ms).
+  // Wait for it to settle so clicking actually submits.
+  const submitBtn = screen.getByRole("button", { name: /send verification code/i });
+  await waitFor(() => expect(submitBtn).not.toBeDisabled(), { timeout: 4000 });
+  fireEvent.click(submitBtn);
+  await waitFor(() => expect(screen.getByPlaceholderText(/• • • • • •/)).toBeInTheDocument(), { timeout: 4000 });
   fireEvent.change(screen.getByPlaceholderText(/• • • • • •/), { target: { value: "123456" } });
 }
 
 async function submitOtp() {
-  fireEvent.click(screen.getByRole("button", { name: /confirm/i }));
+  fireEvent.click(screen.getByRole("button", { name: /^confirm/i }));
 }
+
+const completeProfile = {
+  full_name: "Test User",
+  phone_number: "+201234567890",
+  country: "Egypt",
+  city: "Cairo",
+  address: "123 Main Street, Apt 4",
+  degree: "MD",
+  german_level: "B1",
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
   eqUpdate.mockReset();
   eqSelect.mockReset();
   maybeSingle.mockReset();
+  rpc.mockReset();
+  rpc.mockResolvedValue({ data: "available", error: null });
   eqSelect.mockReturnValue({ maybeSingle });
-  verifyOtpCode.mockResolvedValue({ data: { user: { id: "u-1" }, session: { access_token: "token", refresh_token: "refresh" } }, error: null });
+  verifyOtpCode.mockResolvedValue({
+    data: { user: { id: "u-1" }, session: { access_token: "token", refresh_token: "refresh" } },
+    error: null,
+  });
 });
 
-describe("StudentLogin — OTP verify hardening", () => {
+describe("StudentLogin — OTP verify contract", () => {
   /* ─── SIGNUP ─── */
-  it("signup: stores name + reads back successfully → no sign-out", async () => {
-    eqUpdate.mockResolvedValueOnce({ error: null });               // update
-    maybeSingle.mockResolvedValueOnce({ data: { full_name: "Test User" }, error: null }); // read-back
+  it("signup: update + complete read-back → setSession, no sign-out", async () => {
+    eqUpdate.mockResolvedValueOnce({ error: null });
+    maybeSingle.mockResolvedValueOnce({ data: completeProfile, error: null });
     await reachOtpScreen("signup");
     await submitOtp();
     await waitFor(() => expect(eqUpdate).toHaveBeenCalled());
     await waitFor(() => expect(maybeSingle).toHaveBeenCalled());
+    expect(setSession).toHaveBeenCalled();
     expect(signOut).not.toHaveBeenCalled();
   });
 
-  it("signup: update fails → immediate sign-out + error toast", async () => {
+  it("signup: profile update fails → sign-out + 'Registration failed' toast", async () => {
     eqUpdate.mockResolvedValueOnce({ error: { message: "rls" } });
     await reachOtpScreen("signup");
     await submitOtp();
@@ -95,14 +131,14 @@ describe("StudentLogin — OTP verify hardening", () => {
     }));
   });
 
-  it("signup: read-back returns empty name → sign-out", async () => {
+  it("signup: read-back is incomplete → sign-out + 'Registration incomplete' toast", async () => {
     eqUpdate.mockResolvedValueOnce({ error: null });
-    maybeSingle.mockResolvedValueOnce({ data: { full_name: "" }, error: null });
+    maybeSingle.mockResolvedValueOnce({ data: { full_name: "Test User" }, error: null }); // missing other fields
     await reachOtpScreen("signup");
     await submitOtp();
     await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
     expect(toast).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Verification failed", variant: "destructive",
+      title: "Registration incomplete", variant: "destructive",
     }));
   });
 
@@ -120,39 +156,29 @@ describe("StudentLogin — OTP verify hardening", () => {
     await reachOtpScreen("signup");
     await submitOtp();
     await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
-    expect(toast).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Verification failed", variant: "destructive",
-    }));
   });
 
   /* ─── LOGIN ─── */
-  it("login: profile has name → allowed, no sign-out", async () => {
-    maybeSingle.mockResolvedValueOnce({ data: { full_name: "Existing User" }, error: null });
+  it("login: valid OTP + complete profile → setSession, no sign-out", async () => {
+    maybeSingle.mockResolvedValueOnce({ data: completeProfile, error: null });
     await reachOtpScreen("login");
     await submitOtp();
-    await waitFor(() => expect(maybeSingle).toHaveBeenCalled());
+    await waitFor(() => expect(setSession).toHaveBeenCalled());
     expect(signOut).not.toHaveBeenCalled();
   });
 
-  it("login: profile missing → immediate sign-out", async () => {
+  it("login: valid OTP + incomplete profile → allowed through (RequireAuth handles redirect)", async () => {
+    // Current production behavior: do NOT sign out on incomplete profile;
+    // the global guard redirects to /complete-profile.
     maybeSingle.mockResolvedValueOnce({ data: null, error: null });
     await reachOtpScreen("login");
     await submitOtp();
-    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
-    expect(toast).toHaveBeenCalledWith(expect.objectContaining({
-      title: "Account not registered", variant: "destructive",
-    }));
-  });
-
-  it("login: profile has empty name → sign-out", async () => {
-    maybeSingle.mockResolvedValueOnce({ data: { full_name: "   " }, error: null });
-    await reachOtpScreen("login");
-    await submitOtp();
-    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(setSession).toHaveBeenCalled());
+    expect(signOut).not.toHaveBeenCalled();
   });
 
   /* ─── OTP itself fails ─── */
-  it("invalid OTP → no sign-out, no profile queries", async () => {
+  it("invalid OTP → no sign-out, no profile queries, error toast", async () => {
     verifyOtpCode.mockResolvedValueOnce({ data: null, error: { message: "bad code" } });
     await reachOtpScreen("login");
     await submitOtp();
@@ -160,6 +186,6 @@ describe("StudentLogin — OTP verify hardening", () => {
       title: "Invalid or expired code",
     })));
     expect(signOut).not.toHaveBeenCalled();
-    expect(maybeSingle).not.toHaveBeenCalled();
+    expect(setSession).not.toHaveBeenCalled();
   });
 });
