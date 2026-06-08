@@ -1,13 +1,16 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Row, Column, Img,
+  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Row, Column, Img, Link,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'SSRA Academy'
+const SITE_URL = 'https://ssracourses.com'
 const CONTACT_EMAIL = 'support@ssracourses.com'
 const CONTACT_URL = 'https://ssracourses.com/contact'
+const SITE_ADDRESS = 'Bracknellstraße 41, 51379 Leverkusen, Germany'
 const LOGO_URL = 'https://vffcarzhfxlqzfwrhzau.supabase.co/storage/v1/object/public/ssra-course-images/brand/ssra-logo.png'
+
 
 interface PaymentConfirmationProps {
   studentName?: string
