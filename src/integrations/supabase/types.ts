@@ -1045,6 +1045,38 @@ export type Database = {
           },
         ]
       }
+      ssra_session_credentials: {
+        Row: {
+          created_at: string
+          session_id: string
+          updated_at: string
+          zoom_link: string
+          zoom_password: string | null
+        }
+        Insert: {
+          created_at?: string
+          session_id: string
+          updated_at?: string
+          zoom_link: string
+          zoom_password?: string | null
+        }
+        Update: {
+          created_at?: string
+          session_id?: string
+          updated_at?: string
+          zoom_link?: string
+          zoom_password?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_session_credentials_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "ssra_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ssra_sessions: {
         Row: {
           course_id: string | null
@@ -1056,8 +1088,6 @@ export type Database = {
           recording_url: string | null
           scheduled_at: string
           title: string
-          zoom_link: string
-          zoom_password: string | null
         }
         Insert: {
           course_id?: string | null
@@ -1069,8 +1099,6 @@ export type Database = {
           recording_url?: string | null
           scheduled_at: string
           title: string
-          zoom_link: string
-          zoom_password?: string | null
         }
         Update: {
           course_id?: string | null
@@ -1082,8 +1110,6 @@ export type Database = {
           recording_url?: string | null
           scheduled_at?: string
           title?: string
-          zoom_link?: string
-          zoom_password?: string | null
         }
         Relationships: [
           {
@@ -1366,6 +1392,15 @@ export type Database = {
           read_ct: number
         }[]
       }
+      report_profile_charset_violations: {
+        Args: never
+        Returns: {
+          email: string
+          field: string
+          id: string
+          value: string
+        }[]
+      }
       reserve_pending_enrollment: {
         Args: {
           _coupon_code?: string
@@ -1379,6 +1414,10 @@ export type Database = {
           outcome: string
           reason: string
         }[]
+      }
+      session_has_credentials: {
+        Args: { _session_id: string }
+        Returns: boolean
       }
       validate_coupon: {
         Args: {
