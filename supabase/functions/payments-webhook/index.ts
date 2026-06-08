@@ -275,15 +275,57 @@ async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
 }
 
 
+// Append an immutable row to the revenue_events ledger. Idempotent via the
+// UNIQUE(paddle_event_id) constraint — duplicate inserts are silently ignored.
+async function logRevenueEvent(
+  eventType: string,
+  eventId: string | undefined,
+  env: PaddleEnv,
+  data: any,
+) {
+  if (!eventId) return;
+  try {
+    const totals = data?.details?.totals ?? data?.payout?.totals ?? {};
+    const amount = Number(totals.total ?? totals.grandTotal ?? data?.amount ?? 0) || 0;
+    const fee = Number(totals.fee ?? 0) || 0;
+    const tax = Number(totals.tax ?? 0) || 0;
+    const earnings = Number(totals.earnings ?? (amount - fee - tax)) || 0;
+    const custom = data?.customData ?? {};
+    const isDebit = eventType.startsWith('adjustment.') || eventType.includes('refund') || eventType.includes('chargeback');
+
+    const { error } = await getSupabase().from('revenue_events').insert({
+      paddle_event_id: eventId,
+      event_type: eventType,
+      paddle_transaction_id: data?.transactionId ?? data?.id ?? null,
+      paddle_subscription_id: data?.subscriptionId ?? null,
+      paddle_customer_id: data?.customerId ?? null,
+      user_id: custom.userId ?? null,
+      course_id: custom.courseId ?? null,
+      enrollment_id: custom.enrollmentId ?? null,
+      amount_cents: Math.abs(Math.round(amount)),
+      fee_cents: Math.abs(Math.round(fee)),
+      tax_cents: Math.abs(Math.round(tax)),
+      net_cents: Math.abs(Math.round(earnings)),
+      currency: data?.currencyCode ?? totals.currencyCode ?? 'EUR',
+      environment: env,
+      direction: isDebit ? 'debit' : 'credit',
+      occurred_at: data?.occurredAt ?? data?.createdAt ?? new Date().toISOString(),
+      raw_payload: data ?? {},
+    });
+    if (error && !String(error.message ?? '').includes('duplicate')) {
+      console.error('revenue ledger insert failed:', error);
+    }
+  } catch (e) {
+    console.error('logRevenueEvent error (non-blocking):', e);
+  }
+}
+
 async function handleWebhook(req: Request): Promise<{ eventType: string; eventId: string | undefined; env: string; skipped?: boolean }> {
   const { event, env } = await verifyAndDetectEnv(req);
   const eventType = event.eventType as string;
   const eventId   = (event.notificationId ?? event.id) as string | undefined;
 
   // Idempotency: reject duplicate events BEFORE any side-effects.
-  // The ssra_webhook_events table has a UNIQUE index on event_id.
-  // Checking here prevents double-activation even when the unique constraint
-  // races (e.g., two simultaneous deliveries of the same Paddle notification).
   if (eventId) {
     const { data: existing } = await getSupabase()
       .from('ssra_webhook_events')
@@ -300,6 +342,7 @@ async function handleWebhook(req: Request): Promise<{ eventType: string; eventId
   switch (eventType) {
     case EventName.TransactionCompleted:
       await handleTransactionCompleted(event.data, env);
+      await logRevenueEvent(eventType, eventId, env, event.data);
       break;
     case EventName.SubscriptionCreated:
       await handleSubscriptionCreated(event.data, env);
@@ -313,6 +356,7 @@ async function handleWebhook(req: Request): Promise<{ eventType: string; eventId
     case 'adjustment.created':
     case 'adjustment.updated':
       await handleAdjustmentEvent(event.data, env);
+      await logRevenueEvent(eventType, eventId, env, event.data);
       break;
     default:
       break;
