@@ -57,11 +57,8 @@ const FEATURES = [
   { icon: CreditCard,title:"Secure Global Payments",desc: "Pay securely from anywhere in the world via Paddle — all major cards accepted." },
 ];
 
-const TESTIMONIALS = [
-  { name: "Ahmed K.", origin: "Egypt → Frankfurt", text: "The Medical German subscription changed everything for me. In 3 months I could actually talk to patients.", stars: 5 },
-  { name: "Sara M.",  origin: "Morocco → Berlin",  text: "I was terrified of calling health insurance companies. After the phone communication course, it feels easy.", stars: 5 },
-  { name: "Omar H.",  origin: "Syria → Munich",    text: "SSRA's credential recognition course saved me months of confusion. Worth every euro.", stars: 5 },
-];
+
+
 
 export default function Index() {
   useReveal();
