@@ -73,6 +73,10 @@ export default function AdminRevenue() {
           <p className="text-slate-500 text-sm mt-1">Financial overview of all course sales and subscriptions.</p>
         </div>
 
+        {/* Paddle ledger — immutable accounting view */}
+        <RevenueLedgerWidget />
+
+
         {/* KPI cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={Euro}       label="Total Revenue"         value={`€${totalRevenue.toFixed(0)}`} sub="One-time enrollments"      color="text-emerald-500" />
