@@ -559,9 +559,11 @@ export function useUpsertSession() {
       if (id) {
         const { error } = await supabase.from("ssra_sessions").update(rest as never).eq("id", id as string);
         if (error) throw error;
+        return id as string;
       } else {
-        const { error } = await supabase.from("ssra_sessions").insert(rest as never);
+        const { data, error } = await supabase.from("ssra_sessions").insert(rest as never).select("id").single();
         if (error) throw error;
+        return (data as any).id as string;
       }
     },
     onSuccess: () => {

@@ -308,10 +308,9 @@ function SessionRow({ s, onEdit, onDelete, isPast = false }: {
         )}
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <a href={s.zoom_link} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs font-semibold text-[hsl(220,91%,54%)] border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
-          <ExternalLink className="w-3 h-3" /> Zoom
-        </a>
+        <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg">
+          <Lock className="w-3 h-3" /> Zoom in vault
+        </span>
         <button onClick={() => onEdit(s)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
           <Edit2 className="w-3.5 h-3.5" />
         </button>
