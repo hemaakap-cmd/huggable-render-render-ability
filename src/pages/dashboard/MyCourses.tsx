@@ -32,8 +32,14 @@ export default function MyCourses() {
 
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
 
+  // Only consider cancellation requests created AFTER the enrollment's latest payment.
+  // A re-enrollment (new paid_at) supersedes any prior pending/rejected request on the same row.
+  const paidAtByEnrollment = new Map<string, string | null>();
+  enrollments.forEach((e: any) => paidAtByEnrollment.set(e.id, e.paid_at ?? null));
   const reqByEnrollment = new Map<string, { status: string }>();
   cancelRequests.forEach((r: any) => {
+    const paidAt = paidAtByEnrollment.get(r.enrollment_id);
+    if (paidAt && new Date(r.created_at).getTime() < new Date(paidAt).getTime()) return;
     if (!reqByEnrollment.has(r.enrollment_id)) reqByEnrollment.set(r.enrollment_id, { status: r.status });
   });
 
