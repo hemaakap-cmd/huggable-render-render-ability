@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, BookOpen, Activity, Languages, GraduationCap,
-  CheckCircle2, Star, Users, Globe2, Zap, Shield,
+  CheckCircle2, Users, Globe2, Zap, Shield,
   CreditCard, Play, ChevronRight,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
@@ -57,11 +57,8 @@ const FEATURES = [
   { icon: CreditCard,title:"Secure Global Payments",desc: "Pay securely from anywhere in the world via Paddle — all major cards accepted." },
 ];
 
-const TESTIMONIALS = [
-  { name: "Ahmed K.", origin: "Egypt → Frankfurt", text: "The Medical German subscription changed everything for me. In 3 months I could actually talk to patients.", stars: 5 },
-  { name: "Sara M.",  origin: "Morocco → Berlin",  text: "I was terrified of calling health insurance companies. After the phone communication course, it feels easy.", stars: 5 },
-  { name: "Omar H.",  origin: "Syria → Munich",    text: "SSRA's credential recognition course saved me months of confusion. Worth every euro.", stars: 5 },
-];
+
+
 
 export default function Index() {
   useReveal();
@@ -363,33 +360,8 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ══ TESTIMONIALS ══ */}
-      <section className="py-24">
-        <div className="container">
-          <div className="text-center mb-14 reveal">
-            <span className="badge-blue mb-3">Student Stories</span>
-            <h2 className="font-display text-4xl font-bold text-slate-900">
-              Real Journeys to Germany
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(({ name, origin, text, stars }) => (
-              <div key={name} className="card-lift reveal bg-white border border-slate-200 rounded-2xl p-6">
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: stars }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-sm text-slate-600 leading-relaxed flex-1 mb-5">"{text}"</p>
-                <div>
-                  <div className="font-semibold text-slate-900 text-sm">{name}</div>
-                  <div className="text-xs text-[hsl(220,91%,54%)] mt-0.5">{origin}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
+
 
       {/* ══ CTA ══ */}
       <section className="py-24 bg-hero relative overflow-hidden">
