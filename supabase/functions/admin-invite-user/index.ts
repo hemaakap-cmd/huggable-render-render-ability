@@ -43,9 +43,33 @@ Deno.serve(async (req) => {
       return json({ error: 'Role must be admin or instructor' }, 400);
     }
 
-    // 4) Find or create the auth user
-    const { data: existing } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    let target = existing?.users?.find(u => (u.email ?? '').toLowerCase() === email) ?? null;
+    // 4) Find or create the auth user.
+    // Fast path: look up by email via the indexed profiles table to avoid
+    // paging through every auth user. Falls back to a paginated auth scan
+    // (page size 200) for users that exist in auth but not in profiles.
+    let target: { id: string; email?: string | null } | null = null;
+    const { data: profileMatch } = await admin
+      .from('ssra_profiles')
+      .select('id, email')
+      .ilike('email', email)
+      .maybeSingle();
+    if (profileMatch?.id) {
+      const { data: byId } = await admin.auth.admin.getUserById(profileMatch.id);
+      if (byId?.user) target = { id: byId.user.id, email: byId.user.email };
+    }
+    if (!target) {
+      const perPage = 200;
+      const maxPages = 100; // hard cap = 20k users; protects against runaway loops
+      for (let page = 1; page <= maxPages; page++) {
+        const { data: listed, error: listErr } = await admin.auth.admin.listUsers({ page, perPage });
+        if (listErr) return json({ error: listErr.message }, 500);
+        const users = listed?.users ?? [];
+        const found = users.find(u => (u.email ?? '').toLowerCase() === email);
+        if (found) { target = { id: found.id, email: found.email }; break; }
+        if (users.length < perPage) break; // last page
+      }
+    }
+
 
     let wasInvited = false;
     if (!target) {
