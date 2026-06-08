@@ -1301,6 +1301,7 @@ export type Database = {
           error_reason: string
           final_discount: number
           is_valid: boolean
+          paddle_discount_id: string
         }[]
       }
       verify_ssra_certificate: {

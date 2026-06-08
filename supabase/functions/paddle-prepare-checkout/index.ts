@@ -127,17 +127,45 @@ Deno.serve(async (req) => {
       enrollmentId = inserted.id;
     }
 
-    // Resolve Paddle discount id from coupon code (if one was applied)
+    // Resolve Paddle discount id from coupon code (if one was applied).
+    // CRITICAL: if a coupon was applied but cannot be mapped to a real Paddle
+    // discount, FAIL the checkout instead of silently charging the full price.
+    // This is the bug that caused the UI to show a discount while Paddle
+    // charged the original amount.
     let paddleDiscountId: string | null = null;
     if (sanitizedCouponCode) {
       const { data: couponRow } = await admin
         .from('ssra_coupons')
-        .select('paddle_discount_id, is_active')
+        .select('paddle_discount_id, is_active, valid_until, max_uses, uses_count')
         .eq('code', sanitizedCouponCode)
         .maybeSingle();
-      if (couponRow?.is_active && couponRow.paddle_discount_id) {
-        paddleDiscountId = couponRow.paddle_discount_id;
+
+      if (!couponRow || !couponRow.is_active) {
+        return new Response(JSON.stringify({ error: 'Coupon is no longer valid' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
+      if (couponRow.valid_until && new Date(couponRow.valid_until as string) < new Date()) {
+        return new Response(JSON.stringify({ error: 'Coupon has expired' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (couponRow.max_uses !== null && (couponRow.uses_count ?? 0) >= (couponRow.max_uses as number)) {
+        return new Response(JSON.stringify({ error: 'Coupon usage limit reached' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (!couponRow.paddle_discount_id || !/^dsc_/.test(couponRow.paddle_discount_id as string)) {
+        console.error('Coupon misconfigured: missing paddle_discount_id', {
+          code: sanitizedCouponCode, userId: user.id,
+        });
+        return new Response(JSON.stringify({
+          error: 'This coupon is misconfigured. Please contact support — do not retry without removing the coupon.',
+        }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      paddleDiscountId = couponRow.paddle_discount_id as string;
     }
 
     return new Response(JSON.stringify({

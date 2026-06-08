@@ -58,12 +58,13 @@ Deno.serve(async (req: Request) => {
     if (!result) return json({ error: "Coupon not found" }, 404);
 
     return json({
-      valid:         result.is_valid,
-      errorReason:   result.error_reason,
-      discountType:  result.discount_type,
-      discountValue: result.discount_value,
-      finalDiscount: result.final_discount,
-      couponId:      result.coupon_id,
+      valid:            result.is_valid,
+      errorReason:      result.error_reason,
+      discountType:     result.discount_type,
+      discountValue:    result.discount_value,
+      finalDiscount:    result.final_discount,
+      couponId:         result.coupon_id,
+      paddleDiscountId: result.paddle_discount_id,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";
