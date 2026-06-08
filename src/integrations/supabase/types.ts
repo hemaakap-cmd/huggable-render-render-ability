@@ -134,6 +134,72 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_events: {
+        Row: {
+          amount_cents: number
+          course_id: string | null
+          created_at: string
+          currency: string
+          direction: string
+          enrollment_id: string | null
+          environment: string
+          event_type: string
+          fee_cents: number
+          id: string
+          net_cents: number
+          occurred_at: string
+          paddle_customer_id: string | null
+          paddle_event_id: string
+          paddle_subscription_id: string | null
+          paddle_transaction_id: string | null
+          raw_payload: Json
+          tax_cents: number
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          course_id?: string | null
+          created_at?: string
+          currency?: string
+          direction?: string
+          enrollment_id?: string | null
+          environment: string
+          event_type: string
+          fee_cents?: number
+          id?: string
+          net_cents?: number
+          occurred_at?: string
+          paddle_customer_id?: string | null
+          paddle_event_id: string
+          paddle_subscription_id?: string | null
+          paddle_transaction_id?: string | null
+          raw_payload?: Json
+          tax_cents?: number
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          course_id?: string | null
+          created_at?: string
+          currency?: string
+          direction?: string
+          enrollment_id?: string | null
+          environment?: string
+          event_type?: string
+          fee_cents?: number
+          id?: string
+          net_cents?: number
+          occurred_at?: string
+          paddle_customer_id?: string | null
+          paddle_event_id?: string
+          paddle_subscription_id?: string | null
+          paddle_transaction_id?: string | null
+          raw_payload?: Json
+          tax_cents?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       site_visitor_sessions: {
         Row: {
           city: string | null
@@ -1259,6 +1325,19 @@ export type Database = {
           courses_count: number
           min_price: number
           students_count: number
+        }[]
+      }
+      get_revenue_summary: {
+        Args: { _env?: string; _from: string; _to: string }
+        Returns: {
+          chargeback_cents: number
+          currency: string
+          event_count: number
+          fee_cents: number
+          gross_cents: number
+          net_cents: number
+          refund_cents: number
+          tax_cents: number
         }[]
       }
       get_ssra_email_status: { Args: { _email: string }; Returns: string }
