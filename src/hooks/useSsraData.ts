@@ -504,9 +504,12 @@ export function useMyUpcomingSessions() {
 
       if (courseIds.length === 0) return [];
 
+      // Deliberately omit zoom_link: the secure get-session-access edge function
+      // delivers it only within the access window. Exposing it in client state
+      // would allow students to copy and share the raw link before the session.
       const { data, error } = await supabase
         .from("ssra_sessions")
-        .select("*, ssra_courses(title)")
+        .select("id, course_id, title, description, scheduled_at, duration_minutes, is_cancelled, zoom_password, recording_url, ssra_courses(title)")
         .eq("is_cancelled", false)
         .in("course_id", courseIds)
         .gte("scheduled_at", new Date().toISOString())
@@ -524,7 +527,7 @@ export function usePastSessions() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_sessions")
-        .select("*, ssra_courses(title)")
+        .select("id, course_id, title, description, scheduled_at, duration_minutes, is_cancelled, recording_url, ssra_courses(title)")
         .lt("scheduled_at", new Date().toISOString())
         .order("scheduled_at", { ascending: false })
         .limit(20);

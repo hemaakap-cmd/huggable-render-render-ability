@@ -5,6 +5,15 @@ import { useMyProfile, useUpdateProfile } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+const COUNTRIES = [
+  "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
+  "Algeria", "Tunisia", "Iraq", "Lebanon", "Syria", "Sudan", "Libya",
+  "Germany", "Austria", "Switzerland", "Other",
+];
+
+const ARABIC_RE = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+function containsArabic(s: string) { return ARABIC_RE.test(s); }
+
 export default function MyProfile() {
   const { data: profile, isLoading } = useMyProfile();
   const updateProfile = useUpdateProfile();
@@ -29,6 +38,22 @@ export default function MyProfile() {
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
+    if (form.full_name && containsArabic(form.full_name)) {
+      toast({
+        title: "English characters only",
+        description: "Full name must be in English (Latin) characters only.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (form.full_name && !/^[A-Za-z\s'\-\.]+$/.test(form.full_name.trim())) {
+      toast({
+        title: "Invalid name",
+        description: "Full name may only contain English letters, spaces, hyphens, and apostrophes.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSaving(true);
     try {
       await updateProfile.mutateAsync({
@@ -123,8 +148,11 @@ export default function MyProfile() {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Country</label>
-                  <input value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
-                    placeholder="e.g. Egypt, Morocco…" className={inputClass} />
+                  <select value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
+                    className={inputClass}>
+                    <option value="">Select country…</option>
+                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
                 <div className="flex gap-3 pt-1">
                   <button type="submit" disabled={saving}

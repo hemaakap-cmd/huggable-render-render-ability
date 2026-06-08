@@ -104,6 +104,15 @@ Deno.serve(async (req) => {
       status: 'cancelled',
     }).eq('id', cancelReq.enrollment_id);
 
+    // Revoke any certificates the student earned for this course.
+    // A refunded student should not retain a certificate they were effectively
+    // given access to for free. Revocation is surfaced to them via MyCertificates.tsx.
+    await admin.from('ssra_certificates')
+      .update({ revoked: true, revoked_reason: 'Enrollment cancelled and refunded' })
+      .eq('user_id', cancelReq.user_id)
+      .eq('course_id', cancelReq.course_id)
+      .eq('revoked', false);
+
     let paddleAdjustmentId: string | null = null;
     let refundError: string | null = null;
 

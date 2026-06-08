@@ -12,6 +12,11 @@ type Tab = "signup" | "login";
 type EmailStatus = "idle" | "checking" | "registered" | "available" | "incomplete" | "invalid";
 type OtpVerificationType = "signup" | "magiclink";
 
+// Reject Arabic script and any right-to-left characters in names.
+// Academy records must be in Latin characters for certificates and legal docs.
+const ARABIC_RE = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+function containsArabic(s: string) { return ARABIC_RE.test(s); }
+
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
   "Algeria", "Tunisia", "Iraq", "Lebanon", "Syria", "Sudan", "Libya",
@@ -130,6 +135,22 @@ export default function StudentLogin() {
     if (tab === "signup") {
       if (!name.trim()) {
         toast({ title: "Please enter your full name", variant: "destructive" });
+        return;
+      }
+      if (containsArabic(name)) {
+        toast({
+          title: "English characters only",
+          description: "Please enter your full name in English (Latin) characters only.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!/^[A-Za-z\s'\-\.]+$/.test(name.trim())) {
+        toast({
+          title: "Invalid name",
+          description: "Full name may only contain English letters, spaces, hyphens, and apostrophes.",
+          variant: "destructive",
+        });
         return;
       }
       if (!phone.trim() || phone.trim().length < 6) {

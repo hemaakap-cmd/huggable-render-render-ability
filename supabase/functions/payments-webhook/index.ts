@@ -275,10 +275,27 @@ async function handleSubscriptionCanceled(data: any, _env: PaddleEnv) {
 }
 
 
-async function handleWebhook(req: Request): Promise<{ eventType: string; eventId: string | undefined; env: string }> {
+async function handleWebhook(req: Request): Promise<{ eventType: string; eventId: string | undefined; env: string; skipped?: boolean }> {
   const { event, env } = await verifyAndDetectEnv(req);
   const eventType = event.eventType as string;
   const eventId   = (event.notificationId ?? event.id) as string | undefined;
+
+  // Idempotency: reject duplicate events BEFORE any side-effects.
+  // The ssra_webhook_events table has a UNIQUE index on event_id.
+  // Checking here prevents double-activation even when the unique constraint
+  // races (e.g., two simultaneous deliveries of the same Paddle notification).
+  if (eventId) {
+    const { data: existing } = await getSupabase()
+      .from('ssra_webhook_events')
+      .select('id, status')
+      .eq('event_id', eventId)
+      .maybeSingle();
+    if (existing) {
+      console.log(`Duplicate event ${eventId} (prev status: ${existing.status}), skipping`);
+      return { eventType, eventId, env, skipped: true };
+    }
+  }
+
   console.log('paddle event:', eventType, 'env:', env);
   switch (eventType) {
     case EventName.TransactionCompleted:
@@ -332,11 +349,15 @@ Deno.serve(async (req) => {
   let env = 'unknown';
   try {
     const result = await handleWebhook(req);
-    // result carries env + event info after successful verification
     eventType = result?.eventType ?? 'unknown';
     eventId   = result?.eventId;
     env       = result?.env ?? 'unknown';
-    await logWebhookEvent(eventType, eventId, env, 'processed');
+    if (result?.skipped) {
+      // Duplicate event — already processed; return 200 so Paddle stops retrying.
+      await logWebhookEvent(eventType, eventId, env, 'skipped');
+    } else {
+      await logWebhookEvent(eventType, eventId, env, 'processed');
+    }
     return new Response(JSON.stringify({ received: true }), {
       status: 200, headers: { 'Content-Type': 'application/json' },
     });
