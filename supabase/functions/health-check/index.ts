@@ -1,7 +1,7 @@
 /**
  * health-check — Public endpoint for external uptime monitors.
  *
- * GET  /health-check          → { status, services, metrics, timestamp }
+ * GET  /health-check          → { status, services, timestamp }
  * POST /health-check          → same (some monitors use POST)
  *
  * HTTP status codes:
@@ -9,8 +9,11 @@
  *   207 = some services degraded
  *   503 = one or more services down
  *
- * No authentication required — safe to expose to UptimeRobot, BetterStack, etc.
- * Does NOT return any user data or secrets.
+ * Public response is intentionally minimal: per-service status only,
+ * with no raw error messages or internal metrics.
+ *
+ * Authenticated callers (Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>)
+ * also receive detailed `detail` fields and the `metrics` block.
  */
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -34,6 +37,10 @@ function createSupabase() {
   );
 }
 
+// Generic, non-leaky labels for public consumers.
+const GENERIC_DOWN = 'service unavailable';
+const GENERIC_DEGRADED = 'service degraded';
+
 async function checkDatabase(): Promise<ServiceResult> {
   try {
     const t0 = Date.now();
@@ -51,7 +58,6 @@ async function checkDatabase(): Promise<ServiceResult> {
 async function checkEmailQueue(): Promise<ServiceResult> {
   try {
     const supabase = createSupabase();
-    // Emails pending for > 30 min indicate a stuck queue
     const stuckSince = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const { count, error } = await supabase
       .from('email_send_log')
@@ -72,7 +78,6 @@ async function checkEmailQueue(): Promise<ServiceResult> {
 async function checkPayments(): Promise<ServiceResult> {
   try {
     const supabase = createSupabase();
-    // Enrollments stuck as 'pending' for > 2 hours likely indicate webhook failures
     const since2h = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const { count, error } = await supabase
       .from('ssra_enrollments')
@@ -93,17 +98,16 @@ async function checkAuth(): Promise<ServiceResult> {
   try {
     const supabase = createSupabase();
     const t0 = Date.now();
-    // Lightweight admin check — list 1 user to confirm auth service is responsive
     const { error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 });
     if (error) return { status: 'degraded', detail: error.message };
     return { status: 'ok', latencyMs: Date.now() - t0 };
   } catch (e) {
     return { status: 'degraded', detail: (e as Error).message };
+  }
 }
 
 async function checkPaddleGateway(): Promise<ServiceResult> {
   try {
-    // Probe the live gateway; sandbox key is missing in some self-hosted setups.
     const env = Deno.env.get('PADDLE_LIVE_API_KEY') ? 'live' : 'sandbox';
     const r = await pingPaddleGateway(env as 'live' | 'sandbox');
     if (!r.ok) return { status: 'down', latencyMs: r.latencyMs, detail: r.error ?? `HTTP ${r.status}` };
@@ -112,7 +116,6 @@ async function checkPaddleGateway(): Promise<ServiceResult> {
   } catch (e) {
     return { status: 'degraded', detail: (e as Error).message };
   }
-}
 }
 
 async function getMetrics() {
@@ -128,30 +131,50 @@ async function getMetrics() {
   ]);
 
   return {
-    failedEmails24h:   failedEmailsRes.status  === 'fulfilled' ? (failedEmailsRes.value.count ?? 0) : 0,
-    dlqEmails24h:      dlqEmailsRes.status     === 'fulfilled' ? (dlqEmailsRes.value.count ?? 0) : 0,
-    enrollments24h:    activeEnrollRes.status  === 'fulfilled' ? (activeEnrollRes.value.count ?? 0) : 0,
+    failedEmails24h:   failedEmailsRes.status   === 'fulfilled' ? (failedEmailsRes.value.count ?? 0) : 0,
+    dlqEmails24h:      dlqEmailsRes.status      === 'fulfilled' ? (dlqEmailsRes.value.count ?? 0) : 0,
+    enrollments24h:    activeEnrollRes.status   === 'fulfilled' ? (activeEnrollRes.value.count ?? 0) : 0,
     webhookSuccess24h: webhookSuccessRes.status === 'fulfilled' ? (webhookSuccessRes.value.count ?? 0) : 0,
-    webhookFailed24h:  webhookFailRes.status   === 'fulfilled' ? (webhookFailRes.value.count ?? 0) : 0,
+    webhookFailed24h:  webhookFailRes.status    === 'fulfilled' ? (webhookFailRes.value.count ?? 0) : 0,
   };
+}
+
+function sanitizeService(r: ServiceResult): ServiceResult {
+  // Strip raw error messages from the public response. Keep status +
+  // latency so monitors can still graph response time, but replace
+  // detail with a generic label that does not leak schema or stack info.
+  const out: ServiceResult = { status: r.status };
+  if (typeof r.latencyMs === 'number') out.latencyMs = r.latencyMs;
+  if (r.status === 'down') out.detail = GENERIC_DOWN;
+  else if (r.status === 'degraded') out.detail = GENERIC_DEGRADED;
+  return out;
+}
+
+function isAuthorizedForDetails(req: Request): boolean {
+  const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!expected) return false;
+  const header = req.headers.get('authorization') ?? '';
+  const token = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
+  return token.length > 0 && token === expected;
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   const start = Date.now();
+  const includeDetails = isAuthorizedForDetails(req);
 
-  const [database, email, payments, auth, paddleGateway, metrics] = await Promise.all([
-    checkDatabase(),
-    checkEmailQueue(),
-    checkPayments(),
-    checkAuth(),
-    checkPaddleGateway(),
-    getMetrics(),
-  ]);
+  const detailedPromises: [
+    Promise<ServiceResult>, Promise<ServiceResult>, Promise<ServiceResult>,
+    Promise<ServiceResult>, Promise<ServiceResult>,
+  ] = [
+    checkDatabase(), checkEmailQueue(), checkPayments(), checkAuth(), checkPaddleGateway(),
+  ];
 
-  const services = { database, email, payments, auth, paddleGateway };
-  const allStatuses = Object.values(services).map((s) => s.status);
+  const [database, email, payments, auth, paddleGateway] = await Promise.all(detailedPromises);
+  const detailedServices = { database, email, payments, auth, paddleGateway };
+
+  const allStatuses = Object.values(detailedServices).map((s) => s.status);
   const overallStatus: ServiceStatus = allStatuses.includes('down')
     ? 'down'
     : allStatuses.includes('degraded')
@@ -160,18 +183,24 @@ Deno.serve(async (req) => {
 
   const httpStatus = overallStatus === 'down' ? 503 : overallStatus === 'degraded' ? 207 : 200;
 
-  return new Response(
-    JSON.stringify({
-      status:        overallStatus,
-      version:       VERSION,
-      timestamp:     new Date().toISOString(),
-      responseTimeMs: Date.now() - start,
-      services,
-      metrics,
-    }),
-    {
-      status: httpStatus,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    },
+  const publicServices = Object.fromEntries(
+    Object.entries(detailedServices).map(([k, v]) => [k, sanitizeService(v)]),
   );
+
+  const body: Record<string, unknown> = {
+    status:         overallStatus,
+    version:        VERSION,
+    timestamp:      new Date().toISOString(),
+    responseTimeMs: Date.now() - start,
+    services:       includeDetails ? detailedServices : publicServices,
+  };
+
+  if (includeDetails) {
+    body.metrics = await getMetrics();
+  }
+
+  return new Response(JSON.stringify(body), {
+    status: httpStatus,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 });
