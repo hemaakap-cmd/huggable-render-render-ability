@@ -53,11 +53,26 @@ function JoinZoomButton({ sessionId }: { sessionId: string }) {
   const handleJoin = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("get-session-access", {
-        body: { sessionId },
-      });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        throw new Error("Please sign in again to open the Zoom link.");
+      }
 
-      if (error) throw error;
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-session-access`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok && data?.minutesUntilOpen === undefined) {
+        throw new Error(data?.error ?? "Could not retrieve session link.");
+      }
 
       if (data?.zoom_link) {
         window.open(data.zoom_link, "_blank", "noopener,noreferrer");
