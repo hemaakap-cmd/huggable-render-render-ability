@@ -5,6 +5,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from "recharts";
 import AdminLayout from "@/components/ssra/AdminLayout";
+import RevenueLedgerWidget from "@/components/ssra/RevenueLedgerWidget";
 import { useAdminEnrollments, useAdminSubscriptions, useAdminStats, useRevenueSummary } from "@/hooks/useSsraData";
 
 const COLORS = ["hsl(220,91%,54%)", "hsl(43,96%,50%)", "hsl(160,84%,39%)", "hsl(262,83%,58%)", "hsl(15,86%,56%)", "hsl(200,98%,39%)"];
@@ -71,6 +72,10 @@ export default function AdminRevenue() {
           <h1 className="font-display text-2xl font-bold text-slate-900">Revenue</h1>
           <p className="text-slate-500 text-sm mt-1">Financial overview of all course sales and subscriptions.</p>
         </div>
+
+        {/* Paddle ledger — immutable accounting view */}
+        <RevenueLedgerWidget />
+
 
         {/* KPI cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
