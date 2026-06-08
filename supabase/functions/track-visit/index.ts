@@ -68,13 +68,13 @@ Deno.serve(async (req) => {
           last_seen_at: now,
           path: path ?? existing.path,
           page_views: samePath ? existing.page_views : (existing.page_views ?? 0) + 1,
-          user_id: user_id ?? null,
+          user_id: resolvedUserId,
         })
         .eq('id', existing.id);
     } else {
       await supabase.from('site_visitor_sessions').insert({
         session_id,
-        user_id: user_id ?? null,
+        user_id: resolvedUserId,
         path: path ?? '/',
         country, country_code: country, city, region,
         referrer: referrer ?? null,
