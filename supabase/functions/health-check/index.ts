@@ -15,6 +15,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { pingPaddleGateway } from '../_shared/paddle.ts';
 
 const VERSION = '1.0.0';
 
@@ -98,7 +99,20 @@ async function checkAuth(): Promise<ServiceResult> {
     return { status: 'ok', latencyMs: Date.now() - t0 };
   } catch (e) {
     return { status: 'degraded', detail: (e as Error).message };
+}
+
+async function checkPaddleGateway(): Promise<ServiceResult> {
+  try {
+    // Probe the live gateway; sandbox key is missing in some self-hosted setups.
+    const env = Deno.env.get('PADDLE_LIVE_API_KEY') ? 'live' : 'sandbox';
+    const r = await pingPaddleGateway(env as 'live' | 'sandbox');
+    if (!r.ok) return { status: 'down', latencyMs: r.latencyMs, detail: r.error ?? `HTTP ${r.status}` };
+    if (r.latencyMs > 3000) return { status: 'degraded', latencyMs: r.latencyMs, detail: 'High gateway latency' };
+    return { status: 'ok', latencyMs: r.latencyMs };
+  } catch (e) {
+    return { status: 'degraded', detail: (e as Error).message };
   }
+}
 }
 
 async function getMetrics() {
@@ -127,15 +141,16 @@ Deno.serve(async (req) => {
 
   const start = Date.now();
 
-  const [database, email, payments, auth, metrics] = await Promise.all([
+  const [database, email, payments, auth, paddleGateway, metrics] = await Promise.all([
     checkDatabase(),
     checkEmailQueue(),
     checkPayments(),
     checkAuth(),
+    checkPaddleGateway(),
     getMetrics(),
   ]);
 
-  const services = { database, email, payments, auth };
+  const services = { database, email, payments, auth, paddleGateway };
   const allStatuses = Object.values(services).map((s) => s.status);
   const overallStatus: ServiceStatus = allStatuses.includes('down')
     ? 'down'
