@@ -57,75 +57,64 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    const { data: course, error: courseErr } = await admin
+    // Quick existence read (the RPC will re-lock and re-validate authoritatively)
+    const { data: course } = await admin
       .from('ssra_courses')
-      .select('id, title, price_eur, is_active, capacity, enrolled_count, registration_open, start_date, start_time, duration, instructor_name')
+      .select('id, is_active')
       .eq('id', courseId)
       .maybeSingle();
-
-    if (courseErr || !course || !course.is_active) {
+    if (!course || !course.is_active) {
       return new Response(JSON.stringify({ error: 'Course not available' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    if (course.registration_open === false || (course.enrolled_count ?? 0) >= (course.capacity ?? 50)) {
-      return new Response(JSON.stringify({ error: 'Course is full', waitlistAvailable: true }), {
-        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
 
-    // Lookup or create a pending enrollment for this user+course
-    const { data: existing } = await admin
-      .from('ssra_enrollments')
-      .select('id, status')
-      .eq('user_id', user.id)
-      .eq('course_id', courseId)
+    // Pull profile name/email so the RPC can snapshot them onto the enrollment
+    const { data: profile } = await admin
+      .from('ssra_profiles')
+      .select('full_name, email')
+      .eq('id', user.id)
       .maybeSingle();
 
-    if (existing?.status === 'active') {
+    // ATOMIC reservation: locks the course row, counts active+recent-pending
+    // enrollments against capacity, and creates/refreshes the pending row in
+    // one transaction. Eliminates the TOCTOU race where two simultaneous
+    // payers could both take the last seat.
+    const { data: rpcRows, error: rpcErr } = await admin.rpc('reserve_pending_enrollment', {
+      _user_id:       user.id,
+      _course_id:     courseId,
+      _coupon_code:   sanitizedCouponCode,
+      _student_name:  profile?.full_name ?? user.user_metadata?.full_name ?? null,
+      _student_email: profile?.email ?? user.email ?? null,
+    });
+    if (rpcErr) {
+      console.error('reserve_pending_enrollment rpc error', rpcErr);
+      return new Response(JSON.stringify({ error: 'Could not reserve seat' }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const reservation = (rpcRows as Array<{ enrollment_id: string | null; outcome: string; reason: string | null }>)?.[0];
+    if (!reservation) {
+      return new Response(JSON.stringify({ error: 'Reservation failed' }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (reservation.outcome === 'already_enrolled') {
       return new Response(JSON.stringify({ error: 'Already enrolled', alreadyEnrolled: true }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    let enrollmentId = existing?.id;
-    if (enrollmentId && sanitizedCouponCode) {
-      // Update coupon_code on the existing pending enrollment in case the student added a coupon on retry
-      await admin.from('ssra_enrollments').update({ coupon_code: sanitizedCouponCode }).eq('id', enrollmentId);
+    if (reservation.outcome === 'full') {
+      return new Response(JSON.stringify({ error: 'Course is full', waitlistAvailable: true }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
-    if (!enrollmentId) {
-      const { data: profile } = await admin
-        .from('ssra_profiles')
-        .select('full_name, email')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      const { data: inserted, error: insertErr } = await admin
-        .from('ssra_enrollments')
-        .insert({
-          user_id: user.id,
-          course_id: courseId,
-          status: 'pending',
-          amount_eur: course.price_eur,
-          course_title_snapshot: course.title,
-          start_date_snapshot: course.start_date,
-          start_time_snapshot: course.start_time,
-          duration_snapshot: course.duration,
-          instructor_snapshot: course.instructor_name,
-          student_name_snapshot: profile?.full_name ?? user.user_metadata?.full_name ?? null,
-          student_email_snapshot: profile?.email ?? user.email ?? null,
-          coupon_code: sanitizedCouponCode ?? null,
-        })
-        .select('id')
-        .single();
-      if (insertErr) {
-        console.error('enrollment insert failed', insertErr);
-        return new Response(JSON.stringify({ error: 'Could not create enrollment' }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      enrollmentId = inserted.id;
+    if (reservation.outcome === 'closed' || reservation.outcome === 'error') {
+      return new Response(JSON.stringify({ error: reservation.reason ?? 'Course not available' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+    const enrollmentId = reservation.enrollment_id!;
 
     // Resolve Paddle discount id from coupon code (if one was applied).
     // CRITICAL: if a coupon was applied but cannot be mapped to a real Paddle

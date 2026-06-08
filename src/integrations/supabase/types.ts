@@ -1287,6 +1287,20 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reserve_pending_enrollment: {
+        Args: {
+          _coupon_code?: string
+          _course_id: string
+          _student_email?: string
+          _student_name?: string
+          _user_id: string
+        }
+        Returns: {
+          enrollment_id: string
+          outcome: string
+          reason: string
+        }[]
+      }
       validate_coupon: {
         Args: {
           _amount_eur: number
