@@ -10,13 +10,20 @@ const AUTH_ERROR_PATTERN = /(unauthorized|jwt|session|auth)/i;
 
 async function invokeSessionCredentials(body: Record<string, unknown>) {
   const { data: sessionData } = await supabase.auth.getSession();
-  if (!sessionData.session?.access_token) {
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) {
+    throw new Error("Your login session expired. Please sign in again, then save the Zoom link.");
+  }
+
+  const { error: userError } = await supabase.auth.getUser(accessToken);
+  if (userError) {
+    await supabase.auth.signOut();
     throw new Error("Your login session expired. Please sign in again, then save the Zoom link.");
   }
 
   const result = await supabase.functions.invoke("manage-session-credentials", {
     body,
-    headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (result.error) {
