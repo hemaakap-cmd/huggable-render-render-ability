@@ -142,3 +142,7 @@ const brandBadge = { background: '#f59e0b', color: '#0f172a', fontWeight: 'bold'
 const brandTextCell = { paddingLeft: '14px', verticalAlign: 'middle' as const }
 const brandName = { fontSize: '17px', fontWeight: 700 as const, color: '#ffffff', margin: 0, letterSpacing: '0.3px' }
 const brandTag = { fontSize: '10px', color: 'rgba(255,255,255,0.55)', margin: '2px 0 0', letterSpacing: '1.2px' }
+const contactCard = { background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 18px', margin: '8px 0 0' }
+const contactName = { fontSize: '14px', fontWeight: 700 as const, color: '#0f172a', margin: '0 0 2px' }
+const contactMeta = { fontSize: '12px', color: '#64748b', margin: '0 0 2px', lineHeight: '1.5' }
+
