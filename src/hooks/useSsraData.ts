@@ -504,12 +504,11 @@ export function useMyUpcomingSessions() {
 
       if (courseIds.length === 0) return [];
 
-      // Deliberately omit zoom_link: the secure get-session-access edge function
-      // delivers it only within the access window. Exposing it in client state
-      // would allow students to copy and share the raw link before the session.
+      // Zoom credentials no longer live on ssra_sessions; they're delivered
+      // only by the get-session-access edge function within the access window.
       const { data, error } = await supabase
         .from("ssra_sessions")
-        .select("id, course_id, title, description, scheduled_at, duration_minutes, is_cancelled, zoom_password, recording_url, ssra_courses(title)")
+        .select("id, course_id, title, description, scheduled_at, duration_minutes, is_cancelled, recording_url, ssra_courses(title)")
         .eq("is_cancelled", false)
         .in("course_id", courseIds)
         .gte("scheduled_at", new Date().toISOString())
@@ -1030,17 +1029,19 @@ export function useOperationalAlerts() {
       const now = new Date();
       const in30d = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-      const [coursesRes, sessionsRes, waitlistRes] = await Promise.all([
+      const [coursesRes, sessionsRes, credsRes, waitlistRes] = await Promise.all([
         supabase.from("ssra_courses").select("id, title, is_active, enrolled_count, capacity, registration_open").eq("is_active", true),
-        supabase.from("ssra_sessions").select("id, course_id, title, zoom_link, scheduled_at, is_cancelled")
+        supabase.from("ssra_sessions").select("id, course_id, title, scheduled_at, is_cancelled")
           .eq("is_cancelled", false)
           .gte("scheduled_at", now.toISOString())
           .lte("scheduled_at", in30d.toISOString()),
+        supabase.from("ssra_session_credentials" as never).select("session_id"),
         supabase.from("ssra_waitlist").select("course_id").eq("status", "waiting"),
       ]);
 
       const courses = coursesRes.data ?? [];
-      const sessions = sessionsRes.data ?? [];
+      const sessions = (sessionsRes.data ?? []) as any[];
+      const credsSet = new Set<string>(((credsRes.data ?? []) as any[]).map((r: any) => r.session_id));
       const waitlist = waitlistRes.data ?? [];
 
       const courseSessionCount = new Map<string, number>();
@@ -1048,7 +1049,7 @@ export function useOperationalAlerts() {
 
       for (const s of sessions) {
         courseSessionCount.set(s.course_id, (courseSessionCount.get(s.course_id) ?? 0) + 1);
-        if (!s.zoom_link) {
+        if (!credsSet.has(s.id)) {
           const list = courseMissingZoom.get(s.course_id) ?? [];
           list.push(s.title);
           courseMissingZoom.set(s.course_id, list);

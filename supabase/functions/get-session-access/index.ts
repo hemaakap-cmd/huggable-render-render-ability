@@ -161,8 +161,8 @@ Deno.serve(async (req: Request) => {
 
     // ── Deliver link ─────────────────────────────────────────────
     return json({
-      zoom_link:     session.zoom_link,
-      zoom_password: session.zoom_password,
+      zoom_link:     creds.zoom_link,
+      zoom_password: creds.zoom_password,
       session_title: session.title,
       expires_at:    expiresAt,
       access_count:  (token.access_count ?? 0) + 1,
