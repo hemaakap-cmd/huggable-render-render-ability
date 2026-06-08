@@ -1,0 +1,1 @@
+UPDATE public.ssra_profiles SET full_name='SSRA Academy' WHERE lower(email)='hemaakap@gmail.com';
