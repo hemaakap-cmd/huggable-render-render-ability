@@ -1077,6 +1077,53 @@ export type Database = {
           },
         ]
       }
+      ssra_session_tokens: {
+        Row: {
+          access_count: number
+          accessed_at: string | null
+          created_at: string
+          device_hint: string | null
+          expires_at: string
+          id: string
+          session_id: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_count?: number
+          accessed_at?: string | null
+          created_at?: string
+          device_hint?: string | null
+          expires_at: string
+          id?: string
+          session_id: string
+          token?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_count?: number
+          accessed_at?: string | null
+          created_at?: string
+          device_hint?: string | null
+          expires_at?: string
+          id?: string
+          session_id?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_session_tokens_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ssra_sessions: {
         Row: {
           course_id: string | null
@@ -1329,6 +1376,18 @@ export type Database = {
       }
     }
     Functions: {
+      check_concurrent_session_access: {
+        Args: {
+          _ip_address?: string
+          _session_id: string
+          _token_hash: string
+          _user_agent?: string
+          _user_id: string
+        }
+        Returns: {
+          concurrent: boolean
+        }[]
+      }
       course_has_seats: { Args: { _course_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
