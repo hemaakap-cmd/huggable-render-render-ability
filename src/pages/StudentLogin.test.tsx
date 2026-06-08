@@ -70,7 +70,11 @@ async function reachOtpScreen(tab: "signup" | "login", name = "Test User") {
     rpc.mockResolvedValue({ data: "registered", error: null });
   }
   fireEvent.change(screen.getByPlaceholderText(/you@email\.com/i), { target: { value: "u@test.com" } });
-  fireEvent.click(screen.getByRole("button", { name: /send verification code/i }));
+  // The submit button is disabled while the debounced email check is in flight (500ms).
+  // Wait for it to settle so clicking actually submits.
+  const submitBtn = screen.getByRole("button", { name: /send verification code/i });
+  await waitFor(() => expect(submitBtn).not.toBeDisabled(), { timeout: 4000 });
+  fireEvent.click(submitBtn);
   await waitFor(() => expect(screen.getByPlaceholderText(/• • • • • •/)).toBeInTheDocument(), { timeout: 4000 });
   fireEvent.change(screen.getByPlaceholderText(/• • • • • •/), { target: { value: "123456" } });
 }
