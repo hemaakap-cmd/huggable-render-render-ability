@@ -141,15 +141,16 @@ Deno.serve(async (req) => {
 
   const start = Date.now();
 
-  const [database, email, payments, auth, metrics] = await Promise.all([
+  const [database, email, payments, auth, paddleGateway, metrics] = await Promise.all([
     checkDatabase(),
     checkEmailQueue(),
     checkPayments(),
     checkAuth(),
+    checkPaddleGateway(),
     getMetrics(),
   ]);
 
-  const services = { database, email, payments, auth };
+  const services = { database, email, payments, auth, paddleGateway };
   const allStatuses = Object.values(services).map((s) => s.status);
   const overallStatus: ServiceStatus = allStatuses.includes('down')
     ? 'down'
