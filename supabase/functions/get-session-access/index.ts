@@ -58,16 +58,23 @@ Deno.serve(async (req: Request) => {
     const { sessionId } = body as { sessionId?: string };
     if (!sessionId) return json({ error: "sessionId is required" }, 400);
 
-    // ── Fetch session ───────────────────────────────────────────
+    // ── Fetch session metadata (no credentials live on this table anymore) ──
     const { data: session, error: sessionErr } = await supabaseAdmin
       .from("ssra_sessions")
-      .select("id, course_id, title, zoom_link, zoom_password, scheduled_at, duration_minutes, is_cancelled")
+      .select("id, course_id, title, scheduled_at, duration_minutes, is_cancelled")
       .eq("id", sessionId)
       .maybeSingle();
 
     if (sessionErr || !session) return json({ error: "Session not found" }, 404);
     if (session.is_cancelled)   return json({ error: "Session has been cancelled" }, 410);
-    if (!session.zoom_link)     return json({ error: "Zoom link not yet available" }, 503);
+
+    // ── Fetch credentials from the locked-down credentials table ────────────
+    const { data: creds } = await supabaseAdmin
+      .from("ssra_session_credentials")
+      .select("zoom_link, zoom_password")
+      .eq("session_id", sessionId)
+      .maybeSingle();
+    if (!creds?.zoom_link) return json({ error: "Zoom link not yet available" }, 503);
 
     // ── Access window ───────────────────────────────────────────
     const startMs = new Date(session.scheduled_at).getTime();
