@@ -167,6 +167,36 @@ Deno.serve(async (req) => {
       link: '/dashboard/courses',
     });
 
+    // Send branded cancellation confirmation email to the student (best-effort).
+    try {
+      const recipient = enrollment?.student_email_snapshot;
+      if (recipient) {
+        const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const amountStr = `EUR ${Number(enrollment?.amount_eur ?? 0).toFixed(2)}`;
+        await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${svc}` },
+          body: JSON.stringify({
+            templateName: 'cancellation-confirmation',
+            recipientEmail: recipient,
+            idempotencyKey: `cancel-confirm-${requestId}`,
+            templateData: {
+              studentName: enrollment?.student_name_snapshot ?? 'Student',
+              courseName: enrollment?.course_title_snapshot ?? cancelReq.course_id,
+              orderNumber: enrollment?.order_number ?? enrollment?.id,
+              amountPaid: amountStr,
+              refundIssued,
+              refundAmount: amountStr,
+              cancellationDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+            },
+          }),
+        });
+      }
+    } catch (e) {
+      console.error('cancellation email failed', e);
+    }
+
+
     return new Response(JSON.stringify({
       ok: true,
       status: refundIssued ? 'refunded' : 'approved',

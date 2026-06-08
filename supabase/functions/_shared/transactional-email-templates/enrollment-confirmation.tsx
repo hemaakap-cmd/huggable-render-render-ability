@@ -1,13 +1,16 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Button, Row, Column, Img,
+  Body, Container, Head, Heading, Html, Preview, Text, Section, Hr, Button, Row, Column, Img, Link,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'SSRA Academy'
+const SITE_URL = 'https://ssracourses.com'
 const CONTACT_EMAIL = 'support@ssracourses.com'
+const SITE_ADDRESS = 'Bracknellstraße 41, 51379 Leverkusen, Germany'
 const DASHBOARD_URL = 'https://ssracourses.com/dashboard/courses'
 const LOGO_URL = 'https://vffcarzhfxlqzfwrhzau.supabase.co/storage/v1/object/public/ssra-course-images/brand/ssra-logo.png'
+
 
 interface EnrollmentConfirmationProps {
   studentName?: string
@@ -76,14 +79,28 @@ const EnrollmentConfirmationEmail = ({
         </Section>
 
         <Hr style={hr} />
-        <Text style={footer}>
-          Questions? Email <a href={`mailto:${CONTACT_EMAIL}`} style={link}>{CONTACT_EMAIL}</a>.
-        </Text>
-        <Text style={footer}>{SITE_NAME} · ssracourses.com</Text>
+
+        <Section style={contactCard}>
+          <Row>
+            <Column style={{ width: '56px', verticalAlign: 'middle' as const }}>
+              <Img src={LOGO_URL} width="44" height="44" alt={SITE_NAME} style={{ borderRadius: '10px', display: 'block' }} />
+            </Column>
+            <Column style={{ paddingLeft: '12px', verticalAlign: 'middle' as const }}>
+              <Text style={contactName}>{SITE_NAME}</Text>
+              <Text style={contactMeta}>
+                <Link href={SITE_URL} style={link}>{SITE_URL.replace('https://', '')}</Link>
+                {'  ·  '}
+                <Link href={`mailto:${CONTACT_EMAIL}`} style={link}>{CONTACT_EMAIL}</Link>
+              </Text>
+              <Text style={contactMeta}>{SITE_ADDRESS}</Text>
+            </Column>
+          </Row>
+        </Section>
       </Container>
     </Body>
   </Html>
 )
+
 
 export const template = {
   component: EnrollmentConfirmationEmail,
@@ -125,3 +142,7 @@ const brandBadge = { background: '#f59e0b', color: '#0f172a', fontWeight: 'bold'
 const brandTextCell = { paddingLeft: '14px', verticalAlign: 'middle' as const }
 const brandName = { fontSize: '17px', fontWeight: 700 as const, color: '#ffffff', margin: 0, letterSpacing: '0.3px' }
 const brandTag = { fontSize: '10px', color: 'rgba(255,255,255,0.55)', margin: '2px 0 0', letterSpacing: '1.2px' }
+const contactCard = { background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 18px', margin: '8px 0 0' }
+const contactName = { fontSize: '14px', fontWeight: 700 as const, color: '#0f172a', margin: '0 0 2px' }
+const contactMeta = { fontSize: '12px', color: '#64748b', margin: '0 0 2px', lineHeight: '1.5' }
+
