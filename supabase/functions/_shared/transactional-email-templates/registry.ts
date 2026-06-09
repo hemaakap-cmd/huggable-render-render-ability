@@ -28,7 +28,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-purchase-notification': adminPurchaseNotification,
   'session-link-updated': sessionLinkUpdated,
   'cancellation-confirmation': cancellationConfirmation,
-  'cancellation-confirmation': cancellationConfirmation,
   'instructor-assignment': instructorAssignment,
 }
 
