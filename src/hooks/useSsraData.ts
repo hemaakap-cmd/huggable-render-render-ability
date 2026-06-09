@@ -1462,7 +1462,7 @@ export function useSystemHealth() {
         supabase.from("ssra_enrollments").select("id", { count: "exact", head: true }).gte("enrolled_at", since24h),
         (supabase as any).from("ssra_fraud_flags").select("id, severity").eq("resolved", false),
         (supabase as any).from("ssra_homework_submissions").select("id", { count: "exact", head: true }).eq("status", "submitted"),
-        (supabase as any).from("ssra_notifications").select("id", { count: "exact", head: true }).eq("read", false),
+        (supabase as any).from("ssra_notifications").select("id", { count: "exact", head: true }).is("read_at", null),
         supabase.from("ssra_waitlist").select("id", { count: "exact", head: true }).eq("status", "waiting"),
       ]);
 
