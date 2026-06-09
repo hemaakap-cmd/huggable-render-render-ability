@@ -232,6 +232,7 @@ function AppInner() {
                 <Route path="/dashboard/profile"       element={<RequireAuth><MyProfile /></RequireAuth>} />
                 <Route path="/dashboard/certificates" element={<RequireAuth><MyCertificates /></RequireAuth>} />
                 <Route path="/dashboard/homework"     element={<RequireAuth><MyHomework /></RequireAuth>} />
+                <Route path="/dashboard/materials"    element={<RequireAuth><MyMaterials /></RequireAuth>} />
                 <Route path="/dashboard/orders"       element={<RequireAuth><OrderStatus /></RequireAuth>} />
                 <Route path="/dashboard/*"            element={<RequireAuth><StudentDashboard /></RequireAuth>} />
 
