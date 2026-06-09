@@ -13,6 +13,7 @@ import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/courseCatalog";
 import { supabase } from "@/integrations/supabase/client";
 import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
+import heroBiomechanicsMobile from "@/assets/hero-biomechanics-mobile.jpg";
 
 function useReveal() {
   useEffect(() => {
