@@ -491,6 +491,13 @@ export type Database = {
             foreignKeyName: "ssra_coupon_uses_enrollment_id_fkey"
             columns: ["enrollment_id"]
             isOneToOne: false
+            referencedRelation: "ssra_enrollment_report"
+            referencedColumns: ["enrollment_id"]
+          },
+          {
+            foreignKeyName: "ssra_coupon_uses_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
             referencedRelation: "ssra_enrollments"
             referencedColumns: ["id"]
           },
@@ -1457,6 +1464,34 @@ export type Database = {
       }
     }
     Views: {
+      ssra_enrollment_report: {
+        Row: {
+          amount_paid: number | null
+          attendance_pct: number | null
+          batch_date: string | null
+          certificate_status: string | null
+          country: string | null
+          coupon_code: string | null
+          course_id: string | null
+          course_name: string | null
+          enrollment_date: string | null
+          enrollment_id: string | null
+          payment_status: string | null
+          phone_number: string | null
+          report_month: string | null
+          student_email: string | null
+          student_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ssra_revenue_summary: {
         Row: {
           course_id: string | null
