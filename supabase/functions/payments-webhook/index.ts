@@ -325,6 +325,41 @@ async function logRevenueEvent(
   }
 }
 
+// Append to immutable payment_audit_log. Idempotent via UNIQUE(paddle_event_id).
+async function logAuditEvent(
+  eventType: string,
+  eventId: string | undefined,
+  env: PaddleEnv,
+  data: any,
+  severity: 'info' | 'warn' | 'critical' = 'info',
+) {
+  try {
+    const totals = data?.details?.totals ?? data?.payout?.totals ?? {};
+    const amount = Number(totals.total ?? totals.grandTotal ?? data?.amount ?? 0) || 0;
+    const isDebit = eventType.startsWith('adjustment.') || eventType.includes('refund') || eventType.includes('chargeback');
+    const custom = data?.customData ?? {};
+    const { error } = await getSupabase().from('payment_audit_log').insert({
+      environment: env,
+      event_type: `webhook.${eventType}`,
+      paddle_event_id: eventId ?? null,
+      paddle_resource_id: data?.id ?? data?.transactionId ?? data?.subscriptionId ?? null,
+      user_id: custom.userId ?? null,
+      enrollment_id: custom.enrollmentId ?? null,
+      amount_cents: amount ? Math.abs(Math.round(amount)) : null,
+      currency: data?.currencyCode ?? totals.currencyCode ?? 'EUR',
+      direction: amount ? (isDebit ? 'debit' : 'credit') : null,
+      actor: 'webhook',
+      severity,
+      after_state: data ?? {},
+    });
+    if (error && !String(error.message ?? '').includes('duplicate')) {
+      console.error('audit log insert failed:', error);
+    }
+  } catch (e) {
+    console.error('logAuditEvent error (non-blocking):', e);
+  }
+}
+
 async function handleWebhook(req: Request): Promise<{ eventType: string; eventId: string | undefined; env: string; skipped?: boolean }> {
   const { event, env } = await verifyAndDetectEnv(req);
   const eventType = event.eventType as string;
