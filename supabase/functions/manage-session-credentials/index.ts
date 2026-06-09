@@ -118,6 +118,6 @@ Deno.serve(async (req: Request) => {
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     console.error("manage-session-credentials error:", msg);
-    return json({ error: msg }, 500);
+    return json({ error: "Internal server error" }, 500);
   }
 });
