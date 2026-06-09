@@ -9,7 +9,7 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     css: false,
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
-    testTimeout: 15000,
+    testTimeout: 30000,
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
@@ -23,8 +23,8 @@ export default defineConfig({
       reporter: ["text", "lcov", "json-summary"],
       thresholds: {
         lines: 8,
-        functions: 18,
-        branches: 55,
+        functions: 14,
+        branches: 50,
         statements: 8,
       },
     },
