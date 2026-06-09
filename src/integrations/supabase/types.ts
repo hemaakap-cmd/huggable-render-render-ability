@@ -855,33 +855,66 @@ export type Database = {
       }
       ssra_materials: {
         Row: {
+          allow_download: boolean
           batch_id: string | null
           course_id: string | null
           created_at: string
           description: string | null
+          due_date: string | null
+          external_link: string | null
+          file_name: string | null
+          file_size: number | null
           file_url: string | null
           id: string
+          is_visible: boolean
+          material_type: string
+          mime_type: string | null
+          sort_order: number
+          storage_path: string | null
           title: string
+          updated_at: string
           uploaded_by: string | null
         }
         Insert: {
+          allow_download?: boolean
           batch_id?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
+          due_date?: string | null
+          external_link?: string | null
+          file_name?: string | null
+          file_size?: number | null
           file_url?: string | null
           id?: string
+          is_visible?: boolean
+          material_type?: string
+          mime_type?: string | null
+          sort_order?: number
+          storage_path?: string | null
           title: string
+          updated_at?: string
           uploaded_by?: string | null
         }
         Update: {
+          allow_download?: boolean
           batch_id?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
+          due_date?: string | null
+          external_link?: string | null
+          file_name?: string | null
+          file_size?: number | null
           file_url?: string | null
           id?: string
+          is_visible?: boolean
+          material_type?: string
+          mime_type?: string | null
+          sort_order?: number
+          storage_path?: string | null
           title?: string
+          updated_at?: string
           uploaded_by?: string | null
         }
         Relationships: [
