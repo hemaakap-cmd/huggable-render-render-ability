@@ -12,6 +12,7 @@ import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/courseCatalog";
 import { supabase } from "@/integrations/supabase/client";
+import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 
 function useReveal() {
   useEffect(() => {
