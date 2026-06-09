@@ -853,6 +853,41 @@ export type Database = {
           },
         ]
       }
+      ssra_instructor_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          course_id: string
+          id: string
+          instructor_id: string
+          is_active: boolean
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          course_id: string
+          id?: string
+          instructor_id: string
+          is_active?: boolean
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          course_id?: string
+          id?: string
+          instructor_id?: string
+          is_active?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_instructor_assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ssra_materials: {
         Row: {
           allow_download: boolean
