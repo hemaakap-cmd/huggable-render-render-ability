@@ -31,13 +31,15 @@ function useMyCoursesSimple() {
     queryKey: ["instructor-courses-simple", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("ssra_courses")
-        .select("id, title")
+      const { data, error } = await (supabase.from("ssra_instructor_assignments" as never) as any)
+        .select("course_id, ssra_courses(id, title, is_active)")
         .eq("instructor_id", user!.id)
         .eq("is_active", true);
       if (error) throw error;
-      return (data ?? []) as { id: string; title: string }[];
+      return ((data ?? []) as any[])
+        .map((r) => r.ssra_courses)
+        .filter((c: any) => c && c.is_active)
+        .map((c: any) => ({ id: c.id as string, title: c.title as string }));
     },
   });
 }
