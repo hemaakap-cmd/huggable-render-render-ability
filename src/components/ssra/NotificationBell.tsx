@@ -10,36 +10,53 @@ type Notification = {
   type: string;
   title: string;
   body: string | null;
-  action_url: string | null;
-  read: boolean;
+  link: string | null;
+  read_at: string | null;
   created_at: string;
 };
 
+// Notification type styling — keep in sync with the `type` strings written by
+// server-side triggers and edge functions (see ssra_notifications inserts).
 const TYPE_COLOR: Record<string, string> = {
-  session_reminder:      "bg-blue-50 border-blue-100",
-  enrollment_confirmed:  "bg-emerald-50 border-emerald-100",
-  waitlist_notified:     "bg-amber-50 border-amber-100",
-  certificate_issued:    "bg-purple-50 border-purple-100",
-  refund_processed:      "bg-red-50 border-red-100",
+  payment:                "bg-emerald-50 border-emerald-100",
+  enrollment:             "bg-emerald-50 border-emerald-100",
+  cancellation:           "bg-red-50 border-red-100",
+  subscription:           "bg-blue-50 border-blue-100",
+  instructor_assigned:    "bg-blue-50 border-blue-100",
+  instructor_unassigned:  "bg-amber-50 border-amber-100",
+  session_link:           "bg-blue-50 border-blue-100",
+  session_reminder:       "bg-blue-50 border-blue-100",
+  homework_submitted:     "bg-violet-50 border-violet-100",
+  homework_graded:        "bg-violet-50 border-violet-100",
+  certificate_issued:     "bg-purple-50 border-purple-100",
+  waitlist_promoted:      "bg-amber-50 border-amber-100",
+  refund_processed:       "bg-red-50 border-red-100",
 };
 
 const TYPE_DOT: Record<string, string> = {
-  session_reminder:     "bg-blue-500",
-  enrollment_confirmed: "bg-emerald-500",
-  waitlist_notified:    "bg-amber-500",
-  certificate_issued:   "bg-purple-500",
-  refund_processed:     "bg-red-500",
+  payment:                "bg-emerald-500",
+  enrollment:             "bg-emerald-500",
+  cancellation:           "bg-red-500",
+  subscription:           "bg-blue-500",
+  instructor_assigned:    "bg-blue-500",
+  instructor_unassigned:  "bg-amber-500",
+  session_link:           "bg-blue-500",
+  session_reminder:       "bg-blue-500",
+  homework_submitted:     "bg-violet-500",
+  homework_graded:        "bg-violet-500",
+  certificate_issued:     "bg-purple-500",
+  waitlist_promoted:      "bg-amber-500",
+  refund_processed:       "bg-red-500",
 };
 
 function useNotifications() {
   const { user } = useSsraAuth();
   return useQuery({
-    queryKey: ["ssra-notifications"],
+    queryKey: ["ssra-notifications", user?.id],
     enabled: !!user,
-    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await (supabase.from("ssra_notifications" as never) as any)
-        .select("*")
+        .select("id, type, title, body, link, read_at, created_at")
         .order("created_at", { ascending: false })
         .limit(25);
       if (error) throw error;
@@ -52,13 +69,14 @@ function useMarkRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string | "all") => {
+      const now = new Date().toISOString();
       if (id === "all") {
         await (supabase.from("ssra_notifications" as never) as any)
-          .update({ read: true })
-          .eq("read", false);
+          .update({ read_at: now })
+          .is("read_at", null);
       } else {
         await (supabase.from("ssra_notifications" as never) as any)
-          .update({ read: true })
+          .update({ read_at: now })
           .eq("id", id);
       }
     },
@@ -69,10 +87,33 @@ function useMarkRead() {
 export default function NotificationBell({ scheme = "dark" }: { scheme?: "dark" | "light" }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { user } = useSsraAuth();
+  const qc = useQueryClient();
   const { data: notifications = [] } = useNotifications();
   const markRead = useMarkRead();
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read_at).length;
+
+  // Live updates — re-query when the server inserts/updates a notification for me.
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`ssra-notifications-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ssra_notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => qc.invalidateQueries({ queryKey: ["ssra-notifications", user.id] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, qc]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -135,44 +176,47 @@ export default function NotificationBell({ scheme = "dark" }: { scheme?: "dark" 
                 No notifications yet
               </div>
             ) : (
-              notifications.map((n) => (
-                <div
-                  key={n.id}
-                  className={`px-4 py-3 hover:bg-slate-50 transition-colors ${!n.read ? TYPE_COLOR[n.type] ?? "bg-blue-50 border-blue-100" : ""}`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.read ? "bg-slate-200" : TYPE_DOT[n.type] ?? "bg-blue-500"}`} />
-                    <div className="flex-1 min-w-0">
-                      <div className={`text-xs font-semibold ${n.read ? "text-slate-600" : "text-slate-900"} leading-snug`}>
-                        {n.title}
-                      </div>
-                      {n.body && <div className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.body}</div>}
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] text-slate-400">
-                          {new Date(n.created_at).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                        {n.action_url && (
-                          <Link
-                            to={n.action_url}
-                            onClick={() => { handleMarkNotif(n.id); setOpen(false); }}
-                            className="text-[10px] text-[hsl(220,91%,54%)] flex items-center gap-0.5 hover:underline"
-                          >
-                            View <ExternalLink className="w-2.5 h-2.5" />
-                          </Link>
-                        )}
-                        {!n.read && (
-                          <button
-                            onClick={() => handleMarkNotif(n.id)}
-                            className="text-[10px] text-slate-400 hover:text-slate-600 ml-auto"
-                          >
-                            Mark read
-                          </button>
-                        )}
+              notifications.map((n) => {
+                const isUnread = !n.read_at;
+                return (
+                  <div
+                    key={n.id}
+                    className={`px-4 py-3 hover:bg-slate-50 transition-colors ${isUnread ? TYPE_COLOR[n.type] ?? "bg-blue-50 border-blue-100" : ""}`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${!isUnread ? "bg-slate-200" : TYPE_DOT[n.type] ?? "bg-blue-500"}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-xs font-semibold ${!isUnread ? "text-slate-600" : "text-slate-900"} leading-snug`}>
+                          {n.title}
+                        </div>
+                        {n.body && <div className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.body}</div>}
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(n.created_at).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          {n.link && (
+                            <Link
+                              to={n.link}
+                              onClick={() => { handleMarkNotif(n.id); setOpen(false); }}
+                              className="text-[10px] text-[hsl(220,91%,54%)] flex items-center gap-0.5 hover:underline"
+                            >
+                              View <ExternalLink className="w-2.5 h-2.5" />
+                            </Link>
+                          )}
+                          {isUnread && (
+                            <button
+                              onClick={() => handleMarkNotif(n.id)}
+                              className="text-[10px] text-slate-400 hover:text-slate-600 ml-auto"
+                            >
+                              Mark read
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

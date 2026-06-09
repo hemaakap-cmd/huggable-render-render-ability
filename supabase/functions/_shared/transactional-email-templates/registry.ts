@@ -19,6 +19,7 @@ import { template as sessionLinkUpdated } from './session-link-updated.tsx'
 import { template as cancellationConfirmation } from './cancellation-confirmation.tsx'
 import { template as instructorAssignment } from './instructor-assignment.tsx'
 import { template as instructorUnassignment } from './instructor-unassignment.tsx'
+import { template as waitlistSeatOpen } from './waitlist-seat-open.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'test-email': testEmail,
@@ -31,5 +32,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'cancellation-confirmation': cancellationConfirmation,
   'instructor-assignment': instructorAssignment,
   'instructor-unassignment': instructorUnassignment,
+  'waitlist-seat-open': waitlistSeatOpen,
 }
 

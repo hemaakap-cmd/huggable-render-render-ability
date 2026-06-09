@@ -54,6 +54,17 @@ Deno.serve(async (req: Request) => {
       .eq("id", assignmentId);
     if (upErr) return json({ error: upErr.message }, 500);
 
+    // Audit log row for the unassign action.
+    await adminClient.from("ssra_audit_log").insert({
+      actor_id:      user.id,
+      actor_email:   user.email ?? null,
+      actor_role:    "admin",
+      action:        "instructor_unassigned",
+      resource_type: "ssra_instructor_assignment",
+      resource_id:   assignmentId,
+      details:       { instructor_id: instructorId, course_id: courseId, notify },
+    });
+
     if (!notify) return json({ unassigned: true, notified: 0, emailsSent: 0 });
 
     // Load instructor + course
