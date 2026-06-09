@@ -121,13 +121,14 @@ export default function AdminInstructors() {
   const { data: courses = [] }                = useCoursesList();
   const [search, setSearch]                   = useState("");
   const [selectedInstructor, setSelectedInstructor] = useState("");
-  const [selectedCourse, setSelectedCourse]         = useState("");
+  const [selectedCourseIds, setSelectedCourseIds]   = useState<string[]>([]);
+  const [notifyStudents, setNotifyStudents]         = useState(true);
   const { data: candidates = [] }             = useStudentsList(search);
 
-  const promote   = usePromoteToInstructor();
-  const demote    = useDemoteToStudent();
-  const assign    = useAssignCourse();
-  const unassign  = useUnassignCourse();
+  const promote      = usePromoteToInstructor();
+  const demote       = useDemoteToStudent();
+  const assignNotify = useAssignAndNotify();
+  const unassign     = useUnassignCourse();
 
   const handlePromote = async (userId: string, name: string) => {
     await promote.mutateAsync(userId);
@@ -139,22 +140,51 @@ export default function AdminInstructors() {
     toast({ title: `${name} moved back to Student` });
   };
 
-  const handleAssign = async () => {
-    if (!selectedInstructor || !selectedCourse) return;
-    await assign.mutateAsync({ instructorId: selectedInstructor, courseId: selectedCourse });
-    toast({ title: "Course assigned to instructor" });
-    setSelectedCourse("");
+  const toggleCourse = (id: string) => {
+    setSelectedCourseIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
+  const handleAssignAndNotify = async () => {
+    if (!selectedInstructor || selectedCourseIds.length === 0) return;
+    try {
+      const res = await assignNotify.mutateAsync({
+        instructorId: selectedInstructor,
+        courseIds: selectedCourseIds,
+        notify: notifyStudents,
+      });
+      toast({
+        title: `Assigned to ${res.assigned} course${res.assigned === 1 ? "" : "s"}`,
+        description: notifyStudents
+          ? `Notified ${res.notified} student${res.notified === 1 ? "" : "s"} (${res.emailsSent} email${res.emailsSent === 1 ? "" : "s"} sent).`
+          : "Students were not notified.",
+      });
+      setSelectedCourseIds([]);
+    } catch (e: any) {
+      toast({ title: "Assignment failed", description: e.message, variant: "destructive" });
+    }
   };
 
   const instructorAssignments = (instructorId: string) =>
     (assignments as any[]).filter((a: any) => a.instructor_id === instructorId);
+
+  // courses currently assigned (active) to the selected instructor
+  const alreadyAssignedIds = useMemo(() => {
+    if (!selectedInstructor) return new Set<string>();
+    return new Set(
+      (assignments as any[])
+        .filter((a: any) => a.instructor_id === selectedInstructor)
+        .map((a: any) => a.course_id)
+    );
+  }, [assignments, selectedInstructor]);
 
   return (
     <AdminLayout>
       <div className="max-w-5xl mx-auto space-y-8">
         <div>
           <h1 className="font-display text-2xl font-bold text-slate-900">Instructor Management</h1>
-          <p className="text-slate-500 text-sm mt-1">Promote students to instructors and assign them to courses.</p>
+          <p className="text-slate-500 text-sm mt-1">Promote students to instructors, assign courses, and notify the enrolled students.</p>
         </div>
 
         {/* Promote a user */}
@@ -196,41 +226,120 @@ export default function AdminInstructors() {
           )}
         </div>
 
-        {/* Assign courses */}
+        {/* Assign courses + notify */}
         {instructors.length > 0 && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-blue-600" /> Assign Course to Instructor
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5">
+            <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-blue-600" /> Assign Courses &amp; Notify Students
             </h2>
-            <div className="flex flex-wrap gap-3">
+
+            <div>
+              <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Instructor</label>
               <select
                 value={selectedInstructor}
-                onChange={(e) => setSelectedInstructor(e.target.value)}
-                className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => { setSelectedInstructor(e.target.value); setSelectedCourseIds([]); }}
+                className="w-full max-w-sm text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select instructor</option>
+                <option value="">Select instructor…</option>
                 {(instructors as any[]).map((i: any) => (
                   <option key={i.id} value={i.id}>{i.full_name ?? i.email}</option>
                 ))}
               </select>
-              <select
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
-                className="flex-1 min-w-48 text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select course</option>
-                {(courses as any[]).map((c: any) => (
-                  <option key={c.id} value={c.id}>{c.title}</option>
-                ))}
-              </select>
-              <button
-                onClick={handleAssign}
-                disabled={!selectedInstructor || !selectedCourse || assign.isPending}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] disabled:opacity-50"
-              >
-                {assign.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Assign
-              </button>
             </div>
+
+            {selectedInstructor && (
+              <>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-semibold text-slate-600">
+                      Courses to assign ({selectedCourseIds.length} selected)
+                    </label>
+                    <div className="flex gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCourseIds(
+                          (courses as any[])
+                            .filter((c: any) => !alreadyAssignedIds.has(c.id))
+                            .map((c: any) => c.id)
+                        )}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Select all unassigned
+                      </button>
+                      <span className="text-slate-200">·</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCourseIds([])}
+                        className="text-slate-500 hover:underline"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto p-1">
+                    {(courses as any[]).map((c: any) => {
+                      const isAssigned = alreadyAssignedIds.has(c.id);
+                      const isChecked  = selectedCourseIds.includes(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-colors ${
+                            isChecked
+                              ? "border-blue-300 bg-blue-50"
+                              : isAssigned
+                                ? "border-emerald-200 bg-emerald-50/40"
+                                : "border-slate-200 bg-white hover:bg-slate-50"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleCourse(c.id)}
+                            className="mt-0.5 accent-blue-600"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-slate-900 truncate">{c.title}</div>
+                            {isAssigned && (
+                              <div className="text-[11px] text-emerald-700 mt-0.5">Already assigned</div>
+                            )}
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notifyStudents}
+                    onChange={(e) => setNotifyStudents(e.target.checked)}
+                    className="mt-0.5 accent-blue-600"
+                  />
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                      <Bell className="w-3.5 h-3.5 text-blue-600" /> Notify enrolled students
+                    </div>
+                    <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                      <Mail className="w-3 h-3" /> Sends an in-app notification + branded email to every active student in the selected courses.
+                    </div>
+                  </div>
+                </label>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAssignAndNotify}
+                    disabled={selectedCourseIds.length === 0 || assignNotify.isPending}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,46%)] disabled:opacity-50"
+                  >
+                    {assignNotify.isPending
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : <Send className="w-4 h-4" />}
+                    {notifyStudents ? "Assign & Notify Students" : "Assign Courses"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
