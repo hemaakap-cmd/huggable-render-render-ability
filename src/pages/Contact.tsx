@@ -123,63 +123,6 @@ export default function Contact() {
               </Link>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="md:col-span-3 reveal space-y-5">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="Your name"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@email.com"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="subject">Subject</Label>
-                <Input
-                  id="subject"
-                  placeholder="e.g. Question about Medical German course"
-                  value={form.subject}
-                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  placeholder="Write your question or message here…"
-                  rows={5}
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  required
-                />
-              </div>
-
-              <Button
-                type="submit"
-                disabled={sending}
-                className="btn-luxury-primary w-full py-3 rounded-xl gap-2 text-sm"
-              >
-                {sending ? t("contact.form.sending") : <><Send className="w-4 h-4" />{t("contact.form.send")}</>}
-              </Button>
-            </form>
           </div>
         </div>
       </section>
