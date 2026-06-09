@@ -23,13 +23,20 @@ const NAV = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { profile, loading } = useSsraAuth();
+  const { profile, loading, isInstructor, isAdmin } = useSsraAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const initial = (profile?.full_name ?? profile?.email ?? "S")[0].toUpperCase();
 
+  // Instructors and admins have their own portals — send them there
+  useEffect(() => {
+    if (loading) return;
+    if (isInstructor) navigate("/instructor", { replace: true });
+    else if (isAdmin) navigate("/ssra-admin", { replace: true });
+  }, [loading, isInstructor, isAdmin, navigate]);
+
   // Force students with incomplete profiles to complete their data
-  const needsCompletion = !loading && profile && (!profile.full_name || profile.full_name.trim() === "");
+  const needsCompletion = !loading && profile && !isInstructor && !isAdmin && (!profile.full_name || profile.full_name.trim() === "");
   const onProfilePage = location.pathname === "/dashboard/profile";
 
   useEffect(() => {
