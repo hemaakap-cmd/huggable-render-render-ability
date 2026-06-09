@@ -84,8 +84,11 @@ export default function MySubscription() {
                 <Crown className="w-5 h-5 text-[hsl(43,96%,50%)]" />
                 <span className="text-xs font-semibold text-white/50 uppercase tracking-wide">Active Plan</span>
               </div>
-              <div className="font-display text-2xl font-bold mb-1">{(subscription as any).ssra_courses?.title ?? "Medical German"}</div>
-              <div className="text-white/50 text-sm mb-6">Monthly subscription · €{(subscription as any).ssra_courses?.price_eur ?? 29}/month</div>
+              <div className="font-display text-2xl font-bold mb-1">{(subscription as any).ssra_courses?.title ?? "Your course"}</div>
+              <div className="text-white/50 text-sm mb-6">
+                Monthly subscription
+                {(subscription as any).ssra_courses?.price_eur != null && <> · €{Number((subscription as any).ssra_courses.price_eur)}/month</>}
+              </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-white/8 rounded-xl p-4">
