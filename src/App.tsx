@@ -13,7 +13,7 @@ import { isProfileComplete } from "./lib/profileCompletion";
 import { lazyWithRetry as lazy } from "./lib/lazyWithRetry";
 import Index from "./pages/Index";
 import WhatsAppButton from "./components/ssra/WhatsAppButton";
-import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
+
 
 
 /* ── Public ── */
@@ -195,7 +195,7 @@ function AppInner() {
 
   return (
     <>
-      <PaymentTestModeBanner />
+      
       <Suspense fallback={<Spinner />}>
         <Routes>
                 {/* Public marketing */}
