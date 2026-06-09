@@ -17,6 +17,7 @@ import { template as verificationRejected } from './verification-rejected.tsx'
 import { template as adminPurchaseNotification } from './admin-purchase-notification.tsx'
 import { template as sessionLinkUpdated } from './session-link-updated.tsx'
 import { template as cancellationConfirmation } from './cancellation-confirmation.tsx'
+import { template as instructorAssignment } from './instructor-assignment.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'test-email': testEmail,
