@@ -120,9 +120,11 @@ export default function Index() {
       {/* ══ HERO ══ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image — sports biomechanics */}
-        <div
-          className="absolute inset-0 bg-cover bg-[center_25%] md:bg-center bg-no-repeat md:scale-105"
-          style={{ backgroundImage: `url(${heroBiomechanics})` }}
+        <img
+          src={heroBiomechanics}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-[center_25%] md:object-center md:scale-105"
         />
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-slate-950/75" />
