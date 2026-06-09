@@ -134,6 +134,200 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_audit_log: {
+        Row: {
+          actor: string
+          actor_id: string | null
+          after_state: Json | null
+          amount_cents: number | null
+          before_state: Json | null
+          created_at: string
+          currency: string | null
+          direction: string | null
+          enrollment_id: string | null
+          environment: string
+          event_type: string
+          id: string
+          notes: string | null
+          occurred_at: string
+          paddle_event_id: string | null
+          paddle_resource_id: string | null
+          severity: string
+          user_id: string | null
+        }
+        Insert: {
+          actor?: string
+          actor_id?: string | null
+          after_state?: Json | null
+          amount_cents?: number | null
+          before_state?: Json | null
+          created_at?: string
+          currency?: string | null
+          direction?: string | null
+          enrollment_id?: string | null
+          environment: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          paddle_event_id?: string | null
+          paddle_resource_id?: string | null
+          severity?: string
+          user_id?: string | null
+        }
+        Update: {
+          actor?: string
+          actor_id?: string | null
+          after_state?: Json | null
+          amount_cents?: number | null
+          before_state?: Json | null
+          created_at?: string
+          currency?: string | null
+          direction?: string | null
+          enrollment_id?: string | null
+          environment?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          paddle_event_id?: string | null
+          paddle_resource_id?: string | null
+          severity?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payment_discrepancies: {
+        Row: {
+          actual: Json | null
+          created_at: string
+          db_id: string | null
+          description: string | null
+          environment: string
+          expected: Json | null
+          id: string
+          paddle_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          run_id: string | null
+          severity: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          actual?: Json | null
+          created_at?: string
+          db_id?: string | null
+          description?: string | null
+          environment: string
+          expected?: Json | null
+          id?: string
+          paddle_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          run_id?: string | null
+          severity?: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          actual?: Json | null
+          created_at?: string
+          db_id?: string | null
+          description?: string | null
+          environment?: string
+          expected?: Json | null
+          id?: string
+          paddle_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          run_id?: string | null
+          severity?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_discrepancies_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "payment_reconciliation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_reconciliation_runs: {
+        Row: {
+          amount_mismatch_count: number | null
+          created_at: string
+          db_event_count: number | null
+          db_total_cents: number | null
+          drift_cents: number | null
+          environment: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          matched_count: number | null
+          missing_in_db_count: number | null
+          missing_in_paddle_count: number | null
+          paddle_total_cents: number | null
+          paddle_txn_count: number | null
+          started_at: string
+          status: string
+          summary: Json | null
+          triggered_by: string
+          window_from: string
+          window_to: string
+        }
+        Insert: {
+          amount_mismatch_count?: number | null
+          created_at?: string
+          db_event_count?: number | null
+          db_total_cents?: number | null
+          drift_cents?: number | null
+          environment: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          matched_count?: number | null
+          missing_in_db_count?: number | null
+          missing_in_paddle_count?: number | null
+          paddle_total_cents?: number | null
+          paddle_txn_count?: number | null
+          started_at?: string
+          status?: string
+          summary?: Json | null
+          triggered_by?: string
+          window_from: string
+          window_to: string
+        }
+        Update: {
+          amount_mismatch_count?: number | null
+          created_at?: string
+          db_event_count?: number | null
+          db_total_cents?: number | null
+          drift_cents?: number | null
+          environment?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          matched_count?: number | null
+          missing_in_db_count?: number | null
+          missing_in_paddle_count?: number | null
+          paddle_total_cents?: number | null
+          paddle_txn_count?: number | null
+          started_at?: string
+          status?: string
+          summary?: Json | null
+          triggered_by?: string
+          window_from?: string
+          window_to?: string
+        }
+        Relationships: []
+      }
       revenue_events: {
         Row: {
           amount_cents: number
@@ -1464,6 +1658,16 @@ export type Database = {
       }
     }
     Views: {
+      data_integrity_checks: {
+        Row: {
+          check_type: string | null
+          details: Json | null
+          detected_for: string | null
+          resource_id: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       ssra_enrollment_report: {
         Row: {
           amount_paid: number | null
@@ -1535,6 +1739,7 @@ export type Database = {
       }
       generate_ssra_cert_code: { Args: never; Returns: string }
       generate_ssra_order_number: { Args: never; Returns: string }
+      get_audit_health: { Args: { _env?: string }; Returns: Json }
       get_live_visitor_stats: {
         Args: { _window_minutes?: number }
         Returns: Json
@@ -1578,6 +1783,10 @@ export type Database = {
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
       is_ssra_instructor: { Args: { _uid: string }; Returns: boolean }
       is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }
+      mark_discrepancy_resolved: {
+        Args: { _id: string; _notes: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string

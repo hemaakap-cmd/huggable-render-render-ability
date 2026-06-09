@@ -6,7 +6,7 @@ import {
   ClipboardList, TrendingUp, Crown, UserCog, ChevronDown, Activity,
   GraduationCap, GitBranch, Wand2, Radio, FileCheck, Tag, ShieldAlert,
   FileSpreadsheet, GraduationCap as InstructorIcon, Layers, BookCheck,
-  AlertOctagon, HeartPulse, BarChart3, Award, RotateCcw, Zap, RefreshCw,
+  AlertOctagon, HeartPulse, BarChart3, Award, RotateCcw, Zap, RefreshCw, ShieldCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import BackButton from "@/components/ssra/BackButton";
@@ -43,6 +43,7 @@ const SUPER_NAV = [
   { icon: UserCog,    label: "Manage Admins",     href: "/ssra-admin/admins" },
   { icon: GitBranch,  label: "Sync Status",        href: "/ssra-admin/sync-status" },
   { icon: RefreshCw,  label: "Reconciliation",     href: "/ssra-admin/reconciliation" },
+  { icon: ShieldCheck, label: "Financial Audit",   href: "/ssra-admin/financial-audit" },
   { icon: Wand2,      label: "Manual Grant",      href: "/ssra-admin/manual-grant" },
   { icon: BarChart3,  label: "Student Reports",   href: "/ssra-admin/student-reports" },
 ];

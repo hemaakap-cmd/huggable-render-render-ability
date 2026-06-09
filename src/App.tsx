@@ -81,6 +81,7 @@ const AdminOperations      = lazy(() => import("./pages/ssra-admin/AdminOperatio
 const AdminCertificates    = lazy(() => import("./pages/ssra-admin/AdminCertificates"));
 const AdminCancellations   = lazy(() => import("./pages/ssra-admin/AdminCancellations"));
 const AdminReconciliation  = lazy(() => import("./pages/ssra-admin/AdminReconciliation"));
+const AdminFinancialAudit  = lazy(() => import("./pages/ssra-admin/AdminFinancialAudit"));
 
 /* ── Instructor dashboard ── */
 const InstructorDashboard  = lazy(() => import("./pages/instructor/InstructorDashboard"));
@@ -280,6 +281,7 @@ function AppInner() {
                 <Route path="/ssra-admin/view-as/:userId"  element={<RequireSuperAdmin><SuperAdminViewAs /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/sync-status"         element={<RequireSuperAdmin><SuperAdminSyncStatus /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/reconciliation"      element={<RequireSuperAdmin><AdminReconciliation /></RequireSuperAdmin>} />
+                <Route path="/ssra-admin/financial-audit"     element={<RequireSuperAdmin><AdminFinancialAudit /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/manual-grant"     element={<RequireSuperAdmin><SuperAdminManualGrant /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/student-reports"  element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
                 <Route path="/ssra-super-admin/student-reports" element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
