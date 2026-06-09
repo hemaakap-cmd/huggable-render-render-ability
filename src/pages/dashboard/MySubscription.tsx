@@ -84,8 +84,11 @@ export default function MySubscription() {
                 <Crown className="w-5 h-5 text-[hsl(43,96%,50%)]" />
                 <span className="text-xs font-semibold text-white/50 uppercase tracking-wide">Active Plan</span>
               </div>
-              <div className="font-display text-2xl font-bold mb-1">{(subscription as any).ssra_courses?.title ?? "Medical German"}</div>
-              <div className="text-white/50 text-sm mb-6">Monthly subscription · €{(subscription as any).ssra_courses?.price_eur ?? 29}/month</div>
+              <div className="font-display text-2xl font-bold mb-1">{(subscription as any).ssra_courses?.title ?? "Your course"}</div>
+              <div className="text-white/50 text-sm mb-6">
+                Monthly subscription
+                {(subscription as any).ssra_courses?.price_eur != null && <> · €{Number((subscription as any).ssra_courses.price_eur)}/month</>}
+              </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-white/8 rounded-xl p-4">
@@ -144,15 +147,15 @@ export default function MySubscription() {
             </div>
           </>
         ) : (
-          /* No active subscription — direct enrolment, no verification gate */
+          /* No active subscription — direct to courses catalog */
           <div className="bg-white border border-slate-200 rounded-2xl p-7 text-center">
             <Crown className="w-10 h-10 text-[hsl(43,96%,50%)] mx-auto mb-4" />
-            <div className="font-display text-xl font-bold text-slate-900 mb-2">Medical German</div>
-            <div className="text-slate-500 text-sm mb-1">Monthly subscription · <strong>€29/month</strong></div>
-            <div className="text-slate-400 text-xs mb-6">Cancel anytime at paddle.net. 14-day money-back guarantee.</div>
-            <Link to="/checkout?courseId=medical-german">
+            <div className="font-display text-xl font-bold text-slate-900 mb-2">No active subscription</div>
+            <div className="text-slate-500 text-sm mb-1">Browse our courses and subscribe to start learning.</div>
+            <div className="text-slate-400 text-xs mb-6">Cancel anytime. 14-day money-back guarantee.</div>
+            <Link to="/courses">
               <button className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors">
-                <Crown className="w-4 h-4" /> Subscribe Now
+                <Crown className="w-4 h-4" /> Browse Courses
                 <ArrowRight className="w-4 h-4" />
               </button>
             </Link>
