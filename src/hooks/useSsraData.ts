@@ -867,16 +867,27 @@ export function useAdminStats() {
   return useQuery({
     queryKey: ["ssra-admin-stats"],
     queryFn: async () => {
-      const [students, enrollments, verifications, subscriptions] = await Promise.all([
+      const [students, enrollments, verifications, subscriptions, ledger] = await Promise.all([
         supabase.from("ssra_profiles").select("id", { count: "exact", head: true }).eq("role", "student"),
         supabase.from("ssra_enrollments").select("amount_eur").eq("status", "active"),
         supabase.from("ssra_verifications").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("ssra_subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.rpc("get_revenue_summary", {
+          _from: "2020-01-01T00:00:00Z",
+          _to:   new Date(Date.now() + 86_400_000).toISOString(),
+          _env:  "live",
+        } as any),
       ]);
-      const revenue = (enrollments.data ?? []).reduce((s, e) => s + (e.amount_eur ?? 0), 0);
+      // Source of truth: real money from the payment ledger (gross − refunds − chargebacks).
+      const row = Array.isArray(ledger.data) ? (ledger.data as any[])[0] : (ledger.data as any);
+      const ledgerRevenue = row
+        ? (Number(row.gross_cents ?? 0) - Number(row.refund_cents ?? 0) - Number(row.chargeback_cents ?? 0)) / 100
+        : null;
+      // Fallback (non-admin / RPC error): sum of active enrollments.
+      const enrollmentRevenue = (enrollments.data ?? []).reduce((s, e) => s + (e.amount_eur ?? 0), 0);
       return {
         totalStudents:       students.count ?? 0,
-        totalRevenue:        revenue,
+        totalRevenue:        ledgerRevenue ?? enrollmentRevenue,
         pendingVerifications:verifications.count ?? 0,
         activeSubscriptions: subscriptions.count ?? 0,
       };
