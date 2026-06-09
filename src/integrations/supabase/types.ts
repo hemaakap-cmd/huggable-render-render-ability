@@ -1499,6 +1499,10 @@ export type Database = {
         Args: { _coupon_id: string }
         Returns: undefined
       }
+      is_instructor_for_course: {
+        Args: { _course_id: string; _uid: string }
+        Returns: boolean
+      }
       is_ssra_admin: { Args: { _uid: string }; Returns: boolean }
       is_ssra_instructor: { Args: { _uid: string }; Returns: boolean }
       is_ssra_super_admin: { Args: { _uid: string }; Returns: boolean }
