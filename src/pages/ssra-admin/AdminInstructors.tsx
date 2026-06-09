@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Plus, Trash2, Loader2, Search, BookOpen, UserCheck, Send, Mail, Bell } from "lucide-react";
+import { Users, Trash2, Loader2, Search, BookOpen, UserCheck, Send, Mail, Bell } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
