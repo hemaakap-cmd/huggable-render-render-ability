@@ -12,6 +12,7 @@ import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/courseCatalog";
 import { supabase } from "@/integrations/supabase/client";
+import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 
 function useReveal() {
   useEffect(() => {
@@ -117,7 +118,17 @@ export default function Index() {
       <Header />
 
       {/* ══ HERO ══ */}
-      <section className="relative min-h-screen flex items-center bg-hero overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Background image — sports biomechanics */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+          style={{ backgroundImage: `url(${heroBiomechanics})` }}
+        />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-slate-950/75" />
+        {/* Hero gradient overlay for brand consistency */}
+        <div className="absolute inset-0 bg-hero opacity-60" />
+
         {/* Ambient glows */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-blue-600/20 blur-[100px]" />
