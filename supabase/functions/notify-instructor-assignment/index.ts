@@ -63,6 +63,17 @@ Deno.serve(async (req: Request) => {
       .upsert(rows, { onConflict: "instructor_id,course_id" });
     if (upErr) return json({ error: upErr.message }, 500);
 
+    // Audit log row for the assignment action.
+    await adminClient.from("ssra_audit_log").insert({
+      actor_id:      user.id,
+      actor_email:   user.email ?? null,
+      actor_role:    "admin",
+      action:        "instructor_assigned",
+      resource_type: "ssra_instructor",
+      resource_id:   instructorId,
+      details:       { course_ids: courseIds, notify },
+    });
+
     if (!notify) {
       return json({ assigned: rows.length, notified: 0, emailsSent: 0 });
     }
