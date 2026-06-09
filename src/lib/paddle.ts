@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-
 const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
 
 declare global {
@@ -109,6 +107,7 @@ export function coursePriceId(courseId: string): string {
 }
 
 export async function getPaddlePriceId(externalPriceId: string): Promise<string> {
+  const { supabase } = await import("@/integrations/supabase/client");
   const environment = getPaddleEnvironment();
   const { data, error } = await supabase.functions.invoke("get-paddle-price", {
     body: { priceId: externalPriceId, environment },
