@@ -37,12 +37,13 @@ const TermsConditions = lazy(() => import("./pages/legal/TermsConditions"));
 const RefundCancellation = lazy(() => import("./pages/legal/RefundCancellation"));
 
 /* ── Student dashboard ── */
-const StudentDashboard  = lazy(() => import("./pages/dashboard/StudentDashboard"));
-const MyCourses         = lazy(() => import("./pages/dashboard/MyCourses"));
-const MySessions        = lazy(() => import("./pages/dashboard/MySessions"));
-const MySubscription    = lazy(() => import("./pages/dashboard/MySubscription"));
-const MyProfile         = lazy(() => import("./pages/dashboard/MyProfile"));
-const MyCertificates    = lazy(() => import("./pages/dashboard/MyCertificates"));
+const StudentDashboard         = lazy(() => import("./pages/dashboard/StudentDashboard"));
+const MyCourses                = lazy(() => import("./pages/dashboard/MyCourses"));
+const MySessions               = lazy(() => import("./pages/dashboard/MySessions"));
+const MySubscription           = lazy(() => import("./pages/dashboard/MySubscription"));
+const MyProfile                = lazy(() => import("./pages/dashboard/MyProfile"));
+const MyCertificates           = lazy(() => import("./pages/dashboard/MyCertificates"));
+const NotificationPreferences  = lazy(() => import("./pages/dashboard/NotificationPreferences"));
 
 /* ── Verify ── */
 const VerifyCertificate   = lazy(() => import("./pages/VerifyCertificate"));
@@ -79,6 +80,7 @@ const AdminSystemHealth    = lazy(() => import("./pages/ssra-admin/AdminSystemHe
 const AdminOperations      = lazy(() => import("./pages/ssra-admin/AdminOperations"));
 const AdminCertificates    = lazy(() => import("./pages/ssra-admin/AdminCertificates"));
 const AdminCancellations   = lazy(() => import("./pages/ssra-admin/AdminCancellations"));
+const AdminReconciliation  = lazy(() => import("./pages/ssra-admin/AdminReconciliation"));
 
 /* ── Instructor dashboard ── */
 const InstructorDashboard  = lazy(() => import("./pages/instructor/InstructorDashboard"));
@@ -234,6 +236,7 @@ function AppInner() {
                 <Route path="/dashboard/homework"     element={<RequireAuth><MyHomework /></RequireAuth>} />
                 <Route path="/dashboard/materials"    element={<RequireAuth><MyMaterials /></RequireAuth>} />
                 <Route path="/dashboard/orders"       element={<RequireAuth><OrderStatus /></RequireAuth>} />
+                <Route path="/dashboard/preferences"  element={<RequireAuth><NotificationPreferences /></RequireAuth>} />
                 <Route path="/dashboard/*"            element={<RequireAuth><StudentDashboard /></RequireAuth>} />
 
                 {/* Admin — admin role required */}
@@ -275,7 +278,8 @@ function AppInner() {
                 <Route path="/ssra-admin/admins"            element={<RequireSuperAdmin><SuperAdminAdmins /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/activity"          element={<RequireSuperAdmin><SuperAdminActivity /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/view-as/:userId"  element={<RequireSuperAdmin><SuperAdminViewAs /></RequireSuperAdmin>} />
-                <Route path="/ssra-admin/sync-status"      element={<RequireSuperAdmin><SuperAdminSyncStatus /></RequireSuperAdmin>} />
+                <Route path="/ssra-admin/sync-status"         element={<RequireSuperAdmin><SuperAdminSyncStatus /></RequireSuperAdmin>} />
+                <Route path="/ssra-admin/reconciliation"      element={<RequireSuperAdmin><AdminReconciliation /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/manual-grant"     element={<RequireSuperAdmin><SuperAdminManualGrant /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/student-reports"  element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
                 <Route path="/ssra-super-admin/student-reports" element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
