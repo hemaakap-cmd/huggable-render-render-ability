@@ -1398,6 +1398,39 @@ export type Database = {
           },
         ]
       }
+      ssra_webhook_events: {
+        Row: {
+          created_at: string
+          environment: string
+          error_message: string | null
+          event_id: string | null
+          event_type: string
+          id: string
+          payload: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          environment: string
+          error_message?: string | null
+          event_id?: string | null
+          event_type: string
+          id?: string
+          payload?: Json | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          error_message?: string | null
+          event_id?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -1522,6 +1555,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      recompute_course_enrolled_count: {
+        Args: { _course_id: string }
+        Returns: number
       }
       report_profile_charset_violations: {
         Args: never
