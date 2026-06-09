@@ -121,7 +121,7 @@ export default function Index() {
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image — sports biomechanics */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+          className="absolute inset-0 bg-cover bg-[center_25%] md:bg-center bg-no-repeat md:scale-105"
           style={{ backgroundImage: `url(${heroBiomechanics})` }}
         />
         {/* Dark overlay for readability */}
