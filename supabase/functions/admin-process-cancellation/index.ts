@@ -167,6 +167,85 @@ Deno.serve(async (req) => {
       link: '/dashboard/courses',
     });
 
+    // Audit log row for the cancellation action.
+    await admin.from('ssra_audit_log').insert({
+      actor_id:      user.id,
+      actor_email:   user.email ?? null,
+      actor_role:    profile.role,
+      action:        refundIssued ? 'enrollment_cancelled_with_refund' : 'enrollment_cancelled',
+      resource_type: 'ssra_enrollment',
+      resource_id:   cancelReq.enrollment_id,
+      details: {
+        request_id: requestId,
+        user_id: cancelReq.user_id,
+        course_id: cancelReq.course_id,
+        refund_issued: refundIssued,
+        paddle_adjustment_id: paddleAdjustmentId,
+        refund_error: refundError,
+      },
+    });
+
+    // Waitlist promotion: the cancelled seat must not vanish silently.
+    // Notify the next person waiting on this course so they can act on it.
+    try {
+      const { data: nextWaiter } = await admin
+        .from('ssra_waitlist')
+        .select('id, user_id, position')
+        .eq('course_id', cancelReq.course_id)
+        .eq('status', 'waiting')
+        .order('position', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (nextWaiter) {
+        const courseTitle = enrollment?.course_title_snapshot ?? cancelReq.course_id;
+        await admin.from('ssra_waitlist').update({
+          status: 'notified',
+          notified_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+        }).eq('id', nextWaiter.id);
+
+        await admin.from('ssra_notifications').insert({
+          user_id: nextWaiter.user_id,
+          type: 'waitlist_promoted',
+          title: 'A seat just opened up!',
+          body: `A seat is available in ${courseTitle}. You have 48 hours to enroll before we offer it to the next person on the waitlist.`,
+          link: `/courses/${cancelReq.course_id}`,
+        });
+
+        // Best-effort branded email so the user sees it even when off-site.
+        try {
+          const { data: waiterProfile } = await admin
+            .from('ssra_profiles')
+            .select('email, full_name')
+            .eq('id', nextWaiter.user_id)
+            .maybeSingle();
+          if (waiterProfile?.email) {
+            const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+            await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${svc}` },
+              body: JSON.stringify({
+                templateName: 'waitlist-seat-open',
+                recipientEmail: waiterProfile.email,
+                idempotencyKey: `waitlist-open-${nextWaiter.id}`,
+                templateData: {
+                  studentName: waiterProfile.full_name ?? 'there',
+                  courseName: courseTitle,
+                  enrollUrl: `https://ssracourses.com/courses/${cancelReq.course_id}`,
+                  expiresInHours: 48,
+                },
+              }),
+            });
+          }
+        } catch (e) {
+          console.error('waitlist email failed (non-blocking):', e);
+        }
+      }
+    } catch (e) {
+      console.error('waitlist promotion failed (non-blocking):', e);
+    }
+
     // Send branded cancellation confirmation email to the student (best-effort).
     try {
       const recipient = enrollment?.student_email_snapshot;
