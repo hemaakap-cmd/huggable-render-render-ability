@@ -401,6 +401,8 @@ async function handleWebhook(req: Request): Promise<{ eventType: string; eventId
     default:
       break;
   }
+  // Always capture into the audit ledger (idempotent on paddle_event_id).
+  await logAuditEvent(eventType, eventId, env, event.data);
   return { eventType, eventId, env };
 }
 
