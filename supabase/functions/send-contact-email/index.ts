@@ -104,44 +104,11 @@ const handler = async (req: Request): Promise<Response> => {
     const result = await emailResponse.json();
     console.log("Contact form email sent successfully:", result);
 
-    // 2) Send confirmation email to customer
-    const confirmationContent = `
-      ${emailHeading("Vielen Dank für Ihre Nachricht!")}
-      ${emailParagraph(`Hallo ${safeName},`)}
-      ${emailParagraph("wir haben Ihre Nachricht erhalten und werden uns so schnell wie möglich bei Ihnen melden.")}
-      ${emailSubheading("Ihre Nachricht")}
-      ${emailDetailTable(
-        emailDetailRow("Betreff", safeSubject)
-      )}
-      <div style="background:#faf8f5;border-radius:8px;padding:14px 16px;margin:12px 0;">
-        <p style="margin:0;font-size:13px;color:#2d2926;line-height:1.65;white-space:pre-wrap;">${safeMessage}</p>
-      </div>
-      ${emailParagraph("Falls Sie weitere Fragen haben, können Sie direkt auf diese E-Mail antworten.")}
-      ${emailSignature()}
-    `;
-
-    try {
-      const confirmResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_API_KEY}` },
-        body: JSON.stringify({
-          from: "SSRA Academy <noreply@ssracourses.com>",
-          to: [data.email.trim()],
-          reply_to: "info@ssracourses.com",
-          subject: "Wir haben Ihre Nachricht erhalten – SSRA Academy",
-          html: emailLayout(confirmationContent),
-        }),
-      });
-
-      if (!confirmResponse.ok) {
-        const confirmError = await confirmResponse.text();
-        console.error("Confirmation email failed (non-blocking):", confirmError);
-      } else {
-        console.log("Confirmation email sent to:", data.email.trim());
-      }
-    } catch (confirmErr) {
-      console.error("Confirmation email error (non-blocking):", confirmErr);
-    }
+    // NOTE: We intentionally do NOT send a confirmation email to the
+    // caller-supplied address. This endpoint is unauthenticated, and sending
+    // branded mail to any attacker-supplied address would enable phishing /
+    // spam abuse using our verified sending domain. The internal notification
+    // above is safe because it always goes to a fixed internal mailbox.
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
