@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, CreditCard,
-  User, LogOut, Menu, X, ChevronRight, Video, AlertCircle, Award, BookCheck, Receipt,
+  User, LogOut, Menu, X, ChevronRight, Video, AlertCircle, Award, BookCheck, Receipt, FolderOpen,
 } from "lucide-react";
 import { ssraSignOut, useSsraAuth } from "@/hooks/useSsraAuth";
 import SsraLogo from "@/components/ssra/SsraLogo";
@@ -13,6 +13,7 @@ const NAV = [
   { icon: BookOpen,        label: "My Courses",     href: "/dashboard/courses" },
   { icon: Receipt,         label: "Order Status",   href: "/dashboard/orders" },
   { icon: Video,           label: "Live Sessions",  href: "/dashboard/sessions" },
+  { icon: FolderOpen,      label: "Materials",      href: "/dashboard/materials" },
   { icon: CreditCard,      label: "Subscription",   href: "/dashboard/subscription" },
   { icon: Award,           label: "Certificates",   href: "/dashboard/certificates" },
   { icon: BookCheck,       label: "Homework",       href: "/dashboard/homework" },
