@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Plus, Trash2, Loader2, Search, BookOpen, UserCheck } from "lucide-react";
+import { Users, Plus, Trash2, Loader2, Search, BookOpen, UserCheck, Send, Mail, Bell } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -87,17 +87,15 @@ function useDemoteToStudent() {
   });
 }
 
-function useAssignCourse() {
+function useAssignAndNotify() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ instructorId, courseId }: { instructorId: string; courseId: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await (supabase.from("ssra_instructor_assignments" as never) as any)
-        .upsert(
-          { instructor_id: instructorId, course_id: courseId, assigned_by: user?.id, is_active: true },
-          { onConflict: "instructor_id,course_id" },
-        );
+    mutationFn: async ({ instructorId, courseIds, notify }: { instructorId: string; courseIds: string[]; notify: boolean }) => {
+      const { data, error } = await supabase.functions.invoke("notify-instructor-assignment", {
+        body: { instructorId, courseIds, notify },
+      });
       if (error) throw error;
+      return data as { assigned: number; notified: number; emailsSent: number };
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-instructor-assignments-all"] }),
   });
