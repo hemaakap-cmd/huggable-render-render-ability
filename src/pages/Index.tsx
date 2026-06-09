@@ -13,6 +13,7 @@ import Footer from "@/components/ssra/Footer";
 import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/courseCatalog";
 import { supabase } from "@/integrations/supabase/client";
 import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
+import heroBiomechanicsMobile from "@/assets/hero-biomechanics-mobile.jpg";
 
 function useReveal() {
   useEffect(() => {
@@ -119,10 +120,19 @@ export default function Index() {
 
       {/* ══ HERO ══ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background image — sports biomechanics */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
-          style={{ backgroundImage: `url(${heroBiomechanics})` }}
+        {/* Background image — sports biomechanics (desktop) */}
+        <img
+          src={heroBiomechanics}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center scale-105 hidden md:block"
+        />
+        {/* Background image — sports biomechanics (mobile portrait) */}
+        <img
+          src={heroBiomechanicsMobile}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
         />
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-slate-950/75" />
