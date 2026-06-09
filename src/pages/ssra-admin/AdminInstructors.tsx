@@ -101,14 +101,15 @@ function useAssignAndNotify() {
   });
 }
 
-function useUnassignCourse() {
+function useUnassignAndNotify() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (assignmentId: string) => {
-      const { error } = await (supabase.from("ssra_instructor_assignments" as never) as any)
-        .update({ is_active: false })
-        .eq("id", assignmentId);
+    mutationFn: async ({ assignmentId, notify }: { assignmentId: string; notify: boolean }) => {
+      const { data, error } = await supabase.functions.invoke("notify-instructor-unassignment", {
+        body: { assignmentId, notify },
+      });
       if (error) throw error;
+      return data as { unassigned: boolean; notified: number; emailsSent: number };
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-instructor-assignments-all"] }),
   });
@@ -128,7 +129,25 @@ export default function AdminInstructors() {
   const promote      = usePromoteToInstructor();
   const demote       = useDemoteToStudent();
   const assignNotify = useAssignAndNotify();
-  const unassign     = useUnassignCourse();
+  const unassign     = useUnassignAndNotify();
+  const [unassignTarget, setUnassignTarget] = useState<{ id: string; courseTitle: string; instructorName: string } | null>(null);
+  const [unassignNotify, setUnassignNotify] = useState(true);
+
+  const confirmUnassign = async () => {
+    if (!unassignTarget) return;
+    try {
+      const res = await unassign.mutateAsync({ assignmentId: unassignTarget.id, notify: unassignNotify });
+      toast({
+        title: "Instructor unassigned",
+        description: unassignNotify
+          ? `Notified ${res.notified} student${res.notified === 1 ? "" : "s"} (${res.emailsSent} email${res.emailsSent === 1 ? "" : "s"} sent).`
+          : "Students were not notified.",
+      });
+      setUnassignTarget(null);
+    } catch (e: any) {
+      toast({ title: "Unassign failed", description: e.message, variant: "destructive" });
+    }
+  };
 
   const handlePromote = async (userId: string, name: string) => {
     await promote.mutateAsync(userId);
@@ -389,8 +408,16 @@ export default function AdminInstructors() {
                           <BookOpen className="w-3 h-3 text-slate-400" />
                           <span className="text-slate-700">{(a.ssra_courses as any)?.title}</span>
                           <button
-                            onClick={async () => { await unassign.mutateAsync(a.id); toast({ title: "Unassigned" }); }}
+                            onClick={() => {
+                              setUnassignNotify(true);
+                              setUnassignTarget({
+                                id: a.id,
+                                courseTitle: (a.ssra_courses as any)?.title ?? "this course",
+                                instructorName: instructor.full_name ?? instructor.email ?? "Instructor",
+                              });
+                            }}
                             className="text-slate-300 hover:text-red-500 ml-1"
+                            title="Unassign"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
