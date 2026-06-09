@@ -91,6 +91,7 @@ const InstructorHomework   = lazy(() => import("./pages/instructor/InstructorHom
 
 /* ── Student dashboard extras ── */
 const MyHomework           = lazy(() => import("./pages/dashboard/MyHomework"));
+const MyMaterials          = lazy(() => import("./pages/dashboard/MyMaterials"));
 const OrderStatus          = lazy(() => import("./pages/dashboard/OrderStatus"));
 
 const NotFound = lazy(() => import("./pages/NotFound"));
