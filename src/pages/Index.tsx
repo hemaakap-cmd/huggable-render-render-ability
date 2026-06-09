@@ -120,12 +120,19 @@ export default function Index() {
 
       {/* ══ HERO ══ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background image — sports biomechanics */}
+        {/* Background image — sports biomechanics (desktop) */}
         <img
           src={heroBiomechanics}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-[center_40%] md:object-center md:scale-105"
+          className="absolute inset-0 w-full h-full object-cover object-center scale-105 hidden md:block"
+        />
+        {/* Background image — sports biomechanics (mobile portrait) */}
+        <img
+          src={heroBiomechanicsMobile}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
         />
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-slate-950/75" />
