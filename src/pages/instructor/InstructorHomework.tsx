@@ -46,6 +46,16 @@ export default function InstructorHomework() {
     } finally { setSaving(false); }
   }
 
+  async function openFile(storagePath: string) {
+    try {
+      const url = await getHomeworkSignedUrl(storagePath);
+      if (url) window.open(url, "_blank", "noopener");
+    } catch (e: any) {
+      toast({ title: "Could not open file", description: e.message, variant: "destructive" });
+    }
+  }
+
+
   const pending = (submissions as any[]).filter(s => s.status === "submitted" || s.status === "late").length;
 
   return (
