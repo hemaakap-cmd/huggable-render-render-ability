@@ -71,6 +71,17 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const d: ApplicationPayload = await req.json();
 
+    // Prevent abuse: applicant email must match the authenticated account.
+    const authEmail = (userData.user.email ?? "").toLowerCase().trim();
+    const submittedEmail = (d.email ?? "").toLowerCase().trim();
+    if (!submittedEmail || submittedEmail !== authEmail) {
+      return new Response(
+        JSON.stringify({ error: "Recipient email must match your account email" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+
     // 1) Confirmation to applicant
     const studentHtml = emailLayout(`
       ${emailHeading("تم استلام طلبك — Application Received!")}
