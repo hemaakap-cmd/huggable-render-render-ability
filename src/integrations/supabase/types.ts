@@ -1757,7 +1757,7 @@ export type Database = {
         }[]
       }
       get_revenue_summary: {
-        Args: { _env?: string; _from: string; _to: string }
+        Args: { _env: string; _from: string; _to: string }
         Returns: {
           chargeback_cents: number
           currency: string
