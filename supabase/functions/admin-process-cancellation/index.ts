@@ -115,21 +115,63 @@ Deno.serve(async (req) => {
 
     let paddleAdjustmentId: string | null = null;
     let refundError: string | null = null;
+    let subscriptionCancelError: string | null = null;
 
     // stripe_payment_intent column stores the Paddle transaction ID (txn_xxx)
     const txnId = enrollment?.stripe_payment_intent as string | undefined;
 
+    // Resolve the correct Paddle environment from the matching revenue_event,
+    // because the admin UI may not pass it (or may pass the wrong one).
+    // Falls back to the request body / 'live' so a live txn isn't accidentally
+    // queried against sandbox.
+    let resolvedEnv: PaddleEnv = environment;
+    let subscriptionId: string | null = null;
+    if (txnId) {
+      const { data: re } = await admin
+        .from('revenue_events')
+        .select('environment, paddle_subscription_id')
+        .eq('paddle_transaction_id', txnId)
+        .order('occurred_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (re?.environment === 'live' || re?.environment === 'sandbox') {
+        resolvedEnv = re.environment as PaddleEnv;
+      }
+      subscriptionId = (re?.paddle_subscription_id as string | null) ?? null;
+    }
+
+    // Cancel the recurring Paddle subscription so the customer is not charged again.
+    if (subscriptionId) {
+      try {
+        const cancelRes = await gatewayFetch(
+          resolvedEnv,
+          `/subscriptions/${encodeURIComponent(subscriptionId)}/cancel`,
+          { method: 'POST', body: JSON.stringify({ effective_from: 'immediately' }) },
+        );
+        if (!cancelRes.ok) {
+          const j = await cancelRes.json().catch(() => ({}));
+          // 409 / already canceled is fine.
+          if (cancelRes.status !== 409) {
+            subscriptionCancelError = j?.error?.detail ?? `Subscription cancel failed (${cancelRes.status})`;
+          }
+        }
+      } catch (e) {
+        subscriptionCancelError = (e as Error).message;
+        console.error('paddle subscription cancel failed', e);
+      }
+    }
+
     if (issueRefund && txnId) {
       try {
-        const txnRes = await gatewayFetch(environment, `/transactions/${encodeURIComponent(txnId)}`);
+        const txnRes = await gatewayFetch(resolvedEnv, `/transactions/${encodeURIComponent(txnId)}`);
         const txnJson = await txnRes.json();
         const items = txnJson?.data?.details?.line_items ?? txnJson?.data?.items ?? [];
         const item = Array.isArray(items) && items.length > 0 ? items[0] : null;
         const itemId = item?.id ?? item?.item_id ?? null;
 
-        if (!itemId) throw new Error('Could not resolve transaction item to refund');
+        if (!itemId) throw new Error(`Could not resolve transaction item to refund (env=${resolvedEnv})`);
 
-        const adjRes = await gatewayFetch(environment, '/adjustments', {
+        const adjRes = await gatewayFetch(resolvedEnv, '/adjustments', {
           method: 'POST',
           body: JSON.stringify({
             action: 'refund',
