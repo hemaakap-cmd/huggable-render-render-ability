@@ -158,7 +158,13 @@ export default function InstructorHomework() {
                   {gradeModal.text_content}
                 </div>
               )}
-              {gradeModal.file_url && (
+              {gradeModal.storage_path && (
+                <button type="button" onClick={() => openFile(gradeModal.storage_path)}
+                  className="flex items-center gap-2 text-blue-600 text-sm mb-4 hover:underline">
+                  <FileText className="w-4 h-4" /> View submitted file
+                </button>
+              )}
+              {gradeModal.file_url && !gradeModal.storage_path && (
                 <a href={gradeModal.file_url} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2 text-blue-600 text-sm mb-4 hover:underline">
                   <ExternalLink className="w-4 h-4" /> View submitted file
