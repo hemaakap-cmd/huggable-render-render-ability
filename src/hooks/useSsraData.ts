@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSsraAuth } from "@/hooks/useSsraAuth";
 
 /* ── My enrollments ── */
 export function useMyEnrollments() {
@@ -1240,8 +1241,8 @@ export function useSubmitHomework() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({
-      materialId, courseId, batchId, fileUrl, textContent,
-    }: { materialId: string; courseId: string; batchId?: string; fileUrl?: string; textContent?: string }) => {
+      materialId, courseId, batchId, fileUrl, storagePath, textContent,
+    }: { materialId: string; courseId: string; batchId?: string; fileUrl?: string; storagePath?: string; textContent?: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
       const { error } = await (supabase as any).from("ssra_homework_submissions").upsert({
@@ -1250,6 +1251,7 @@ export function useSubmitHomework() {
         course_id:    courseId,
         batch_id:     batchId ?? null,
         file_url:     fileUrl ?? null,
+        storage_path: storagePath ?? null,
         text_content: textContent ?? null,
         status:       "submitted",
         submitted_at: new Date().toISOString(),
@@ -1257,8 +1259,83 @@ export function useSubmitHomework() {
       }, { onConflict: "material_id,user_id" });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-my-homework"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-my-homework"] });
+      qc.invalidateQueries({ queryKey: ["ssra-my-homework-assignments"] });
+      qc.invalidateQueries({ queryKey: ["ssra-instructor-homework"] });
+    },
   });
+}
+
+/**
+ * Lists all homework ASSIGNMENTS (from ssra_materials, type='homework') for
+ * courses the student is actively enrolled in or subscribed to, joined with
+ * the student's submission row (if any).
+ */
+export function useMyHomeworkAssignments() {
+  const { user } = useSsraAuth();
+  return useQuery({
+    queryKey: ["ssra-my-homework-assignments", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const [enrRes, subRes] = await Promise.all([
+        (supabase as any).from("ssra_enrollments")
+          .select("course_id").eq("user_id", user!.id).eq("status", "active"),
+        (supabase as any).from("ssra_subscriptions")
+          .select("course_id").eq("user_id", user!.id).in("status", ["active", "trialing"]),
+      ]);
+      const courseIds = Array.from(new Set([
+        ...((enrRes.data ?? []) as any[]).map((r) => r.course_id),
+        ...((subRes.data ?? []) as any[]).map((r) => r.course_id),
+      ].filter(Boolean)));
+      if (courseIds.length === 0) return [] as any[];
+
+      const { data: materials, error: mErr } = await (supabase as any)
+        .from("ssra_materials")
+        .select("id, course_id, title, description, due_date, is_visible, material_type, ssra_courses(title)")
+        .in("course_id", courseIds)
+        .eq("material_type", "homework")
+        .eq("is_visible", true)
+        .order("due_date", { ascending: true, nullsFirst: false });
+      if (mErr) throw mErr;
+
+      const materialIds = ((materials ?? []) as any[]).map((m) => m.id);
+      if (materialIds.length === 0) return [];
+
+      const { data: subs } = await (supabase as any)
+        .from("ssra_homework_submissions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .in("material_id", materialIds);
+      const subByMat = new Map<string, any>(((subs ?? []) as any[]).map((s) => [s.material_id, s]));
+
+      const now = Date.now();
+      return ((materials ?? []) as any[]).map((m) => {
+        const sub = subByMat.get(m.id) ?? null;
+        let status: string = sub?.status ?? "missing";
+        if (!sub && m.due_date && new Date(m.due_date).getTime() < now) status = "missing";
+        return {
+          material_id:  m.id,
+          course_id:    m.course_id,
+          title:        m.title,
+          description:  m.description,
+          due_date:     m.due_date,
+          course_title: m.ssra_courses?.title ?? null,
+          submission:   sub,
+          status,
+        };
+      });
+    },
+  });
+}
+
+/** Generate a signed download URL for a homework submission file. */
+export async function getHomeworkSignedUrl(storagePath: string, expiresInSec = 300) {
+  const { data, error } = await supabase.storage
+    .from("homework-submissions")
+    .createSignedUrl(storagePath, expiresInSec);
+  if (error) throw error;
+  return data?.signedUrl ?? null;
 }
 
 /* ═══════════════════════════════════════════════════════════

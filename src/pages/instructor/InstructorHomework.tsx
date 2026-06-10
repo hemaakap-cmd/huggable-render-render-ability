@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { BookOpen, ExternalLink, X, Loader2 } from "lucide-react";
+import { BookOpen, ExternalLink, X, Loader2, FileText } from "lucide-react";
 import InstructorLayout from "@/components/ssra/InstructorLayout";
-import { useInstructorHomework, useGradeHomework } from "@/hooks/useSsraData";
+import { useInstructorHomework, useGradeHomework, getHomeworkSignedUrl } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -45,6 +45,16 @@ export default function InstructorHomework() {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally { setSaving(false); }
   }
+
+  async function openFile(storagePath: string) {
+    try {
+      const url = await getHomeworkSignedUrl(storagePath);
+      if (url) window.open(url, "_blank", "noopener");
+    } catch (e: any) {
+      toast({ title: "Could not open file", description: e.message, variant: "destructive" });
+    }
+  }
+
 
   const pending = (submissions as any[]).filter(s => s.status === "submitted" || s.status === "late").length;
 
@@ -114,7 +124,14 @@ export default function InstructorHomework() {
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {sub.file_url && (
+                        {sub.storage_path && (
+                          <button onClick={() => openFile(sub.storage_path)}
+                            title="Open submitted file"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
+                            <FileText className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {sub.file_url && !sub.storage_path && (
                           <a href={sub.file_url} target="_blank" rel="noopener noreferrer"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -151,7 +168,13 @@ export default function InstructorHomework() {
                   {gradeModal.text_content}
                 </div>
               )}
-              {gradeModal.file_url && (
+              {gradeModal.storage_path && (
+                <button type="button" onClick={() => openFile(gradeModal.storage_path)}
+                  className="flex items-center gap-2 text-blue-600 text-sm mb-4 hover:underline">
+                  <FileText className="w-4 h-4" /> View submitted file
+                </button>
+              )}
+              {gradeModal.file_url && !gradeModal.storage_path && (
                 <a href={gradeModal.file_url} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2 text-blue-600 text-sm mb-4 hover:underline">
                   <ExternalLink className="w-4 h-4" /> View submitted file

@@ -996,6 +996,7 @@ export type Database = {
           id: string
           material_id: string | null
           status: string
+          storage_path: string | null
           submitted_at: string
           text_content: string | null
           user_id: string
@@ -1011,6 +1012,7 @@ export type Database = {
           id?: string
           material_id?: string | null
           status?: string
+          storage_path?: string | null
           submitted_at?: string
           text_content?: string | null
           user_id: string
@@ -1026,6 +1028,7 @@ export type Database = {
           id?: string
           material_id?: string | null
           status?: string
+          storage_path?: string | null
           submitted_at?: string
           text_content?: string | null
           user_id?: string
