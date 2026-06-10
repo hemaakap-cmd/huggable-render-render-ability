@@ -59,14 +59,35 @@ async function checkEmailQueue(): Promise<ServiceResult> {
   try {
     const supabase = createSupabase();
     const stuckSince = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-    const { count, error } = await supabase
+
+    // email_send_log is append-only: a "pending" row is written when enqueued,
+    // and a separate terminal row ("sent"/"failed"/"dlq"/"bounced"/"rate_limited")
+    // is appended when the worker processes it. Counting raw "pending" rows
+    // would grow forever. A message is only truly stuck if its message_id has
+    // NO terminal row.
+    const { data: pendingRows, error } = await supabase
       .from('email_send_log')
-      .select('id', { head: true, count: 'exact' })
+      .select('message_id')
       .eq('status', 'pending')
-      .lt('created_at', stuckSince);
+      .lt('created_at', stuckSince)
+      .limit(500);
 
     if (error) return { status: 'degraded', detail: error.message };
-    const stuck = count ?? 0;
+
+    const ids = Array.from(new Set((pendingRows ?? []).map((r: any) => r.message_id).filter(Boolean)));
+    if (ids.length === 0) return { status: 'ok' };
+
+    const { data: terminalRows, error: tErr } = await supabase
+      .from('email_send_log')
+      .select('message_id')
+      .in('message_id', ids)
+      .in('status', ['sent', 'failed', 'dlq', 'bounced', 'rate_limited']);
+
+    if (tErr) return { status: 'degraded', detail: tErr.message };
+
+    const resolved = new Set((terminalRows ?? []).map((r: any) => r.message_id));
+    const stuck = ids.filter((id) => !resolved.has(id)).length;
+
     if (stuck > 100) return { status: 'down',     detail: `${stuck} emails stuck > 30 min` };
     if (stuck > 20)  return { status: 'degraded', detail: `${stuck} emails pending > 30 min` };
     return { status: 'ok' };
