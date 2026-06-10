@@ -114,7 +114,14 @@ export default function InstructorHomework() {
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {sub.file_url && (
+                        {sub.storage_path && (
+                          <button onClick={() => openFile(sub.storage_path)}
+                            title="Open submitted file"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
+                            <FileText className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {sub.file_url && !sub.storage_path && (
                           <a href={sub.file_url} target="_blank" rel="noopener noreferrer"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
                             <ExternalLink className="w-3.5 h-3.5" />
