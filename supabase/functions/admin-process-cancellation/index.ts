@@ -193,7 +193,10 @@ Deno.serve(async (req) => {
 
     await admin.from('ssra_cancellation_requests').update({
       status: refundIssued ? 'refunded' : 'approved',
-      admin_notes: adminNotes ?? (refundError ? `Refund must be issued manually: ${refundError}` : null),
+      admin_notes: adminNotes ?? [
+        refundError ? `Refund must be issued manually: ${refundError}` : null,
+        subscriptionCancelError ? `Subscription cancel failed: ${subscriptionCancelError}` : null,
+      ].filter(Boolean).join(' | ') || null,
       paddle_adjustment_id: paddleAdjustmentId,
       reviewed_by: user.id,
       reviewed_at: new Date().toISOString(),
