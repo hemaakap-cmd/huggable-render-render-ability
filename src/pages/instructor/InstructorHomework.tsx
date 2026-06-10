@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { BookOpen, ExternalLink, X, Loader2 } from "lucide-react";
+import { BookOpen, ExternalLink, X, Loader2, FileText } from "lucide-react";
 import InstructorLayout from "@/components/ssra/InstructorLayout";
-import { useInstructorHomework, useGradeHomework } from "@/hooks/useSsraData";
+import { useInstructorHomework, useGradeHomework, getHomeworkSignedUrl } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 
 const STATUS_COLORS: Record<string, string> = {
