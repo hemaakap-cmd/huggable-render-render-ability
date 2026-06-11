@@ -161,23 +161,45 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Refund policy: customer keeps 80%, SSRA Academy retains 20% as an
+    // administrative fee. Compute the partial refund per transaction line item
+    // from the amount the customer actually paid (gross total, incl. tax).
+    let refundedAmountCents = 0;
+    let adminFeeCents = 0;
+    let currencyCode = 'EUR';
     if (issueRefund && txnId) {
       try {
         const txnRes = await gatewayFetch(resolvedEnv, `/transactions/${encodeURIComponent(txnId)}`);
         const txnJson = await txnRes.json();
+        currencyCode = txnJson?.data?.currency_code ?? 'EUR';
         const items = txnJson?.data?.details?.line_items ?? txnJson?.data?.items ?? [];
-        const item = Array.isArray(items) && items.length > 0 ? items[0] : null;
-        const itemId = item?.id ?? item?.item_id ?? null;
+        if (!Array.isArray(items) || items.length === 0) {
+          throw new Error(`Could not resolve transaction items to refund (env=${resolvedEnv})`);
+        }
 
-        if (!itemId) throw new Error(`Could not resolve transaction item to refund (env=${resolvedEnv})`);
+        const refundItems = items.map((it: any) => {
+          const itemId = it?.id ?? it?.item_id;
+          if (!itemId) throw new Error('Missing line item id');
+          // totals.total = gross (incl. tax) in lowest denomination, as string.
+          const grossStr = it?.totals?.total ?? it?.totals?.subtotal ?? '0';
+          const gross = Number(grossStr);
+          if (!Number.isFinite(gross) || gross <= 0) {
+            throw new Error(`Invalid line item total for refund: ${grossStr}`);
+          }
+          // 80% refund, rounded down to the cent (admin fee absorbs the rounding).
+          const refundCents = Math.floor(gross * 0.8);
+          refundedAmountCents += refundCents;
+          adminFeeCents += gross - refundCents;
+          return { item_id: itemId, type: 'partial', amount: String(refundCents) };
+        });
 
         const adjRes = await gatewayFetch(resolvedEnv, '/adjustments', {
           method: 'POST',
           body: JSON.stringify({
             action: 'refund',
             transaction_id: txnId,
-            reason: 'Customer cancelled within 14-day window',
-            items: [{ item_id: itemId, type: 'full' }],
+            reason: 'Customer cancellation — 80% refund (20% administrative fee retained per refund policy)',
+            items: refundItems,
           }),
         });
         const adjJson = await adjRes.json();
