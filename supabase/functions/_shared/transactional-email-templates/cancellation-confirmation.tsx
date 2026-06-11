@@ -17,6 +17,8 @@ interface CancellationConfirmationProps {
   amountPaid?: string
   refundIssued?: boolean
   refundAmount?: string
+  administrativeFee?: string | null
+  refundPolicyNote?: string | null
   cancellationDate?: string
 }
 
