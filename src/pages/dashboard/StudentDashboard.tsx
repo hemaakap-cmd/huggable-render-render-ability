@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { BookOpen, CreditCard, Clock, ArrowRight, Crown, Video, Calendar, Bell } from "lucide-react";
+import { BookOpen, CreditCard, Clock, ArrowRight, Crown, Video, Calendar, Bell, Info } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMyEnrollments, useMySubscription, useMyProfile, useMyUpcomingSessions } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 function useCountdown(target: string | null) {
   const [ms, setMs] = useState(() => (target ? new Date(target).getTime() - Date.now() : 0));
@@ -29,13 +30,27 @@ function formatCountdown(ms: number): string {
   return `${mins}m ${secs}s`;
 }
 
-function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
+function StatCard({ label, value, sub, color, tooltip }: { label: string; value: string | number; sub?: string; color: string; tooltip?: string }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5">
-      <div className="text-xs text-slate-500 mb-1">{label}</div>
-      <div className={`text-3xl font-bold font-display ${color}`}>{value}</div>
-      {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
-    </div>
+    <TooltipProvider>
+      <div className="bg-white border border-slate-200 rounded-2xl p-5">
+        <div className="flex items-center gap-1.5 mb-1">
+          <div className="text-xs text-slate-500">{label}</div>
+          {tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[200px] text-xs">
+                {tooltip}
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+        <div className={`text-3xl font-bold font-display ${color}`}>{value}</div>
+        {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -106,12 +121,26 @@ export default function StudentDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <StatCard label="Courses enrolled"   value={eLoading ? "…" : enrollments.length} color="text-[hsl(220,91%,54%)]" />
-          <StatCard label="Subscription"
+          <StatCard
+            label="Courses enrolled"
+            value={eLoading ? "…" : enrollments.length}
+            color="text-[hsl(220,91%,54%)]"
+            tooltip="Counted from ssra_enrollments: your paid and active course enrollments."
+          />
+          <StatCard
+            label="Subscription"
             value={sLoading ? "…" : hasActiveSubscription ? "Active" : "None"}
             sub={hasActiveSubscription ? "Medical German" : "€19/mo available"}
-            color={hasActiveSubscription ? "text-emerald-600" : "text-slate-400"} />
-          <StatCard label="Upcoming sessions"  value={(upcomingSessions as any[]).length} sub="Your courses only" color="text-purple-600" />
+            color={hasActiveSubscription ? "text-emerald-600" : "text-slate-400"}
+            tooltip="Read from ssra_subscriptions (Paddle): your recurring subscription status."
+          />
+          <StatCard
+            label="Upcoming sessions"
+            value={(upcomingSessions as any[]).length}
+            sub="Your courses only"
+            color="text-purple-600"
+            tooltip="From ssra_sessions filtered by your enrollments: upcoming live sessions you can join."
+          />
         </div>
 
         {/* Active subscription card */}
