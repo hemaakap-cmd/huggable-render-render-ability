@@ -121,12 +121,26 @@ export default function StudentDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <StatCard label="Courses enrolled"   value={eLoading ? "…" : enrollments.length} color="text-[hsl(220,91%,54%)]" />
-          <StatCard label="Subscription"
+          <StatCard
+            label="Courses enrolled"
+            value={eLoading ? "…" : enrollments.length}
+            color="text-[hsl(220,91%,54%)]"
+            tooltip="Counted from ssra_enrollments: your paid and active course enrollments."
+          />
+          <StatCard
+            label="Subscription"
             value={sLoading ? "…" : hasActiveSubscription ? "Active" : "None"}
             sub={hasActiveSubscription ? "Medical German" : "€19/mo available"}
-            color={hasActiveSubscription ? "text-emerald-600" : "text-slate-400"} />
-          <StatCard label="Upcoming sessions"  value={(upcomingSessions as any[]).length} sub="Your courses only" color="text-purple-600" />
+            color={hasActiveSubscription ? "text-emerald-600" : "text-slate-400"}
+            tooltip="Read from ssra_subscriptions (Paddle): your recurring subscription status."
+          />
+          <StatCard
+            label="Upcoming sessions"
+            value={(upcomingSessions as any[]).length}
+            sub="Your courses only"
+            color="text-purple-600"
+            tooltip="From ssra_sessions filtered by your enrollments: upcoming live sessions you can join."
+          />
         </div>
 
         {/* Active subscription card */}
