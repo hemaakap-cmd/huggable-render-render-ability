@@ -30,13 +30,27 @@ function formatCountdown(ms: number): string {
   return `${mins}m ${secs}s`;
 }
 
-function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
+function StatCard({ label, value, sub, color, tooltip }: { label: string; value: string | number; sub?: string; color: string; tooltip?: string }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5">
-      <div className="text-xs text-slate-500 mb-1">{label}</div>
-      <div className={`text-3xl font-bold font-display ${color}`}>{value}</div>
-      {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
-    </div>
+    <TooltipProvider>
+      <div className="bg-white border border-slate-200 rounded-2xl p-5">
+        <div className="flex items-center gap-1.5 mb-1">
+          <div className="text-xs text-slate-500">{label}</div>
+          {tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[200px] text-xs">
+                {tooltip}
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+        <div className={`text-3xl font-bold font-display ${color}`}>{value}</div>
+        {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
+      </div>
+    </TooltipProvider>
   );
 }
 
