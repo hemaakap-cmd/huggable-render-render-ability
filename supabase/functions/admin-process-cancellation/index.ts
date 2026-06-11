@@ -318,7 +318,15 @@ Deno.serve(async (req) => {
       const recipient = enrollment?.student_email_snapshot;
       if (recipient) {
         const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const amountStr = `EUR ${Number(enrollment?.amount_eur ?? 0).toFixed(2)}`;
+        const fmtMoney = (cents: number) =>
+          `${currencyCode} ${(cents / 100).toFixed(2)}`;
+        const paidStr = `EUR ${Number(enrollment?.amount_eur ?? 0).toFixed(2)}`;
+        const refundStr = refundedAmountCents > 0
+          ? fmtMoney(refundedAmountCents)
+          : paidStr;
+        const adminFeeStr = adminFeeCents > 0
+          ? fmtMoney(adminFeeCents)
+          : null;
         await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${svc}` },
@@ -330,9 +338,13 @@ Deno.serve(async (req) => {
               studentName: enrollment?.student_name_snapshot ?? 'Student',
               courseName: enrollment?.course_title_snapshot ?? cancelReq.course_id,
               orderNumber: enrollment?.order_number ?? enrollment?.id,
-              amountPaid: amountStr,
+              amountPaid: paidStr,
               refundIssued,
-              refundAmount: amountStr,
+              refundAmount: refundStr,
+              administrativeFee: adminFeeStr,
+              refundPolicyNote: refundIssued
+                ? 'Per our refund policy, a 20% administrative fee is retained and 80% of your payment is refunded.'
+                : null,
               cancellationDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
             },
           }),
