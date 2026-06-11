@@ -123,7 +123,9 @@ export const template = {
     orderNumber: 'SSRA-ENR-2026-A1B2C3',
     amountPaid: '€19.00',
     refundIssued: true,
-    refundAmount: '€19.00',
+    refundAmount: '€15.20',
+    administrativeFee: '€3.80',
+    refundPolicyNote: 'Per our refund policy, a 20% administrative fee is retained and 80% of your payment is refunded.',
     cancellationDate: 'June 8, 2026',
   },
 } satisfies TemplateEntry
