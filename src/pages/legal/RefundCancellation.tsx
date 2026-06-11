@@ -38,8 +38,8 @@ export default function RefundCancellation() {
               <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-6 h-6 text-green-500" />
               </div>
-              <h3 className="font-bold text-slate-900 mb-2">14-Day Guarantee</h3>
-              <p className="text-sm text-slate-500">Full refund available within 14 days of your initial purchase or first subscription charge.</p>
+              <h3 className="font-bold text-slate-900 mb-2">80% Refund Guarantee</h3>
+              <p className="text-sm text-slate-500">If you cancel within 14 days, we refund 80% of your payment. A 20% administrative fee is retained to cover processing and operational costs.</p>
             </div>
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
               <div className="w-12 h-12 rounded-full bg-[hsl(220,91%,54%)]/10 flex items-center justify-center mx-auto mb-4">
