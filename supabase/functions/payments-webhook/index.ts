@@ -209,23 +209,9 @@ async function handleSubscriptionCreated(data: any, _env: PaddleEnv) {
       .select('student_email_snapshot, student_name_snapshot, course_title_snapshot, order_number')
       .maybeSingle();
 
-    if (enr?.student_email_snapshot) {
-      await sendEmail('enrollment-confirmation', enr.student_email_snapshot, `paddle-sub-enr-${data.id}`, {
-        studentName: enr.student_name_snapshot ?? 'Student',
-        courseName: enr.course_title_snapshot ?? courseId,
-        orderNumber: enr.order_number ?? data.id,
-        dashboardUrl: `${SITE_URL}/dashboard`,
-      });
-      await sendEmail('admin-purchase-notification', ADMIN_NOTIFY_EMAIL, `paddle-sub-admin-${data.id}`, {
-        studentName: enr.student_name_snapshot ?? 'Student',
-        studentEmail: enr.student_email_snapshot,
-        courseName: enr.course_title_snapshot ?? courseId,
-        orderNumber: enr.order_number ?? data.id,
-        amountPaid: 'Monthly subscription',
-        environment: _env,
-        transactionId: data.id,
-      });
-    }
+    // Note: enrollment-confirmation + admin-purchase-notification are sent
+    // from handleTransactionCompleted to avoid duplicate emails when both
+    // transaction.completed and subscription.created fire for the same purchase.
 
     await supabase.from('ssra_notifications').insert({
       user_id: userId,
