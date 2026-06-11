@@ -29,6 +29,8 @@ const CancellationConfirmationEmail = ({
   amountPaid,
   refundIssued,
   refundAmount,
+  administrativeFee,
+  refundPolicyNote,
   cancellationDate,
 }: CancellationConfirmationProps) => (
   <Html lang="en" dir="ltr">
