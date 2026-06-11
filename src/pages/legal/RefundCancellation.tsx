@@ -38,8 +38,8 @@ export default function RefundCancellation() {
               <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-6 h-6 text-green-500" />
               </div>
-              <h3 className="font-bold text-slate-900 mb-2">14-Day Guarantee</h3>
-              <p className="text-sm text-slate-500">Full refund available within 14 days of your initial purchase or first subscription charge.</p>
+              <h3 className="font-bold text-slate-900 mb-2">80% Refund Guarantee</h3>
+              <p className="text-sm text-slate-500">If you cancel within 14 days, we refund 80% of your payment. A 20% administrative fee is retained to cover processing and operational costs.</p>
             </div>
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
               <div className="w-12 h-12 rounded-full bg-[hsl(220,91%,54%)]/10 flex items-center justify-center mx-auto mb-4">
@@ -88,13 +88,15 @@ export default function RefundCancellation() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">2. Refund Eligibility</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>You are eligible for a full refund under the following conditions:</p>
+                <p>You are eligible for a refund under the following conditions:</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li>You request a refund within 14 calendar days of your initial purchase date or first subscription charge.</li>
-                  <li>Refund requests are handled by Paddle.com, our Merchant of Record, under Paddle's buyer refund process.</li>
-                  <li>You use the email address used at checkout so Paddle can locate your order.</li>
+                  <li>You request a cancellation within 14 calendar days of your initial purchase date or first subscription charge.</li>
+                  <li>Approved cancellations are refunded at <strong>80% of the amount paid</strong>. SSRA Academy retains <strong>20% as an administrative fee</strong> to cover payment processing and operational costs.</li>
+                  <li>Example: a €19.00 payment → administrative fee €3.80 → refund €15.20.</li>
+                  <li>Refunds are returned to your original payment method through Paddle.com, our Merchant of Record.</li>
+                  <li>Use the email address used at checkout so Paddle can locate your order.</li>
                 </ul>
-                <p className="text-sm text-slate-500 italic mt-2">Refund and cancellation mechanics are governed by Paddle's Refund Policy and Buyer Terms.</p>
+                <p className="text-sm text-slate-500 italic mt-2">Taxes (VAT/Sales Tax) charged at checkout follow the same 80/20 split. Refund and cancellation mechanics are governed by Paddle's Buyer Terms.</p>
               </div>
             </div>
 

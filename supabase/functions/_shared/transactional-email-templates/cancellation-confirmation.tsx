@@ -17,6 +17,8 @@ interface CancellationConfirmationProps {
   amountPaid?: string
   refundIssued?: boolean
   refundAmount?: string
+  administrativeFee?: string | null
+  refundPolicyNote?: string | null
   cancellationDate?: string
 }
 
@@ -27,6 +29,8 @@ const CancellationConfirmationEmail = ({
   amountPaid,
   refundIssued,
   refundAmount,
+  administrativeFee,
+  refundPolicyNote,
   cancellationDate,
 }: CancellationConfirmationProps) => (
   <Html lang="en" dir="ltr">
@@ -58,13 +62,20 @@ const CancellationConfirmationEmail = ({
           <Row style={kvRow}><Column style={k}>Order number</Column><Column style={v}>{orderNumber ?? '—'}</Column></Row>
           <Row style={kvRow}><Column style={k}>Amount paid</Column><Column style={v}>{amountPaid ?? '—'}</Column></Row>
           <Row style={kvRow}><Column style={k}>Cancellation date</Column><Column style={v}>{cancellationDate ?? '—'}</Column></Row>
+          {administrativeFee && (
+            <Row style={kvRow}><Column style={k}>Administrative fee (20%)</Column><Column style={v}>− {administrativeFee}</Column></Row>
+          )}
           <Row style={kvRow}>
-            <Column style={k}>Refund</Column>
+            <Column style={k}>Refund {administrativeFee ? '(80%)' : ''}</Column>
             <Column style={v}>
               {refundIssued ? `Issued — ${refundAmount ?? amountPaid ?? ''}` : 'Will be processed manually by our team'}
             </Column>
           </Row>
         </Section>
+
+        {refundPolicyNote && (
+          <Text style={text}>{refundPolicyNote}</Text>
+        )}
 
         <Text style={text}>
           {refundIssued
@@ -112,7 +123,9 @@ export const template = {
     orderNumber: 'SSRA-ENR-2026-A1B2C3',
     amountPaid: '€19.00',
     refundIssued: true,
-    refundAmount: '€19.00',
+    refundAmount: '€15.20',
+    administrativeFee: '€3.80',
+    refundPolicyNote: 'Per our refund policy, a 20% administrative fee is retained and 80% of your payment is refunded.',
     cancellationDate: 'June 8, 2026',
   },
 } satisfies TemplateEntry

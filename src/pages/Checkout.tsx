@@ -212,12 +212,19 @@ export default function Checkout() {
                   </>
                 )}
                 {!couponApplied && course.type === "subscription" && (
-                  <p className="text-xs text-slate-400">Cancel anytime at paddle.net. 14-day money-back guarantee.</p>
+                  <p className="text-xs text-slate-400">Cancel anytime at paddle.net. See refund policy below.</p>
                 )}
+                <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
+                  Prices are <strong>tax-exclusive</strong>. VAT / sales tax is calculated automatically at checkout based on your country and shown as a separate line (Course price + VAT = Total).
+                </p>
+              </div>
+              <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-100 text-[11px] text-amber-900 leading-relaxed">
+                <strong>Refund policy:</strong> Cancellations approved within 14 days are refunded at <strong>80%</strong> of the amount paid. A <strong>20% administrative fee</strong> is retained. Example: €19.00 paid → €3.80 fee → €15.20 refund.{" "}
+                <Link to="/refund-policy" className="underline">Read full policy</Link>.
               </div>
               <div className="mt-5 flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-500">
                 <Shield className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
-                Payments processed securely by Paddle.com (Merchant of Record). Your card details are never stored on our servers.
+                Payments processed securely by Paddle.com (Merchant of Record). Invoices, receipts and emails are issued under SSRA Academy. Your card details are never stored on our servers.
               </div>
             </div>
           </div>
