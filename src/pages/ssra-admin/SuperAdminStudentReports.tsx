@@ -359,7 +359,7 @@ export default function SuperAdminStudentReports() {
               <StatCard icon={Users} label="Students" value={overview.students.toLocaleString()} color="blue" />
               <StatCard icon={GraduationCap} label="Active Students" value={overview.activeStudents.toLocaleString()} color="green" />
               <StatCard icon={BookOpen} label="Enrollments" value={overview.enrollments.toLocaleString()} color="indigo" />
-              <StatCard icon={DollarSign} label="Total Revenue" value={fmtEUR(overview.revenue)} color="amber" />
+              <StatCard icon={DollarSign} label="Enrollment Revenue" value={fmtEUR(overview.revenue)} color="amber" />
               <StatCard icon={Award} label="Certificates" value={overview.certificates.toLocaleString()} color="emerald" />
               <StatCard icon={BookOpen} label="Active Courses" value={overview.courses.toLocaleString()} color="violet" />
               <StatCard icon={Layers} label="Batches" value={overview.batches.toLocaleString()} color="rose" />
