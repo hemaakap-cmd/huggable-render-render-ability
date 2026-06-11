@@ -62,13 +62,20 @@ const CancellationConfirmationEmail = ({
           <Row style={kvRow}><Column style={k}>Order number</Column><Column style={v}>{orderNumber ?? '—'}</Column></Row>
           <Row style={kvRow}><Column style={k}>Amount paid</Column><Column style={v}>{amountPaid ?? '—'}</Column></Row>
           <Row style={kvRow}><Column style={k}>Cancellation date</Column><Column style={v}>{cancellationDate ?? '—'}</Column></Row>
+          {administrativeFee && (
+            <Row style={kvRow}><Column style={k}>Administrative fee (20%)</Column><Column style={v}>− {administrativeFee}</Column></Row>
+          )}
           <Row style={kvRow}>
-            <Column style={k}>Refund</Column>
+            <Column style={k}>Refund {administrativeFee ? '(80%)' : ''}</Column>
             <Column style={v}>
               {refundIssued ? `Issued — ${refundAmount ?? amountPaid ?? ''}` : 'Will be processed manually by our team'}
             </Column>
           </Row>
         </Section>
+
+        {refundPolicyNote && (
+          <Text style={text}>{refundPolicyNote}</Text>
+        )}
 
         <Text style={text}>
           {refundIssued
