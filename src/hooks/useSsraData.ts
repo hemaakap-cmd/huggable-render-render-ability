@@ -89,38 +89,30 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
   return useQuery({
     queryKey: ["ssra-admin-students-paying", search, page, pageSize],
     queryFn: async () => {
-      // Step 1: get distinct user_ids that have at least one enrollment
-      const { data: enrollRows, error: eErr } = await supabase
-        .from("ssra_enrollments")
-        .select("user_id, status, course_id, enrolled_at, created_at");
-      if (eErr) throw eErr;
+      // Use the server-side ssra_student_enrollment_stats view to avoid
+      // fetching the entire ssra_enrollments table into the browser.
+      // At 100k+ students the old client-side Map approach would load
+      // millions of rows — this pushes the GROUP BY into PostgreSQL.
+      const { data: statsRows, error: statsErr } = await (supabase as any)
+        .from("ssra_student_enrollment_stats")
+        .select("user_id, total_enrollments, active_enrollments, unique_courses, course_ids, first_enrolled_at");
+      if (statsErr) throw statsErr;
 
-      const enrollmentCounts = new Map<string, number>();
-      const activeCounts = new Map<string, number>();
-      const courseSets = new Map<string, Set<string>>();
-      const firstEnrolledAt = new Map<string, string>();
-      for (const e of enrollRows ?? []) {
-        if (!e.user_id) continue;
-        enrollmentCounts.set(e.user_id, (enrollmentCounts.get(e.user_id) ?? 0) + 1);
-        if (e.status === "active") {
-          activeCounts.set(e.user_id, (activeCounts.get(e.user_id) ?? 0) + 1);
-        }
-        if (e.course_id) {
-          if (!courseSets.has(e.user_id)) courseSets.set(e.user_id, new Set());
-          courseSets.get(e.user_id)!.add(e.course_id);
-        }
-        const when = (e.enrolled_at ?? e.created_at) as string | null;
-        if (when) {
-          const prev = firstEnrolledAt.get(e.user_id);
-          if (!prev || new Date(when).getTime() < new Date(prev).getTime()) {
-            firstEnrolledAt.set(e.user_id, when);
-          }
-        }
+      const statsByUserId = new Map<string, {
+        total_enrollments: number;
+        active_enrollments: number;
+        unique_courses: number;
+        course_ids: string[];
+        first_enrolled_at: string | null;
+      }>();
+      for (const row of statsRows ?? []) {
+        if (row.user_id) statsByUserId.set(row.user_id, row);
       }
-      const studentIds = Array.from(enrollmentCounts.keys());
+
+      const studentIds = Array.from(statsByUserId.keys());
       if (studentIds.length === 0) return { rows: [], total: 0 };
 
-      // Step 2: page profiles within those ids
+      // Page profiles within those ids
       const from = page * pageSize;
       const to   = from + pageSize - 1;
       let q = supabase
@@ -150,15 +142,18 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
       }
 
       return {
-        rows: rows.map((s) => ({
-          ...s,
-          ssra_enrollments: [{ count: enrollmentCounts.get(s.id) ?? 0 }],
-          ssra_active_enrollments: activeCounts.get(s.id) ?? 0,
-          ssra_unique_courses: courseSets.get(s.id)?.size ?? 0,
-          ssra_course_ids: Array.from(courseSets.get(s.id) ?? []),
-          ssra_first_enrolled_at: firstEnrolledAt.get(s.id) ?? null,
-          ssra_subscriptions: latestSubscription.get(s.id) ? [latestSubscription.get(s.id)!] : [],
-        })),
+        rows: rows.map((s) => {
+          const stats = statsByUserId.get(s.id);
+          return {
+            ...s,
+            ssra_enrollments:       [{ count: stats?.total_enrollments ?? 0 }],
+            ssra_active_enrollments: stats?.active_enrollments ?? 0,
+            ssra_unique_courses:     stats?.unique_courses ?? 0,
+            ssra_course_ids:         stats?.course_ids ?? [],
+            ssra_first_enrolled_at:  stats?.first_enrolled_at ?? null,
+            ssra_subscriptions:      latestSubscription.get(s.id) ? [latestSubscription.get(s.id)!] : [],
+          };
+        }),
         total: count ?? 0,
       };
     },
@@ -171,16 +166,16 @@ export function useAdminLeads(search = "", page = 0, pageSize = 25) {
   return useQuery({
     queryKey: ["ssra-admin-leads", search, page, pageSize],
     queryFn: async () => {
-      // Step 1: collect user_ids that have any enrollment (to exclude)
-      const { data: enrollRows, error: eErr } = await supabase
-        .from("ssra_enrollments")
+      // Use the enrollment stats view to get the set of user_ids that have
+      // at least one enrollment — avoids loading all enrollment rows client-side.
+      const { data: statsRows, error: statsErr } = await (supabase as any)
+        .from("ssra_student_enrollment_stats")
         .select("user_id");
-      if (eErr) throw eErr;
+      if (statsErr) throw statsErr;
       const enrolledIds = new Set(
-        (enrollRows ?? []).map((e: any) => e.user_id).filter(Boolean) as string[],
+        (statsRows ?? []).map((r: any) => r.user_id as string).filter(Boolean),
       );
 
-      // Step 2: page profiles excluding those ids
       const from = page * pageSize;
       const to   = from + pageSize - 1;
       let q = supabase
@@ -189,7 +184,6 @@ export function useAdminLeads(search = "", page = 0, pageSize = 25) {
         .eq("role", "student")
         .order("created_at", { ascending: false });
       if (enrolledIds.size > 0) {
-        // exclude paying users
         q = q.not("id", "in", `(${Array.from(enrolledIds).join(",")})`);
       }
       if (search) q = q.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
@@ -206,44 +200,23 @@ export function useLeadStudentStats() {
   return useQuery({
     queryKey: ["ssra-admin-leads-students-stats"],
     queryFn: async () => {
-      const [{ data: profiles }, { data: enrolls }] = await Promise.all([
-        supabase.from("ssra_profiles").select("id, created_at").eq("role", "student"),
-        supabase.from("ssra_enrollments").select("user_id, amount_eur, created_at, status"),
-      ]);
-      const paid = new Set((enrolls ?? []).map((e: any) => e.user_id).filter(Boolean));
-      const totalStudents = paid.size;
-      const totalProfiles = (profiles ?? []).length;
-      const totalLeads = totalProfiles - totalStudents;
-
-      const monthStart = new Date();
-      monthStart.setDate(1);
-      monthStart.setHours(0, 0, 0, 0);
-
-      const newLeadsThisMonth = (profiles ?? []).filter(
-        (p: any) => !paid.has(p.id) && new Date(p.created_at) >= monthStart,
-      ).length;
-
-      const newStudentsThisMonth = new Set(
-        (enrolls ?? [])
-          .filter((e: any) => new Date(e.created_at) >= monthStart)
-          .map((e: any) => e.user_id),
-      ).size;
-
-      const conversionRate = totalProfiles > 0 ? (totalStudents / totalProfiles) * 100 : 0;
-
-      const totalRevenue = (enrolls ?? [])
-        .filter((e: any) => e.status === "active")
-        .reduce((sum: number, e: any) => sum + (Number(e.amount_eur) || 0), 0);
-      const revenuePerStudent = totalStudents > 0 ? totalRevenue / totalStudents : 0;
-
+      // Single server-side RPC replaces the old dual full-table read
+      // (ssra_profiles + ssra_enrollments) that was fetching all rows client-side.
+      const { data, error } = await supabase.rpc("get_lead_student_stats" as never);
+      if (error) throw error;
+      const row = Array.isArray(data) ? (data as any[])[0] : (data as any);
+      if (!row) return {
+        totalLeads: 0, totalStudents: 0, newLeadsThisMonth: 0,
+        newStudentsThisMonth: 0, conversionRate: 0, totalRevenue: 0, revenuePerStudent: 0,
+      };
       return {
-        totalLeads,
-        totalStudents,
-        newLeadsThisMonth,
-        newStudentsThisMonth,
-        conversionRate,
-        totalRevenue,
-        revenuePerStudent,
+        totalLeads:            Number(row.total_leads ?? 0),
+        totalStudents:         Number(row.total_students ?? 0),
+        newLeadsThisMonth:     Number(row.new_leads_this_month ?? 0),
+        newStudentsThisMonth:  Number(row.new_students_this_month ?? 0),
+        conversionRate:        Number(row.conversion_rate ?? 0),
+        totalRevenue:          Number(row.total_revenue_eur ?? 0),
+        revenuePerStudent:     Number(row.revenue_per_student ?? 0),
       };
     },
   });
@@ -525,9 +498,27 @@ export function usePastSessions() {
   return useQuery({
     queryKey: ["ssra-sessions-past"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // Recordings are paid content — only return sessions for courses the
+      // user is actively enrolled in or subscribed to.
+      const [{ data: enrollments }, { data: subscriptions }] = await Promise.all([
+        supabase.from("ssra_enrollments").select("course_id").eq("user_id", user.id).eq("status", "active"),
+        supabase.from("ssra_subscriptions").select("course_id").eq("user_id", user.id).in("status", ["active", "trialing", "canceled"]),
+      ]);
+
+      const courseIds = [
+        ...(enrollments ?? []).map((e) => e.course_id),
+        ...(subscriptions ?? []).map((s) => s.course_id),
+      ].filter((id): id is string => Boolean(id));
+
+      if (courseIds.length === 0) return [];
+
       const { data, error } = await supabase
         .from("ssra_sessions")
         .select("id, course_id, title, description, scheduled_at, duration_minutes, is_cancelled, recording_url, ssra_courses(title)")
+        .in("course_id", courseIds)
         .lt("scheduled_at", new Date().toISOString())
         .order("scheduled_at", { ascending: false })
         .limit(20);
@@ -1185,11 +1176,28 @@ export function useInstructorHomework(courseId?: string, status?: string) {
   return useQuery({
     queryKey: ["ssra-instructor-homework", courseId ?? "all", status ?? "all"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // Scope to courses this instructor is actually assigned to.
+      const { data: assignments } = await (supabase as any)
+        .from("ssra_instructor_assignments")
+        .select("course_id")
+        .eq("instructor_id", user.id);
+      const assignedCourseIds = (assignments ?? []).map((a: any) => a.course_id as string);
+      if (assignedCourseIds.length === 0) return [];
+
+      // If the caller requests a specific course, verify they're assigned to it.
+      const allowedCourseIds = courseId
+        ? assignedCourseIds.filter((id) => id === courseId)
+        : assignedCourseIds;
+      if (allowedCourseIds.length === 0) return [];
+
       let q = (supabase as any)
         .from("ssra_homework_submissions")
         .select("*, ssra_course_materials(title, due_date), ssra_courses(title), ssra_profiles(full_name, email)")
+        .in("course_id", allowedCourseIds)
         .order("submitted_at", { ascending: false });
-      if (courseId) q = q.eq("course_id", courseId);
       if (status && status !== "all") q = q.eq("status", status);
       const { data, error } = await q;
       if (error) throw error;

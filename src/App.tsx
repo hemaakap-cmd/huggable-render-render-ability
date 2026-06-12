@@ -206,7 +206,7 @@ function AppInner() {
                 <Route path="/apply"            element={<Apply />} />
                 <Route path="/contact"          element={<Contact />} />
                 <Route path="/pricing"          element={<Pricing />} />
-                <Route path="/checkout"         element={<Checkout />} />
+                <Route path="/checkout"         element={<RequireAuth><Checkout /></RequireAuth>} />
                 <Route path="/payment-success"  element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/login"            element={<StudentLogin />} />
