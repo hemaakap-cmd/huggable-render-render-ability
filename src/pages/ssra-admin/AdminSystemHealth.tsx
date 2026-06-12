@@ -4,8 +4,9 @@ import {
   Wifi, Server,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { Link } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
-import { useSystemHealth, useServiceHealth } from "@/hooks/useSsraData";
+import { useSystemHealth, useServiceHealth, useCronHealth } from "@/hooks/useSsraData";
 
 /* ── Score ring ─────────────────────────────────────────────────── */
 function ScoreRing({ score }: { score: number }) {
@@ -93,9 +94,10 @@ function MetricCard({ icon, label, value, sub, status = "ok" }: MetricCardProps)
 export default function AdminSystemHealth() {
   const { data: health, isLoading: healthLoading, refetch: refetchHealth, isFetching: healthFetching } = useSystemHealth();
   const { data: svc,    isLoading: svcLoading,    refetch: refetchSvc,   isFetching: svcFetching }     = useServiceHealth();
+  const { data: cron,   refetch: refetchCron,     isFetching: cronFetching }                            = useCronHealth();
 
-  const isFetching = healthFetching || svcFetching;
-  const refetch    = () => { refetchHealth(); refetchSvc(); };
+  const isFetching = healthFetching || svcFetching || cronFetching;
+  const refetch    = () => { refetchHealth(); refetchSvc(); refetchCron(); };
 
   const score         = (health as any)?.healthScore         ?? 0;
   const enrollments   = (health as any)?.enrollments24h      ?? 0;
@@ -185,6 +187,69 @@ export default function AdminSystemHealth() {
             </div>
           </div>
         </div>
+
+        {/* Scheduled jobs (pg_cron) health */}
+        {cron && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-5">
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4" /> Scheduled Jobs (pg_cron)
+            </div>
+
+            {cron.reconciliationStale && (
+              <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-3 text-red-700 text-sm font-semibold mb-3">
+                <XCircle className="w-5 h-5 shrink-0" />
+                {cron.lastReconciliationAt
+                  ? `Nightly reconciliation has NOT run for ${cron.reconciliationAgeHours} hours (threshold: 25 h). pg_cron may be dead.`
+                  : "Nightly reconciliation has NEVER run. Check pg_cron configuration (app.supabase_url / app.service_role_key GUCs)."}
+                <Link to="/ssra-admin/reconciliation"
+                  className="ml-auto shrink-0 px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700">
+                  Run manually now
+                </Link>
+              </div>
+            )}
+
+            {cron.waitlistCronStale && (
+              <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-3 text-red-700 text-sm font-semibold mb-3">
+                <XCircle className="w-5 h-5 shrink-0" />
+                {cron.stuckWaitlistEmails} waitlist promotion email{cron.stuckWaitlistEmails > 1 ? "s" : ""} stuck unsent
+                for over 1 hour — the notify-waitlist-promotion cron (every 15 min) is not running.
+                <Link to="/ssra-admin/waitlist"
+                  className="ml-auto shrink-0 px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700">
+                  Review waitlist
+                </Link>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className={`border rounded-xl p-4 ${cron.reconciliationStale ? "border-red-200 bg-red-50" : "border-emerald-200 bg-emerald-50"}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-700">Nightly reconciliation</span>
+                  {cron.reconciliationStale
+                    ? <span className="flex items-center gap-1 text-red-600 text-sm font-semibold"><XCircle className="w-4 h-4" />Stale</span>
+                    : <span className="flex items-center gap-1 text-emerald-600 text-sm font-semibold"><CheckCircle2 className="w-4 h-4" />OK</span>}
+                </div>
+                <div className="text-xs text-slate-500 mt-2">
+                  {cron.lastReconciliationAt
+                    ? <>Last run {cron.reconciliationAgeHours} h ago ({new Date(cron.lastReconciliationAt).toLocaleString("en-GB")}) — status: {cron.lastReconciliationStatus}</>
+                    : "No runs recorded yet"}
+                </div>
+              </div>
+              <div className={`border rounded-xl p-4 ${cron.waitlistCronStale ? "border-red-200 bg-red-50" : "border-emerald-200 bg-emerald-50"}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-700">Waitlist promotion emails</span>
+                  {cron.waitlistCronStale
+                    ? <span className="flex items-center gap-1 text-red-600 text-sm font-semibold"><XCircle className="w-4 h-4" />Stuck</span>
+                    : <span className="flex items-center gap-1 text-emerald-600 text-sm font-semibold"><CheckCircle2 className="w-4 h-4" />OK</span>}
+                </div>
+                <div className="text-xs text-slate-500 mt-2">
+                  {cron.waitlistCronStale
+                    ? `${cron.stuckWaitlistEmails} unsent promotion email(s) older than 1 h`
+                    : "No stuck promotion emails — cron healthy"}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {healthLoading ? (
           <div className="text-center py-10 text-slate-400">Loading metrics…</div>

@@ -5,8 +5,10 @@ import {
   User, LogOut, Menu, X, ChevronRight, Video, AlertCircle, Award, BookCheck, Receipt, FolderOpen, Bell,
 } from "lucide-react";
 import { ssraSignOut, useSsraAuth } from "@/hooks/useSsraAuth";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import BackButton from "@/components/ssra/BackButton";
+import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 
 const NAV = [
   { icon: LayoutDashboard, label: "Overview",      href: "/dashboard" },
@@ -26,6 +28,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { profile, loading, isInstructor, isAdmin } = useSsraAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Live ecosystem: every student-facing flow writes an in-app notification;
+  // an INSERT on the student's notifications invalidates their dashboard caches.
+  useRealtimeSync("student", profile?.id ?? null);
   const initial = (profile?.full_name ?? profile?.email ?? "S")[0].toUpperCase();
 
   // Instructors and admins have their own portals — send them there
@@ -144,7 +150,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
           )}
-          {children}
+          <PanelErrorBoundary panelName="your dashboard">
+            {children}
+          </PanelErrorBoundary>
         </main>
       </div>
     </div>

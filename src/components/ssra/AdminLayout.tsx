@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import BackButton from "@/components/ssra/BackButton";
+import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
 const ADMIN_NAV = [
   { icon: LayoutDashboard, label: "Dashboard",       href: "/ssra-admin" },
@@ -70,6 +72,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [open, setOpen]     = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const { profile, isSuperAdmin } = useSsraAuth();
+
+  // Live ecosystem: invalidate React Query caches the moment a system_events
+  // row lands (enrollments, refunds, sessions, fraud flags, ...).
+  useRealtimeSync("admin");
 
   const close = () => setOpen(false);
 
@@ -176,7 +182,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="mb-4">
             <BackButton />
           </div>
-          {children}
+          <PanelErrorBoundary panelName="the admin panel">
+            {children}
+          </PanelErrorBoundary>
         </main>
       </div>
     </div>

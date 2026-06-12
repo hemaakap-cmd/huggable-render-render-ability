@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import BackButton from "@/components/ssra/BackButton";
+import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
 const NAV = [
@@ -108,7 +109,9 @@ export default function InstructorLayout({ children }: { children: React.ReactNo
           <div className="mb-4">
             <BackButton />
           </div>
-          {children}
+          <PanelErrorBoundary panelName="the instructor portal">
+            {children}
+          </PanelErrorBoundary>
         </main>
       </div>
     </div>

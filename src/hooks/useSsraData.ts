@@ -89,72 +89,39 @@ export function useAdminStudents(search = "", page = 0, pageSize = 25) {
   return useQuery({
     queryKey: ["ssra-admin-students-paying", search, page, pageSize],
     queryFn: async () => {
-      // Use the server-side ssra_student_enrollment_stats view to avoid
-      // fetching the entire ssra_enrollments table into the browser.
-      // At 100k+ students the old client-side Map approach would load
-      // millions of rows — this pushes the GROUP BY into PostgreSQL.
-      const { data: statsRows, error: statsErr } = await (supabase as any)
-        .from("ssra_student_enrollment_stats")
-        .select("user_id, total_enrollments, active_enrollments, unique_courses, course_ids, first_enrolled_at");
-      if (statsErr) throw statsErr;
-
-      const statsByUserId = new Map<string, {
-        total_enrollments: number;
-        active_enrollments: number;
-        unique_courses: number;
-        course_ids: string[];
-        first_enrolled_at: string | null;
-      }>();
-      for (const row of statsRows ?? []) {
-        if (row.user_id) statsByUserId.set(row.user_id, row);
-      }
-
-      const studentIds = Array.from(statsByUserId.keys());
-      if (studentIds.length === 0) return { rows: [], total: 0 };
-
-      // Page profiles within those ids
-      const from = page * pageSize;
-      const to   = from + pageSize - 1;
-      let q = supabase
-        .from("ssra_profiles")
-        .select("*", { count: "exact" })
-        .eq("role", "student")
-        .in("id", studentIds)
-        .order("created_at", { ascending: false })
-        .range(from, to);
-      if (search) q = q.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
-      const { data, error, count } = await q;
+      // Fully server-side: filter + join + aggregate + paginate + count happen
+      // inside get_admin_students() (migration 20260612230000). The response
+      // is always exactly one page of rows regardless of table size — safe at
+      // 100k+ students.
+      const { data, error } = await supabase.rpc("get_admin_students" as never, {
+        _search:    search || null,
+        _page:      page,
+        _page_size: pageSize,
+      } as never);
       if (error) throw error;
 
-      const rows = data ?? [];
-      const ids = rows.map((s) => s.id);
-
-      const { data: subs } = await supabase
-        .from("ssra_subscriptions")
-        .select("user_id, status, created_at")
-        .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"])
-        .order("created_at", { ascending: false });
-
-      const latestSubscription = new Map<string, { status: string }>();
-      for (const s of subs ?? []) {
-        if (!s.user_id) continue;
-        if (!latestSubscription.has(s.user_id)) latestSubscription.set(s.user_id, { status: s.status });
-      }
+      const rows = (data ?? []) as Array<{
+        id: string; full_name: string | null; email: string | null;
+        role: string; country: string | null; city: string | null;
+        phone_number: string | null; created_at: string;
+        total_enrollments: number; active_enrollments: number;
+        unique_courses: number; course_ids: string[] | null;
+        first_enrolled_at: string | null; latest_sub_status: string | null;
+        total_count: number;
+      }>;
 
       return {
-        rows: rows.map((s) => {
-          const stats = statsByUserId.get(s.id);
-          return {
-            ...s,
-            ssra_enrollments:       [{ count: stats?.total_enrollments ?? 0 }],
-            ssra_active_enrollments: stats?.active_enrollments ?? 0,
-            ssra_unique_courses:     stats?.unique_courses ?? 0,
-            ssra_course_ids:         stats?.course_ids ?? [],
-            ssra_first_enrolled_at:  stats?.first_enrolled_at ?? null,
-            ssra_subscriptions:      latestSubscription.get(s.id) ? [latestSubscription.get(s.id)!] : [],
-          };
-        }),
-        total: count ?? 0,
+        // Map to the row shape AdminStudents.tsx already consumes
+        rows: rows.map((s) => ({
+          ...s,
+          ssra_enrollments:        [{ count: Number(s.total_enrollments) || 0 }],
+          ssra_active_enrollments: Number(s.active_enrollments) || 0,
+          ssra_unique_courses:     Number(s.unique_courses) || 0,
+          ssra_course_ids:         s.course_ids ?? [],
+          ssra_first_enrolled_at:  s.first_enrolled_at ?? null,
+          ssra_subscriptions:      s.latest_sub_status ? [{ status: s.latest_sub_status }] : [],
+        })),
+        total: rows[0] ? Number(rows[0].total_count) : 0,
       };
     },
   });
@@ -1539,6 +1506,64 @@ export function useWebhookEvents(limit = 200) {
         error_message: string | null;
         processed_at: string;
       }>;
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CRON JOB HEALTH — detect silently dead pg_cron schedules
+   ═══════════════════════════════════════════════════════════ */
+
+export interface CronHealth {
+  lastReconciliationAt: string | null;
+  reconciliationAgeHours: number | null;
+  reconciliationStale: boolean;       // no completed run in > 25 h
+  lastReconciliationStatus: string | null;
+  stuckWaitlistEmails: number;        // promoted > 1 h ago, email never sent
+  waitlistCronStale: boolean;
+}
+
+export function useCronHealth() {
+  return useQuery({
+    queryKey: ["ssra-cron-health"],
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+    queryFn: async (): Promise<CronHealth> => {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+      const [reconRes, waitlistRes] = await Promise.all([
+        (supabase as any)
+          .from("ssra_reconciliation_reports")
+          .select("ran_at, status")
+          .order("ran_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        // Waitlist entries promoted > 1 h ago whose email was never sent —
+        // the notify-waitlist-promotion cron runs every 15 min, so anything
+        // older than an hour means the cron is dead or failing.
+        (supabase as any)
+          .from("ssra_waitlist")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "notified")
+          .eq("email_sent", false)
+          .lt("notified_at", oneHourAgo),
+      ]);
+
+      const lastRun = reconRes.data as { ran_at: string; status: string } | null;
+      const ageHours = lastRun
+        ? (Date.now() - new Date(lastRun.ran_at).getTime()) / 3_600_000
+        : null;
+      const stuckEmails = waitlistRes.count ?? 0;
+
+      return {
+        lastReconciliationAt:     lastRun?.ran_at ?? null,
+        reconciliationAgeHours:   ageHours !== null ? Math.round(ageHours * 10) / 10 : null,
+        // Stale if never ran, or last completed run was over 25 h ago
+        reconciliationStale:      ageHours === null || ageHours > 25,
+        lastReconciliationStatus: lastRun?.status ?? null,
+        stuckWaitlistEmails:      stuckEmails,
+        waitlistCronStale:        stuckEmails > 0,
+      };
     },
   });
 }
