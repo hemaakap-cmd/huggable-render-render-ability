@@ -3,17 +3,12 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
-const SUBSCRIPTION_COURSES: Record<string, string> = {
-  'medical-german': 'medical_german_monthly',
-  'test-course': 'test_course_monthly',
-};
-
-function coursePriceId(courseId: string): string {
-  return SUBSCRIPTION_COURSES[courseId] ?? `${courseId.replace(/-/g, '_')}_onetime`;
-}
-
-function isSubscriptionCourse(courseId: string): boolean {
-  return courseId in SUBSCRIPTION_COURSES;
+// Billing model is read from ssra_courses.is_subscription (single source of
+// truth — see migration 20260612200000). Price id naming convention:
+//   subscription → <id>_monthly, one-time → <id>_onetime
+function coursePriceId(courseId: string, isSubscription: boolean): string {
+  const base = courseId.replace(/-/g, '_');
+  return isSubscription ? `${base}_monthly` : `${base}_onetime`;
 }
 
 Deno.serve(async (req) => {
@@ -57,10 +52,11 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    // Quick existence read (the RPC will re-lock and re-validate authoritatively)
+    // Quick existence read (the RPC will re-lock and re-validate authoritatively).
+    // is_subscription is the authoritative billing model — DB single source of truth.
     const { data: course } = await admin
       .from('ssra_courses')
-      .select('id, is_active')
+      .select('id, is_active, is_subscription')
       .eq('id', courseId)
       .maybeSingle();
     if (!course || !course.is_active) {
@@ -164,7 +160,7 @@ Deno.serve(async (req) => {
     const { userId: _u, courseId: _c, enrollmentId: _e, ...safeMeta } = rawMeta;
 
     return new Response(JSON.stringify({
-      paddlePriceId: coursePriceId(courseId),
+      paddlePriceId: coursePriceId(courseId, !!course.is_subscription),
       paddleDiscountId,
       customData: {
         ...safeMeta,

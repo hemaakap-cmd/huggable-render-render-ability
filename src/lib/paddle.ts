@@ -91,19 +91,18 @@ export async function initializePaddle(): Promise<void> {
   return initPromise;
 }
 
-/** Courses sold as recurring subscriptions instead of one-time purchases. */
-const SUBSCRIPTION_COURSES: Record<string, string> = {
-  "medical-german": "medical_german_monthly",
-  "test-course": "test_course_monthly",
-};
-
-export function isSubscriptionCourse(courseId: string): boolean {
-  return courseId in SUBSCRIPTION_COURSES;
-}
-
-/** Map our course id (e.g. "medical-german") to the Paddle external price id */
-export function coursePriceId(courseId: string): string {
-  return SUBSCRIPTION_COURSES[courseId] ?? `${courseId.replace(/-/g, "_")}_onetime`;
+/**
+ * Map our course id to the Paddle external price id for DISPLAY purposes only.
+ *
+ * The authoritative billing model lives in ssra_courses.is_subscription
+ * (migration 20260612200000). At checkout the paddle-prepare-checkout edge
+ * function reads it from the DB and returns the correct paddlePriceId — the
+ * frontend never decides billing. This helper only feeds the static course
+ * catalog metadata.
+ */
+export function coursePriceId(courseId: string, isSubscription = false): string {
+  const base = courseId.replace(/-/g, "_");
+  return isSubscription ? `${base}_monthly` : `${base}_onetime`;
 }
 
 export async function getPaddlePriceId(externalPriceId: string): Promise<string> {
