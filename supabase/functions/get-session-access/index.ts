@@ -13,6 +13,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
+import { checkRateLimit, rateLimitedResponse } from "../_shared/rate-limit.ts";
 
 const ACCESS_WINDOW_BEFORE_MINUTES = 30;
 const ACCESS_WINDOW_AFTER_MINUTES  = 120;
@@ -52,6 +53,16 @@ Deno.serve(async (req: Request) => {
       authHeader.replace("Bearer ", ""),
     );
     if (userErr || !user) return json({ error: "Unauthorized" }, 401);
+
+    // Rate limit: 30 requests per user per 5 minutes.
+    // Prevents session-id enumeration and Zoom link scraping. Legitimate use
+    // is 1-3 calls around the start of a session.
+    const allowed = await checkRateLimit(supabaseAdmin, {
+      key: `session:${user.id}`,
+      maxRequests: 30,
+      windowSeconds: 300,
+    });
+    if (!allowed) return rateLimitedResponse(corsHeaders);
 
     // ── Parse request ───────────────────────────────────────────
     const body = await req.json().catch(() => ({}));

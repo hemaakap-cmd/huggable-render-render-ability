@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { checkRateLimit, rateLimitedResponse, clientIp } from '../_shared/rate-limit.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,6 +34,23 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!
     )
+
+    // OTP brute-force protection. A 6-digit code has 1,000,000 combinations;
+    // limiting to 5 attempts per email per 15 min makes guessing infeasible.
+    // The per-IP limit catches distributed guessing across many emails.
+    const [emailAllowed, ipAllowed] = await Promise.all([
+      checkRateLimit(adminClient, {
+        key: `otp:${normalizedEmail}`,
+        maxRequests: 5,
+        windowSeconds: 900,
+      }),
+      checkRateLimit(adminClient, {
+        key: `otp-ip:${clientIp(req)}`,
+        maxRequests: 20,
+        windowSeconds: 900,
+      }),
+    ])
+    if (!emailAllowed || !ipAllowed) return rateLimitedResponse(corsHeaders)
 
     const { data: aliases } = await adminClient
       .from('auth_otp_aliases')

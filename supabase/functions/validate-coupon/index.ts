@@ -6,6 +6,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
+import { checkRateLimit, rateLimitedResponse } from "../_shared/rate-limit.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -36,6 +37,15 @@ Deno.serve(async (req: Request) => {
       authHeader.replace("Bearer ", ""),
     );
     if (userErr || !user) return json({ error: "Unauthorized" }, 401);
+
+    // Rate limit: 20 coupon validations per user per 5 minutes.
+    // Prevents coupon code enumeration / brute-forcing discount codes.
+    const allowed = await checkRateLimit(supabaseAdmin, {
+      key: `coupon:${user.id}`,
+      maxRequests: 20,
+      windowSeconds: 300,
+    });
+    if (!allowed) return rateLimitedResponse(corsHeaders);
 
     const { code, courseId, amountEur } = await req.json();
     if (!code || !courseId || amountEur === undefined) {
