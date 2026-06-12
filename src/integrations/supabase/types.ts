@@ -328,6 +328,24 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_counters: {
+        Row: {
+          count: number
+          key: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          key: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          key?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       revenue_events: {
         Row: {
           amount_cents: number
@@ -779,6 +797,7 @@ export type Database = {
           instructor_id: string | null
           instructor_name: string | null
           is_active: boolean
+          is_subscription: boolean
           level: string | null
           modules: Json | null
           price_egp: number | null
@@ -812,6 +831,7 @@ export type Database = {
           instructor_id?: string | null
           instructor_name?: string | null
           is_active?: boolean
+          is_subscription?: boolean
           level?: string | null
           modules?: Json | null
           price_egp?: number | null
@@ -845,6 +865,7 @@ export type Database = {
           instructor_id?: string | null
           instructor_name?: string | null
           is_active?: boolean
+          is_subscription?: boolean
           level?: string | null
           modules?: Json | null
           price_egp?: number | null
@@ -1559,6 +1580,8 @@ export type Database = {
         Row: {
           course_id: string
           created_at: string
+          email_sent: boolean
+          email_sent_at: string | null
           expires_at: string | null
           id: string
           notes: string | null
@@ -1571,6 +1594,8 @@ export type Database = {
         Insert: {
           course_id: string
           created_at?: string
+          email_sent?: boolean
+          email_sent_at?: string | null
           expires_at?: string | null
           id?: string
           notes?: string | null
@@ -1583,6 +1608,8 @@ export type Database = {
         Update: {
           course_id?: string
           created_at?: string
+          email_sent?: boolean
+          email_sent_at?: string | null
           expires_at?: string | null
           id?: string
           notes?: string | null
@@ -1717,6 +1744,17 @@ export type Database = {
           },
         ]
       }
+      ssra_student_enrollment_stats: {
+        Row: {
+          active_enrollments: number | null
+          course_ids: string[] | null
+          first_enrolled_at: string | null
+          total_enrollments: number | null
+          unique_courses: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_concurrent_session_access: {
@@ -1731,10 +1769,23 @@ export type Database = {
           concurrent: boolean
         }[]
       }
+      check_rate_limit: {
+        Args: { _key: string; _max_requests: number; _window_seconds: number }
+        Returns: boolean
+      }
       course_has_seats: { Args: { _course_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      emit_event: {
+        Args: {
+          _event_type: string
+          _payload: Json
+          _resource_id: string
+          _resource_type: string
+        }
+        Returns: undefined
       }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
@@ -1742,7 +1793,39 @@ export type Database = {
       }
       generate_ssra_cert_code: { Args: never; Returns: string }
       generate_ssra_order_number: { Args: never; Returns: string }
+      get_admin_students: {
+        Args: { _page?: number; _page_size?: number; _search?: string }
+        Returns: {
+          active_enrollments: number
+          city: string
+          country: string
+          course_ids: string[]
+          created_at: string
+          email: string
+          first_enrolled_at: string
+          full_name: string
+          id: string
+          latest_sub_status: string
+          phone_number: string
+          role: string
+          total_count: number
+          total_enrollments: number
+          unique_courses: number
+        }[]
+      }
       get_audit_health: { Args: { _env?: string }; Returns: Json }
+      get_lead_student_stats: {
+        Args: never
+        Returns: {
+          conversion_rate: number
+          new_leads_this_month: number
+          new_students_this_month: number
+          revenue_per_student: number
+          total_leads: number
+          total_revenue_eur: number
+          total_students: number
+        }[]
+      }
       get_live_visitor_stats: {
         Args: { _window_minutes?: number }
         Returns: Json
