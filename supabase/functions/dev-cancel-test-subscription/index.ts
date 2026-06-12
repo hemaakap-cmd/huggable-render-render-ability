@@ -20,6 +20,12 @@ Deno.serve(async (req) => {
     });
 
   try {
+    // Hard guard: this is a dev-only helper. Refuse outside development.
+    const appEnv = (Deno.env.get('APP_ENV') ?? '').toLowerCase();
+    if (appEnv !== 'development') {
+      return json({ error: 'Not available' }, 403);
+    }
+
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401);
 

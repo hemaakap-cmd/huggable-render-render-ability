@@ -58,7 +58,7 @@ export default function AdminStudents() {
   const { data, isLoading }       = useAdminStudents(search, page, PAGE_SIZE);
   const { data: stats }           = useLeadStudentStats();
   const { data: courses = [] }    = useAdminCourses();
-  const rows  = (data?.rows ?? []) as StudentRow[];
+  const rows  = (data?.rows ?? []) as unknown as StudentRow[];
   const total = data?.total ?? 0;
   const { isSuperAdmin }          = useSsraAuth();
   const navigate                  = useNavigate();
