@@ -118,28 +118,54 @@ Deno.serve(async (req) => {
       link: '/dashboard/courses',
     });
 
-    // Notify admin via email (best-effort; ignore failures).
+    const svc        = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+
+    // 1. Confirmation email to student (dedicated template, best-effort).
     try {
-      const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+      const studentEmail = enrollment.student_email_snapshot ?? user.email;
+      if (studentEmail) {
+        await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${svc}` },
+          body: JSON.stringify({
+            templateName: 'cancellation-request-received',
+            recipientEmail: studentEmail,
+            idempotencyKey: `cancel-req-student-${inserted.id}`,
+            templateData: {
+              studentName: enrollment.student_name_snapshot ?? 'Student',
+              courseName:  enrollment.course_title_snapshot ?? enrollment.course_id,
+              orderNumber: enrollment.order_number ?? enrollment.id,
+              amountPaid:  `EUR ${Number(enrollment.amount_eur ?? 0).toFixed(2)}`,
+              reason:      reason.slice(0, 500),
+              requestId:   inserted.id,
+            },
+          }),
+        });
+      }
+    } catch (e) { console.error('student cancellation email failed', e); }
+
+    // 2. Admin alert email (uses dedicated admin notification template, best-effort).
+    try {
+      await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${svc}` },
         body: JSON.stringify({
           templateName: 'admin-purchase-notification',
           recipientEmail: 'hemaakap@gmail.com',
-          idempotencyKey: `cancel-req-${inserted.id}`,
+          idempotencyKey: `cancel-req-admin-${inserted.id}`,
           templateData: {
-            studentName: enrollment.student_name_snapshot ?? 'Student',
-            studentEmail: enrollment.student_email_snapshot ?? user.email,
-            courseName: `[CANCELLATION REQUEST] ${enrollment.course_title_snapshot ?? enrollment.course_id}`,
-            orderNumber: enrollment.order_number ?? enrollment.id,
-            amountPaid: `EUR ${Number(enrollment.amount_eur ?? 0).toFixed(2)}`,
-            environment: 'request',
-            transactionId: `Reason: ${reason.slice(0, 180)}`,
+            studentName:   enrollment.student_name_snapshot ?? 'Student',
+            studentEmail:  enrollment.student_email_snapshot ?? user.email,
+            courseName:    `[CANCELLATION REQUEST] ${enrollment.course_title_snapshot ?? enrollment.course_id}`,
+            orderNumber:   enrollment.order_number ?? enrollment.id,
+            amountPaid:    `EUR ${Number(enrollment.amount_eur ?? 0).toFixed(2)}`,
+            environment:   'request',
+            transactionId: `ID: ${inserted.id} | Reason: ${reason.slice(0, 160)}`,
           },
         }),
       });
-    } catch (e) { console.error('admin notify failed', e); }
+    } catch (e) { console.error('admin cancellation notify failed', e); }
 
     return new Response(JSON.stringify({ ok: true, id: inserted.id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -20,6 +20,7 @@ import { template as cancellationConfirmation } from './cancellation-confirmatio
 import { template as instructorAssignment } from './instructor-assignment.tsx'
 import { template as instructorUnassignment } from './instructor-unassignment.tsx'
 import { template as waitlistSeatOpen } from './waitlist-seat-open.tsx'
+import { template as cancellationRequestReceived } from './cancellation-request-received.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'test-email': testEmail,
@@ -30,6 +31,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-purchase-notification': adminPurchaseNotification,
   'session-link-updated': sessionLinkUpdated,
   'cancellation-confirmation': cancellationConfirmation,
+  'cancellation-request-received': cancellationRequestReceived,
   'instructor-assignment': instructorAssignment,
   'instructor-unassignment': instructorUnassignment,
   'waitlist-seat-open': waitlistSeatOpen,
