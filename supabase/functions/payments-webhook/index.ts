@@ -372,12 +372,20 @@ async function handleWebhook(req: Request): Promise<{ eventType: string; eventId
       break;
     case EventName.SubscriptionCreated:
       await handleSubscriptionCreated(event.data, env);
+      // Revenue integrity: record the subscription START in the ledger too.
+      // Recurring transaction.completed events carry the money amounts; this
+      // row guarantees a subscription can never begin invisibly to finance,
+      // even if the first transaction event is delayed or dropped.
+      await logRevenueEvent(eventType, eventId, env, event.data);
       break;
     case EventName.SubscriptionUpdated:
       await handleSubscriptionUpdated(event.data, env);
       break;
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
+      // Cancellations end a revenue stream — they belong in the ledger for
+      // churn/MRR reporting and CFO-grade auditability.
+      await logRevenueEvent(eventType, eventId, env, event.data);
       break;
     case 'adjustment.created':
     case 'adjustment.updated':
@@ -389,6 +397,31 @@ async function handleWebhook(req: Request): Promise<{ eventType: string; eventId
   }
   // Always capture into the audit ledger (idempotent on paddle_event_id).
   await logAuditEvent(eventType, eventId, env, event.data);
+
+  // Traceability: one system_events row per processed webhook. entity_id is
+  // the enrollment when known (links the Paddle event to every DB-trigger
+  // event emitted for that enrollment), otherwise the Paddle resource id.
+  // Full chain for one payment is then queryable via:
+  //   SELECT * FROM system_events WHERE entity_id = '<enrollment_id>' ORDER BY occurred_at;
+  try {
+    const custom = event.data?.customData ?? {};
+    await getSupabase().from('system_events').insert({
+      event_type:  'WebhookProcessed',
+      entity_type: custom.enrollmentId ? 'enrollment' : 'paddle_resource',
+      entity_id:   String(custom.enrollmentId ?? event.data?.id ?? eventId ?? 'unknown'),
+      payload: {
+        paddle_event_type: eventType,
+        paddle_event_id:   eventId ?? null,
+        paddle_resource_id: event.data?.id ?? null,
+        user_id:    custom.userId ?? null,
+        course_id:  custom.courseId ?? null,
+        environment: env,
+      },
+    });
+  } catch (e) {
+    console.error('system_events trace insert failed (non-blocking):', e);
+  }
+
   return { eventType, eventId, env };
 }
 
