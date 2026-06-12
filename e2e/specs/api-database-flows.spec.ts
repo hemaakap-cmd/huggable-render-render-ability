@@ -9,6 +9,9 @@
  *   3. Role-change audit trail (audit_log + system_events)
  *   4. Rate limiting RPC window behaviour
  *   5. reconcile_system() self-healing (enrolled_count drift repair)
+ *   6. instructor_teaches_student() only matches ACTIVE enrollments
+ *   7. RESTRICTIVE write shields — an authenticated student cannot tamper
+ *      with their own enrollment row (migration 20260612250000)
  *
  * Everything runs inside a uniquely-named sandbox course + throwaway users
  * and is cleaned up in afterAll, so it is safe against a production project.
@@ -204,4 +207,93 @@ test("5. reconcile_system() repairs enrolled_count drift", async () => {
     .eq("id", COURSE_ID)
     .single();
   expect(course?.enrolled_count).toBe(0); // drift repaired to the true count
+});
+
+test("6. instructor_teaches_student only matches ACTIVE enrollments", async () => {
+  // Make userB an instructor assigned to the sandbox course.
+  const { error: aErr } = await db.from("ssra_instructor_assignments").insert({
+    instructor_id: userB,
+    course_id: COURSE_ID,
+    is_active: true,
+  });
+  expect(aErr).toBeNull();
+
+  // userA's enrollment is 'cancelled' (from test 2) → must NOT count as taught
+  const { data: taughtCancelled } = await db.rpc("instructor_teaches_student", {
+    _instructor_id: userB,
+    _student_id: userA,
+  });
+  expect(taughtCancelled).toBe(false);
+
+  // Reactivate → must count as taught
+  await db.from("ssra_enrollments")
+    .update({ status: "active" })
+    .eq("user_id", userA)
+    .eq("course_id", COURSE_ID);
+
+  const { data: taughtActive } = await db.rpc("instructor_teaches_student", {
+    _instructor_id: userB,
+    _student_id: userA,
+  });
+  expect(taughtActive).toBe(true);
+
+  // restore state + cleanup assignment
+  await db.from("ssra_enrollments")
+    .update({ status: "cancelled" })
+    .eq("user_id", userA)
+    .eq("course_id", COURSE_ID);
+  await db.from("ssra_instructor_assignments")
+    .delete()
+    .eq("instructor_id", userB)
+    .eq("course_id", COURSE_ID);
+});
+
+test("7. restrictive shield: student cannot tamper with their own enrollment", async () => {
+  const anonKey = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  test.skip(!anonKey, "SUPABASE_ANON_KEY not set");
+
+  // Sign in as userA with the password the sandbox created
+  const client = createClient(url!, anonKey!, { auth: { persistSession: false } });
+  const { data: signIn, error: signInErr } = await client.auth.signInWithPassword({
+    email: `${RUN_ID}-a@ssra-academy.test`,
+    password: `Pw!${RUN_ID}aXYZ`,
+  });
+  expect(signInErr).toBeNull();
+  expect(signIn.session).toBeTruthy();
+
+  // Attempt to self-activate the cancelled enrollment (free course access!)
+  await client
+    .from("ssra_enrollments")
+    .update({ status: "active" })
+    .eq("user_id", userA)
+    .eq("course_id", COURSE_ID);
+
+  // RLS silently filters blocked rows — verify via service role that the
+  // tampering did NOT land
+  const { data: row } = await db
+    .from("ssra_enrollments")
+    .select("status")
+    .eq("user_id", userA)
+    .eq("course_id", COURSE_ID)
+    .single();
+  expect(row?.status).toBe("cancelled");
+
+  // Attempt to forge a brand-new active enrollment
+  const { error: forgeErr } = await client.from("ssra_enrollments").insert({
+    user_id: userA,
+    course_id: COURSE_ID,
+    status: "active",
+    amount_eur: 0,
+  });
+  expect(forgeErr).not.toBeNull(); // INSERT must be rejected outright
+
+  // Attempt to forge a session token (zoom-link minting is service-role only)
+  const { error: tokenErr } = await client.from("ssra_session_tokens").insert({
+    session_id: "00000000-0000-0000-0000-000000000000",
+    user_id: userA,
+    expires_at: new Date(Date.now() + 3_600_000).toISOString(),
+  });
+  expect(tokenErr).not.toBeNull();
+
+  await client.auth.signOut();
 });
