@@ -50,11 +50,35 @@ async function snapshot(env: "sandbox" | "live") {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
+    // Require either the service-role bearer (cron) or a super_admin JWT.
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+    }
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const isService = !!serviceKey && token === serviceKey;
+    if (!isService) {
+      const userClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: `Bearer ${token}` } } },
+      );
+      const { data: { user }, error: ue } = await userClient.auth.getUser(token);
+      if (ue || !user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: CORS });
+      }
+      const { data: isSuper } = await supabase.rpc("is_ssra_super_admin", { _uid: user.id });
+      if (!isSuper) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: CORS });
+      }
+    }
+
     const live = await snapshot("live");
     const sandbox = await snapshot("sandbox");
     return new Response(JSON.stringify({ ok: true, live, sandbox }), { headers: CORS });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return new Response(JSON.stringify({ ok: false, error: msg }), { status: 500, headers: CORS });
+    console.error("payments-audit-snapshot error:", msg);
+    return new Response(JSON.stringify({ ok: false, error: "Internal error" }), { status: 500, headers: CORS });
   }
 });
