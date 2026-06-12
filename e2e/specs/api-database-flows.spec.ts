@@ -261,6 +261,17 @@ test("7. restrictive shield: student cannot tamper with their own enrollment", a
   expect(signInErr).toBeNull();
   expect(signIn.session).toBeTruthy();
 
+  // REGRESSION GUARD (incident 2026-06-12): a FOR ALL restrictive policy
+  // once blocked students from READING their own enrollments, breaking the
+  // entire dashboard. Reads must always work; only writes are shielded.
+  const { data: ownRows, error: ownReadErr } = await client
+    .from("ssra_enrollments")
+    .select("id, status")
+    .eq("user_id", userA)
+    .eq("course_id", COURSE_ID);
+  expect(ownReadErr).toBeNull();
+  expect((ownRows ?? []).length).toBeGreaterThanOrEqual(1);
+
   // Attempt to self-activate the cancelled enrollment (free course access!)
   await client
     .from("ssra_enrollments")
