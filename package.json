@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "e2e:seed": "node e2e/seed.mjs",
+    "check:migrations": "node scripts/check-migrations.mjs",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
