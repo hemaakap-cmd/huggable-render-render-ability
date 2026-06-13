@@ -73,8 +73,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [collapsed, setCollapsed] = useState(false);
   const { profile, isSuperAdmin } = useSsraAuth();
 
-  // Live ecosystem: invalidate React Query caches the moment a system_events
-  // row lands (enrollments, refunds, sessions, fraud flags, ...).
+  // Live ecosystem: invalidate React Query caches the moment a domain
+  // notification lands (enrollments, refunds, sessions, fraud flags, ...).
   useRealtimeSync("admin");
 
   const close = () => setOpen(false);

@@ -4,46 +4,34 @@
  * Bridges Supabase Realtime → React Query so dashboards reflect domain
  * changes within ~1 second instead of waiting out the 60 s staleTime.
  *
- * Two channels, chosen by role:
+ * Both roles listen to INSERTs on ssra_notifications (the table that ALL
+ * domain flows already write to — enrollment, payment, cancellation, refund,
+ * homework graded, role change, fraud, waitlist...). This table is live and in
+ * the realtime publication; the previous admin channel pointed at a
+ * `system_events` table that is NOT provisioned in production, so admin
+ * realtime never fired (live audit 2026-06-13, finding H3). Reusing the proven
+ * notifications stream gives admins genuine live invalidation with no
+ * dependency on unprovisioned infrastructure.
  *
- *  ADMIN  — listens to INSERTs on system_events (the immutable event bus that
- *           every DB trigger and the payments webhook write to). Each
- *           event_type maps to the React Query keys it invalidates. RLS on
- *           system_events restricts the stream to admins, so non-admins
- *           receive nothing even if they subscribe.
- *
- *  STUDENT — listens to INSERTs on their own ssra_notifications rows
- *           (user_id = auth.uid() via RLS). Every student-facing flow
- *           (enrollment activated, session cancelled, certificate issued,
- *           homework graded, waitlist promoted...) already creates a
- *           notification, so it doubles as a perfect change signal.
+ *  ADMIN  — listens to ALL ssra_notifications INSERTs (RLS lets admins read
+ *           every row) and broadly invalidates the admin dashboard query set.
+ *  STUDENT — listens to their OWN ssra_notifications rows (user_id = auth.uid()
+ *           via RLS) and invalidates the student dashboard query set.
  */
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-/** event_type → React Query key prefixes to invalidate */
-const ADMIN_EVENT_KEY_MAP: Record<string, string[]> = {
-  EnrollmentCreated:       ["ssra-admin-enrollments", "ssra-admin-stats", "ssra-admin-students-paying", "ssra-admin-leads", "ssra-admin-leads-students-stats", "ssra-courses-capacity-map", "ssra-stale-enrollments"],
-  EnrollmentActivated:     ["ssra-admin-enrollments", "ssra-admin-stats", "ssra-admin-students-paying", "ssra-revenue-summary", "ssra-courses-capacity-map", "ssra-system-health"],
-  EnrollmentCancelled:     ["ssra-admin-enrollments", "ssra-admin-stats", "ssra-revenue-summary", "ssra-courses-capacity-map", "ssra-admin-waitlist"],
-  RefundCompleted:         ["ssra-admin-enrollments", "ssra-admin-stats", "ssra-revenue-summary"],
-  SessionCreated:          ["ssra-admin-sessions", "ssra-sessions-upcoming", "ssra-operational-alerts"],
-  SessionCancelled:        ["ssra-admin-sessions", "ssra-sessions-upcoming", "ssra-sessions-mine-upcoming"],
-  SessionDeleted:          ["ssra-admin-sessions", "ssra-sessions-upcoming"],
-  CourseUpdated:           ["ssra-admin-courses", "ssra-courses-capacity-map", "ssra-price-hidden-map"],
-  CertificateIssued:       ["ssra-admin-stats"],
-  CertificateRevoked:      ["ssra-admin-stats"],
-  SubscriptionPastDue:     ["ssra-admin-subscriptions"],
-  SubscriptionCancelled:   ["ssra-admin-subscriptions", "ssra-admin-stats"],
-  SubscriptionReactivated: ["ssra-admin-subscriptions"],
-  FraudFlagRaised:         ["ssra-fraud-flags", "ssra-system-health"],
-  WaitlistPromoted:        ["ssra-admin-waitlist", "ssra-system-health", "ssra-cron-health"],
-  BatchStatusChanged:      ["ssra-admin-batches", "ssra-batch-report"],
-  ReconciliationCompleted: ["ssra-cron-health", "ssra-system-health"],
-  WebhookProcessed:        ["ssra-webhook-events"],
-  RoleChanged:             ["ssra-admin-users", "ssra-admin-students-paying"],
-};
+/** Admin dashboard keys refreshed whenever any domain notification lands. */
+const ADMIN_KEYS = [
+  "ssra-admin-enrollments", "ssra-admin-stats", "ssra-admin-students-paying",
+  "ssra-admin-leads", "ssra-admin-leads-students-stats", "ssra-courses-capacity-map",
+  "ssra-stale-enrollments", "ssra-revenue-summary", "ssra-system-health",
+  "ssra-admin-sessions", "ssra-sessions-upcoming", "ssra-operational-alerts",
+  "ssra-admin-courses", "ssra-admin-subscriptions", "ssra-fraud-flags",
+  "ssra-admin-waitlist", "ssra-admin-batches", "ssra-webhook-events",
+  "ssra-admin-users", "ssra-reconciliation-live",
+];
 
 /** Keys every student-facing notification may affect */
 const STUDENT_KEYS = [
@@ -66,16 +54,11 @@ export function useRealtimeSync(role: "admin" | "student", userId?: string | nul
 
     const channel = role === "admin"
       ? supabase
-          .channel("rt-admin-system-events")
+          .channel("rt-admin-notifications")
           .on(
             "postgres_changes",
-            { event: "INSERT", schema: "public", table: "system_events" },
-            (payload) => {
-              const eventType = (payload.new as { event_type?: string })?.event_type;
-              if (eventType && ADMIN_EVENT_KEY_MAP[eventType]) {
-                invalidate(ADMIN_EVENT_KEY_MAP[eventType]);
-              }
-            },
+            { event: "INSERT", schema: "public", table: "ssra_notifications" },
+            () => invalidate(ADMIN_KEYS),
           )
       : supabase
           .channel(`rt-student-notifications-${userId}`)

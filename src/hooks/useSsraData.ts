@@ -1531,36 +1531,25 @@ export function useCronHealth() {
     queryFn: async (): Promise<CronHealth> => {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
-      const [reconRes, waitlistRes] = await Promise.all([
-        (supabase as any)
-          .from("ssra_reconciliation_reports")
-          .select("ran_at, status")
-          .order("ran_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        // Waitlist entries promoted > 1 h ago whose email was never sent —
-        // the notify-waitlist-promotion cron runs every 15 min, so anything
-        // older than an hour means the cron is dead or failing.
-        (supabase as any)
-          .from("ssra_waitlist")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "notified")
-          .eq("email_sent", false)
-          .lt("notified_at", oneHourAgo),
-      ]);
+      // Reconciliation is now an on-demand check (see AdminReconciliation.tsx),
+      // not a nightly cron writing ssra_reconciliation_reports — that table is
+      // not provisioned in production (finding H3, 2026-06-13). We therefore no
+      // longer treat a missing report as "stale"; only the waitlist cron, which
+      // genuinely runs every 15 min, is health-checked here.
+      const waitlistRes = await (supabase as any)
+        .from("ssra_waitlist")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "notified")
+        .eq("email_sent", false)
+        .lt("notified_at", oneHourAgo);
 
-      const lastRun = reconRes.data as { ran_at: string; status: string } | null;
-      const ageHours = lastRun
-        ? (Date.now() - new Date(lastRun.ran_at).getTime()) / 3_600_000
-        : null;
       const stuckEmails = waitlistRes.count ?? 0;
 
       return {
-        lastReconciliationAt:     lastRun?.ran_at ?? null,
-        reconciliationAgeHours:   ageHours !== null ? Math.round(ageHours * 10) / 10 : null,
-        // Stale if never ran, or last completed run was over 25 h ago
-        reconciliationStale:      ageHours === null || ageHours > 25,
-        lastReconciliationStatus: lastRun?.status ?? null,
+        lastReconciliationAt:     null,
+        reconciliationAgeHours:   null,
+        reconciliationStale:      false,
+        lastReconciliationStatus: null,
         stuckWaitlistEmails:      stuckEmails,
         waitlistCronStale:        stuckEmails > 0,
       };
