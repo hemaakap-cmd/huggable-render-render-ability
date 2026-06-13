@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "student_insert_own_attendance" ON public.ssra_session_attendance;
