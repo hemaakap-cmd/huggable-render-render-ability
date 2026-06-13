@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Globe2, Heart, Instagram, Facebook, Youtube } from "lucide-react";
+import { Mail, Globe2, Heart, Instagram, Facebook, Youtube, MessageSquare } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 
 export default function Footer() {
