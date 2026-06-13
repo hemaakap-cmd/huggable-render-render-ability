@@ -26,11 +26,20 @@ Deno.serve(async (req) => {
     // SECURITY: Ignore any user_id sent in the request body — clients used to
     // pass it explicitly, which let unauthenticated callers spoof another
     // user's UUID into analytics. Derive user_id ONLY from the verified JWT.
-    const { session_id, path, referrer, utm } = body ?? {};
+    const { session_id, path, referrer: rawReferrer, utm } = body ?? {};
     if (!session_id || typeof session_id !== 'string') {
       return new Response(JSON.stringify({ error: 'session_id required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Sanitize referrer: only accept valid http(s) URLs, cap length.
+    let referrer: string | null = null;
+    if (typeof rawReferrer === 'string' && rawReferrer.length > 0 && rawReferrer.length <= 2000) {
+      try {
+        const u = new URL(rawReferrer);
+        if (u.protocol === 'http:' || u.protocol === 'https:') referrer = u.toString().slice(0, 2000);
+      } catch { /* invalid URL, drop */ }
     }
 
     let resolvedUserId: string | null = null;
