@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     // Upsert by session_id
     const { data: existing } = await supabase
       .from('site_visitor_sessions')
-      .select('id, page_views, path')
+      .select('id, page_views, path, country, city, region')
       .eq('session_id', session_id)
       .maybeSingle();
 
@@ -87,6 +87,10 @@ Deno.serve(async (req) => {
           path: path ?? existing.path,
           page_views: samePath ? existing.page_views : (existing.page_views ?? 0) + 1,
           user_id: resolvedUserId,
+          country: existing.country ?? country,
+          country_code: (existing as any).country_code ?? country,
+          city: existing.city ?? city,
+          region: existing.region ?? region,
         })
         .eq('id', existing.id);
     } else {
