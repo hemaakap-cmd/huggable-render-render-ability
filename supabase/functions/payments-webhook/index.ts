@@ -172,7 +172,7 @@ async function handleTransactionCompleted(data: any, env: PaddleEnv) {
   });
 }
 
-async function handleSubscriptionCreated(data: any, _env: PaddleEnv) {
+async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const custom = data.customData ?? {};
   const userId = custom.userId as string | undefined;
   const courseId = custom.courseId as string | undefined;
@@ -183,6 +183,45 @@ async function handleSubscriptionCreated(data: any, _env: PaddleEnv) {
   }
   const supabase = getSupabase();
 
+  // If the course hasn't started yet, align the first renewal with the
+  // 1st of the month AFTER the course start date, so billing follows the
+  // course calendar (per-calendar-month) instead of the payment date.
+  let alignedPeriodEnd: string | null = null;
+  try {
+    const { data: course } = await supabase
+      .from('ssra_courses')
+      .select('start_date')
+      .eq('id', courseId)
+      .maybeSingle();
+    const startDateStr = (course as any)?.start_date as string | null;
+    if (startDateStr) {
+      const start = new Date(startDateStr + 'T00:00:00Z');
+      if (start.getTime() > Date.now()) {
+        const target = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1, 0, 0, 0));
+        const currentEnd = data.currentBillingPeriod?.endsAt
+          ? new Date(data.currentBillingPeriod.endsAt).getTime()
+          : 0;
+        // Only push forward — never bring billing earlier than Paddle's default.
+        if (target.getTime() > currentEnd) {
+          const targetIso = target.toISOString();
+          try {
+            const paddle = getPaddleClient(env);
+            await paddle.subscriptions.update(data.id, {
+              nextBilledAt: targetIso,
+              prorationBillingMode: 'do_not_bill',
+            } as any);
+            alignedPeriodEnd = targetIso;
+            console.log(`Aligned subscription ${data.id} next bill to ${targetIso} (course ${courseId} starts ${startDateStr}).`);
+          } catch (e) {
+            console.error('Failed to align subscription billing date (non-blocking):', e);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Course start lookup for billing alignment failed (non-blocking):', e);
+  }
+
   await supabase.from('ssra_subscriptions').upsert({
     user_id: userId,
     course_id: courseId,
@@ -190,7 +229,7 @@ async function handleSubscriptionCreated(data: any, _env: PaddleEnv) {
     stripe_customer_id: data.customerId,
     status: data.status ?? 'active',
     current_period_start: data.currentBillingPeriod?.startsAt,
-    current_period_end: data.currentBillingPeriod?.endsAt,
+    current_period_end: alignedPeriodEnd ?? data.currentBillingPeriod?.endsAt,
     cancel_at_period_end: false,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'stripe_subscription_id' });
