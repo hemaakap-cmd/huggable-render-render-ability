@@ -14,12 +14,12 @@ interface Props {
   studentName?: string
   courseName?: string
   instructorName?: string
-  instructorEmail?: string
 }
 
 const InstructorAssignmentEmail = ({
-  studentName, courseName, instructorName, instructorEmail,
+  studentName, courseName, instructorName,
 }: Props) => (
+
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Meet your instructor for {courseName ?? 'your course'}</Preview>
@@ -45,10 +45,8 @@ const InstructorAssignmentEmail = ({
         <Section style={card}>
           <Heading as="h2" style={h2}>{courseName ?? 'Your course'}</Heading>
           <Row style={kvRow}><Column style={k}>Instructor</Column><Column style={v}>{instructorName ?? '—'}</Column></Row>
-          {instructorEmail && (
-            <Row style={kvRow}><Column style={k}>Contact</Column><Column style={v}>{instructorEmail}</Column></Row>
-          )}
         </Section>
+
 
         <Section style={{ textAlign: 'center', margin: '24px 0' }}>
           <Button href={DASHBOARD_URL} style={btn}>Go to my courses</Button>
@@ -79,8 +77,8 @@ export const template = {
     studentName: 'Ahmed',
     courseName: 'Medizinisches Deutsch',
     instructorName: 'Dr. Mohamed E.',
-    instructorEmail: 'mohamed@ssracourses.com',
   },
+
 } satisfies TemplateEntry
 
 const main          = { backgroundColor: '#ffffff', fontFamily: "'Segoe UI', Arial, sans-serif" }

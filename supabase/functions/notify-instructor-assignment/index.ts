@@ -133,8 +133,8 @@ Deno.serve(async (req: Request) => {
       if (!r.name)  r.name  = p?.full_name ?? undefined;
     }
 
-    const instructorName  = instructor.full_name ?? instructor.email ?? "Your instructor";
-    const instructorEmail = instructor.email ?? undefined;
+    const instructorName  = instructor.full_name ?? "Your instructor";
+
 
     // In-app notifications
     const notifRows = Array.from(recMap.values()).map((r) => ({
@@ -159,8 +159,8 @@ Deno.serve(async (req: Request) => {
             studentName:     r.name ?? "student",
             courseName:      courseTitle.get(r.courseId) ?? "your course",
             instructorName,
-            instructorEmail,
           },
+
         },
       });
       if (!res.error) sent++;
