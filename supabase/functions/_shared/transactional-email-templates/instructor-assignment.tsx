@@ -77,8 +77,8 @@ export const template = {
     studentName: 'Ahmed',
     courseName: 'Medizinisches Deutsch',
     instructorName: 'Dr. Mohamed E.',
-    instructorEmail: 'mohamed@ssracourses.com',
   },
+
 } satisfies TemplateEntry
 
 const main          = { backgroundColor: '#ffffff', fontFamily: "'Segoe UI', Arial, sans-serif" }
