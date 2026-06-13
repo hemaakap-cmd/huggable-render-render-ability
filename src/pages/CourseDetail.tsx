@@ -107,7 +107,7 @@ export default function CourseDetail() {
       <section className={`bg-gradient-to-br ${course.color} pt-32 pb-20 relative overflow-hidden`}>
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-white/10 blur-[80px] pointer-events-none" />
         <div className="container max-w-4xl relative">
-          <BackButton className="text-white/70 hover:text-white mb-6" />
+          <BackButton variant="dark" className="mb-6" />
 
           <div className="flex flex-wrap items-center gap-2 mb-5">
             {hidden ? (

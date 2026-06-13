@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
-import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 
 export default function Legal() {
@@ -25,9 +24,8 @@ export default function Legal() {
         <meta property="og:type" content="website" />
       </Helmet>
 <Header />
-<div className="container pt-20 pb-0">
-  <BackButton />
-</div>
+
+
 
       <div className="container max-w-3xl py-32">
         <h1 className="font-display text-4xl font-bold text-foreground mb-2">Legal Information</h1>

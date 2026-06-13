@@ -198,7 +198,7 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <BackButton className="mb-4 text-white/70 hover:text-white" />
+        <BackButton variant="dark" className="mb-4" />
         <Link to="/" className="flex items-center justify-center mb-8">
           <SsraLogo size={36} scheme="light" />
         </Link>

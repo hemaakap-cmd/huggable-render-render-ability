@@ -5,7 +5,6 @@ import {
   Video, FolderOpen, LogOut, Menu, X, ChevronDown, GraduationCap, BookCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
-import BackButton from "@/components/ssra/BackButton";
 import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 
@@ -106,9 +105,7 @@ export default function InstructorLayout({ children }: { children: React.ReactNo
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="mb-4">
-            <BackButton />
-          </div>
+
           <PanelErrorBoundary panelName="the instructor portal">
             {children}
           </PanelErrorBoundary>

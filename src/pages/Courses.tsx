@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown, AlertCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
-import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, type Course } from "@/lib/courseCatalog";
 import { useCoursesCapacityMap } from "@/hooks/useSsraData";
@@ -148,9 +147,8 @@ export default function Courses() {
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
       </Helmet>
 <Header />
-<div className="container pt-20 pb-0">
-  <BackButton />
-</div>
+
+
 
       {/* Hero */}
       <section className="bg-hero pt-32 pb-20 relative overflow-hidden">

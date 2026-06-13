@@ -9,7 +9,6 @@ import {
   AlertOctagon, HeartPulse, BarChart3, Award, RotateCcw, Zap, RefreshCw, ShieldCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
-import BackButton from "@/components/ssra/BackButton";
 import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
@@ -179,9 +178,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="mb-4">
-            <BackButton />
-          </div>
+
           <PanelErrorBoundary panelName="the admin panel">
             {children}
           </PanelErrorBoundary>

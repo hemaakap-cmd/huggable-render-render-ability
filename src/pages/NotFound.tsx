@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { GraduationCap, ArrowLeft } from "lucide-react";
 import Header from "@/components/ssra/Header";
-import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { Button } from "@/components/ui/button";
 
@@ -9,9 +8,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
 <Header />
-<div className="container pt-20 pb-0">
-  <BackButton />
-</div>
+
       <div className="flex-1 flex items-center justify-center py-32">
         <div className="text-center max-w-md px-6">
           <div className="w-20 h-20 rounded-full bg-[hsl(43,96%,50%)] bg-opacity-10 flex items-center justify-center mx-auto mb-6">

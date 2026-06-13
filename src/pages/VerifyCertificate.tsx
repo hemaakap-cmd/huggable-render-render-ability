@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { CheckCircle2, XCircle, Search, ShieldCheck, Calendar, GraduationCap, Award, Loader2 } from "lucide-react";
 import Header from "@/components/ssra/Header";
-import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,9 +51,8 @@ export default function VerifyCertificate() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
 <Header />
-<div className="container pt-20 pb-0">
-  <BackButton />
-</div>
+
+
 
       <section className="bg-[hsl(222,47%,9%)] pt-32 pb-16">
         <div className="container max-w-2xl text-center">
