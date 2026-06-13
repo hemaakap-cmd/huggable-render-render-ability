@@ -32,6 +32,9 @@ const MIGRATIONS_DIR = join(process.cwd(), "supabase", "migrations");
 const ALLOWLIST = new Set([
   "20260605201013_b991c143-21fa-49cb-98e7-10b0c8e81cd7.sql", // dropped in 20260607205412
   "20260612195635_3893176d-e063-4aa6-8c01-f3084475a535.sql", // dropped in 20260612260000
+  // Lovable squash: creates enrollments_no_client_writes + session_tokens_no_client_writes
+  // as FOR ALL then DROPs both later in the SAME file (lines ~369-370). Self-neutralized.
+  "20260612223738_9221c086-7d05-48c6-a1fd-ef8d8f8327d4.sql",
 ]);
 
 // Strip SQL comments so commented-out examples / explanations don't trip the guard.
