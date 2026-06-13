@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Search, Loader2, Mail, Globe2 } from "lucide-react";
+import { Users, Search, Loader2, Globe2 } from "lucide-react";
+
 import { useSearchParams } from "react-router-dom";
 import InstructorLayout from "@/components/ssra/InstructorLayout";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
