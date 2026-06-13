@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Search, Loader2, Mail, Globe2 } from "lucide-react";
+import { Users, Search, Loader2, Globe2 } from "lucide-react";
+
 import { useSearchParams } from "react-router-dom";
 import InstructorLayout from "@/components/ssra/InstructorLayout";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
@@ -39,8 +40,9 @@ function useInstructorStudents(courseId: string) {
 
       const { data: profiles } = await supabase
         .from("ssra_profiles")
-        .select("id, full_name, email, country, phone_number")
+        .select("id, full_name, country")
         .in("id", ids);
+
 
       const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
@@ -66,10 +68,10 @@ export default function InstructorStudents() {
     const q = search.toLowerCase();
     return (
       s.profile?.full_name?.toLowerCase().includes(q) ||
-      s.profile?.email?.toLowerCase().includes(q) ||
       s.profile?.country?.toLowerCase().includes(q)
     );
   });
+
 
   return (
     <InstructorLayout>
@@ -100,9 +102,10 @@ export default function InstructorStudents() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, country…"
+            placeholder="Search by name or country…"
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
+
         </div>
 
         {!courseId ? (
@@ -125,9 +128,7 @@ export default function InstructorStudents() {
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   <th className="text-left px-5 py-3">Student</th>
-                  <th className="text-left px-5 py-3">Email</th>
                   <th className="text-left px-5 py-3">Country</th>
-                  <th className="text-left px-5 py-3">Phone</th>
                   <th className="text-left px-5 py-3">Enrolled</th>
                 </tr>
               </thead>
@@ -137,27 +138,22 @@ export default function InstructorStudents() {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 font-bold text-xs shrink-0">
-                          {(s.profile?.full_name ?? s.profile?.email ?? "?")[0].toUpperCase()}
+                          {(s.profile?.full_name ?? "?")[0].toUpperCase()}
                         </div>
                         <span className="font-medium text-slate-900">{s.profile?.full_name ?? "—"}</span>
                       </div>
-                    </td>
-                    <td className="px-5 py-3">
-                      <a href={`mailto:${s.profile?.email}`} className="flex items-center gap-1 text-slate-500 hover:text-[hsl(220,91%,54%)]">
-                        <Mail className="w-3.5 h-3.5" /> {s.profile?.email ?? "—"}
-                      </a>
                     </td>
                     <td className="px-5 py-3">
                       <span className="flex items-center gap-1 text-slate-500">
                         <Globe2 className="w-3.5 h-3.5" /> {s.profile?.country ?? "—"}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-slate-500">{s.profile?.phone_number ?? "—"}</td>
                     <td className="px-5 py-3 text-xs text-slate-400">
                       {s.enrolled_at ? new Date(s.enrolled_at).toLocaleDateString() : "—"}
                     </td>
                   </tr>
                 ))}
+
               </tbody>
             </table>
           </div>
