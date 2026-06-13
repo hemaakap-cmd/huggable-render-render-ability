@@ -21,6 +21,7 @@ import { template as instructorAssignment } from './instructor-assignment.tsx'
 import { template as instructorUnassignment } from './instructor-unassignment.tsx'
 import { template as waitlistSeatOpen } from './waitlist-seat-open.tsx'
 import { template as cancellationRequestReceived } from './cancellation-request-received.tsx'
+import { template as paymentReminder } from './payment-reminder.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'test-email': testEmail,
