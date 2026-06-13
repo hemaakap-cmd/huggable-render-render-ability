@@ -128,9 +128,7 @@ export default function InstructorStudents() {
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   <th className="text-left px-5 py-3">Student</th>
-                  <th className="text-left px-5 py-3">Email</th>
                   <th className="text-left px-5 py-3">Country</th>
-                  <th className="text-left px-5 py-3">Phone</th>
                   <th className="text-left px-5 py-3">Enrolled</th>
                 </tr>
               </thead>
@@ -140,27 +138,22 @@ export default function InstructorStudents() {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 font-bold text-xs shrink-0">
-                          {(s.profile?.full_name ?? s.profile?.email ?? "?")[0].toUpperCase()}
+                          {(s.profile?.full_name ?? "?")[0].toUpperCase()}
                         </div>
                         <span className="font-medium text-slate-900">{s.profile?.full_name ?? "—"}</span>
                       </div>
-                    </td>
-                    <td className="px-5 py-3">
-                      <a href={`mailto:${s.profile?.email}`} className="flex items-center gap-1 text-slate-500 hover:text-[hsl(220,91%,54%)]">
-                        <Mail className="w-3.5 h-3.5" /> {s.profile?.email ?? "—"}
-                      </a>
                     </td>
                     <td className="px-5 py-3">
                       <span className="flex items-center gap-1 text-slate-500">
                         <Globe2 className="w-3.5 h-3.5" /> {s.profile?.country ?? "—"}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-slate-500">{s.profile?.phone_number ?? "—"}</td>
                     <td className="px-5 py-3 text-xs text-slate-400">
                       {s.enrolled_at ? new Date(s.enrolled_at).toLocaleDateString() : "—"}
                     </td>
                   </tr>
                 ))}
+
               </tbody>
             </table>
           </div>
