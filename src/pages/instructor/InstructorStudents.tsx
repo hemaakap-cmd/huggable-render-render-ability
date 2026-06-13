@@ -68,10 +68,10 @@ export default function InstructorStudents() {
     const q = search.toLowerCase();
     return (
       s.profile?.full_name?.toLowerCase().includes(q) ||
-      s.profile?.email?.toLowerCase().includes(q) ||
       s.profile?.country?.toLowerCase().includes(q)
     );
   });
+
 
   return (
     <InstructorLayout>
