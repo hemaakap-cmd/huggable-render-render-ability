@@ -151,7 +151,32 @@ export default function AdminCoupons() {
           </button>
         </div>
 
-        {/* Create / Edit modal */}
+        {/* Public visibility toggle */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center justify-between gap-4">
+          <div>
+            <div className="font-semibold text-slate-900 text-sm">Show coupon field on checkout</div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              When off, customers won't see the "Enter code" field at checkout. Active coupons remain valid via direct links.
+            </p>
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                await setFlag.mutateAsync({ key: "coupons_enabled", enabled: !couponsEnabled });
+                toast({ title: couponsEnabled ? "Coupon field hidden" : "Coupon field visible" });
+              } catch (e: unknown) {
+                toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
+              }
+            }}
+            className="shrink-0"
+            aria-label="Toggle coupon visibility"
+          >
+            {couponsEnabled
+              ? <ToggleRight className="w-10 h-10 text-emerald-500" />
+              : <ToggleLeft className="w-10 h-10 text-slate-300" />}
+          </button>
+        </div>
+
         {editing && (
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
             <h2 className="font-semibold text-slate-900">{editing.id ? "Edit Coupon" : "New Coupon"}</h2>
