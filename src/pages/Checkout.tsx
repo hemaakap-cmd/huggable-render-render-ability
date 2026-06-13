@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
