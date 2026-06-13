@@ -212,11 +212,14 @@ const ALL_COURSES: Course[] = [
   },
 ];
 
-const TEST_COURSE = COURSES.find((c) => c.id === "test-course")!;
+const TEST_COURSE = ALL_COURSES.find((c) => c.id === "test-course")!;
+
+/** Public course catalogue — excludes the internal QA "test-course". */
+export const COURSES: Course[] = ALL_COURSES.filter((c) => c.id !== "test-course");
 
 export function getCourse(id: string) {
   if (id === "test-course") return TEST_COURSE;
-  return COURSES.find((c) => c.id === id);
+  return ALL_COURSES.find((c) => c.id === id);
 }
 
 export const SUBSCRIPTION_COURSE = COURSES.find((c) => c.type === "subscription")!;
