@@ -142,6 +142,7 @@ export default function AdminEnrollments() {
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <div className="text-sm font-bold text-slate-900">€{e.amount_eur ?? 0}</div>
                     <StatusBadge status={e.status} />
+                    {e.status === "pending" && <SendReminderButton enrollment={e} />}
                     <div className="text-xs text-slate-400">
                       {e.paid_at
                         ? new Date(e.paid_at).toLocaleDateString()
