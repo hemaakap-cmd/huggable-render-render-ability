@@ -7,7 +7,6 @@ import {
 import { ssraSignOut, useSsraAuth } from "@/hooks/useSsraAuth";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import SsraLogo from "@/components/ssra/SsraLogo";
-import BackButton from "@/components/ssra/BackButton";
 import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 
 const NAV = [

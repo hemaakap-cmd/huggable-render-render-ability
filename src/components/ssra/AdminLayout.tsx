@@ -9,7 +9,6 @@ import {
   AlertOctagon, HeartPulse, BarChart3, Award, RotateCcw, Zap, RefreshCw, ShieldCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
-import BackButton from "@/components/ssra/BackButton";
 import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";

@@ -5,7 +5,6 @@ import {
   Video, FolderOpen, LogOut, Menu, X, ChevronDown, GraduationCap, BookCheck,
 } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
-import BackButton from "@/components/ssra/BackButton";
 import PanelErrorBoundary from "@/components/PanelErrorBoundary";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
 

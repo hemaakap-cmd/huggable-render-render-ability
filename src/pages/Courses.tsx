@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown, AlertCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
-import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { COURSES, type Course } from "@/lib/courseCatalog";
 import { useCoursesCapacityMap } from "@/hooks/useSsraData";
