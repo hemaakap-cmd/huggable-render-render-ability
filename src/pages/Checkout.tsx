@@ -96,7 +96,14 @@ export default function Checkout() {
         },
       });
       if (error) throw new Error(error.message);
-      if (data?.alreadyEnrolled) throw new Error("You are already enrolled in this course.");
+      if (data?.alreadyEnrolled) {
+        toast({
+          title: "You're already enrolled ✅",
+          description: "This course is already in your dashboard. Redirecting you there…",
+        });
+        setTimeout(() => navigate("/dashboard/courses"), 1500);
+        return;
+      }
       if (!data?.paddlePriceId) throw new Error("Could not prepare checkout. Please try again.");
 
       const enrollmentId: string | undefined = data.customData?.enrollmentId;
