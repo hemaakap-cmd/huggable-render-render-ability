@@ -7,6 +7,7 @@ import {
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useFeatureFlag, useSetFeatureFlag } from "@/hooks/useFeatureFlag";
 
 type Coupon = {
   id: string;
