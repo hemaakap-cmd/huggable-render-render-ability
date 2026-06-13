@@ -1271,6 +1271,24 @@ export type Database = {
         }
         Relationships: []
       }
+      ssra_public_catalog_events: {
+        Row: {
+          changed_at: string
+          entity: string
+          id: number
+        }
+        Insert: {
+          changed_at?: string
+          entity?: string
+          id?: number
+        }
+        Update: {
+          changed_at?: string
+          entity?: string
+          id?: number
+        }
+        Relationships: []
+      }
       ssra_session_access_log: {
         Row: {
           accessed_at: string
