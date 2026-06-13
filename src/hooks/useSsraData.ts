@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
+import { courseFromRecord, type CourseRecord } from "@/lib/courseCatalog";
 
 /* ── My enrollments ── */
 export function useMyEnrollments() {
@@ -339,6 +341,43 @@ export function useAdminSubscriptions() {
 }
 
 /* ── Admin: all courses ── */
+export function usePublicCourses() {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("rt-public-courses")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "ssra_public_catalog_events" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+          qc.invalidateQueries({ queryKey: ["public-home-stats"] });
+          qc.invalidateQueries({ queryKey: ["ssra-price-hidden-map"] });
+          qc.invalidateQueries({ queryKey: ["ssra-courses-capacity-map"] });
+        },
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [qc]);
+
+  return useQuery({
+    queryKey: ["ssra-public-courses"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ssra_courses")
+        .select("id, title, title_ar, subtitle, description, price_eur, course_type, category, requires_verification, duration_weeks, level, price_hidden, modules, is_subscription")
+        .eq("is_active", true)
+        .neq("id", "test-course")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return ((data ?? []) as CourseRecord[]).map(courseFromRecord);
+    },
+    refetchInterval: 15_000,
+  });
+}
+
 export function useAdminCourses() {
   return useQuery({
     queryKey: ["ssra-admin-courses"],
@@ -366,7 +405,11 @@ export function useUpsertCourse() {
         if (error) throw error;
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+      qc.invalidateQueries({ queryKey: ["public-home-stats"] });
+    },
   });
 }
 
@@ -377,7 +420,11 @@ export function useToggleCourse() {
       const { error } = await supabase.from("ssra_courses").update({ is_active, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+      qc.invalidateQueries({ queryKey: ["public-home-stats"] });
+    },
   });
 }
 
@@ -388,7 +435,11 @@ export function useTogglePriceHidden() {
       const { error } = await supabase.from("ssra_courses").update({ price_hidden, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-price-hidden-map"] });
+    },
   });
 }
 

@@ -4,8 +4,8 @@ import { BookOpen, Globe2, Clock, ArrowRight, Filter, CreditCard, Crown, AlertCi
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, type Course } from "@/lib/courseCatalog";
-import { useCoursesCapacityMap } from "@/hooks/useSsraData";
+import { type Course } from "@/lib/courseCatalog";
+import { useCoursesCapacityMap, usePublicCourses } from "@/hooks/useSsraData";
 
 function useReveal() {
   useEffect(() => {
@@ -126,9 +126,10 @@ function CourseRow({
 export default function Courses() {
   useReveal();
   const [active, setActive] = useState<Category>("all");
+  const { data: courses = [] } = usePublicCourses();
   const { data: capacityMap = {} } = useCoursesCapacityMap();
 
-  const filtered = active === "all" ? COURSES : COURSES.filter((c) => c.category === active);
+  const filtered = active === "all" ? courses : courses.filter((c) => c.category === active);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -154,7 +155,7 @@ export default function Courses() {
       <section className="bg-hero pt-32 pb-20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-blue-500/10 blur-[80px] pointer-events-none" />
         <div className="container max-w-3xl text-center relative reveal">
-          <span className="badge-gold mb-6">9 Courses Available</span>
+          <span className="badge-gold mb-6">{courses.length} Courses Available</span>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-5">
             SSRA Course Catalogue
           </h1>

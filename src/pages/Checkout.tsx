@@ -8,7 +8,7 @@ import { getCourse } from "@/lib/courseCatalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
-import { useCourseSchedule } from "@/hooks/useSsraData";
+import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
 
 function fmtDate(d?: string | null) {
@@ -22,7 +22,8 @@ export default function Checkout() {
   const navigate  = useNavigate();
   const { toast } = useToast();
   const courseId  = params.get("courseId") ?? "";
-  const course    = getCourse(courseId);
+  const { data: publicCourses, isLoading: coursesLoading } = usePublicCourses();
+  const course    = publicCourses?.find((c) => c.id === courseId) ?? (courseId === "test-course" ? getCourse(courseId) : undefined);
   const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
@@ -134,7 +135,7 @@ export default function Checkout() {
     }
   }
 
-  if (authLoading) {
+  if (authLoading || (coursesLoading && !course)) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />

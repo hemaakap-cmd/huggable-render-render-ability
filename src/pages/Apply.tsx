@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { COURSES as COURSE_CATALOG } from "@/lib/courseCatalog";
+import { usePublicCourses } from "@/hooks/useSsraData";
 
 function useReveal() {
   useEffect(() => {
@@ -31,12 +31,11 @@ const STEPS = [
   { n: "03", title: "Get Access",    desc: "Once approved, you'll receive an email to complete your subscription." },
 ];
 
-const COURSES = COURSE_CATALOG.map((c) => ({ id: c.id, label: c.titleAr ? `${c.title} (${c.titleAr})` : c.title }));
-
 export default function Apply() {
   useReveal();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { data: courses = [] } = usePublicCourses();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -238,7 +237,7 @@ export default function Apply() {
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Select a course…</option>
-                  {COURSES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                  {courses.map((c) => <option key={c.id} value={c.id}>{c.titleAr ? `${c.title} (${c.titleAr})` : c.title}</option>)}
                 </select>
               </div>
 

@@ -8,8 +8,7 @@ import {
 import Header from "@/components/ssra/Header";
 import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, getCourse } from "@/lib/courseCatalog";
-import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlist } from "@/hooks/useSsraData";
+import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlist, usePublicCourses } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,13 +27,14 @@ export default function CourseDetail() {
   const navigate   = useNavigate();
   const { user }   = useSsraAuth();
   const { toast }  = useToast();
-  const course     = getCourse(id);
+  const { data: courses, isLoading: coursesLoading } = usePublicCourses();
+  const course     = courses?.find((c) => c.id === id);
   const { data: priceHidden = {} } = usePriceHiddenMap();
   const { data: schedule }         = useCourseSchedule(id);
   const { data: capacity }         = useCourseCapacity(id);
   const joinWaitlist               = useJoinWaitlist();
   const [joiningWaitlist, setJoiningWaitlist] = useState(false);
-  const hidden   = !!priceHidden[id];
+  const hidden   = !!(course?.price_hidden || priceHidden[id]);
   const isFull   = capacity ? capacity.enrolled_count >= capacity.capacity : false;
   const seatsLeft = capacity ? Math.max(0, capacity.capacity - capacity.enrolled_count) : null;
 
@@ -50,6 +50,18 @@ export default function CourseDetail() {
       toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
     } finally { setJoiningWaitlist(false); }
   };
+
+  if (coursesLoading && !course) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!course) {
     return (
@@ -71,7 +83,7 @@ export default function CourseDetail() {
     navigate(`/checkout?courseId=${course.id}`);
   };
 
-  const related = COURSES.filter((c) => c.category === course.category && c.id !== course.id).slice(0, 3);
+  const related = (courses ?? []).filter((c) => c.category === course.category && c.id !== course.id).slice(0, 3);
 
   const shortTitle = (course.subtitle.length > 45 ? course.subtitle.slice(0, 44).trimEnd() + "…" : course.subtitle) + " · SSRA";
 

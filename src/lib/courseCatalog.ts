@@ -23,6 +23,23 @@ export interface Course {
   paymentLink?: string;
 }
 
+export interface CourseRecord {
+  id: string;
+  title: string | null;
+  title_ar: string | null;
+  subtitle: string | null;
+  description: string | null;
+  price_eur: number | string | null;
+  course_type: string | null;
+  category: string | null;
+  requires_verification: boolean | null;
+  duration_weeks: string | null;
+  level: string | null;
+  price_hidden: boolean | null;
+  modules: unknown;
+  is_subscription?: boolean | null;
+}
+
 /**
  * NOTE: The €1 "test-course" exists ONLY in the database (ssra_courses) for
  * admin/QA testing of the checkout flow via the direct URL
@@ -213,6 +230,64 @@ const ALL_COURSES: Course[] = [
 ];
 
 const TEST_COURSE = ALL_COURSES.find((c) => c.id === "test-course")!;
+
+const COURSE_BY_ID = new Map(ALL_COURSES.map((course) => [course.id, course]));
+
+const CATEGORY_COLORS: Record<Course["category"], string> = {
+  clinical: "from-blue-600 to-blue-800",
+  language: "from-emerald-600 to-teal-800",
+  career: "from-rose-600 to-rose-800",
+};
+
+function normalizeCourseType(row: CourseRecord, fallback?: Course): CourseType {
+  if (row.course_type === "subscription" || row.is_subscription) return "subscription";
+  if (row.course_type === "one_time") return "one_time";
+  return fallback?.type ?? "one_time";
+}
+
+function normalizeCategory(value: string | null | undefined, fallback?: Course): Course["category"] {
+  if (value === "clinical" || value === "language" || value === "career") return value;
+  return fallback?.category ?? "clinical";
+}
+
+function normalizeModules(value: unknown, fallback?: Course): string[] {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+    } catch {
+      return value.split("\n").map((item) => item.trim()).filter(Boolean);
+    }
+  }
+  return fallback?.modules ?? [];
+}
+
+export function courseFromRecord(row: CourseRecord): Course {
+  const fallback = COURSE_BY_ID.get(row.id);
+  const type = normalizeCourseType(row, fallback);
+  const category = normalizeCategory(row.category, fallback);
+
+  return {
+    id: row.id,
+    title: row.title?.trim() || fallback?.title || "Untitled course",
+    titleAr: row.title_ar?.trim() || fallback?.titleAr || "",
+    subtitle: row.subtitle?.trim() || fallback?.subtitle || row.title?.trim() || "Course",
+    desc: row.description?.trim() || fallback?.desc || row.subtitle?.trim() || "Course details will be announced soon.",
+    price: Number(row.price_eur ?? fallback?.price ?? 0),
+    interval: type === "subscription" ? "month" : undefined,
+    type,
+    priceId: coursePriceId(row.id, type === "subscription"),
+    category,
+    weeks: row.duration_weeks?.trim() || fallback?.weeks || "To be announced",
+    level: row.level?.trim() || fallback?.level || "All levels",
+    requires_verification: !!row.requires_verification,
+    modules: normalizeModules(row.modules, fallback),
+    color: fallback?.color ?? CATEGORY_COLORS[category],
+    price_hidden: !!row.price_hidden,
+    paymentLink: fallback?.paymentLink,
+  };
+}
 
 /** Public course catalogue — excludes the internal QA "test-course". */
 export const COURSES: Course[] = ALL_COURSES.filter((c) => c.id !== "test-course");
