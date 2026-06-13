@@ -7,7 +7,8 @@ import {
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, SUBSCRIPTION_COURSE, type Course } from "@/lib/courseCatalog";
+import { type Course } from "@/lib/courseCatalog";
+import { usePublicCourses } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 
 function useReveal() {
@@ -136,9 +137,11 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
 export default function Pricing() {
   useReveal();
 
-  const clinical  = COURSES.filter((c) => c.category === "clinical");
-  const language  = COURSES.filter((c) => c.category === "language");
-  const career    = COURSES.filter((c) => c.category === "career");
+  const { data: courses = [] } = usePublicCourses();
+  const subscriptionCourse = courses.find((c) => c.type === "subscription");
+  const clinical  = courses.filter((c) => c.category === "clinical");
+  const language  = courses.filter((c) => c.category === "language");
+  const career    = courses.filter((c) => c.category === "career");
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -191,7 +194,7 @@ export default function Pricing() {
       </section>
 
       {/* Subscription spotlight */}
-      <section className="py-20">
+      {subscriptionCourse && <section className="py-20">
         <div className="container max-w-5xl">
           <div className="text-center mb-10 reveal">
             <span className="badge-blue mb-3">Subscription Course</span>
@@ -199,10 +202,10 @@ export default function Pricing() {
             <p className="text-slate-500 text-sm mt-2">Requires proof of sports science graduation or enrolment.</p>
           </div>
           <div className="max-w-lg mx-auto reveal">
-            <PriceCard course={SUBSCRIPTION_COURSE} highlight />
+            <PriceCard course={subscriptionCourse} highlight />
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Clinical courses */}
       <section className="py-16 bg-white border-t border-slate-100">
