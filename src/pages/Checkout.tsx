@@ -28,6 +28,7 @@ export default function Checkout() {
   const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
+  const { enabled: couponsEnabled } = useFeatureFlag("coupons_enabled");
 
   const [loading, setLoading] = useState(false);
 
