@@ -110,8 +110,7 @@ export default function Index() {
           "email": "info@ssracourses.com",
           "address": { "@type": "PostalAddress", "addressCountry": "DE" },
           "sameAs": [
-            "https://instagram.com/ssra.academy",
-            "https://facebook.com/ssraacademy"
+            "https://www.instagram.com/ssra_academy?igsh=eTM0YnBvNzN4cTl1"
           ]
         })}</script>
       </Helmet>

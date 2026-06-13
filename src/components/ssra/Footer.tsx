@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Globe2, Heart, Instagram, Facebook, Youtube, MessageSquare } from "lucide-react";
+import { Mail, Globe2, Heart, Instagram, MessageSquare } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 
 export default function Footer() {
@@ -79,20 +79,10 @@ export default function Footer() {
               <Mail className="w-3.5 h-3.5" /> info@ssracourses.com
             </a>
             <div className="flex gap-3 mt-5">
-              <a href="https://instagram.com/ssra.academy" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/ssra_academy?igsh=eTM0YnBvNzN4cTl1" target="_blank" rel="noopener noreferrer"
                 className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/30 transition-all"
                 aria-label="Instagram">
                 <Instagram className="w-4 h-4" />
-              </a>
-              <a href="https://facebook.com/ssraacademy" target="_blank" rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/30 transition-all"
-                aria-label="Facebook">
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a href="https://youtube.com/@ssraacademy" target="_blank" rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/30 transition-all"
-                aria-label="YouTube">
-                <Youtube className="w-4 h-4" />
               </a>
             </div>
           </div>
