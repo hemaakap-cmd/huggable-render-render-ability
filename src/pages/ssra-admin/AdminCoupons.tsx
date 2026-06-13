@@ -95,6 +95,8 @@ export default function AdminCoupons() {
   const { data: coupons = [], isLoading } = useCoupons();
   const upsert = useUpsertCoupon();
   const toggle = useToggleCoupon();
+  const { enabled: couponsEnabled } = useFeatureFlag("coupons_enabled");
+  const setFlag = useSetFeatureFlag();
   const [editing, setEditing] = useState<Partial<Coupon> | null>(null);
   const [saving, setSaving]   = useState(false);
 
