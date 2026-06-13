@@ -1,6 +1,53 @@
-import { BookOpen, TrendingUp, Euro } from "lucide-react";
+import { BookOpen, TrendingUp, Euro, Mail, Loader2 } from "lucide-react";
+import { useState } from "react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { useAdminEnrollments, useAdminSubscriptions } from "@/hooks/useSsraData";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+function SendReminderButton({ enrollment }: { enrollment: any }) {
+  const [loading, setLoading] = useState(false);
+  const email = enrollment.ssra_profiles?.email ?? enrollment.student_email_snapshot;
+  if (!email) return null;
+  const send = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          template: "payment-reminder",
+          to: email,
+          data: {
+            studentName: enrollment.ssra_profiles?.full_name ?? enrollment.student_name_snapshot ?? "there",
+            courseName: enrollment.course_title_snapshot ?? enrollment.ssra_courses?.title ?? "your course",
+            startDate: enrollment.start_date_snapshot
+              ? new Date(enrollment.start_date_snapshot + "T00:00:00").toLocaleDateString()
+              : "—",
+            startTime: enrollment.start_time_snapshot ? String(enrollment.start_time_snapshot).slice(0, 5) : "—",
+            amount: `€${enrollment.amount_eur ?? 0}`,
+            orderNumber: enrollment.order_number ?? "—",
+            checkoutUrl: `https://ssracourses.com/courses/${enrollment.course_id}`,
+          },
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Reminder sent", description: `Payment reminder emailed to ${email}.` });
+    } catch (e: any) {
+      toast({ title: "Failed to send", description: e?.message ?? "Try again.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <button
+      onClick={send}
+      disabled={loading}
+      className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 disabled:opacity-50"
+    >
+      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+      Send reminder
+    </button>
+  );
+}
 
 function StatusBadge({ status }: { status: string }) {
   const m: Record<string, string> = {
