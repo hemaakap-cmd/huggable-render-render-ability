@@ -43,12 +43,30 @@ Deno.serve(async (req) => {
       if (user?.id) resolvedUserId = user.id;
     }
 
-    // Cloudflare / proxy geo headers
-    const country = req.headers.get('cf-ipcountry') || req.headers.get('x-vercel-ip-country') || null;
-    const city = req.headers.get('cf-ipcity') || req.headers.get('x-vercel-ip-city') || null;
-    const region = req.headers.get('cf-region') || req.headers.get('x-vercel-ip-region') || null;
-    const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown';
+    // Cloudflare / proxy geo headers (when present)
+    let country = req.headers.get('cf-ipcountry') || req.headers.get('x-vercel-ip-country') || null;
+    let city = req.headers.get('cf-ipcity') || req.headers.get('x-vercel-ip-city') || null;
+    let region = req.headers.get('cf-region') || req.headers.get('x-vercel-ip-region') || null;
+    const ip = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '').split(',')[0].trim() || 'unknown';
     const ua = req.headers.get('user-agent') ?? '';
+
+    // Fallback: lookup geo from IP via ipapi.co (free, no key) if no proxy headers
+    if (!country && ip && ip !== 'unknown' && !ip.startsWith('127.') && !ip.startsWith('10.') && !ip.startsWith('192.168.')) {
+      try {
+        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`, {
+          headers: { 'User-Agent': 'ssra-analytics/1.0' },
+          signal: AbortSignal.timeout(2500),
+        });
+        if (geoRes.ok) {
+          const geo = await geoRes.json();
+          if (!geo.error) {
+            country = geo.country_name || geo.country || null;
+            city = geo.city || null;
+            region = geo.region || null;
+          }
+        }
+      } catch { /* silent — geo lookup is best-effort */ }
+    }
 
     const ip_hash = await hashIp(ip);
     const now = new Date().toISOString();
