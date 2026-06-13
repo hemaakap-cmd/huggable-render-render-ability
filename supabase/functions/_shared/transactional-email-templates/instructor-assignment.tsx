@@ -14,12 +14,12 @@ interface Props {
   studentName?: string
   courseName?: string
   instructorName?: string
-  instructorEmail?: string
 }
 
 const InstructorAssignmentEmail = ({
-  studentName, courseName, instructorName, instructorEmail,
+  studentName, courseName, instructorName,
 }: Props) => (
+
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Meet your instructor for {courseName ?? 'your course'}</Preview>
