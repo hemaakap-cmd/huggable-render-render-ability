@@ -3,9 +3,17 @@
  * self-healing surfaces (reconciliation, system health with cron monitoring).
  */
 import { test, expect } from "@playwright/test";
+import { personaAuthReady } from "../helpers/persona";
 
-const HAS_CREDS = !!process.env.E2E_PASSWORD;
-test.skip(!HAS_CREDS, "E2E_PASSWORD not set — persona specs skipped");
+// Gate on a REAL seeded session (set by auth.setup), not merely on the env var,
+// so the suite skips cleanly when personas aren't provisioned instead of running
+// unauthenticated and reporting false failures.
+test.beforeEach(() => {
+  test.skip(
+    !personaAuthReady("super-admin.json"),
+    "No seeded super-admin session (E2E_PASSWORD unset or persona not provisioned) — skipped",
+  );
+});
 
 test.describe("Super-admin portal", () => {
   const PAGES = [

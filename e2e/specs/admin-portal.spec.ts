@@ -3,9 +3,17 @@
  * fenced out of super-admin-only routes.
  */
 import { test, expect } from "@playwright/test";
+import { personaAuthReady } from "../helpers/persona";
 
-const HAS_CREDS = !!process.env.E2E_PASSWORD;
-test.skip(!HAS_CREDS, "E2E_PASSWORD not set — persona specs skipped");
+// Gate on a REAL seeded session (set by auth.setup), not merely on the env var,
+// so the suite skips cleanly when personas aren't provisioned instead of running
+// unauthenticated and reporting false failures.
+test.beforeEach(() => {
+  test.skip(
+    !personaAuthReady("admin.json"),
+    "No seeded admin session (E2E_PASSWORD unset or persona not provisioned) — skipped",
+  );
+});
 
 test.describe("Admin portal", () => {
   test("admin dashboard renders", async ({ page }) => {

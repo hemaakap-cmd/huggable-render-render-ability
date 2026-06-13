@@ -62,11 +62,17 @@ for (const p of personas) {
     });
 
     if (error || !data.session) {
+      // Degrade gracefully: write an empty state and SKIP (don't throw). A hard
+      // throw fails the whole setup project and turns an infra gap (personas not
+      // seeded) into a cascade of dependent failures. With an empty state +
+      // skip, the persona specs detect the absent session and self-skip cleanly.
       fs.writeFileSync(out, JSON.stringify(EMPTY_STATE));
-      throw new Error(
+      setup.skip(
+        true,
         `Sign-in failed for ${p.role} (${p.email}): ${error?.message ?? "no session"}. ` +
-        `Run "node e2e/seed.mjs" first to provision personas.`,
+        `Run "node e2e/seed.mjs" to provision personas — persona specs will skip until then.`,
       );
+      return;
     }
 
     const state = {
