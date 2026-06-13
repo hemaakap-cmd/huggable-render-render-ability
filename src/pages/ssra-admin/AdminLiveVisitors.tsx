@@ -154,7 +154,7 @@ export default function AdminLiveVisitors() {
                         <td className="px-6 py-3 font-mono text-xs text-slate-600">{v.path}</td>
                         <td className="px-6 py-3 text-slate-500 capitalize">{v.device_type || "—"}</td>
                         <td className="px-6 py-3 text-slate-500 text-xs truncate max-w-[200px]">
-                          {v.referrer ? new URL(v.referrer).hostname : "Direct"}
+                          {(() => { try { return v.referrer ? new URL(v.referrer).hostname : "Direct"; } catch { return "Direct"; } })()}
                         </td>
                         <td className="px-6 py-3 text-slate-400 text-xs" data-tick={tick}>
                           {formatDistanceToNow(new Date(v.last_seen_at), { addSuffix: true })}
