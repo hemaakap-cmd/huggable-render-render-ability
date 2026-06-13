@@ -276,7 +276,11 @@ async function logRevenueEvent(
 ) {
   if (!eventId) return;
   try {
-    const totals = data?.details?.totals ?? data?.payout?.totals ?? {};
+    // Adjustments/refunds carry their money under data.totals (NOT
+    // data.details.totals, which is only on transactions). Without this, refund
+    // debits were written with amount 0 — so the ledger never reflected refunds
+    // and reported revenue overstated reality (live audit 2026-06-13, finding H2).
+    const totals = data?.details?.totals ?? data?.totals ?? data?.payout?.totals ?? data?.payoutTotals ?? {};
     const amount = Number(totals.total ?? totals.grandTotal ?? data?.amount ?? 0) || 0;
     const fee = Number(totals.fee ?? 0) || 0;
     const tax = Number(totals.tax ?? 0) || 0;
@@ -320,7 +324,7 @@ async function logAuditEvent(
   severity: 'info' | 'warn' | 'critical' = 'info',
 ) {
   try {
-    const totals = data?.details?.totals ?? data?.payout?.totals ?? {};
+    const totals = data?.details?.totals ?? data?.totals ?? data?.payout?.totals ?? data?.payoutTotals ?? {};
     const amount = Number(totals.total ?? totals.grandTotal ?? data?.amount ?? 0) || 0;
     const isDebit = eventType.startsWith('adjustment.') || eventType.includes('refund') || eventType.includes('chargeback');
     const custom = data?.customData ?? {};
@@ -396,31 +400,12 @@ async function handleWebhook(req: Request): Promise<{ eventType: string; eventId
       break;
   }
   // Always capture into the audit ledger (idempotent on paddle_event_id).
+  // Per-webhook traceability is fully covered by three existing, live tables:
+  //   ssra_webhook_events (receipt + status), revenue_events (money ledger,
+  //   credit/debit), payment_audit_log (immutable detail). The old
+  //   system_events insert was removed (H3, 2026-06-13) because that table is
+  //   not provisioned in production and every insert silently threw.
   await logAuditEvent(eventType, eventId, env, event.data);
-
-  // Traceability: one system_events row per processed webhook. entity_id is
-  // the enrollment when known (links the Paddle event to every DB-trigger
-  // event emitted for that enrollment), otherwise the Paddle resource id.
-  // Full chain for one payment is then queryable via:
-  //   SELECT * FROM system_events WHERE entity_id = '<enrollment_id>' ORDER BY occurred_at;
-  try {
-    const custom = event.data?.customData ?? {};
-    await getSupabase().from('system_events').insert({
-      event_type:  'WebhookProcessed',
-      entity_type: custom.enrollmentId ? 'enrollment' : 'paddle_resource',
-      entity_id:   String(custom.enrollmentId ?? event.data?.id ?? eventId ?? 'unknown'),
-      payload: {
-        paddle_event_type: eventType,
-        paddle_event_id:   eventId ?? null,
-        paddle_resource_id: event.data?.id ?? null,
-        user_id:    custom.userId ?? null,
-        course_id:  custom.courseId ?? null,
-        environment: env,
-      },
-    });
-  } catch (e) {
-    console.error('system_events trace insert failed (non-blocking):', e);
-  }
 
   return { eventType, eventId, env };
 }

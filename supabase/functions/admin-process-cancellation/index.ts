@@ -169,19 +169,44 @@ Deno.serve(async (req) => {
     let currencyCode = 'EUR';
     if (issueRefund && txnId) {
       try {
-        const txnRes = await gatewayFetch(resolvedEnv, `/transactions/${encodeURIComponent(txnId)}`);
+        // Refundable line items live on the transaction's details.line_items[].
+        // Paddle only populates this reliably when the transaction is fetched
+        // with ?include=details (and the camelCase `details.lineItems` shape can
+        // appear depending on SDK/gateway). We request the include explicitly
+        // and accept every known shape so the refund stops silently failing with
+        // "Could not resolve transaction item to refund" (finding M1, 2026-06-13).
+        const txnRes = await gatewayFetch(
+          resolvedEnv,
+          `/transactions/${encodeURIComponent(txnId)}?include=details`,
+        );
+        if (!txnRes.ok) {
+          const body = await txnRes.text().catch(() => '');
+          throw new Error(`Paddle transaction fetch failed (${txnRes.status}, env=${resolvedEnv}) ${body}`.trim());
+        }
         const txnJson = await txnRes.json();
-        currencyCode = txnJson?.data?.currency_code ?? 'EUR';
-        const items = txnJson?.data?.details?.line_items ?? txnJson?.data?.items ?? [];
+        const txn = txnJson?.data ?? {};
+        currencyCode = txn?.currency_code ?? txn?.currencyCode ?? 'EUR';
+        const items =
+          txn?.details?.line_items ??
+          txn?.details?.lineItems ??
+          txn?.line_items ??
+          txn?.items ??
+          [];
         if (!Array.isArray(items) || items.length === 0) {
-          throw new Error(`Could not resolve transaction items to refund (env=${resolvedEnv})`);
+          throw new Error(
+            `Could not resolve transaction items to refund (txn=${txnId}, env=${resolvedEnv}, status=${txn?.status ?? 'unknown'})`,
+          );
         }
 
         const refundItems = items.map((it: any) => {
-          const itemId = it?.id ?? it?.item_id;
-          if (!itemId) throw new Error('Missing line item id');
-          // totals.total = gross (incl. tax) in lowest denomination, as string.
-          const grossStr = it?.totals?.total ?? it?.totals?.subtotal ?? '0';
+          // Line-item id (txnitm_…) is `id`; older shapes nest it differently.
+          const itemId = it?.id ?? it?.item_id ?? it?.itemId;
+          if (!itemId) throw new Error('Missing line item id on transaction');
+          // totals.total = gross (incl. tax) in the lowest denomination, as a
+          // string; tolerate snake/camel and unit_totals fallbacks.
+          const grossStr =
+            it?.totals?.total ?? it?.totals?.subtotal ??
+            it?.unit_totals?.total ?? it?.unitTotals?.total ?? '0';
           const gross = Number(grossStr);
           if (!Number.isFinite(gross) || gross <= 0) {
             throw new Error(`Invalid line item total for refund: ${grossStr}`);
