@@ -67,15 +67,21 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="p-5 rounded-xl bg-card border border-border flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-[hsl(43,96%,50%)] bg-opacity-10 flex items-center justify-center shrink-0">
-                <MessageSquare className="w-5 h-5 text-[hsl(43,96%,50%)]" />
+            <a
+              href="https://wa.me/201097687000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-5 rounded-xl bg-card border-2 border-[#25D366]/30 flex items-start gap-4 hover:border-[#25D366]/60 hover:shadow-md transition-all group"
+            >
+              <div className="w-10 h-10 rounded-lg bg-[#25D366]/10 flex items-center justify-center shrink-0">
+                <MessageSquare className="w-5 h-5 text-[#25D366]" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-foreground mb-1">WhatsApp</div>
-                <div className="text-sm text-muted-foreground">Available for enrolled students</div>
+                <div className="text-sm font-semibold text-foreground mb-1">WhatsApp — Egypt <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#25D366] text-white ml-1">URGENT</span></div>
+                <div className="text-sm text-[#25D366] font-medium group-hover:underline">+20 10 97687000</div>
+                <div className="text-xs text-muted-foreground mt-1">اتصال للأهمية · إذا كان هناك مشكلة ما، الاستفسار عن طريق الواتساب</div>
               </div>
-            </div>
+            </a>
 
             <div className="p-5 rounded-xl bg-card border border-border flex items-start gap-4">
               <div className="w-10 h-10 rounded-lg bg-[hsl(43,96%,50%)] bg-opacity-10 flex items-center justify-center shrink-0">

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Globe2, Heart, Instagram, Facebook, Youtube } from "lucide-react";
+import { Mail, Globe2, Heart, Instagram, Facebook, Youtube, MessageSquare } from "lucide-react";
 import SsraLogo from "@/components/ssra/SsraLogo";
 
 export default function Footer() {
@@ -67,6 +67,12 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <Globe2 className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
                 <span>Online · Germany</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-[#25D366] shrink-0" />
+                <a href="https://wa.me/201097687000" target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366] transition-colors">
+                  +20 10 97687000 <span className="text-[10px] font-bold bg-[#25D366] text-white px-1 py-0.5 rounded ml-1">URGENT</span>
+                </a>
               </li>
             </ul>
             <a href="mailto:info@ssracourses.com" className="inline-flex items-center gap-2 mt-4 text-xs text-[hsl(220,91%,54%)] hover:text-blue-400 transition-colors">
