@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
@@ -27,6 +28,7 @@ export default function Checkout() {
   const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
+  const { enabled: couponsEnabled } = useFeatureFlag("coupons_enabled");
 
   const [loading, setLoading] = useState(false);
 
@@ -264,49 +266,51 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Coupon code */}
-              <div className="mb-5">
-                <label className="text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
-                  <Tag className="w-3.5 h-3.5" /> Coupon code
-                </label>
-                {couponApplied ? (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span className="text-sm text-emerald-700 font-semibold flex-1">{couponApplied.code} applied</span>
-                    <button
-                      type="button"
-                      onClick={() => { setCouponApplied(null); setCouponCode(""); }}
-                      className="text-emerald-500 hover:text-emerald-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={couponCode}
-                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleApplyCoupon(); }}}
-                      placeholder="Enter code"
-                      className="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider uppercase"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void handleApplyCoupon()}
-                      disabled={couponLoading || !couponCode.trim()}
-                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-                    >
-                      {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
-                    </button>
-                  </div>
-                )}
-                {couponError && (
-                  <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" /> {couponError}
-                  </p>
-                )}
-              </div>
+              {/* Coupon code (admin-controlled) */}
+              {couponsEnabled && (
+                <div className="mb-5">
+                  <label className="text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
+                    <Tag className="w-3.5 h-3.5" /> Coupon code
+                  </label>
+                  {couponApplied ? (
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-sm text-emerald-700 font-semibold flex-1">{couponApplied.code} applied</span>
+                      <button
+                        type="button"
+                        onClick={() => { setCouponApplied(null); setCouponCode(""); }}
+                        className="text-emerald-500 hover:text-emerald-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleApplyCoupon(); }}}
+                        placeholder="Enter code"
+                        className="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider uppercase"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleApplyCoupon()}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                      >
+                        {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                      </button>
+                    </div>
+                  )}
+                  {couponError && (
+                    <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" /> {couponError}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <form onSubmit={handlePay}>
                 <button type="submit" disabled={loading || !scheduleReady}
