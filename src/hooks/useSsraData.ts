@@ -349,7 +349,7 @@ export function usePublicCourses() {
       .channel("rt-public-courses")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "ssra_courses" },
+        { event: "INSERT", schema: "public", table: "ssra_public_catalog_events" },
         () => {
           qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
           qc.invalidateQueries({ queryKey: ["public-home-stats"] });
