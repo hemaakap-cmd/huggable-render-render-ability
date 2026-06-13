@@ -159,8 +159,8 @@ Deno.serve(async (req: Request) => {
             studentName:     r.name ?? "student",
             courseName:      courseTitle.get(r.courseId) ?? "your course",
             instructorName,
-            instructorEmail,
           },
+
         },
       });
       if (!res.error) sent++;
