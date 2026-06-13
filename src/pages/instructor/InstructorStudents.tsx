@@ -40,8 +40,9 @@ function useInstructorStudents(courseId: string) {
 
       const { data: profiles } = await supabase
         .from("ssra_profiles")
-        .select("id, full_name, email, country, phone_number")
+        .select("id, full_name, country")
         .in("id", ids);
+
 
       const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
