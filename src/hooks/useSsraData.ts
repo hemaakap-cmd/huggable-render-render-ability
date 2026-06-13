@@ -374,6 +374,7 @@ export function usePublicCourses() {
       if (error) throw error;
       return ((data ?? []) as CourseRecord[]).map(courseFromRecord);
     },
+    refetchInterval: 15_000,
   });
 }
 
@@ -404,7 +405,11 @@ export function useUpsertCourse() {
         if (error) throw error;
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+      qc.invalidateQueries({ queryKey: ["public-home-stats"] });
+    },
   });
 }
 
@@ -415,7 +420,11 @@ export function useToggleCourse() {
       const { error } = await supabase.from("ssra_courses").update({ is_active, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+      qc.invalidateQueries({ queryKey: ["public-home-stats"] });
+    },
   });
 }
 
@@ -426,7 +435,11 @@ export function useTogglePriceHidden() {
       const { error } = await supabase.from("ssra_courses").update({ price_hidden, updated_at: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-price-hidden-map"] });
+    },
   });
 }
 
