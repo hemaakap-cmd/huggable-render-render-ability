@@ -36,5 +36,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'instructor-assignment': instructorAssignment,
   'instructor-unassignment': instructorUnassignment,
   'waitlist-seat-open': waitlistSeatOpen,
+  'payment-reminder': paymentReminder,
 }
 
