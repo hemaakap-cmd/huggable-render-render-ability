@@ -155,50 +155,48 @@ export default function Index() {
           }}
         />
 
-        <div className="container relative z-10 pt-28 pb-20">
-          <BackButton className="text-white/70 hover:text-white mb-6" />
+        <div className="container relative z-10 pt-24 pb-16 md:pt-28 md:pb-20">
+          <BackButton className="text-white/70 hover:text-white mb-4 md:mb-6" />
           <div className="max-w-4xl mx-auto text-center">
             {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/15 text-white/80 text-xs font-medium mb-8 backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-[hsl(43,96%,50%)] animate-pulse" />
-              Sports Science &amp; Rehabilitation Academy · Germany
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/8 border border-white/15 text-white/80 text-[11px] md:text-xs font-medium mb-5 md:mb-8 backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-[hsl(43,96%,50%)] animate-pulse shrink-0" />
+              <span>Sports Science &amp; Rehabilitation Academy · Germany</span>
             </div>
 
-            <h1 className="font-display text-5xl md:text-7xl font-bold text-white leading-[1.05] mb-6">
-              Your Career in
-              <br />
-              <span className="text-gold-shimmer">German Sports</span>
-              <br />
-              Rehabilitation
+            <h1 className="font-display text-[2rem] leading-[1.1] sm:text-4xl md:text-7xl font-bold text-white md:leading-[1.05] mb-4 md:mb-6">
+              Your Career in{" "}
+              <span className="text-gold-shimmer">German Sports Rehabilitation</span>
             </h1>
 
-            <p className="text-white/85 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
+            <p className="text-white/85 text-base md:text-xl leading-relaxed max-w-2xl mx-auto mb-8 md:mb-10">
               Evidence-based online courses for sports science graduates. Learn in Arabic, study German, and land your first job in Germany — all in one academy.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-14">
-              <Link to="/courses">
-                <button className="btn-gold flex items-center gap-2 px-8 py-4 rounded-xl text-base">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-10 md:mb-14">
+              <Link to="/courses" className="w-full sm:w-auto">
+                <button className="btn-gold w-full sm:w-auto flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 rounded-xl text-base">
                   <span>Explore Courses</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>
-              <Link to="/apply">
-                <button className="btn-outline-white flex items-center gap-2 px-8 py-4 rounded-xl text-base">
+              <Link to="/apply" className="w-full sm:w-auto">
+                <button className="btn-outline-white w-full sm:w-auto flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 rounded-xl text-base">
                   <span>Apply Free</span>
                 </button>
               </Link>
             </div>
 
             {/* Trust row */}
-            <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-white/75">
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Non-profit mission</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Arabic support</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Paddle secure payments</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Cancel anytime</span>
+            <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-8 text-[11px] md:text-xs text-white/75">
+              <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Non-profit mission</span>
+              <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Arabic support</span>
+              <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Paddle secure</span>
+              <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Cancel anytime</span>
             </div>
           </div>
         </div>
+
 
         {/* Bottom wave */}
         <div className="absolute bottom-0 inset-x-0">
