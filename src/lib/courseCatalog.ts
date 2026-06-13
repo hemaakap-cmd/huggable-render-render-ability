@@ -30,7 +30,7 @@ export interface Course {
  * public catalogue so it never appears on the homepage, /courses, /pricing,
  * or anywhere else a customer can see it.
  */
-export const COURSES: Course[] = [
+const ALL_COURSES: Course[] = [
 
 
   /* ── LANGUAGE (subscription) ── */
