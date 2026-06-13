@@ -1832,6 +1832,16 @@ export type Database = {
         }[]
       }
       get_audit_health: { Args: { _env?: string }; Returns: Json }
+      get_instructor_course_students: {
+        Args: { _course_id: string }
+        Returns: {
+          country: string
+          enrolled_at: string
+          full_name: string
+          status: string
+          user_id: string
+        }[]
+      }
       get_lead_student_stats: {
         Args: never
         Returns: {

@@ -28,27 +28,18 @@ function useInstructorStudents(courseId: string) {
     queryKey: ["instructor-students", user?.id, courseId],
     enabled: !!user && !!courseId,
     queryFn: async () => {
-      const { data: enrollments, error } = await supabase
-        .from("ssra_enrollments")
-        .select("user_id, enrolled_at, status")
-        .eq("course_id", courseId)
-        .eq("status", "active");
+      // Uses a SECURITY DEFINER RPC that returns ONLY non-PII columns
+      // (name, country). Direct instructor reads of ssra_profiles are blocked.
+      const { data, error } = await (supabase.rpc as any)(
+        "get_instructor_course_students",
+        { _course_id: courseId },
+      );
       if (error) throw error;
-
-      const ids = (enrollments ?? []).map((e) => e.user_id).filter(Boolean) as string[];
-      if (ids.length === 0) return [];
-
-      const { data: profiles } = await supabase
-        .from("ssra_profiles")
-        .select("id, full_name, country")
-        .in("id", ids);
-
-
-      const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
-
-      return (enrollments ?? []).map((e) => ({
-        ...e,
-        profile: e.user_id ? profileMap.get(e.user_id) ?? null : null,
+      return ((data ?? []) as any[]).map((row: any) => ({
+        user_id: row.user_id,
+        enrolled_at: row.enrolled_at,
+        status: row.status,
+        profile: { full_name: row.full_name, country: row.country },
       }));
     },
   });
