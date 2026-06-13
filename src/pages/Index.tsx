@@ -9,7 +9,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
-import { COURSES, SUBSCRIPTION_COURSE } from "@/lib/courseCatalog";
+import { usePublicCourses } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
 import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 import heroBiomechanicsMobile from "@/assets/hero-biomechanics-mobile.jpg";
@@ -64,7 +64,9 @@ const FEATURES = [
 export default function Index() {
   useReveal();
 
-  const featuredCourses = COURSES.slice(0, 3);
+  const { data: courses = [] } = usePublicCourses();
+  const featuredCourses = courses.slice(0, 3);
+  const subscriptionCourse = courses.find((course) => course.type === "subscription");
   const { data: stats } = useHomeStats();
 
   const STATS = [
@@ -220,7 +222,7 @@ export default function Index() {
       </section>
 
       {/* ══ SUBSCRIPTION HIGHLIGHT ══ */}
-      <section className="py-20 bg-slate-50">
+      {subscriptionCourse && <section className="py-20 bg-slate-50">
         <div className="container">
           <div className="max-w-5xl mx-auto">
             <div className="reveal grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-xl border border-slate-200">
@@ -246,7 +248,7 @@ export default function Index() {
                 </div>
                 <div className="mt-8">
                   <div className="text-4xl font-bold text-white font-display">
-                    €{SUBSCRIPTION_COURSE.price}
+                    €{subscriptionCourse.price}
                     <span className="text-base font-normal text-white/50">/month</span>
                   </div>
                   <div className="text-xs text-white/40 mt-1">Open to all · Cancel anytime</div>
@@ -291,7 +293,7 @@ export default function Index() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ══ FEATURED COURSES ══ */}
       <section className="py-24">
