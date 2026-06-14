@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { isPaymentsConfigured } from "@/lib/stripe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 // Courses that use "pay what you want" donation pricing instead of fixed price.
