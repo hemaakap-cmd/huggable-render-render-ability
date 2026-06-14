@@ -28,6 +28,18 @@ export default function PaymentSuccess() {
       while (!cancelled && attempt < 20) {
         attempt++;
         setAttempts(attempt);
+        if (sessionId) {
+          const { data: confirmed } = await supabase.functions.invoke("confirm-checkout-session", {
+            body: { sessionId },
+          });
+          if (cancelled) return;
+          if (confirmed?.status === "success" && confirmed.enrollment) {
+            setEnrollment(confirmed.enrollment);
+            setStatus("success");
+            return;
+          }
+        }
+
         let query = supabase
           .from("ssra_enrollments")
           .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
