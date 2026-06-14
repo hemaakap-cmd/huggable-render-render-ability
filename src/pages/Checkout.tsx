@@ -97,6 +97,17 @@ export default function Checkout() {
   async function handlePay(e: React.FormEvent) {
     e.preventDefault();
     if (!course || !user) return;
+
+    // Stripe Payment Link for German medical course (€19) — bypass Paddle so
+    // Egyptian local Visa cards work. Manual enrollment activation after payment.
+    if (course.id === "medical-german") {
+      const stripeUrl = new URL("https://buy.stripe.com/4gM4gz4gUeawfYi8Pyb7y0d");
+      if (user.email) stripeUrl.searchParams.set("prefilled_email", user.email);
+      stripeUrl.searchParams.set("client_reference_id", user.id);
+      window.location.href = stripeUrl.toString();
+      return;
+    }
+
     setLoading(true);
     setCheckoutIssue(null);
     try {
