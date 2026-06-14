@@ -1713,6 +1713,101 @@ export type Database = {
         }
         Relationships: []
       }
+      ssra_zoom_broadcast_recipients: {
+        Row: {
+          broadcast_id: string
+          created_at: string
+          email: string
+          error: string | null
+          id: string
+          sent_at: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          broadcast_id: string
+          created_at?: string
+          email: string
+          error?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          broadcast_id?: string
+          created_at?: string
+          email?: string
+          error?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssra_zoom_broadcast_recipients_broadcast_id_fkey"
+            columns: ["broadcast_id"]
+            isOneToOne: false
+            referencedRelation: "ssra_zoom_broadcasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ssra_zoom_broadcasts: {
+        Row: {
+          audience: string
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          failed_count: number
+          id: string
+          scheduled_at: string
+          sent_by: string | null
+          sent_count: number
+          status: string
+          title: string
+          total_recipients: number
+          updated_at: string
+          zoom_link: string
+          zoom_password: string | null
+        }
+        Insert: {
+          audience?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          failed_count?: number
+          id?: string
+          scheduled_at: string
+          sent_by?: string | null
+          sent_count?: number
+          status?: string
+          title: string
+          total_recipients?: number
+          updated_at?: string
+          zoom_link: string
+          zoom_password?: string | null
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          failed_count?: number
+          id?: string
+          scheduled_at?: string
+          sent_by?: string | null
+          sent_count?: number
+          status?: string
+          title?: string
+          total_recipients?: number
+          updated_at?: string
+          zoom_link?: string
+          zoom_password?: string | null
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
