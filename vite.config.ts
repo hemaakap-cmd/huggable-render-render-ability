@@ -3,24 +3,24 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 /**
- * Governance gate for the Paddle client token.
+ * Governance gate for the Stripe publishable client token.
  *
  * Runs at build/dev startup. In production mode (the build that ships to the
- * live public domain), the Paddle client token MUST start with `live_`.
- * Any `test_` token or missing token aborts the build — preventing a
+ * live public domain), the Stripe client token MUST start with `pk_live_`.
+ * Any `pk_test_` token or missing token aborts the build — preventing a
  * sandbox token from ever reaching real customers.
  *
- * In development mode a `test_` (or missing) token is fine — that is the
+ * In development mode a `pk_test_` (or missing) token is fine — that is the
  * preview-only sandbox.
  */
-function assertPaddleTokenForMode(mode: string, env: Record<string, string>) {
+function assertStripeTokenForMode(mode: string, env: Record<string, string>) {
   const token = env.VITE_PAYMENTS_CLIENT_TOKEN ?? "";
   const isProduction = mode === "production";
 
   if (!isProduction) {
-    if (token && !token.startsWith("test_") && !token.startsWith("live_")) {
+    if (token && !token.startsWith("pk_test_") && !token.startsWith("pk_live_")) {
       console.warn(
-        `[paddle-governance] Unknown VITE_PAYMENTS_CLIENT_TOKEN prefix in dev mode "${mode}".`,
+        `[stripe-governance] Unknown VITE_PAYMENTS_CLIENT_TOKEN prefix in dev mode "${mode}".`,
       );
     }
     return;
@@ -28,27 +28,27 @@ function assertPaddleTokenForMode(mode: string, env: Record<string, string>) {
 
   if (!token) {
     throw new Error(
-      "[paddle-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN is not set. " +
-        "A live (`live_...`) Paddle client token is required for production.",
+      "[stripe-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN is not set. " +
+        "A live (`pk_live_...`) Stripe publishable token is required for production.",
     );
   }
-  if (token.startsWith("test_")) {
+  if (token.startsWith("pk_test_")) {
     throw new Error(
-      "[paddle-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN starts with `test_`. " +
+      "[stripe-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN starts with `pk_test_`. " +
         "A sandbox token must NEVER be shipped to production — replace with the live token before publishing.",
     );
   }
-  if (!token.startsWith("live_")) {
+  if (!token.startsWith("pk_live_")) {
     throw new Error(
-      "[paddle-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN has an unrecognized prefix. " +
-        "Expected a `live_...` token for production.",
+      "[stripe-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN has an unrecognized prefix. " +
+        "Expected a `pk_live_...` token for production.",
     );
   }
 }
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  assertPaddleTokenForMode(mode, env);
+  assertStripeTokenForMode(mode, env);
 
   return {
     server: {
@@ -58,10 +58,9 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       {
-        name: "paddle-governance-runtime-guard",
-        // Re-check on every rebuild trigger so a swapped .env can't slip through.
+        name: "stripe-governance-runtime-guard",
         configResolved(resolved) {
-          assertPaddleTokenForMode(resolved.mode, env);
+          assertStripeTokenForMode(resolved.mode, env);
         },
       },
     ],
