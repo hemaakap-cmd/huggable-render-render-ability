@@ -19,6 +19,8 @@ project_id = "vffcarzhfxlqzfwrhzau"
     verify_jwt = false
   [functions.create-donation-checkout]
     verify_jwt = false
+  [functions.confirm-checkout-session]
+    verify_jwt = false
   [functions.payments-webhook]
     verify_jwt = false
   [functions.create-portal-session]
