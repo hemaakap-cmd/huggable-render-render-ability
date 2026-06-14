@@ -11,6 +11,7 @@ import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { isPaymentsConfigured } from "@/lib/stripe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { supabase } from "@/integrations/supabase/client";
 
 // Courses that use "pay what you want" donation pricing instead of fixed price.
 const DONATION_COURSE_IDS = new Set(["medical-german"]);
@@ -35,6 +36,7 @@ export default function Checkout() {
   const { user, profile, loading: authLoading } = useSsraAuth();
 
   const [showCheckout, setShowCheckout] = useState(false);
+  const [activeEnrollment, setActiveEnrollment] = useState<any>(null);
   const isDonation = DONATION_COURSE_IDS.has(courseId);
   const [donationPick, setDonationPick] = useState<number | "custom">(10);
   const [donationCustom, setDonationCustom] = useState<string>("");
@@ -57,6 +59,26 @@ export default function Checkout() {
       navigate(`/login?redirect=${encodeURIComponent(`/checkout?courseId=${courseId}`)}`);
     }
   }, [authLoading, user, navigate, courseId]);
+
+  useEffect(() => {
+    if (!user || !courseId) return;
+    let cancelled = false;
+    supabase
+      .from("ssra_enrollments")
+      .select("id, paid_at, order_number")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setActiveEnrollment(data ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, courseId]);
 
   if (authLoading || (coursesLoading && !course)) {
     return (
@@ -233,7 +255,24 @@ export default function Checkout() {
                 </div>
               )}
 
-              {!showCheckout && (
+              {activeEnrollment && (
+                <div className="mb-4 p-5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-900">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <CheckCircle2 className="w-5 h-5" /> أنت مسجل بالفعل في هذا الكورس
+                  </div>
+                  <p className="text-xs leading-relaxed mb-4">
+                    تم تأكيد الدفع والتسجيل بنجاح. رقم الطلب: <span className="font-mono font-semibold">{activeEnrollment.order_number ?? "—"}</span>
+                  </p>
+                  <Link
+                    to="/dashboard/courses"
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700"
+                  >
+                    الذهاب إلى كورساتي
+                  </Link>
+                </div>
+              )}
+
+              {!showCheckout && !activeEnrollment && (
                 <button
                   type="button"
                   onClick={() => {
@@ -261,11 +300,16 @@ export default function Checkout() {
                 </button>
               )}
 
-              {showCheckout && isPaymentsConfigured() && (
+              {showCheckout && isPaymentsConfigured() && !activeEnrollment && (
                 <StripeEmbeddedCheckout
                   courseId={course.id}
                   returnUrl={returnUrl}
                   donationAmountCents={isDonation ? donationAmount * 100 : undefined}
+                  onAlreadyEnrolled={() => {
+                    setShowCheckout(false);
+                    setActiveEnrollment({ order_number: "—" });
+                    toast({ title: "أنت مسجل بالفعل", description: "تم تأكيد تسجيلك في هذا الكورس." });
+                  }}
                 />
               )}
             </div>

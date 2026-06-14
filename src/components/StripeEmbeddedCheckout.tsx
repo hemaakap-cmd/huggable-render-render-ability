@@ -6,9 +6,10 @@ interface Props {
   courseId: string;
   returnUrl?: string;
   donationAmountCents?: number; // when set, routes through create-donation-checkout
+  onAlreadyEnrolled?: () => void;
 }
 
-export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCents }: Props) {
+export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCents, onAlreadyEnrolled }: Props) {
   const fetchClientSecret = async (): Promise<string> => {
     const isDonation = typeof donationAmountCents === "number" && donationAmountCents > 0;
     const { data, error } = await supabase.functions.invoke(
@@ -19,6 +20,10 @@ export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCent
           : { courseId, environment: getStripeEnvironment(), returnUrl },
       },
     );
+    if (data?.alreadyEnrolled) {
+      onAlreadyEnrolled?.();
+      throw new Error("Already enrolled");
+    }
     if (error || !data?.clientSecret) {
       throw new Error(error?.message || data?.error || "Failed to create checkout session");
     }
