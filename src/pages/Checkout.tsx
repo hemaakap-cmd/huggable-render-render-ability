@@ -31,6 +31,7 @@ export default function Checkout() {
   const { enabled: couponsEnabled } = useFeatureFlag("coupons_enabled");
 
   const [loading, setLoading] = useState(false);
+  const [checkoutIssue, setCheckoutIssue] = useState<string | null>(null);
 
   const [couponCode,    setCouponCode]    = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
@@ -49,6 +50,14 @@ export default function Checkout() {
       navigate(`/login?redirect=${encodeURIComponent(`/checkout?courseId=${courseId}`)}`);
     }
   }, [authLoading, user, navigate, courseId]);
+
+  useEffect(() => {
+    const onCheckoutError = () => {
+      setCheckoutIssue("The secure payment window could not load in this browser. Open this page in Chrome or Safari, then try again.");
+    };
+    window.addEventListener("paddle:checkout-error", onCheckoutError);
+    return () => window.removeEventListener("paddle:checkout-error", onCheckoutError);
+  }, []);
 
   function getUtmMeta(): Record<string, string> {
     const keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content"];
@@ -89,6 +98,7 @@ export default function Checkout() {
     e.preventDefault();
     if (!course || !user) return;
     setLoading(true);
+    setCheckoutIssue(null);
     try {
       // 1. Create pending enrollment row and get Paddle external price ID
       const { data, error } = await supabase.functions.invoke("paddle-prepare-checkout", {
@@ -126,11 +136,14 @@ export default function Checkout() {
         customData: data.customData,
         customer: { email: user.email ?? undefined },
         settings: {
+          displayMode: "overlay",
+          variant: "one-page",
           successUrl,
-          allowedPaymentMethods: ["card", "paypal"],
+          allowLogout: false,
         },
       });
     } catch (err: unknown) {
+      setCheckoutIssue("The secure payment window could not load. If you opened this from Instagram, WhatsApp, or Facebook, open it in Chrome or Safari and try again.");
       toast({ title: "Payment error", description: (err as Error).message, variant: "destructive" });
     } finally {
       setLoading(false);
@@ -246,6 +259,20 @@ export default function Checkout() {
               <p className="text-slate-500 text-sm mb-6">
                 A secure Paddle checkout will open to complete your payment.
               </p>
+
+              <div className="mb-5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>
+                  If checkout shows “Something went wrong”, open this page in Chrome or Safari instead of Instagram, WhatsApp, or Facebook in-app browsers.
+                </span>
+              </div>
+
+              {checkoutIssue && (
+                <div className="mb-5 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 leading-relaxed flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{checkoutIssue}</span>
+                </div>
+              )}
 
               {/* Logged-in user info */}
               <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
