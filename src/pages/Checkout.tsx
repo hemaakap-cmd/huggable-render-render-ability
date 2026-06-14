@@ -34,6 +34,17 @@ export default function Checkout() {
   const { user, profile, loading: authLoading } = useSsraAuth();
 
   const [showCheckout, setShowCheckout] = useState(false);
+  const isDonation = DONATION_COURSE_IDS.has(courseId);
+  const [donationPick, setDonationPick] = useState<number | "custom">(10);
+  const [donationCustom, setDonationCustom] = useState<string>("");
+  const donationAmount = useMemo(() => {
+    if (donationPick === "custom") {
+      const n = Number(donationCustom);
+      return Number.isFinite(n) ? Math.floor(n) : 0;
+    }
+    return donationPick;
+  }, [donationPick, donationCustom]);
+  const donationValid = isDonation ? donationAmount >= DONATION_MIN : true;
 
   const scheduleReady = !!(schedule?.start_date && schedule?.start_time && schedule?.duration);
 
