@@ -4,6 +4,16 @@ type StripeEnv = "sandbox" | "live";
 
 const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
 
+/**
+ * True when a usable Stripe publishable key is configured.
+ * A missing token, or any value that isn't a `pk_test_`/`pk_live_` key
+ * (e.g. a placeholder like `live_...` written before Stripe go-live
+ * finishes provisioning live keys), means checkout cannot run.
+ */
+export function isPaymentsConfigured(): boolean {
+  return !!clientToken && (clientToken.startsWith("pk_test_") || clientToken.startsWith("pk_live_"));
+}
+
 function paymentsEnvironment(): StripeEnv {
   if (clientToken?.startsWith("pk_test_")) return "sandbox";
   if (clientToken?.startsWith("pk_live_")) return "live";
