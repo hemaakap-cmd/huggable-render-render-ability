@@ -22,6 +22,7 @@ import { template as instructorUnassignment } from './instructor-unassignment.ts
 import { template as waitlistSeatOpen } from './waitlist-seat-open.tsx'
 import { template as cancellationRequestReceived } from './cancellation-request-received.tsx'
 import { template as paymentReminder } from './payment-reminder.tsx'
+import { template as leadCourseReminder } from './lead-course-reminder.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'test-email': testEmail,
@@ -37,5 +38,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'instructor-unassignment': instructorUnassignment,
   'waitlist-seat-open': waitlistSeatOpen,
   'payment-reminder': paymentReminder,
+  'lead-course-reminder': leadCourseReminder,
 }
 
