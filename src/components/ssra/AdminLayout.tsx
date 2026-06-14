@@ -28,6 +28,7 @@ const ADMIN_NAV = [
   { icon: Library,          label: "Courses",          href: "/ssra-admin/courses" },
   { icon: Layers,           label: "Batches",          href: "/ssra-admin/batches" },
   { icon: Video,            label: "Sessions",         href: "/ssra-admin/sessions" },
+  { icon: Video,            label: "Zoom Broadcast",   href: "/ssra-admin/zoom-broadcast" },
   { icon: BookOpen,         label: "Enrollments",      href: "/ssra-admin/enrollments" },
   { icon: BookCheck,        label: "Homework",         href: "/ssra-admin/homework" },
   { icon: Award,            label: "Certificates",     href: "/ssra-admin/certificates" },

@@ -21,3 +21,5 @@ project_id = "vffcarzhfxlqzfwrhzau"
     verify_jwt = false
   [functions.create-portal-session]
     verify_jwt = false
+  [functions.admin-send-zoom-invitation]
+    verify_jwt = false

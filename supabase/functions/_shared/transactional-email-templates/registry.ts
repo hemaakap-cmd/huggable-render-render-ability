@@ -23,6 +23,7 @@ import { template as waitlistSeatOpen } from './waitlist-seat-open.tsx'
 import { template as cancellationRequestReceived } from './cancellation-request-received.tsx'
 import { template as paymentReminder } from './payment-reminder.tsx'
 import { template as leadCourseReminder } from './lead-course-reminder.tsx'
+import { template as zoomInvitation } from './zoom-invitation.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'test-email': testEmail,
@@ -39,5 +40,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-seat-open': waitlistSeatOpen,
   'payment-reminder': paymentReminder,
   'lead-course-reminder': leadCourseReminder,
+  'zoom-invitation': zoomInvitation,
 }
 
