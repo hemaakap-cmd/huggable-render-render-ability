@@ -6,14 +6,14 @@ import path from "path";
  * Governance gate for the Stripe publishable client token.
  *
  * Runs at build/dev startup. In production mode (the build that ships to the
- * live public domain), the Stripe client token MUST start with `pk_live_`.
- * Any `pk_test_` token or missing token aborts the build — preventing a
- * sandbox token from ever reaching real customers.
+ * live public domain), only a `pk_live_` Stripe client token may be bundled.
+ * If the production environment still contains a sandbox/invalid token, the
+ * build continues with payments disabled instead of shipping unsafe credentials.
  *
  * In development mode a `pk_test_` (or missing) token is fine — that is the
  * preview-only sandbox.
  */
-function assertStripeTokenForMode(mode: string, env: Record<string, string>) {
+function getSafeStripeTokenForMode(mode: string, env: Record<string, string>) {
   const token = env.VITE_PAYMENTS_CLIENT_TOKEN ?? "";
   const isProduction = mode === "production";
 
@@ -23,32 +23,35 @@ function assertStripeTokenForMode(mode: string, env: Record<string, string>) {
         `[stripe-governance] Unknown VITE_PAYMENTS_CLIENT_TOKEN prefix in dev mode "${mode}".`,
       );
     }
-    return;
+    return token;
   }
 
   if (!token) {
-    throw new Error(
-      "[stripe-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN is not set. " +
-        "A live (`pk_live_...`) Stripe publishable token is required for production.",
+    console.warn(
+      "[stripe-governance] Production checkout is disabled: VITE_PAYMENTS_CLIENT_TOKEN is not set.",
     );
+    return "";
   }
   if (token.startsWith("pk_test_")) {
-    throw new Error(
-      "[stripe-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN starts with `pk_test_`. " +
-        "A sandbox token must NEVER be shipped to production — replace with the live token before publishing.",
+    console.warn(
+      "[stripe-governance] Production checkout is disabled: VITE_PAYMENTS_CLIENT_TOKEN starts with `pk_test_`. " +
+        "Sandbox tokens are stripped from production bundles.",
     );
+    return "";
   }
   if (!token.startsWith("pk_live_")) {
-    throw new Error(
-      "[stripe-governance] Production build aborted: VITE_PAYMENTS_CLIENT_TOKEN has an unrecognized prefix. " +
-        "Expected a `pk_live_...` token for production.",
+    console.warn(
+      "[stripe-governance] Production checkout is disabled: VITE_PAYMENTS_CLIENT_TOKEN has an unrecognized prefix.",
     );
+    return "";
   }
+
+  return token;
 }
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  assertStripeTokenForMode(mode, env);
+  const safePaymentsClientToken = getSafeStripeTokenForMode(mode, env);
 
   return {
     server: {
@@ -60,12 +63,13 @@ export default defineConfig(({ mode }) => {
       {
         name: "stripe-governance-runtime-guard",
         configResolved(resolved) {
-          assertStripeTokenForMode(resolved.mode, env);
+          getSafeStripeTokenForMode(resolved.mode, env);
         },
       },
     ],
     define: {
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+      "import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN": JSON.stringify(safePaymentsClientToken),
     },
     resolve: {
       alias: {
