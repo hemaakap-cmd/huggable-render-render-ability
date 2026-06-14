@@ -7,7 +7,7 @@ import {
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMySubscription } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
-import { getPaddleEnvironment } from "@/lib/paddle";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { toast } from "@/hooks/use-toast";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; cls: string }> = {
@@ -29,10 +29,13 @@ export default function MySubscription() {
   const openBillingPortal = async () => {
     setPortalLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("paddle-portal-session", {
-        body: { environment: getPaddleEnvironment() },
+      const { data, error } = await supabase.functions.invoke("create-portal-session", {
+        body: {
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/dashboard/subscription`,
+        },
       });
-      if (error || !data?.url) throw new Error(error?.message || "Could not open billing portal");
+      if (error || !data?.url) throw new Error(error?.message || data?.error || "Could not open billing portal");
       window.open(data.url as string, "_blank", "noopener,noreferrer");
     } catch (e) {
       toast({ title: "Billing portal", description: (e as Error).message, variant: "destructive" });
@@ -42,19 +45,14 @@ export default function MySubscription() {
   };
 
   const devCancelTestSub = async () => {
-    if (!confirm("Cancel the TEST subscription immediately and free the seat so you can re-enroll?")) return;
+    if (!confirm("Cancel the TEST subscription immediately?")) return;
     setDevCancelLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("dev-cancel-test-subscription", {
-        body: { environment: getPaddleEnvironment() },
+        body: { environment: getStripeEnvironment() },
       });
       if (error) throw new Error(error.message);
-      toast({
-        title: "Test subscription cancelled",
-        description: data?.paddleErrors?.length
-          ? "DB cleared. Paddle reported: " + data.paddleErrors.join("; ")
-          : "You can now re-enroll in the test course.",
-      });
+      toast({ title: "Test subscription cancelled", description: data?.message ?? "Done." });
       setTimeout(() => window.location.reload(), 800);
     } catch (e) {
       toast({ title: "Cancel failed", description: (e as Error).message, variant: "destructive" });
@@ -139,9 +137,9 @@ export default function MySubscription() {
             <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
               <h3 className="font-semibold text-slate-800 text-sm">Need help?</h3>
               <div className="text-xs text-slate-500 space-y-1.5">
-                <p>• To <strong>cancel</strong> your subscription, click "Manage Billing at paddle.net" above.</p>
+                <p>• To <strong>cancel</strong> your subscription, click "Manage Billing" above.</p>
                 <p>• You keep access until the end of the current billing period.</p>
-                <p>• To <strong>update your payment method</strong>, use the Paddle portal above.</p>
+                <p>• To <strong>update your payment method</strong>, use the billing portal above.</p>
                 <p>• For any other issues, <Link to="/contact" className="text-[hsl(220,91%,54%)] hover:underline">contact us</Link>.</p>
               </div>
             </div>
