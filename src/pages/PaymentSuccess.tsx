@@ -13,6 +13,7 @@ export default function PaymentSuccess() {
   const { user, loading: authLoading } = useSsraAuth();
   const courseId = params.get("courseId");
   const enrollmentId = params.get("enrollmentId");
+  const sessionId = params.get("session_id");
 
   const [status, setStatus] = useState<Status>("checking");
   const [enrollment, setEnrollment] = useState<any>(null);
@@ -32,7 +33,12 @@ export default function PaymentSuccess() {
           .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
           .order("created_at", { ascending: false })
           .limit(1);
-        if (enrollmentId) query = supabase
+        if (sessionId) query = supabase
+          .from("ssra_enrollments")
+          .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
+          .eq("stripe_checkout_session_id", sessionId)
+          .limit(1);
+        else if (enrollmentId) query = supabase
           .from("ssra_enrollments")
           .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
           .eq("id", enrollmentId)
