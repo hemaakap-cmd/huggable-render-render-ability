@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, ArrowLeft, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Tag, X } from "lucide-react";
+import { CreditCard, Shield, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { getCourse } from "@/lib/courseCatalog";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
-import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
-import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
@@ -28,17 +27,8 @@ export default function Checkout() {
   const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
-  const { enabled: couponsEnabled } = useFeatureFlag("coupons_enabled");
 
-  const [loading, setLoading] = useState(false);
-  const [checkoutIssue, setCheckoutIssue] = useState<string | null>(null);
-
-  const [couponCode,    setCouponCode]    = useState("");
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [couponError,   setCouponError]   = useState<string | null>(null);
-  const [couponApplied, setCouponApplied] = useState<{
-    code: string; discountType: string; discountValue: number; finalDiscount: number;
-  } | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const scheduleReady = !!(schedule?.start_date && schedule?.start_time && schedule?.duration);
 
@@ -50,116 +40,6 @@ export default function Checkout() {
       navigate(`/login?redirect=${encodeURIComponent(`/checkout?courseId=${courseId}`)}`);
     }
   }, [authLoading, user, navigate, courseId]);
-
-  useEffect(() => {
-    const onCheckoutError = () => {
-      setCheckoutIssue("The secure payment window could not load in this browser. Open this page in Chrome or Safari, then try again.");
-    };
-    window.addEventListener("paddle:checkout-error", onCheckoutError);
-    return () => window.removeEventListener("paddle:checkout-error", onCheckoutError);
-  }, []);
-
-  function getUtmMeta(): Record<string, string> {
-    const keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content"];
-    const out: Record<string, string> = {};
-    keys.forEach((k) => { const v = sessionStorage.getItem(k); if (v) out[k] = v; });
-    return out;
-  }
-
-  async function handleApplyCoupon() {
-    if (!couponCode.trim() || !course) return;
-    setCouponLoading(true);
-    setCouponError(null);
-    try {
-      const { data, error } = await supabase.functions.invoke("validate-coupon", {
-        body: { code: couponCode.trim().toUpperCase(), courseId: course.id, amountEur: course.price },
-      });
-      if (error) throw new Error(error.message);
-      if (!data?.valid) {
-        setCouponError(data?.errorReason ?? "Invalid coupon code.");
-        setCouponApplied(null);
-      } else {
-        setCouponApplied({
-          code:          couponCode.trim().toUpperCase(),
-          discountType:  data.discountType,
-          discountValue: data.discountValue,
-          finalDiscount: data.finalDiscount,
-        });
-        setCouponError(null);
-      }
-    } catch (err: unknown) {
-      setCouponError((err as Error).message);
-    } finally {
-      setCouponLoading(false);
-    }
-  }
-
-  async function handlePay(e: React.FormEvent) {
-    e.preventDefault();
-    if (!course || !user) return;
-
-    // Stripe Payment Link for German medical course (€19) — bypass Paddle so
-    // Egyptian local Visa cards work. Manual enrollment activation after payment.
-    if (course.id === "medical-german") {
-      const stripeUrl = new URL("https://buy.stripe.com/4gM4gz4gUeawfYi8Pyb7y0d");
-      if (user.email) stripeUrl.searchParams.set("prefilled_email", user.email);
-      stripeUrl.searchParams.set("client_reference_id", user.id);
-      window.location.href = stripeUrl.toString();
-      return;
-    }
-
-    setLoading(true);
-    setCheckoutIssue(null);
-    try {
-      // 1. Create pending enrollment row and get Paddle external price ID
-      const { data, error } = await supabase.functions.invoke("paddle-prepare-checkout", {
-        body: {
-          courseId: course.id,
-          couponCode: couponApplied?.code ?? null,
-          metadata: getUtmMeta(),
-        },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.alreadyEnrolled) {
-        toast({
-          title: "You're already enrolled ✅",
-          description: "This course is already in your dashboard. Redirecting you there…",
-        });
-        setTimeout(() => navigate("/dashboard/courses"), 1500);
-        return;
-      }
-      if (!data?.paddlePriceId) throw new Error("Could not prepare checkout. Please try again.");
-
-      const enrollmentId: string | undefined = data.customData?.enrollmentId;
-
-      // 2. Init Paddle.js (cached after first call)
-      await initializePaddle();
-
-      // 3. Resolve external price ID → Paddle internal price ID (pri_xxx)
-      const internalPriceId = await getPaddlePriceId(data.paddlePriceId);
-
-      // 4. Open Paddle checkout overlay
-      const successUrl = `${window.location.origin}/payment-success?courseId=${course.id}${enrollmentId ? `&enrollmentId=${enrollmentId}` : ""}`;
-
-      window.Paddle.Checkout.open({
-        items: [{ priceId: internalPriceId, quantity: 1 }],
-        ...(data.paddleDiscountId ? { discountId: data.paddleDiscountId } : {}),
-        customData: data.customData,
-        customer: { email: user.email ?? undefined },
-        settings: {
-          displayMode: "overlay",
-          variant: "one-page",
-          successUrl,
-          allowLogout: false,
-        },
-      });
-    } catch (err: unknown) {
-      setCheckoutIssue("The secure payment window could not load. If you opened this from Instagram, WhatsApp, or Facebook, open it in Chrome or Safari and try again.");
-      toast({ title: "Payment error", description: (err as Error).message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  }
 
   if (authLoading || (coursesLoading && !course)) {
     return (
@@ -192,8 +72,11 @@ export default function Checkout() {
     );
   }
 
+  const returnUrl = `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}&courseId=${course.id}`;
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <PaymentTestModeBanner />
       <Header />
       <div className="container max-w-4xl pt-28 pb-20">
         <BackButton className="mb-8" />
@@ -225,40 +108,22 @@ export default function Checkout() {
                   <span className="text-sm text-slate-500">
                     {course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
                   </span>
-                  <span className={`font-bold font-display text-xl ${couponApplied ? "line-through text-slate-400 text-base" : "text-slate-900"}`}>
+                  <span className="font-bold font-display text-xl text-slate-900">
                     €{course.price}
-                    {!couponApplied && course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
+                    {course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
                   </span>
                 </div>
-                {couponApplied && (
-                  <>
-                    <div className="flex items-center justify-between text-emerald-700 text-sm">
-                      <span>Discount ({couponApplied.code})</span>
-                      <span>− €{couponApplied.finalDiscount.toFixed(2)}</span>
-                    </div>
-                    <div className="flex items-center justify-between font-bold text-slate-900">
-                      <span className="text-sm">Total</span>
-                      <span className="font-display text-xl">
-                        €{Math.max(0, course.price - couponApplied.finalDiscount).toFixed(2)}
-                        {course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
-                      </span>
-                    </div>
-                  </>
-                )}
-                {!couponApplied && course.type === "subscription" && (
-                  <p className="text-xs text-slate-400">Cancel anytime at paddle.net. See refund policy below.</p>
-                )}
                 <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
-                  Prices are <strong>tax-exclusive</strong>. VAT / sales tax is calculated automatically at checkout based on your country and shown as a separate line (Course price + VAT = Total).
+                  Tax is calculated automatically at checkout based on your country.
                 </p>
               </div>
               <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-100 text-[11px] text-amber-900 leading-relaxed">
-                <strong>Refund policy:</strong> Cancellations approved within 14 days are refunded at <strong>80%</strong> of the amount paid. A <strong>20% administrative fee</strong> is retained. Example: €19.00 paid → €3.80 fee → €15.20 refund.{" "}
+                <strong>Refund policy:</strong> Cancellations approved within 14 days are refunded at <strong>80%</strong> of the amount paid. A <strong>20% administrative fee</strong> is retained.{" "}
                 <Link to="/refund-policy" className="underline">Read full policy</Link>.
               </div>
               <div className="mt-5 flex items-center gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-500">
                 <Shield className="w-4 h-4 text-[hsl(220,91%,54%)] shrink-0" />
-                Payments processed securely by Paddle.com (Merchant of Record). Invoices, receipts and emails are issued under SSRA Academy. Your card details are never stored on our servers.
+                Payments processed securely by Stripe. Your card details are never stored on our servers.
               </div>
             </div>
           </div>
@@ -267,23 +132,7 @@ export default function Checkout() {
           <div className="md:col-span-3 order-1 md:order-2">
             <div className="bg-white border border-slate-200 rounded-2xl p-8">
               <h2 className="font-display text-2xl font-bold text-slate-900 mb-1">Complete Enrolment</h2>
-              <p className="text-slate-500 text-sm mb-6">
-                A secure Paddle checkout will open to complete your payment.
-              </p>
-
-              <div className="mb-5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>
-                  If checkout shows “Something went wrong”, open this page in Chrome or Safari instead of Instagram, WhatsApp, or Facebook in-app browsers.
-                </span>
-              </div>
-
-              {checkoutIssue && (
-                <div className="mb-5 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 leading-relaxed flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{checkoutIssue}</span>
-                </div>
-              )}
+              <p className="text-slate-500 text-sm mb-6">Secure checkout powered by Stripe.</p>
 
               {/* Logged-in user info */}
               <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
@@ -304,74 +153,27 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Coupon code (admin-controlled) */}
-              {couponsEnabled && (
-                <div className="mb-5">
-                  <label className="text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
-                    <Tag className="w-3.5 h-3.5" /> Coupon code
-                  </label>
-                  {couponApplied ? (
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span className="text-sm text-emerald-700 font-semibold flex-1">{couponApplied.code} applied</span>
-                      <button
-                        type="button"
-                        onClick={() => { setCouponApplied(null); setCouponCode(""); }}
-                        className="text-emerald-500 hover:text-emerald-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={couponCode}
-                        onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
-                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleApplyCoupon(); }}}
-                        placeholder="Enter code"
-                        className="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider uppercase"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => void handleApplyCoupon()}
-                        disabled={couponLoading || !couponCode.trim()}
-                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-                      >
-                        {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
-                      </button>
-                    </div>
-                  )}
-                  {couponError && (
-                    <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-3.5 h-3.5" /> {couponError}
-                    </p>
-                  )}
-                </div>
+              {!showCheckout && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!scheduleReady) {
+                      toast({ title: "Setup incomplete", description: "Please contact the admin.", variant: "destructive" });
+                      return;
+                    }
+                    setShowCheckout(true);
+                  }}
+                  disabled={!scheduleReady}
+                  className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Pay €{course.price}{course.type === "subscription" ? "/mo" : ""}
+                </button>
               )}
 
-              <form onSubmit={handlePay}>
-                <button type="submit" disabled={loading || !scheduleReady}
-                  className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                  {loading
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Preparing checkout…</>
-                    : !scheduleReady
-                      ? "Setup incomplete — contact admin"
-                      : <><CreditCard className="w-4 h-4" /> Pay €{couponApplied
-                          ? Math.max(0, course.price - couponApplied.finalDiscount).toFixed(2)
-                          : course.price}{course.type === "subscription" ? "/mo" : ""} via Paddle</>
-                  }
-                </button>
-              </form>
-
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
-                <span>Visa</span>
-                <span>Mastercard</span>
-                <span>American Express</span>
-                <span>Apple Pay</span>
-                <span>Google Pay</span>
-                <span>PayPal</span>
-              </div>
+              {showCheckout && (
+                <StripeEmbeddedCheckout courseId={course.id} returnUrl={returnUrl} />
+              )}
             </div>
           </div>
         </div>

@@ -15,3 +15,9 @@ project_id = "vffcarzhfxlqzfwrhzau"
     verify_jwt = true
   [functions.send-transactional-email]
     verify_jwt = true
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.payments-webhook]
+    verify_jwt = false
+  [functions.create-portal-session]
+    verify_jwt = false
