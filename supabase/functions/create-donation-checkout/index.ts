@@ -116,7 +116,6 @@ Deno.serve(async (req) => {
         courseId: courseId,
         donation: "true",
       },
-      managed_payments: { enabled: true },
     } as any);
 
     await supabase.from("ssra_enrollments").upsert({
