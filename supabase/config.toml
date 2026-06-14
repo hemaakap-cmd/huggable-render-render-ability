@@ -25,3 +25,5 @@ project_id = "vffcarzhfxlqzfwrhzau"
     verify_jwt = false
   [functions.admin-send-zoom-invitation]
     verify_jwt = false
+  [functions.register-payment-domain]
+    verify_jwt = false
