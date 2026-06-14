@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User } from "lucide-react";
+import { CreditCard, Shield, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Heart } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
@@ -10,6 +10,11 @@ import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
+// Courses that use "pay what you want" donation pricing instead of fixed price.
+const DONATION_COURSE_IDS = new Set(["medical-german"]);
+const DONATION_SUGGESTED = [5, 10, 25, 50];
+const DONATION_MIN = 1;
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
