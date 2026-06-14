@@ -5,13 +5,20 @@ import { supabase } from "@/integrations/supabase/client";
 interface Props {
   courseId: string;
   returnUrl?: string;
+  donationAmountCents?: number; // when set, routes through create-donation-checkout
 }
 
-export function StripeEmbeddedCheckout({ courseId, returnUrl }: Props) {
+export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCents }: Props) {
   const fetchClientSecret = async (): Promise<string> => {
-    const { data, error } = await supabase.functions.invoke("create-checkout", {
-      body: { courseId, environment: getStripeEnvironment(), returnUrl },
-    });
+    const isDonation = typeof donationAmountCents === "number" && donationAmountCents > 0;
+    const { data, error } = await supabase.functions.invoke(
+      isDonation ? "create-donation-checkout" : "create-checkout",
+      {
+        body: isDonation
+          ? { courseId, amountCents: donationAmountCents, environment: getStripeEnvironment(), returnUrl }
+          : { courseId, environment: getStripeEnvironment(), returnUrl },
+      },
+    );
     if (error || !data?.clientSecret) {
       throw new Error(error?.message || data?.error || "Failed to create checkout session");
     }
