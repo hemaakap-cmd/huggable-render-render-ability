@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Video, Send, Loader2, Users, CheckCircle2, AlertCircle, Calendar, Clock, Link as LinkIcon } from "lucide-react";
+import { Video, Send, Loader2, Users, CheckCircle2, AlertCircle, Calendar, Clock, Link as LinkIcon, Eye, X } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -30,19 +30,31 @@ export default function AdminZoomBroadcast() {
   const [duration, setDuration] = useState(60);
   const [zoomLink, setZoomLink] = useState("");
   const [zoomPassword, setZoomPassword] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
 
-  // Count of recipients preview
-  const { data: studentCount } = useQuery({
-    queryKey: ["zoom-broadcast-student-count"],
+  // Count + sample of recipients
+  const { data: recipientsInfo, isLoading: recipientsLoading } = useQuery({
+    queryKey: ["zoom-broadcast-recipients"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("ssra_profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("role", "student")
-        .not("email", "is", null);
-      return count ?? 0;
+      const [{ count }, { data: sample }] = await Promise.all([
+        supabase
+          .from("ssra_profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "student")
+          .not("email", "is", null),
+        supabase
+          .from("ssra_profiles")
+          .select("email, full_name")
+          .eq("role", "student")
+          .not("email", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(10),
+      ]);
+      return { count: count ?? 0, sample: sample ?? [] };
     },
   });
+
+  const studentCount = recipientsInfo?.count ?? 0;
 
   const { data: broadcasts = [], isLoading } = useQuery({
     queryKey: ["zoom-broadcasts"],
@@ -84,6 +96,7 @@ export default function AdminZoomBroadcast() {
       setDuration(60);
       setZoomLink("");
       setZoomPassword("");
+      setPreviewOpen(false);
       qc.invalidateQueries({ queryKey: ["zoom-broadcasts"] });
     },
     onError: (e: Error) => {
@@ -91,13 +104,13 @@ export default function AdminZoomBroadcast() {
     },
   });
 
-  const canSubmit = title.trim() && scheduledAt && zoomLink.trim() && duration > 0 && !sendMutation.isPending;
+  const formValid = !!(title.trim() && scheduledAt && zoomLink.trim() && duration > 0);
+  const canSubmit = formValid && !sendMutation.isPending;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleOpenPreview = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
-    if (!confirm(`Send this Zoom invitation to ${studentCount ?? 0} registered students?`)) return;
-    sendMutation.mutate();
+    if (!formValid) return;
+    setPreviewOpen(true);
   };
 
   return (
@@ -116,11 +129,11 @@ export default function AdminZoomBroadcast() {
         </div>
 
         {/* Compose form */}
-        <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5">
+        <form onSubmit={handleOpenPreview} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5">
           <div className="flex items-center gap-2 text-sm text-slate-600 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
             <Users className="w-4 h-4 text-blue-600" />
             <span>
-              <strong>{studentCount ?? "…"}</strong> registered students will receive this invitation by email.
+              <strong>{recipientsLoading ? "…" : studentCount}</strong> registered students will receive this invitation by email.
             </span>
           </div>
 
@@ -205,12 +218,10 @@ export default function AdminZoomBroadcast() {
 
           <button
             type="submit"
-            disabled={!canSubmit}
+            disabled={!formValid}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {sendMutation.isPending
-              ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
-              : <><Send className="w-4 h-4" /> Send invitation to all students</>}
+            <Eye className="w-4 h-4" /> Preview recipients & send
           </button>
         </form>
 
@@ -258,6 +269,91 @@ export default function AdminZoomBroadcast() {
           )}
         </section>
       </div>
+
+      {/* Preview modal */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => !sendMutation.isPending && setPreviewOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between p-5 border-b border-slate-100">
+              <div>
+                <h3 className="font-semibold text-slate-900">Confirm invitation</h3>
+                <p className="text-xs text-slate-500 mt-1">Review who will receive this email.</p>
+              </div>
+              <button
+                onClick={() => setPreviewOpen(false)}
+                disabled={sendMutation.isPending}
+                className="text-slate-400 hover:text-slate-600 disabled:opacity-50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 overflow-y-auto">
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <div className="flex items-center gap-2 text-blue-900 font-semibold text-sm">
+                  <Users className="w-4 h-4" />
+                  {studentCount} students will receive this email
+                </div>
+                <div className="text-xs text-blue-700/80 mt-1">All registered students (paid or not).</div>
+              </div>
+
+              <div>
+                <div className="text-xs font-semibold text-slate-700 mb-2">Sample (first 10 recipients)</div>
+                <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 max-h-64 overflow-y-auto">
+                  {(recipientsInfo?.sample ?? []).length === 0 ? (
+                    <div className="text-xs text-slate-400 p-3 text-center">No recipients found.</div>
+                  ) : (
+                    recipientsInfo!.sample.map((r: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between px-3 py-2 text-xs">
+                        <span className="text-slate-700 truncate">{r.full_name || "—"}</span>
+                        <span className="text-slate-500 font-mono truncate ml-3">{r.email}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {studentCount > 10 && (
+                  <div className="text-[11px] text-slate-400 mt-2">
+                    + {studentCount - 10} more not shown
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1.5">
+                <div className="font-semibold text-slate-700">{title}</div>
+                <div className="text-slate-500">
+                  {scheduledAt && new Date(scheduledAt).toLocaleString()} · {duration} min
+                </div>
+                <div className="text-slate-500 truncate">{zoomLink}</div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 p-4 flex gap-2 justify-end">
+              <button
+                onClick={() => setPreviewOpen(false)}
+                disabled={sendMutation.isPending}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => sendMutation.mutate()}
+                disabled={!canSubmit || studentCount === 0}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sendMutation.isPending
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+                  : <><Send className="w-4 h-4" /> Confirm & send to {studentCount}</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
