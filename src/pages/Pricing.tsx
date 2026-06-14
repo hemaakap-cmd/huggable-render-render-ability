@@ -56,7 +56,7 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
       <div className="p-6 flex flex-col flex-1">
         <div className="mb-4">
           <div className={`text-xs font-semibold uppercase tracking-wide mb-1 ${highlight ? "text-white/50" : "text-slate-400"}`}>
-            {course.category === "language" && course.type === "subscription" ? "Subscription" : course.category}
+            {course.id === "medical-german" ? "Pay what you want" : course.category === "language" && course.type === "subscription" ? "Subscription" : course.category}
           </div>
           <h3 className={`font-display text-xl font-bold mb-1 ${highlight ? "text-white" : "text-slate-900"}`}>
             {course.title}
@@ -72,6 +72,13 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl ${highlight ? "bg-white/10 border border-white/20" : "bg-slate-100 border border-slate-200"}`}>
               <span className={`font-semibold text-sm ${highlight ? "text-white/70" : "text-slate-500"}`}>Coming Soon</span>
             </div>
+          ) : course.id === "medical-german" ? (
+            <>
+              <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                From €1
+              </span>
+              <span className={`text-sm ml-2 ${highlight ? "text-white/50" : "text-slate-400"}`}>· you choose</span>
+            </>
           ) : (
             <>
               <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
@@ -85,6 +92,8 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
           <div className={`text-xs mt-1 ${highlight ? "text-white/40" : "text-slate-400"}`}>
             {course.price_hidden
               ? "Price will be announced soon"
+              : course.id === "medical-german"
+              ? "ساهم بأي مبلغ يناسبك — هنساعد بعض"
               : course.type === "subscription" ? "Cancel anytime" : "One-time payment"}
             {!course.price_hidden && course.requires_verification && " · Verification required"}
           </div>
@@ -119,12 +128,12 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
               highlight ? "btn-gold" : "btn-primary"
             }`}
           >
-            {course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+            {course.id === "medical-german" ? "Contribute & Enrol" : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
             <ArrowRight className="w-4 h-4" />
           </button>
         )}
 
-        {!course.price_hidden && course.type === "subscription" && (
+        {!course.price_hidden && course.id !== "medical-german" && course.type === "subscription" && (
           <p className={`text-center text-xs mt-2 ${highlight ? "text-white/35" : "text-slate-400"}`}>
             Requires sports science diploma or student ID
           </p>

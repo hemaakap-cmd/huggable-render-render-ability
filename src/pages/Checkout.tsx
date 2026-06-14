@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User } from "lucide-react";
+import { CreditCard, Shield, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Heart } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
@@ -10,6 +10,11 @@ import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
+// Courses that use "pay what you want" donation pricing instead of fixed price.
+const DONATION_COURSE_IDS = new Set(["medical-german"]);
+const DONATION_SUGGESTED = [5, 10, 25, 50];
+const DONATION_MIN = 1;
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
@@ -29,6 +34,17 @@ export default function Checkout() {
   const { user, profile, loading: authLoading } = useSsraAuth();
 
   const [showCheckout, setShowCheckout] = useState(false);
+  const isDonation = DONATION_COURSE_IDS.has(courseId);
+  const [donationPick, setDonationPick] = useState<number | "custom">(10);
+  const [donationCustom, setDonationCustom] = useState<string>("");
+  const donationAmount = useMemo(() => {
+    if (donationPick === "custom") {
+      const n = Number(donationCustom);
+      return Number.isFinite(n) ? Math.floor(n) : 0;
+    }
+    return donationPick;
+  }, [donationPick, donationCustom]);
+  const donationValid = isDonation ? donationAmount >= DONATION_MIN : true;
 
   const scheduleReady = !!(schedule?.start_date && schedule?.start_time && schedule?.duration);
 
@@ -106,15 +122,20 @@ export default function Checkout() {
               <div className="border-t border-slate-100 pt-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
-                    {course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
+                    {isDonation ? "Pay what you want" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
                   </span>
                   <span className="font-bold font-display text-xl text-slate-900">
-                    €{course.price}
-                    {course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
+                    {isDonation ? (
+                      <>€{donationValid ? donationAmount : "—"}</>
+                    ) : (
+                      <>€{course.price}{course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}</>
+                    )}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
-                  Tax is calculated automatically at checkout based on your country.
+                  {isDonation
+                    ? "Choose any amount from €1 upwards. 100% goes toward keeping the course free for more students."
+                    : "Tax is calculated automatically at checkout based on your country."}
                 </p>
               </div>
               <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-100 text-[11px] text-amber-900 leading-relaxed">
@@ -153,6 +174,54 @@ export default function Checkout() {
                 </div>
               </div>
 
+              {isDonation && !showCheckout && (
+                <div className="mb-6 p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200">
+                  <div className="flex items-start gap-2 mb-3">
+                    <Heart className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">ساهم بأي مبلغ تقدر عليه</div>
+                      <div className="text-xs text-slate-600 mt-0.5">
+                        مساهمتك بتساعدنا نوفر الكورس لأكبر عدد من الطلاب. كله بيقدر يتعلم — وكلنا بنساعد بعض.
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 mb-3">
+                    {DONATION_SUGGESTED.map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => { setDonationPick(amt); setDonationCustom(""); }}
+                        className={`py-2.5 rounded-lg text-sm font-semibold border transition ${
+                          donationPick === amt
+                            ? "bg-emerald-600 text-white border-emerald-600"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-emerald-400"
+                        }`}
+                      >
+                        €{amt}
+                      </button>
+                    ))}
+                  </div>
+                  <label className="block">
+                    <div className="text-xs font-medium text-slate-600 mb-1">أو اكتب مبلغ مخصص (€)</div>
+                    <input
+                      type="number"
+                      min={DONATION_MIN}
+                      step={1}
+                      placeholder={`مثلاً 15 — الحد الأدنى €${DONATION_MIN}`}
+                      value={donationCustom}
+                      onChange={(e) => { setDonationCustom(e.target.value); setDonationPick("custom"); }}
+                      onFocus={() => setDonationPick("custom")}
+                      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                        donationPick === "custom" ? "border-emerald-500 bg-white" : "border-slate-200 bg-white"
+                      }`}
+                    />
+                  </label>
+                  {!donationValid && donationPick === "custom" && donationCustom !== "" && (
+                    <p className="text-xs text-red-600 mt-2">الحد الأدنى للمساهمة €{DONATION_MIN}</p>
+                  )}
+                </div>
+              )}
+
               {!showCheckout && (
                 <button
                   type="button"
@@ -161,18 +230,28 @@ export default function Checkout() {
                       toast({ title: "Setup incomplete", description: "Please contact the admin.", variant: "destructive" });
                       return;
                     }
+                    if (isDonation && !donationValid) {
+                      toast({ title: "Invalid amount", description: `Minimum contribution is €${DONATION_MIN}.`, variant: "destructive" });
+                      return;
+                    }
                     setShowCheckout(true);
                   }}
-                  disabled={!scheduleReady}
+                  disabled={!scheduleReady || (isDonation && !donationValid)}
                   className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CreditCard className="w-4 h-4" />
-                  Pay €{course.price}{course.type === "subscription" ? "/mo" : ""}
+                  {isDonation ? <Heart className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
+                  {isDonation
+                    ? `ساهم بـ €${donationValid ? donationAmount : "—"}`
+                    : <>Pay €{course.price}{course.type === "subscription" ? "/mo" : ""}</>}
                 </button>
               )}
 
               {showCheckout && (
-                <StripeEmbeddedCheckout courseId={course.id} returnUrl={returnUrl} />
+                <StripeEmbeddedCheckout
+                  courseId={course.id}
+                  returnUrl={returnUrl}
+                  donationAmountCents={isDonation ? donationAmount * 100 : undefined}
+                />
               )}
             </div>
           </div>
