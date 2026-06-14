@@ -255,7 +255,24 @@ export default function Checkout() {
                 </div>
               )}
 
-              {!showCheckout && (
+              {activeEnrollment && (
+                <div className="mb-4 p-5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-900">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <CheckCircle2 className="w-5 h-5" /> أنت مسجل بالفعل في هذا الكورس
+                  </div>
+                  <p className="text-xs leading-relaxed mb-4">
+                    تم تأكيد الدفع والتسجيل بنجاح. رقم الطلب: <span className="font-mono font-semibold">{activeEnrollment.order_number ?? "—"}</span>
+                  </p>
+                  <Link
+                    to="/dashboard/courses"
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700"
+                  >
+                    الذهاب إلى كورساتي
+                  </Link>
+                </div>
+              )}
+
+              {!showCheckout && !activeEnrollment && (
                 <button
                   type="button"
                   onClick={() => {
@@ -283,11 +300,16 @@ export default function Checkout() {
                 </button>
               )}
 
-              {showCheckout && isPaymentsConfigured() && (
+              {showCheckout && isPaymentsConfigured() && !activeEnrollment && (
                 <StripeEmbeddedCheckout
                   courseId={course.id}
                   returnUrl={returnUrl}
                   donationAmountCents={isDonation ? donationAmount * 100 : undefined}
+                  onAlreadyEnrolled={() => {
+                    setShowCheckout(false);
+                    setActiveEnrollment({ order_number: "—" });
+                    toast({ title: "أنت مسجل بالفعل", description: "تم تأكيد تسجيلك في هذا الكورس." });
+                  }}
                 />
               )}
             </div>
