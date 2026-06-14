@@ -93,6 +93,6 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error('dev-cancel-test-subscription error', e);
-    return json({ error: (e as Error).message }, 500);
+    return json({ error: 'Internal server error' }, 500);
   }
 });

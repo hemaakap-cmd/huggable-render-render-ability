@@ -59,23 +59,9 @@ Deno.serve(async (req) => {
     const ip = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '').split(',')[0].trim() || 'unknown';
     const ua = req.headers.get('user-agent') ?? '';
 
-    // Fallback: lookup geo from IP via ipapi.co (free, no key) if no proxy headers
-    if (!country && ip && ip !== 'unknown' && !ip.startsWith('127.') && !ip.startsWith('10.') && !ip.startsWith('192.168.')) {
-      try {
-        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`, {
-          headers: { 'User-Agent': 'ssra-analytics/1.0' },
-          signal: AbortSignal.timeout(2500),
-        });
-        if (geoRes.ok) {
-          const geo = await geoRes.json();
-          if (!geo.error) {
-            country = geo.country_name || geo.country || null;
-            city = geo.city || null;
-            region = geo.region || null;
-          }
-        }
-      } catch { /* silent — geo lookup is best-effort */ }
-    }
+    // Geo fallback removed: we no longer forward raw IPs to third-party
+    // services (e.g. ipapi.co). We rely only on edge/proxy geo headers
+    // (Cloudflare/Vercel). When absent, geo fields stay null.
 
     const ip_hash = await hashIp(ip);
     const now = new Date().toISOString();
@@ -122,7 +108,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
+    console.error('track-visit error', e);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
