@@ -895,6 +895,7 @@ export type Database = {
           created_at: string | null
           duration_snapshot: string | null
           enrolled_at: string | null
+          environment: string
           id: string
           instructor_snapshot: string | null
           order_number: string | null
@@ -902,6 +903,7 @@ export type Database = {
           start_date_snapshot: string | null
           start_time_snapshot: string | null
           status: string
+          stripe_checkout_session_id: string | null
           stripe_payment_intent: string | null
           stripe_session_id: string | null
           student_email_snapshot: string | null
@@ -917,6 +919,7 @@ export type Database = {
           created_at?: string | null
           duration_snapshot?: string | null
           enrolled_at?: string | null
+          environment?: string
           id?: string
           instructor_snapshot?: string | null
           order_number?: string | null
@@ -924,6 +927,7 @@ export type Database = {
           start_date_snapshot?: string | null
           start_time_snapshot?: string | null
           status?: string
+          stripe_checkout_session_id?: string | null
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
           student_email_snapshot?: string | null
@@ -939,6 +943,7 @@ export type Database = {
           created_at?: string | null
           duration_snapshot?: string | null
           enrolled_at?: string | null
+          environment?: string
           id?: string
           instructor_snapshot?: string | null
           order_number?: string | null
@@ -946,6 +951,7 @@ export type Database = {
           start_date_snapshot?: string | null
           start_time_snapshot?: string | null
           status?: string
+          stripe_checkout_session_id?: string | null
           stripe_payment_intent?: string | null
           stripe_session_id?: string | null
           student_email_snapshot?: string | null
@@ -1507,7 +1513,9 @@ export type Database = {
           created_at: string | null
           current_period_end: string | null
           current_period_start: string | null
+          environment: string
           id: string
+          price_id: string | null
           status: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -1520,7 +1528,9 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          environment?: string
           id?: string
+          price_id?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -1533,7 +1543,9 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          environment?: string
           id?: string
+          price_id?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
