@@ -223,10 +223,24 @@ export default function Checkout() {
                 </div>
               )}
 
+              {!isPaymentsConfigured() && (
+                <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-800">
+                  <div className="font-semibold mb-1">الدفع غير مفعّل حاليًا</div>
+                  <div className="text-xs leading-relaxed">
+                    الموقع لسه ما اكتملش إعداد المدفوعات الحقيقية. لو حضرتك المسؤول، كمّل خطوات Stripe go-live من تبويب Payments
+                    في Lovable. لو طالب — جرّب تاني بعد شوية أو تواصل معانا.
+                  </div>
+                </div>
+              )}
+
               {!showCheckout && (
                 <button
                   type="button"
                   onClick={() => {
+                    if (!isPaymentsConfigured()) {
+                      toast({ title: "الدفع غير مفعّل", description: "إعداد Stripe لسه ما اكتملش. تواصل مع الإدارة.", variant: "destructive" });
+                      return;
+                    }
                     if (!scheduleReady) {
                       toast({ title: "Setup incomplete", description: "Please contact the admin.", variant: "destructive" });
                       return;
@@ -237,7 +251,7 @@ export default function Checkout() {
                     }
                     setShowCheckout(true);
                   }}
-                  disabled={!scheduleReady || (isDonation && !donationValid)}
+                  disabled={!isPaymentsConfigured() || !scheduleReady || (isDonation && !donationValid)}
                   className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isDonation ? <Heart className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
@@ -247,7 +261,7 @@ export default function Checkout() {
                 </button>
               )}
 
-              {showCheckout && (
+              {showCheckout && isPaymentsConfigured() && (
                 <StripeEmbeddedCheckout
                   courseId={course.id}
                   returnUrl={returnUrl}
