@@ -122,15 +122,20 @@ export default function Checkout() {
               <div className="border-t border-slate-100 pt-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
-                    {course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
+                    {isDonation ? "Pay what you want" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
                   </span>
                   <span className="font-bold font-display text-xl text-slate-900">
-                    €{course.price}
-                    {course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}
+                    {isDonation ? (
+                      <>€{donationValid ? donationAmount : "—"}</>
+                    ) : (
+                      <>€{course.price}{course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}</>
+                    )}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
-                  Tax is calculated automatically at checkout based on your country.
+                  {isDonation
+                    ? "Choose any amount from €1 upwards. 100% goes toward keeping the course free for more students."
+                    : "Tax is calculated automatically at checkout based on your country."}
                 </p>
               </div>
               <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-100 text-[11px] text-amber-900 leading-relaxed">
