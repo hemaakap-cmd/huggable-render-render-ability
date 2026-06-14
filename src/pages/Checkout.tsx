@@ -11,6 +11,7 @@ import { useCourseSchedule, usePublicCourses } from "@/hooks/useSsraData";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { isPaymentsConfigured } from "@/lib/stripe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { supabase } from "@/integrations/supabase/client";
 
 // Courses that use "pay what you want" donation pricing instead of fixed price.
 const DONATION_COURSE_IDS = new Set(["medical-german"]);
@@ -35,6 +36,7 @@ export default function Checkout() {
   const { user, profile, loading: authLoading } = useSsraAuth();
 
   const [showCheckout, setShowCheckout] = useState(false);
+  const [activeEnrollment, setActiveEnrollment] = useState<any>(null);
   const isDonation = DONATION_COURSE_IDS.has(courseId);
   const [donationPick, setDonationPick] = useState<number | "custom">(10);
   const [donationCustom, setDonationCustom] = useState<string>("");
@@ -57,6 +59,26 @@ export default function Checkout() {
       navigate(`/login?redirect=${encodeURIComponent(`/checkout?courseId=${courseId}`)}`);
     }
   }, [authLoading, user, navigate, courseId]);
+
+  useEffect(() => {
+    if (!user || !courseId) return;
+    let cancelled = false;
+    supabase
+      .from("ssra_enrollments")
+      .select("id, paid_at, order_number")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setActiveEnrollment(data ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, courseId]);
 
   if (authLoading || (coursesLoading && !course)) {
     return (
