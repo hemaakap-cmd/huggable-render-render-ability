@@ -76,6 +76,7 @@ const AdminInstructors     = lazy(() => import("./pages/ssra-admin/AdminInstruct
 const AdminBatches         = lazy(() => import("./pages/ssra-admin/AdminBatches"));
 const AdminHomework        = lazy(() => import("./pages/ssra-admin/AdminHomework"));
 const AdminFraud           = lazy(() => import("./pages/ssra-admin/AdminFraud"));
+const AdminPaymentMonitor  = lazy(() => import("./pages/ssra-admin/AdminPaymentMonitor"));
 const AdminSystemHealth    = lazy(() => import("./pages/ssra-admin/AdminSystemHealth"));
 const AdminOperations      = lazy(() => import("./pages/ssra-admin/AdminOperations"));
 const AdminCertificates    = lazy(() => import("./pages/ssra-admin/AdminCertificates"));
