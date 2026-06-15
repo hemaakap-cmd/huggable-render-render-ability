@@ -297,7 +297,7 @@ export default function Checkout() {
                 >
                   {isDonation ? <Heart className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
                   {isDonation
-                    ? `اشترك بـ €${donationValid ? donationAmount : "—"}`
+                    ? `تبرع بـ €${donationValid ? donationAmount : "—"}`
                     : <>Pay €{course.price}{course.type === "subscription" ? "/mo" : ""}</>}
                 </button>
               )}
