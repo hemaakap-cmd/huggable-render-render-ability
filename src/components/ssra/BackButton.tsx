@@ -21,7 +21,7 @@ interface BackButtonProps {
  */
 export default function BackButton({
   className = "",
-  label = "رجوع",
+  label = "Back",
   to = "/",
   variant = "light",
 }: BackButtonProps) {
@@ -55,7 +55,7 @@ export default function BackButton({
       <Link
         to={to}
         className={`${base} ${styles} ${className}`}
-        aria-label="رجوع للصفحة السابقة"
+        aria-label="Back to previous page"
       >
         {content}
       </Link>
@@ -67,7 +67,7 @@ export default function BackButton({
       type="button"
       onClick={() => navigate(-1)}
       className={`${base} ${styles} ${className}`}
-      aria-label="رجوع للصفحة السابقة"
+      aria-label="Back to previous page"
     >
       {content}
     </button>

@@ -114,10 +114,10 @@ export default function AdminStudents() {
     setSaving(true);
     try {
       await updateStudent.mutateAsync({ userId: manage.id, patch: editForm });
-      toast({ title: "تم تحديث بيانات الطالب" });
+      toast({ title: "Student updated" });
       setEditing(false);
     } catch (e: any) {
-      toast({ title: "فشل الحفظ", description: e.message, variant: "destructive" });
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
     } finally { setSaving(false); }
   }
 
@@ -126,22 +126,22 @@ export default function AdminStudents() {
     setDeleting(true);
     try {
       await deleteStudent.mutateAsync({ userId: manage.id });
-      toast({ title: "تم حذف الطالب نهائياً" });
+      toast({ title: "Student permanently deleted" });
       setManage(null);
       setDeleteConfirm(false);
     } catch (e: any) {
-      toast({ title: "فشل الحذف", description: e.message, variant: "destructive" });
+      toast({ title: "Delete failed", description: e.message, variant: "destructive" });
     } finally { setDeleting(false); }
   }
 
   async function handleCancelEnrollment(enrollmentId: string) {
-    if (!confirm("إلغاء تسجيل الطالب من هذا الكورس؟")) return;
+    if (!confirm("Unenroll this student from this course?")) return;
     try {
       await cancelEnrollment.mutateAsync({ enrollmentId });
       setStudentEnrollments((prev) => prev.map((e) => e.id === enrollmentId ? { ...e, status: "cancelled" } : e));
-      toast({ title: "تم إلغاء التسجيل" });
+      toast({ title: "Enrollment cancelled" });
     } catch (e: any) {
-      toast({ title: "فشل الإلغاء", description: e.message, variant: "destructive" });
+      toast({ title: "Cancel failed", description: e.message, variant: "destructive" });
     }
   }
 
@@ -327,14 +327,14 @@ export default function AdminStudents() {
                             <button
                               onClick={() => setViewing(s)}
                               className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 border border-amber-200 px-2 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
-                              title="خطاب الدوافع وقائمة الانتظار">
+                              title="Motivation letter & waitlist">
                               <FileText className="w-3 h-3" />
                             </button>
                             <button
                               onClick={() => openManage(s)}
                               className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
                               title="Manage student">
-                              <Edit2 className="w-3 h-3" /> إدارة
+                              <Edit2 className="w-3 h-3" /> Manage
                             </button>
                             {isSuperAdmin && (
                               <button
@@ -379,7 +379,7 @@ export default function AdminStudents() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
               <div>
-                <h2 className="font-bold text-slate-900">إدارة الطالب</h2>
+                <h2 className="font-bold text-slate-900">Manage Student</h2>
                 <p className="text-xs text-slate-500 mt-0.5">{manage.email}</p>
               </div>
               <button onClick={() => setManage(null)} className="text-slate-400 hover:text-slate-700">
@@ -391,31 +391,31 @@ export default function AdminStudents() {
               {/* Profile section */}
               <section>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-slate-700">البيانات الشخصية</h3>
+                  <h3 className="text-sm font-semibold text-slate-700">Personal Information</h3>
                   {!editing ? (
                     <button onClick={() => setEditing(true)}
                       className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
-                      <Edit2 className="w-3 h-3" /> تعديل
+                      <Edit2 className="w-3 h-3" /> Edit
                     </button>
                   ) : (
                     <div className="flex gap-2">
-                      <button onClick={() => setEditing(false)} className="text-xs text-slate-500 hover:underline">إلغاء</button>
+                      <button onClick={() => setEditing(false)} className="text-xs text-slate-500 hover:underline">Cancel</button>
                       <button onClick={handleSaveStudent} disabled={saving}
                         className="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg flex items-center gap-1 disabled:opacity-50">
-                        {saving && <Loader2 className="w-3 h-3 animate-spin" />} حفظ
+                        {saving && <Loader2 className="w-3 h-3 animate-spin" />} Save
                       </button>
                     </div>
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                   {([
-                    ["full_name", "الاسم الكامل"],
-                    ["phone_number", "رقم الهاتف"],
-                    ["country", "الدولة"],
-                    ["city", "المدينة"],
-                    ["date_of_birth", "تاريخ الميلاد", "date"],
-                    ["degree", "الشهادة"],
-                    ["german_level", "مستوى الألمانية"],
+                    ["full_name", "Full Name"],
+                    ["phone_number", "Phone Number"],
+                    ["country", "Country"],
+                    ["city", "City"],
+                    ["date_of_birth", "Date of Birth", "date"],
+                    ["degree", "Degree"],
+                    ["german_level", "German Level"],
                   ] as const).map(([k, label, type]) => (
                     <div key={k}>
                       <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{label}</label>
@@ -432,7 +432,7 @@ export default function AdminStudents() {
                     </div>
                   ))}
                   <div className="md:col-span-2">
-                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">العنوان</label>
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Address</label>
                     {editing ? (
                       <textarea value={editForm.address ?? ""}
                         onChange={(e) => setEditForm((f) => ({ ...f, address: e.target.value }))}
@@ -446,11 +446,11 @@ export default function AdminStudents() {
 
               {/* Enrollments */}
               <section>
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">تسجيلات الكورسات</h3>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">Course Enrollments</h3>
                 {loadingEnrollments ? (
-                  <div className="text-sm text-slate-400 text-center py-4"><Loader2 className="w-4 h-4 animate-spin inline mr-2" />جارٍ التحميل…</div>
+                  <div className="text-sm text-slate-400 text-center py-4"><Loader2 className="w-4 h-4 animate-spin inline mr-2" />Loading…</div>
                 ) : studentEnrollments.length === 0 ? (
-                  <div className="text-sm text-slate-400 text-center py-4">لا توجد تسجيلات</div>
+                  <div className="text-sm text-slate-400 text-center py-4">No enrollments</div>
                 ) : (
                   <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
                     {studentEnrollments.map((e) => (
@@ -458,7 +458,7 @@ export default function AdminStudents() {
                         <div>
                           <div className="text-sm font-medium text-slate-800">{e.course_title_snapshot || e.course_id}</div>
                           <div className="text-xs text-slate-500">
-                            {new Date(e.enrolled_at).toLocaleDateString("ar-EG")} · €{e.amount_eur ?? "—"} ·{" "}
+                            {new Date(e.enrolled_at).toLocaleDateString("en-GB")} · €{e.amount_eur ?? "—"} ·{" "}
                             <span className={
                               e.status === "active" ? "text-emerald-600" :
                               e.status === "cancelled" ? "text-red-600" :
@@ -469,7 +469,7 @@ export default function AdminStudents() {
                         {e.status === "active" && (
                           <button onClick={() => handleCancelEnrollment(e.id)}
                             className="text-xs font-semibold text-red-600 hover:bg-red-50 px-2 py-1 rounded inline-flex items-center gap-1">
-                            <Ban className="w-3 h-3" /> إلغاء
+                            <Ban className="w-3 h-3" /> Cancel
                           </button>
                         )}
                       </div>
@@ -482,24 +482,24 @@ export default function AdminStudents() {
               {isSuperAdmin && (
                 <section className="border border-red-200 bg-red-50 rounded-lg p-4">
                   <h3 className="text-sm font-bold text-red-900 flex items-center gap-2 mb-2">
-                    <AlertTriangle className="w-4 h-4" /> منطقة الخطر
+                    <AlertTriangle className="w-4 h-4" /> Danger Zone
                   </h3>
                   {!deleteConfirm ? (
                     <button onClick={() => setDeleteConfirm(true)}
                       className="text-xs font-semibold text-red-700 border border-red-300 bg-white px-3 py-1.5 rounded-lg hover:bg-red-100 flex items-center gap-1.5">
-                      <Trash2 className="w-3 h-3" /> حذف الطالب نهائياً
+                      <Trash2 className="w-3 h-3" /> Permanently delete student
                     </button>
                   ) : (
                     <div>
                       <p className="text-xs text-red-800 mb-3">
-                        سيتم حذف الحساب نهائياً وإلغاء كل التسجيلات النشطة. هذا لا يمكن التراجع عنه.
+                        The account will be permanently deleted and all active enrollments cancelled. This cannot be undone.
                       </p>
                       <div className="flex gap-2">
                         <button onClick={() => setDeleteConfirm(false)}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-200">إلغاء</button>
+                          className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-200">Cancel</button>
                         <button onClick={handleDeleteStudent} disabled={deleting}
                           className="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 disabled:opacity-50">
-                          {deleting && <Loader2 className="w-3 h-3 animate-spin" />} تأكيد الحذف
+                          {deleting && <Loader2 className="w-3 h-3 animate-spin" />} Confirm delete
                         </button>
                       </div>
                     </div>

@@ -126,7 +126,7 @@ export default function UserDetailsDialog({
         <div className="overflow-y-auto p-5 space-y-6">
           {loading ? (
             <div className="flex items-center justify-center py-10 text-slate-400 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin mr-2" /> جارٍ التحميل…
+              <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading…
             </div>
           ) : (
             <>
@@ -134,11 +134,11 @@ export default function UserDetailsDialog({
               <section>
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="w-4 h-4 text-amber-500" />
-                  <h3 className="font-semibold text-slate-800 text-sm">خطاب الدوافع (Motivation Letter)</h3>
+                  <h3 className="font-semibold text-slate-800 text-sm">Motivation Letter</h3>
                 </div>
                 {verifications.length === 0 ? (
                   <div className="text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                    لا يوجد طلب تقدّم / خطاب دوافع لهذا المستخدم.
+                    No application or motivation letter for this user.
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -162,22 +162,22 @@ export default function UserDetailsDialog({
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-500 mb-3">
-                          {v.degree && <div><span className="text-slate-400">الشهادة:</span> {v.degree}</div>}
-                          {v.graduation_year && <div><span className="text-slate-400">سنة التخرج:</span> {v.graduation_year}</div>}
-                          {v.german_level && <div><span className="text-slate-400">الألمانية:</span> {v.german_level}</div>}
-                          {v.country && <div><span className="text-slate-400">الدولة:</span> {v.country}</div>}
+                          {v.degree && <div><span className="text-slate-400">Degree:</span> {v.degree}</div>}
+                          {v.graduation_year && <div><span className="text-slate-400">Graduation year:</span> {v.graduation_year}</div>}
+                          {v.german_level && <div><span className="text-slate-400">German level:</span> {v.german_level}</div>}
+                          {v.country && <div><span className="text-slate-400">Country:</span> {v.country}</div>}
                         </div>
                         {v.motivation ? (
                           <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed bg-white p-3 rounded-lg border border-slate-100">
                             {v.motivation}
                           </p>
                         ) : (
-                          <p className="text-xs text-slate-400 italic">لم يكتب خطاب دوافع.</p>
+                          <p className="text-xs text-slate-400 italic">No motivation letter written.</p>
                         )}
                         {v.diploma_url && (
                           <a href={v.diploma_url} target="_blank" rel="noreferrer"
                             className="inline-flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 mt-2">
-                            <ExternalLink className="w-3 h-3" /> فتح شهادة التخرج
+                            <ExternalLink className="w-3 h-3" /> Open diploma
                           </a>
                         )}
                       </div>
@@ -190,21 +190,21 @@ export default function UserDetailsDialog({
               <section>
                 <div className="flex items-center gap-2 mb-3">
                   <ListOrdered className="w-4 h-4 text-amber-500" />
-                  <h3 className="font-semibold text-slate-800 text-sm">قائمة الانتظار (Waitlist)</h3>
+                  <h3 className="font-semibold text-slate-800 text-sm">Waitlist</h3>
                 </div>
                 {waitlist.length === 0 ? (
                   <div className="text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                    هذا المستخدم غير مسجّل في أي قائمة انتظار.
+                    This user is not on any waitlist.
                   </div>
                 ) : (
                   <div className="border border-slate-200 rounded-xl overflow-hidden">
                     <table className="w-full text-xs">
                       <thead className="bg-slate-50 text-slate-500">
                         <tr>
-                          <th className="text-left px-3 py-2 font-semibold">الكورس</th>
-                          <th className="text-center px-3 py-2 font-semibold">الترتيب</th>
-                          <th className="text-center px-3 py-2 font-semibold">الحالة</th>
-                          <th className="text-left px-3 py-2 font-semibold">التاريخ</th>
+                          <th className="text-left px-3 py-2 font-semibold">Course</th>
+                          <th className="text-center px-3 py-2 font-semibold">Position</th>
+                          <th className="text-center px-3 py-2 font-semibold">Status</th>
+                          <th className="text-left px-3 py-2 font-semibold">Date</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">

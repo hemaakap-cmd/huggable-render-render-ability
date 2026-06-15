@@ -171,19 +171,19 @@ export default function AdminCourses() {
     setDeleting(true);
     try {
       await deleteCourse.mutateAsync({ courseId: deleteTarget.id, force: deleteForce });
-      toast({ title: "تم حذف الكورس" });
+      toast({ title: "Course deleted" });
       setDeleteTarget(null);
       setDeleteForce(false);
     } catch (e: any) {
       const msg = e?.message || "Delete failed";
       if (msg.includes("active enrollments")) {
         toast({
-          title: "لا يمكن الحذف",
-          description: "يوجد طلاب مسجلون حالياً. فعّل 'حذف قسري' لإلغاء تسجيلهم والمتابعة.",
+          title: "Cannot delete",
+          description: "Active enrollments exist. Enable 'Force delete' to cancel them and proceed.",
           variant: "destructive",
         });
       } else {
-        toast({ title: "فشل الحذف", description: msg, variant: "destructive" });
+        toast({ title: "Delete failed", description: msg, variant: "destructive" });
       }
     } finally {
       setDeleting(false);
@@ -218,10 +218,10 @@ export default function AdminCourses() {
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-sm">
                 <div className="font-semibold text-amber-900">
-                  {incomplete.length} كورس منشور ناقص بيانات حرجة
+                  {incomplete.length} published course(s) missing critical fields
                 </div>
                 <div className="text-amber-700 mt-1">
-                  المفقود عادةً: تاريخ البداية، وقت البداية، اسم المدرس، نوع التقديم، أو المدة. اضغط Edit على أي صف بـ <span className="inline-flex items-center gap-1 font-semibold">⚠️</span> لاستكماله.
+                  Usually missing: start date, start time, instructor name, format, or duration. Click Edit on any row marked with <span className="inline-flex items-center gap-1 font-semibold">⚠️</span> to complete it.
                 </div>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function AdminCourses() {
                     </td>
                     <td className="px-4 py-3.5 text-right font-bold text-slate-800">€{c.price_eur}</td>
                     <td className="px-4 py-3.5 text-right text-slate-500 text-xs hidden sm:table-cell">
-                      {c.price_egp ? `${Number(c.price_egp).toLocaleString()} ج.م` : "—"}
+                      {c.price_egp ? `EGP ${Number(c.price_egp).toLocaleString()}` : "—"}
                     </td>
                     <td className="px-4 py-3.5 text-center text-xs hidden lg:table-cell">
                       <span className={`font-semibold ${c.enrolled_count >= c.capacity ? "text-red-600" : "text-slate-700"}`}>
@@ -393,7 +393,7 @@ export default function AdminCourses() {
                     className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">العنوان (Arabic)</label>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Title (Arabic)</label>
                   <input dir="rtl" value={form.title_ar as string} onChange={(e) => field("title_ar", e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
                 </div>
@@ -425,7 +425,7 @@ export default function AdminCourses() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Price EGP</label>
                   <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">ج.م</span>
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">EGP</span>
                     <input type="number" min="0"
                       value={form.price_egp as number} onChange={(e) => field("price_egp", e.target.value)}
                       className="w-full h-10 pl-9 pr-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(220,91%,54%)]/30 focus:border-[hsl(220,91%,54%)]" />
@@ -595,25 +595,25 @@ export default function AdminCourses() {
                 <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900">حذف الكورس</h3>
+                <h3 className="font-bold text-slate-900">Delete Course</h3>
                 <p className="text-sm text-slate-500 mt-1">
-                  هل أنت متأكد من حذف <strong>{deleteTarget.title}</strong>؟ هذا الإجراء لا يمكن التراجع عنه.
+                  Are you sure you want to delete <strong>{deleteTarget.title}</strong>? This action cannot be undone.
                 </p>
               </div>
             </div>
             <label className="flex items-start gap-2 text-sm text-slate-700 bg-red-50 border border-red-100 rounded-lg p-3 cursor-pointer">
               <input type="checkbox" checked={deleteForce} onChange={(e) => setDeleteForce(e.target.checked)} className="mt-0.5" />
               <span>
-                <strong>حذف قسري</strong> — إلغاء تسجيل كل الطلاب النشطين في هذا الكورس تلقائياً.
+                <strong>Force delete</strong> — automatically cancel all active enrollments in this course.
               </span>
             </label>
             <div className="flex justify-end gap-2 mt-5">
               <button onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100">إلغاء</button>
+                className="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100">Cancel</button>
               <button onClick={handleDelete} disabled={deleting}
                 className="flex items-center gap-2 px-5 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50">
                 {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
-                {deleting ? "جارٍ الحذف…" : "حذف نهائي"}
+                {deleting ? "Deleting…" : "Permanently delete"}
               </button>
             </div>
           </div>
