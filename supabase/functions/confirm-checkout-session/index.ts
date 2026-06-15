@@ -151,6 +151,59 @@ Deno.serve(async (req) => {
 
     if (enrollmentError) throw enrollmentError;
 
+    // ── Send branded purchase confirmation emails (idempotent) ─────────
+    try {
+      const recipientEmail = user.email;
+      if (recipientEmail && enrollment) {
+        const paymentDateStr = new Date(enrollment.paid_at ?? now).toLocaleDateString("en-GB", {
+          day: "numeric", month: "long", year: "numeric",
+        });
+        const amountStr = enrollment.amount_eur != null
+          ? `€${Number(enrollment.amount_eur).toFixed(2)}` : "—";
+        const studentName = (user.user_metadata as any)?.full_name
+          || recipientEmail.split("@")[0];
+
+        // 1) Payment receipt
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "payment-confirmation",
+            recipientEmail,
+            idempotencyKey: `payment-confirm-${enrollment.id}`,
+            templateData: {
+              studentName,
+              courseName: enrollment.course_title_snapshot ?? course?.title ?? null,
+              orderNumber: enrollment.order_number,
+              amountPaid: amountStr,
+              paymentDate: paymentDateStr,
+            },
+          },
+        });
+
+        // 2) Enrollment / course access details
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "enrollment-confirmation",
+            recipientEmail,
+            idempotencyKey: `enrollment-confirm-${enrollment.id}`,
+            templateData: {
+              studentName,
+              courseName: enrollment.course_title_snapshot ?? course?.title ?? null,
+              startDate: course?.start_date ?? null,
+              startTime: course?.start_time ?? null,
+              duration: course?.duration ?? null,
+              instructor: course?.instructor_name ?? null,
+              orderNumber: enrollment.order_number,
+              amountPaid: amountStr,
+              paymentDate: paymentDateStr,
+            },
+          },
+        });
+      }
+    } catch (mailErr) {
+      console.error("purchase email send failed (non-fatal):", mailErr);
+    }
+
+
     if (subscription) {
       const item = subscription.items?.data?.[0];
       await supabase.from("ssra_subscriptions").upsert({
