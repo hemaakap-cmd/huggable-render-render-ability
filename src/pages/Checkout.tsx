@@ -16,9 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 // Courses that use "pay what you want" donation pricing instead of fixed price.
 // Medical German is a monthly subscription in the catalogue, so it must stay on
 // the recurring checkout path and not be treated as a contribution.
-const DONATION_COURSE_IDS = new Set<string>();
-const DONATION_SUGGESTED = [5, 10, 25, 50];
-const DONATION_MIN = 1;
+const DONATION_COURSE_IDS = new Set<string>(["medical-german"]);
+const DONATION_SUGGESTED = [10, 15, 25, 50, 75, 100, 150, 200];
+const DONATION_MIN = 10;
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
@@ -40,7 +40,7 @@ export default function Checkout() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [activeEnrollment, setActiveEnrollment] = useState<any>(null);
   const isDonation = DONATION_COURSE_IDS.has(courseId);
-  const [donationPick, setDonationPick] = useState<number | "custom">(10);
+  const [donationPick, setDonationPick] = useState<number | "custom">(DONATION_SUGGESTED[0]);
   const [donationCustom, setDonationCustom] = useState<string>("");
   const donationAmount = useMemo(() => {
     if (donationPick === "custom") {
