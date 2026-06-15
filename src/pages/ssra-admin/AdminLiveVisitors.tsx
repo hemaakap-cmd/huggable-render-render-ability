@@ -186,18 +186,19 @@ export default function AdminLiveVisitors() {
           </div>
         </div>
 
-        {/* Today totals */}
+        {/* Period totals */}
         <div>
-          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Today</h2>
+          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">{PERIOD_LABELS[period]}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Stat icon={<Users className="w-5 h-5" />} label="Visitors today" value={totals.visitors} color="text-sky-600" />
-            <Stat icon={<MapPin className="w-5 h-5" />} label="Countries today" value={totals.countries} color="text-blue-600" />
-            <Stat icon={<LogIn className="w-5 h-5" />} label="Logins today" value={totals.logins} color="text-amber-600" />
+            <Stat icon={<Users className="w-5 h-5" />} label={`Visitors ${period === "today" ? "today" : ""}`} value={totals.visitors} color="text-sky-600" />
+            <Stat icon={<MapPin className="w-5 h-5" />} label={`Countries ${period === "today" ? "today" : ""}`} value={totals.countries} color="text-blue-600" />
+            <Stat icon={<LogIn className="w-5 h-5" />} label={`Logins ${period === "today" ? "today" : ""}`} value={totals.logins} color="text-amber-600" />
             <Stat icon={<UserCheck className="w-5 h-5" />} label="Completed profiles" value={totals.completedProfiles} color="text-emerald-600" />
           </div>
         </div>
 
-        {/* Live (last 5 min) */}
+        {/* Active now (last 5 min) — only when today */}
+        {period === "today" && (
         <div>
           <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Live · last {WINDOW_MIN} min</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -207,6 +208,7 @@ export default function AdminLiveVisitors() {
             <Stat icon={<Activity className="w-5 h-5" />} label="Logged-in users" value={visitors.filter((v) => v.user_id).length} color="text-amber-600" />
           </div>
         </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* By Country */}
