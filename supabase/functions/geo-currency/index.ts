@@ -60,11 +60,13 @@ async function lookupCountry(ip: string): Promise<string | null> {
 }
 
 function currencyForCountry(cc: string | null): string {
+  // If detection fails entirely, fall back to EUR.
   if (!cc) return "EUR";
   const up = cc.toUpperCase();
   if (COUNTRY_TO_CURRENCY[up]) return COUNTRY_TO_CURRENCY[up];
   if (EU_COUNTRIES.has(up)) return "EUR";
-  return "EUR";
+  // Any other detected country (US, CA, UK, etc.) → USD
+  return "USD";
 }
 
 Deno.serve(async (req) => {
@@ -92,12 +94,14 @@ Deno.serve(async (req) => {
         // expose select rates for client formatting/conversion sanity
         rates: {
           EUR: 1,
+          USD: rates.USD ?? null,
           EGP: rates.EGP ?? null,
           SAR: rates.SAR ?? null,
           TND: rates.TND ?? null,
         },
         updatedAt: fxCache?.at ?? Date.now(),
       }),
+
       { headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=900" } },
     );
   } catch (e) {

@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       currency?: string;
       fxRate?: number;
     };
-    const ALLOWED = new Set(["EUR", "EGP", "SAR", "TND"]);
+    const ALLOWED = new Set(["EUR", "USD", "EGP", "SAR", "TND"]);
     const currency = (requestedCurrency && ALLOWED.has(requestedCurrency.toUpperCase()))
       ? requestedCurrency.toUpperCase()
       : "EUR";
