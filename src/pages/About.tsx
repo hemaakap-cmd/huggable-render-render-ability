@@ -58,6 +58,17 @@ const VALUES = [
 
 export default function About() {
   useReveal();
+  const [team, setTeam] = useState<PublicTeamMember[]>([]);
+  const [teamLoading, setTeamLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.rpc("get_public_team");
+      if (!error && data) setTeam(data as PublicTeamMember[]);
+      setTeamLoading(false);
+    })();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-background">
