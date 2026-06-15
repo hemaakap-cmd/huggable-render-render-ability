@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { usePublicCourses } from "@/hooks/useSsraData";
+import { useCurrency } from "@/hooks/useCurrency";
 import { supabase } from "@/integrations/supabase/client";
 import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 import heroBiomechanicsMobile from "@/assets/hero-biomechanics-mobile.jpg";
