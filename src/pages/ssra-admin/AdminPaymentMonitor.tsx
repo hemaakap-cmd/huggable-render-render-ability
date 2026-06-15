@@ -87,7 +87,7 @@ export default function AdminPaymentMonitor() {
       setAttempts((attemptsRes.data as Attempt[]) || []);
       setTopFailed((topFailedRes.data as any[]) || []);
     } catch (e: any) {
-      toast({ title: "خطأ في التحميل", description: e.message, variant: "destructive" });
+      toast({ title: "Failed to load", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -155,9 +155,9 @@ export default function AdminPaymentMonitor() {
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <CreditCard className="w-6 h-6 text-blue-600" />
-              مراقبة الدفع
+              Payment Monitor
             </h1>
-            <p className="text-sm text-slate-500 mt-1">تتبع كل محاولات الدفع والفشل وأنماط الاستخدام</p>
+            <p className="text-sm text-slate-500 mt-1">Track every payment attempt, failure, and usage pattern</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <select
@@ -173,17 +173,17 @@ export default function AdminPaymentMonitor() {
               onChange={(e) => setHours(Number(e.target.value))}
               className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
             >
-              <option value={1}>آخر ساعة</option>
-              <option value={24}>آخر 24 ساعة</option>
-              <option value={168}>آخر 7 أيام</option>
-              <option value={720}>آخر 30 يوم</option>
+              <option value={1}>Last hour</option>
+              <option value={24}>Last 24 hours</option>
+              <option value={168}>Last 7 days</option>
+              <option value={720}>Last 30 days</option>
             </select>
             <button
               onClick={loadAll}
               className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 flex items-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-              تحديث
+              Refresh
             </button>
             <button
               onClick={exportCSV}
@@ -197,23 +197,23 @@ export default function AdminPaymentMonitor() {
 
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Kpi label="إجمالي المحاولات" value={stats?.total ?? 0} icon={<CreditCard className="w-5 h-5 text-blue-600" />} />
-          <Kpi label="معدل النجاح" value={`${stats?.success_rate ?? 0}%`} icon={<TrendingUp className="w-5 h-5 text-emerald-600" />} />
-          <Kpi label="فشل" value={stats?.failed ?? 0} icon={<XCircle className="w-5 h-5 text-red-600" />} tone="red" />
-          <Kpi label="نجاح" value={stats?.succeeded ?? 0} icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />} />
-          <Kpi label="قيد التنفيذ" value={(stats?.initiated ?? 0) + (stats?.abandoned ?? 0)} icon={<Loader2 className="w-5 h-5 text-amber-600" />} />
-          <Kpi label="متوسط زمن الدفع" value={`${Math.round((stats?.avg_duration_ms ?? 0) / 1000)}s`} icon={<Clock className="w-5 h-5 text-slate-600" />} />
-          <Kpi label="مستخدمين فريدين" value={stats?.unique_users ?? 0} icon={<Users className="w-5 h-5 text-blue-600" />} />
-          <Kpi label="مستخدمين متكرري الفشل" value={topFailed.length} icon={<AlertTriangle className="w-5 h-5 text-orange-600" />} tone={topFailed.length > 0 ? "orange" : undefined} />
+          <Kpi label="Total Attempts" value={stats?.total ?? 0} icon={<CreditCard className="w-5 h-5 text-blue-600" />} />
+          <Kpi label="Success Rate" value={`${stats?.success_rate ?? 0}%`} icon={<TrendingUp className="w-5 h-5 text-emerald-600" />} />
+          <Kpi label="Failed" value={stats?.failed ?? 0} icon={<XCircle className="w-5 h-5 text-red-600" />} tone="red" />
+          <Kpi label="Succeeded" value={stats?.succeeded ?? 0} icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />} />
+          <Kpi label="In Progress" value={(stats?.initiated ?? 0) + (stats?.abandoned ?? 0)} icon={<Loader2 className="w-5 h-5 text-amber-600" />} />
+          <Kpi label="Avg. Payment Time" value={`${Math.round((stats?.avg_duration_ms ?? 0) / 1000)}s`} icon={<Clock className="w-5 h-5 text-slate-600" />} />
+          <Kpi label="Unique Users" value={stats?.unique_users ?? 0} icon={<Users className="w-5 h-5 text-blue-600" />} />
+          <Kpi label="Repeat Failures" value={topFailed.length} icon={<AlertTriangle className="w-5 h-5 text-orange-600" />} tone={topFailed.length > 0 ? "orange" : undefined} />
         </div>
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card title="المحاولات بمرور الوقت">
+          <Card title="Attempts Over Time">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={(stats?.hourly_buckets || []).map(b => ({
-                  hour: new Date(b.hour).toLocaleString("ar-EG", { hour: "2-digit", day: "2-digit", month: "2-digit" }),
+                  hour: new Date(b.hour).toLocaleString("en-GB", { hour: "2-digit", day: "2-digit", month: "2-digit" }),
                   succeeded: b.succeeded, failed: b.failed,
                 }))}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -221,16 +221,16 @@ export default function AdminPaymentMonitor() {
                   <YAxis fontSize={11} allowDecimals={false} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="succeeded" stackId="a" fill="#10b981" name="نجاح" />
-                  <Bar dataKey="failed" stackId="a" fill="#ef4444" name="فشل" />
+                  <Bar dataKey="succeeded" stackId="a" fill="#10b981" name="Succeeded" />
+                  <Bar dataKey="failed" stackId="a" fill="#ef4444" name="Failed" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </Card>
 
-          <Card title="أكثر أسباب الفشل">
+          <Card title="Top Failure Reasons">
             {failureReasonsForPie.length === 0 ? (
-              <div className="h-64 flex items-center justify-center text-sm text-slate-400">لا يوجد فشل في هذه الفترة 🎉</div>
+              <div className="h-64 flex items-center justify-center text-sm text-slate-400">No failures in this period 🎉</div>
             ) : (
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -248,15 +248,15 @@ export default function AdminPaymentMonitor() {
 
         {/* Top failed users */}
         {topFailed.length > 0 && (
-          <Card title="🚨 مستخدمون فشلوا أكثر من مرة">
+          <Card title="🚨 Users with multiple failures">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-slate-500 border-b border-slate-100">
-                    <th className="py-2 px-2">المستخدم</th>
-                    <th className="py-2 px-2">عدد الفشل</th>
-                    <th className="py-2 px-2">إجمالي المحاولات</th>
-                    <th className="py-2 px-2">آخر محاولة</th>
+                    <th className="py-2 px-2">User</th>
+                    <th className="py-2 px-2">Failures</th>
+                    <th className="py-2 px-2">Total Attempts</th>
+                    <th className="py-2 px-2">Last Attempt</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,7 +265,7 @@ export default function AdminPaymentMonitor() {
                       <td className="py-2 px-2">{u.user_email || u.user_id?.slice(0,8)}</td>
                       <td className="py-2 px-2"><span className="text-red-600 font-semibold">{u.failed_count}</span></td>
                       <td className="py-2 px-2">{u.total_attempts}</td>
-                      <td className="py-2 px-2 text-slate-500">{new Date(u.last_attempt_at).toLocaleString("ar-EG")}</td>
+                      <td className="py-2 px-2 text-slate-500">{new Date(u.last_attempt_at).toLocaleString("en-GB")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -275,12 +275,12 @@ export default function AdminPaymentMonitor() {
         )}
 
         {/* Filters + Attempts table */}
-        <Card title={`سجل المحاولات (${filteredAttempts.length})`}>
+        <Card title={`Attempts Log (${filteredAttempts.length})`}>
           <div className="flex flex-wrap gap-2 mb-3">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="بحث بالبريد، الكورس، أو معرف الجلسة…"
+              placeholder="Search by email, course, or session ID…"
               className="flex-1 min-w-[200px] px-3 py-2 border border-slate-200 rounded-lg text-sm"
             />
             <select
@@ -288,12 +288,12 @@ export default function AdminPaymentMonitor() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
             >
-              <option value="">كل الحالات</option>
-              <option value="succeeded">ناجحة</option>
-              <option value="failed">فاشلة</option>
-              <option value="initiated">قيد البدء</option>
-              <option value="processing">قيد المعالجة</option>
-              <option value="abandoned">متروكة</option>
+              <option value="">All statuses</option>
+              <option value="succeeded">Succeeded</option>
+              <option value="failed">Failed</option>
+              <option value="initiated">Initiated</option>
+              <option value="processing">Processing</option>
+              <option value="abandoned">Abandoned</option>
             </select>
           </div>
 
@@ -301,27 +301,27 @@ export default function AdminPaymentMonitor() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-slate-500 border-b border-slate-100">
-                  <th className="py-2 px-2">الوقت</th>
-                  <th className="py-2 px-2">المستخدم</th>
-                  <th className="py-2 px-2">الكورس</th>
-                  <th className="py-2 px-2">المبلغ</th>
-                  <th className="py-2 px-2">الحالة</th>
-                  <th className="py-2 px-2">المحاولة #</th>
-                  <th className="py-2 px-2">المدة</th>
-                  <th className="py-2 px-2">سبب الفشل</th>
-                  <th className="py-2 px-2">الدولة</th>
+                  <th className="py-2 px-2">Time</th>
+                  <th className="py-2 px-2">User</th>
+                  <th className="py-2 px-2">Course</th>
+                  <th className="py-2 px-2">Amount</th>
+                  <th className="py-2 px-2">Status</th>
+                  <th className="py-2 px-2">Attempt #</th>
+                  <th className="py-2 px-2">Duration</th>
+                  <th className="py-2 px-2">Failure Reason</th>
+                  <th className="py-2 px-2">Country</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && filteredAttempts.length === 0 && (
-                  <tr><td colSpan={9} className="py-8 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline mr-2" />جارٍ التحميل…</td></tr>
+                  <tr><td colSpan={9} className="py-8 text-center text-slate-400"><Loader2 className="w-5 h-5 animate-spin inline mr-2" />Loading…</td></tr>
                 )}
                 {!loading && filteredAttempts.length === 0 && (
-                  <tr><td colSpan={9} className="py-8 text-center text-slate-400">لا توجد محاولات</td></tr>
+                  <tr><td colSpan={9} className="py-8 text-center text-slate-400">No attempts</td></tr>
                 )}
                 {filteredAttempts.map((a) => (
                   <tr key={a.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-                    <td className="py-2 px-2 whitespace-nowrap text-slate-500 text-xs">{new Date(a.created_at).toLocaleString("ar-EG")}</td>
+                    <td className="py-2 px-2 whitespace-nowrap text-slate-500 text-xs">{new Date(a.created_at).toLocaleString("en-GB")}</td>
                     <td className="py-2 px-2 text-xs">{a.user_email || a.user_id?.slice(0,8)}</td>
                     <td className="py-2 px-2 text-xs">{a.course_title || a.course_id}</td>
                     <td className="py-2 px-2">{a.amount_eur ? `€${a.amount_eur}` : "—"}</td>

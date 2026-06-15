@@ -103,16 +103,16 @@ export default function AdminLeads() {
   );
 
   const sendReminders = async () => {
-    if (!courseId) { toast({ title: "اختر الكورس الأول", variant: "destructive" }); return; }
-    if (selectedLeads.length === 0) { toast({ title: "اختر شخص واحد على الأقل", variant: "destructive" }); return; }
+    if (!courseId) { toast({ title: "Select a course first", variant: "destructive" }); return; }
+    if (selectedLeads.length === 0) { toast({ title: "Select at least one lead", variant: "destructive" }); return; }
 
     const course: any = (courses ?? []).find((c: any) => c.id === courseId);
-    if (!course) { toast({ title: "الكورس غير موجود", variant: "destructive" }); return; }
+    if (!course) { toast({ title: "Course not found", variant: "destructive" }); return; }
 
     setSending(true);
     let ok = 0, fail = 0;
     const courseUrl = `${window.location.origin}/courses/${course.slug ?? course.id}`;
-    const priceLabel = course.price_eur ? `€${course.price_eur}${course.is_subscription ? " / شهر" : ""}` : undefined;
+    const priceLabel = course.price_eur ? `€${course.price_eur}${course.is_subscription ? " / month" : ""}` : undefined;
 
     for (const lead of selectedLeads) {
       try {
@@ -140,8 +140,8 @@ export default function AdminLeads() {
     }
     setSending(false);
     toast({
-      title: `تم الإرسال`,
-      description: `نجح: ${ok}${fail ? ` · فشل: ${fail}` : ""}`,
+      title: `Sent`,
+      description: `Succeeded: ${ok}${fail ? ` · Failed: ${fail}` : ""}`,
     });
     if (ok > 0) setSelectedIds(new Set());
   };
@@ -180,20 +180,20 @@ export default function AdminLeads() {
         {/* Reminder bar */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-amber-900">
-            <Send className="w-4 h-4" /> إرسال تذكير لحجز الكورس
+            <Send className="w-4 h-4" /> Send course reminder
           </div>
           <select
             value={courseId}
             onChange={(e) => setCourseId(e.target.value)}
             className="h-9 px-3 rounded-lg border border-amber-300 bg-white text-sm min-w-[220px]"
           >
-            <option value="">اختر الكورس…</option>
+            <option value="">Select course…</option>
             {(courses ?? []).map((c: any) => (
               <option key={c.id} value={c.id}>{c.title_ar || c.title}</option>
             ))}
           </select>
           <div className="text-xs text-amber-800">
-            {selectedLeads.length} مختار
+            {selectedLeads.length} selected
           </div>
           <button
             onClick={sendReminders}
@@ -201,7 +201,7 @@ export default function AdminLeads() {
             className="ms-auto flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            {sending ? "جارٍ الإرسال…" : "إرسال التذكير"}
+            {sending ? "Sending…" : "Send reminder"}
           </button>
         </div>
 
@@ -322,7 +322,7 @@ export default function AdminLeads() {
                           <button
                             onClick={() => setViewing(r)}
                             className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50"
-                            title="عرض خطاب الدوافع وقائمة الانتظار"
+                            title="View motivation letter & waitlist"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
