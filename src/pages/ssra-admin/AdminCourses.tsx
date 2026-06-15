@@ -166,6 +166,30 @@ export default function AdminCourses() {
     toast({ title: c.price_hidden ? "Price is now visible" : "Price hidden — showing 'Coming Soon'" });
   }
 
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteCourse.mutateAsync({ courseId: deleteTarget.id, force: deleteForce });
+      toast({ title: "تم حذف الكورس" });
+      setDeleteTarget(null);
+      setDeleteForce(false);
+    } catch (e: any) {
+      const msg = e?.message || "Delete failed";
+      if (msg.includes("active enrollments")) {
+        toast({
+          title: "لا يمكن الحذف",
+          description: "يوجد طلاب مسجلون حالياً. فعّل 'حذف قسري' لإلغاء تسجيلهم والمتابعة.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "فشل الحذف", description: msg, variant: "destructive" });
+      }
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   const categoryColor: Record<string, string> = {
     clinical:  "bg-blue-50 text-blue-700",
     language:  "bg-emerald-50 text-emerald-700",
