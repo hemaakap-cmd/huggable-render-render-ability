@@ -242,7 +242,7 @@ export default function Checkout() {
                     />
                   </label>
                   {!donationValid && donationPick === "custom" && donationCustom !== "" && (
-                    <p className="text-xs text-red-600 mt-2">الحد الأدنى للمساهمة €{DONATION_MIN}</p>
+                  <p className="text-xs text-red-600 mt-2">الحد الأدنى للاشتراك €{DONATION_MIN}</p>
                   )}
                 </div>
               )}
