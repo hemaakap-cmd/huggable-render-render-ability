@@ -320,15 +320,24 @@ export default function AdminStudents() {
                             <span className="text-xs text-slate-300">—</span>
                           )}
                         </td>
-                        {isSuperAdmin && (
-                          <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
                             <button
-                              onClick={() => navigate(`/ssra-admin/view-as/${s.id}`)}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors">
-                              <Eye className="w-3 h-3" /> View as
+                              onClick={() => openManage(s)}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                              title="Manage student">
+                              <Edit2 className="w-3 h-3" /> إدارة
                             </button>
-                          </td>
-                        )}
+                            {isSuperAdmin && (
+                              <button
+                                onClick={() => navigate(`/ssra-admin/view-as/${s.id}`)}
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 border border-amber-200 px-2 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                                title="View as student">
+                                <Eye className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
