@@ -68,6 +68,7 @@ const SuperAdminViewAs    = lazy(() => import("./pages/ssra-admin/SuperAdminView
 const SuperAdminSyncStatus = lazy(() => import("./pages/ssra-admin/SuperAdminSyncStatus"));
 const SuperAdminManualGrant = lazy(() => import("./pages/ssra-admin/SuperAdminManualGrant"));
 const SuperAdminStudentReports = lazy(() => import("./pages/ssra-admin/SuperAdminStudentReports"));
+const SuperAdminSiteSettings = lazy(() => import("./pages/ssra-admin/SuperAdminSiteSettings"));
 const AdminLiveVisitors    = lazy(() => import("./pages/ssra-admin/AdminLiveVisitors"));
 const AdminWaitlist        = lazy(() => import("./pages/ssra-admin/AdminWaitlist"));
 const AdminCoupons         = lazy(() => import("./pages/ssra-admin/AdminCoupons"));
@@ -291,6 +292,7 @@ function AppInner() {
                 <Route path="/ssra-admin/manual-grant"     element={<RequireSuperAdmin><SuperAdminManualGrant /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/student-reports"  element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
                 <Route path="/ssra-super-admin/student-reports" element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
+                <Route path="/ssra-admin/site-settings"     element={<RequireSuperAdmin><SuperAdminSiteSettings /></RequireSuperAdmin>} />
 
                 <Route path="*" element={<NotFound />} />
         </Routes>
