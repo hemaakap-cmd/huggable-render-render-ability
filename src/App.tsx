@@ -69,6 +69,8 @@ const SuperAdminSyncStatus = lazy(() => import("./pages/ssra-admin/SuperAdminSyn
 const SuperAdminManualGrant = lazy(() => import("./pages/ssra-admin/SuperAdminManualGrant"));
 const SuperAdminStudentReports = lazy(() => import("./pages/ssra-admin/SuperAdminStudentReports"));
 const SuperAdminSiteSettings = lazy(() => import("./pages/ssra-admin/SuperAdminSiteSettings"));
+const SuperAdminTeam = lazy(() => import("./pages/ssra-admin/SuperAdminTeam"));
+const Team = lazy(() => import("./pages/Team"));
 const AdminLiveVisitors    = lazy(() => import("./pages/ssra-admin/AdminLiveVisitors"));
 const AdminWaitlist        = lazy(() => import("./pages/ssra-admin/AdminWaitlist"));
 const AdminCoupons         = lazy(() => import("./pages/ssra-admin/AdminCoupons"));
