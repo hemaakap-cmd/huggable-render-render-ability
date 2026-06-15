@@ -116,7 +116,7 @@ export default function SuperAdminSiteSettings() {
     const payload = data[group.key] ?? {};
     const { error } = await supabase
       .from("ssra_site_settings")
-      .upsert({ key: group.key, value: payload }, { onConflict: "key" });
+      .upsert({ key: group.key, value: payload as never }, { onConflict: "key" });
     setSaving(null);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
