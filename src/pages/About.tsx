@@ -100,7 +100,7 @@ export default function About() {
                   We believe Arabic-speaking students, graduates, and professionals deserve direct access to modern sports science, sports therapy, and rehabilitation knowledge — not outdated textbooks or second-hand translations.
                 </p>
                 <p>
-                  Our goal is to build bridges: between rigorous academic standards and Arab-world ambition, between research and practice, between experienced professionals and the next generation entering the field — wherever they choose to work.
+                  Our goal is to build bridges: between expert knowledge and practical application, between experienced professionals and the next generation entering the field — wherever they choose to work.
                 </p>
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function About() {
               {[
                 "Academy founded in Germany with a global Arabic-speaking community",
                 "Modern, evidence-based sports science curriculum",
-                "Courses in Arabic, German, and English",
+                "Courses delivered entirely in Arabic",
                 "Fair support for graduates — no exploitation, no false promises",
                 "Active professional network for knowledge exchange and growth",
               ].map((item) => (

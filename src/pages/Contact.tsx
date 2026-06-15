@@ -89,7 +89,7 @@ export default function Contact() {
               </div>
               <div>
                 <div className="text-sm font-semibold text-foreground mb-1">Language</div>
-                <div className="text-sm text-muted-foreground">Arabic · German · English</div>
+                <div className="text-sm text-muted-foreground">Arabic only — all courses and support in your language</div>
               </div>
             </div>
 

@@ -53,7 +53,7 @@ function useHomeStats() {
 
 const FEATURES = [
   { icon: Shield,   title: "Verified Curriculum",   desc: "Every course reviewed by practising German sports scientists and physiotherapists." },
-  { icon: Languages,title: "Arabic-First Support",  desc: "All modules explained in Arabic with German and English resources." },
+  { icon: Languages,title: "Arabic-First Support",  desc: "All modules explained in Arabic — no language barrier." },
   { icon: Zap,      title: "Job-Ready in Weeks",    desc: "Practical, scenario-based learning — not theory for theory's sake." },
   { icon: CreditCard,title:"Secure Global Payments",desc: "Pay securely from anywhere in the world via Paddle — all major cards accepted." },
 ];
