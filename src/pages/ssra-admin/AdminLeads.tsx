@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { Search, UserPlus, Mail, Globe2, Phone, Download, FileSpreadsheet, ChevronLeft, ChevronRight, TrendingUp, MapPin, Calendar, Send, Loader2 } from "lucide-react";
+import { Search, UserPlus, Mail, Globe2, Phone, Download, FileSpreadsheet, ChevronLeft, ChevronRight, TrendingUp, MapPin, Calendar, Send, Loader2, Eye } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
+import UserDetailsDialog from "@/components/ssra/UserDetailsDialog";
 import { useAdminLeads, useLeadStudentStats, useAdminCourses } from "@/hooks/useSsraData";
 import { exportToCSV, exportToExcel, profileCompletion, type ExportColumn } from "@/lib/exportUtils";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,6 +55,7 @@ export default function AdminLeads() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [courseId, setCourseId] = useState<string>("");
   const [sending, setSending] = useState(false);
+  const [viewing, setViewing] = useState<Lead | null>(null);
 
   const { data, isLoading } = useAdminLeads(search, page, PAGE_SIZE);
   const { data: stats } = useLeadStudentStats();
@@ -259,6 +261,7 @@ export default function AdminLeads() {
                     <th className="text-left px-4 py-3">Location</th>
                     <th className="text-center px-4 py-3">Profile</th>
                     <th className="text-left px-4 py-3">Registered</th>
+                    <th className="text-center px-4 py-3 w-12"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -315,6 +318,15 @@ export default function AdminLeads() {
                         <td className="px-4 py-3 text-xs text-slate-500">
                           {new Date(r.created_at).toLocaleDateString()}
                         </td>
+                        <td className="px-2 py-3 text-center">
+                          <button
+                            onClick={() => setViewing(r)}
+                            className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50"
+                            title="عرض خطاب الدوافع وقائمة الانتظار"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -341,6 +353,14 @@ export default function AdminLeads() {
           </div>
         )}
       </div>
+      {viewing && (
+        <UserDetailsDialog
+          userId={viewing.id}
+          userEmail={viewing.email}
+          userName={viewing.full_name}
+          onClose={() => setViewing(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
-import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone, MapPin, Calendar, BookOpen, Edit2, Trash2, X, Loader2, Ban, AlertTriangle } from "lucide-react";
+import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone, MapPin, Calendar, BookOpen, Edit2, Trash2, X, Loader2, Ban, AlertTriangle, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
+import UserDetailsDialog from "@/components/ssra/UserDetailsDialog";
 import { useAdminStudents, useLeadStudentStats, useAdminCourses, useUpdateStudent, useDeleteStudent, useCancelEnrollment } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,6 +76,7 @@ export default function AdminStudents() {
   const [deleting, setDeleting] = useState(false);
   const [studentEnrollments, setStudentEnrollments] = useState<any[]>([]);
   const [loadingEnrollments, setLoadingEnrollments] = useState(false);
+  const [viewing, setViewing] = useState<StudentRow | null>(null);
 
   const updateStudent = useUpdateStudent();
   const deleteStudent = useDeleteStudent();
@@ -323,6 +325,12 @@ export default function AdminStudents() {
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
                             <button
+                              onClick={() => setViewing(s)}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 border border-amber-200 px-2 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                              title="خطاب الدوافع وقائمة الانتظار">
+                              <FileText className="w-3 h-3" />
+                            </button>
+                            <button
                               onClick={() => openManage(s)}
                               className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
                               title="Manage student">
@@ -501,6 +509,15 @@ export default function AdminStudents() {
             </div>
           </div>
         </div>
+      )}
+
+      {viewing && (
+        <UserDetailsDialog
+          userId={viewing.id}
+          userEmail={viewing.email}
+          userName={viewing.full_name}
+          onClose={() => setViewing(null)}
+        />
       )}
     </AdminLayout>
   );
