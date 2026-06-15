@@ -4,7 +4,16 @@ import { Loader2, ShieldCheck, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSsraAuth, ssraSignOut } from "@/hooks/useSsraAuth";
-import { isProfileComplete } from "@/lib/profileCompletion";
+import {
+  isProfileComplete,
+  validateFullName,
+  validatePhone,
+  validateCity,
+  validateAddress,
+  validateCountry,
+  validateDegree,
+  validateGermanLevel,
+} from "@/lib/profileCompletion";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import BackButton from "@/components/ssra/BackButton";
 
@@ -60,23 +69,21 @@ export default function CompleteProfile() {
     );
   }
 
-  const LATIN_NAME = /^[A-Za-z][A-Za-z\s'\-\.]*$/;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) return toast({ title: "Please enter your full name", variant: "destructive" });
-    if (!LATIN_NAME.test(fullName.trim())) {
-      return toast({
-        title: "English characters only",
-        description: "Full name may only contain English letters, spaces, hyphens, and apostrophes.",
-        variant: "destructive",
-      });
+    const checks: Array<string | null> = [
+      validateFullName(fullName),
+      validatePhone(phone),
+      validateCountry(country),
+      validateCity(city),
+      validateAddress(address),
+      validateDegree(degree),
+      validateGermanLevel(germanLevel),
+    ];
+    const firstError = checks.find((m) => m);
+    if (firstError) {
+      return toast({ title: "Please correct your details", description: firstError, variant: "destructive" });
     }
-    if (!phone.trim() || phone.trim().length < 6) return toast({ title: "Please enter a valid phone number", variant: "destructive" });
-    if (!country) return toast({ title: "Please select your country", variant: "destructive" });
-    if (!city.trim()) return toast({ title: "Please enter your city", variant: "destructive" });
-    if (!address.trim() || address.trim().length < 5) return toast({ title: "Please enter your address", variant: "destructive" });
-    if (!degree) return toast({ title: "Please select your degree", variant: "destructive" });
-    if (!germanLevel) return toast({ title: "Please select your German level", variant: "destructive" });
 
     setSaving(true);
     const { error } = await supabase

@@ -6,7 +6,17 @@ import { useToast } from "@/hooks/use-toast";
 import SsraLogo from "@/components/ssra/SsraLogo";
 import BackButton from "@/components/ssra/BackButton";
 import { verifyOtpCode } from "@/lib/verifyOtpCode";
-import { isProfileComplete, missingProfileFields } from "@/lib/profileCompletion";
+import {
+  isProfileComplete,
+  missingProfileFields,
+  validateFullName,
+  validatePhone,
+  validateCity,
+  validateAddress,
+  validateCountry,
+  validateDegree,
+  validateGermanLevel,
+} from "@/lib/profileCompletion";
 
 type Tab = "signup" | "login";
 type EmailStatus = "idle" | "checking" | "registered" | "available" | "incomplete" | "invalid";
@@ -133,48 +143,18 @@ export default function StudentLogin() {
       return;
     }
     if (tab === "signup") {
-      if (!name.trim()) {
-        toast({ title: "Please enter your full name", variant: "destructive" });
-        return;
-      }
-      if (containsArabic(name)) {
-        toast({
-          title: "English characters only",
-          description: "Please enter your full name in English (Latin) characters only.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (!/^[A-Za-z\s'\-\.]+$/.test(name.trim())) {
-        toast({
-          title: "Invalid name",
-          description: "Full name may only contain English letters, spaces, hyphens, and apostrophes.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (!phone.trim() || phone.trim().length < 6) {
-        toast({ title: "Please enter a valid phone number", variant: "destructive" });
-        return;
-      }
-      if (!country) {
-        toast({ title: "Please select your country", variant: "destructive" });
-        return;
-      }
-      if (!city.trim()) {
-        toast({ title: "Please enter your city", variant: "destructive" });
-        return;
-      }
-      if (!address.trim() || address.trim().length < 5) {
-        toast({ title: "Please enter your full address", variant: "destructive" });
-        return;
-      }
-      if (!degree) {
-        toast({ title: "Please select your degree", variant: "destructive" });
-        return;
-      }
-      if (!germanLevel) {
-        toast({ title: "Please select your German level", variant: "destructive" });
+      const checks: Array<string | null> = [
+        validateFullName(name),
+        validatePhone(phone),
+        validateCountry(country),
+        validateCity(city),
+        validateAddress(address),
+        validateDegree(degree),
+        validateGermanLevel(germanLevel),
+      ];
+      const firstError = checks.find((m) => m);
+      if (firstError) {
+        toast({ title: "Please correct your details", description: firstError, variant: "destructive" });
         return;
       }
       if (status === "registered") {
