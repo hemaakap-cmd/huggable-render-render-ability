@@ -318,6 +318,15 @@ export default function AdminLeads() {
                         <td className="px-4 py-3 text-xs text-slate-500">
                           {new Date(r.created_at).toLocaleDateString()}
                         </td>
+                        <td className="px-2 py-3 text-center">
+                          <button
+                            onClick={() => setViewing(r)}
+                            className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50"
+                            title="عرض خطاب الدوافع وقائمة الانتظار"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
