@@ -8,7 +8,8 @@ const supabase = createClient(
 );
 
 // Courses opted into "pay what you want" donation pricing.
-const DONATION_COURSE_IDS = new Set(["medical-german"]);
+// Medical German is sold as a recurring subscription and must not use this path.
+const DONATION_COURSE_IDS = new Set<string>();
 const MIN_AMOUNT_CENTS = 100; // €1 minimum
 const MAX_AMOUNT_CENTS = 1_000_000; // €10,000 sanity cap
 
