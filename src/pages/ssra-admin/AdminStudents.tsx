@@ -257,7 +257,7 @@ export default function AdminStudents() {
                     <th className="text-left px-4 py-3">Location</th>
                     <th className="text-left px-4 py-3">Courses</th>
                     <th className="text-center px-4 py-3">Sub</th>
-                    {isSuperAdmin && <th className="text-center px-4 py-3">View As</th>}
+                    <th className="text-center px-4 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
