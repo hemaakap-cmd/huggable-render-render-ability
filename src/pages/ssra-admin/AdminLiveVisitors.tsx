@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { Users, Globe2, FileText, Activity, RefreshCw } from "lucide-react";
+import { Users, Globe2, FileText, Activity, RefreshCw, LogIn, UserCheck, MapPin } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+
+type TodayTotals = {
+  visitors: number;
+  countries: number;
+  logins: number;
+  completedProfiles: number;
+};
 
 type Visitor = {
   id: string;
@@ -27,6 +34,49 @@ export default function AdminLiveVisitors() {
   const [refreshing, setRefreshing] = useState(false);
   const [tick, setTick] = useState(0);
 
+  const [totals, setTotals] = useState<TodayTotals>({ visitors: 0, countries: 0, logins: 0, completedProfiles: 0 });
+
+  async function loadTotals() {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const sinceISO = startOfDay.toISOString();
+
+    const [sessionsRes, profilesRes] = await Promise.all([
+      supabase
+        .from("site_visitor_sessions")
+        .select("session_id,user_id,country")
+        .gte("first_seen_at", sinceISO)
+        .limit(10000),
+      supabase
+        .from("ssra_profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "student")
+        .neq("full_name", "")
+        .neq("phone_number", "")
+        .neq("country", "")
+        .neq("city", "")
+        .neq("address", "")
+        .neq("degree", "")
+        .neq("german_level", ""),
+    ]);
+
+    const rows = (sessionsRes.data ?? []) as Array<{ session_id: string; user_id: string | null; country: string | null }>;
+    const sessionSet = new Set<string>();
+    const countrySet = new Set<string>();
+    const loginSet = new Set<string>();
+    for (const r of rows) {
+      if (r.session_id) sessionSet.add(r.session_id);
+      if (r.country) countrySet.add(r.country);
+      if (r.user_id) loginSet.add(r.user_id);
+    }
+    setTotals({
+      visitors: sessionSet.size,
+      countries: countrySet.size,
+      logins: loginSet.size,
+      completedProfiles: profilesRes.count ?? 0,
+    });
+  }
+
   async function load() {
     setRefreshing(true);
     try {
@@ -39,6 +89,7 @@ export default function AdminLiveVisitors() {
         .limit(200);
       if (error) console.error("[live-visitors] load error:", error);
       setVisitors((data as Visitor[]) ?? []);
+      void loadTotals();
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -91,12 +142,26 @@ export default function AdminLiveVisitors() {
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Stat icon={<Users className="w-5 h-5" />} label="Active now" value={visitors.length} color="text-emerald-600" />
-          <Stat icon={<Globe2 className="w-5 h-5" />} label="Countries" value={countries.length} color="text-blue-600" />
-          <Stat icon={<FileText className="w-5 h-5" />} label="Pages viewed" value={pages.length} color="text-violet-600" />
-          <Stat icon={<Activity className="w-5 h-5" />} label="Logged-in users" value={visitors.filter((v) => v.user_id).length} color="text-amber-600" />
+        {/* Today totals */}
+        <div>
+          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Today</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Stat icon={<Users className="w-5 h-5" />} label="Visitors today" value={totals.visitors} color="text-sky-600" />
+            <Stat icon={<MapPin className="w-5 h-5" />} label="Countries today" value={totals.countries} color="text-blue-600" />
+            <Stat icon={<LogIn className="w-5 h-5" />} label="Logins today" value={totals.logins} color="text-amber-600" />
+            <Stat icon={<UserCheck className="w-5 h-5" />} label="Completed profiles" value={totals.completedProfiles} color="text-emerald-600" />
+          </div>
+        </div>
+
+        {/* Live (last 5 min) */}
+        <div>
+          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Live · last {WINDOW_MIN} min</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Stat icon={<Users className="w-5 h-5" />} label="Active now" value={visitors.length} color="text-emerald-600" />
+            <Stat icon={<Globe2 className="w-5 h-5" />} label="Countries" value={countries.length} color="text-blue-600" />
+            <Stat icon={<FileText className="w-5 h-5" />} label="Pages viewed" value={pages.length} color="text-violet-600" />
+            <Stat icon={<Activity className="w-5 h-5" />} label="Logged-in users" value={visitors.filter((v) => v.user_id).length} color="text-amber-600" />
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
