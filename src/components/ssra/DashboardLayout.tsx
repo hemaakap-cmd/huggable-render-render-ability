@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, CreditCard,
-  User, LogOut, Menu, X, ChevronRight, Video, AlertCircle, Award, BookCheck, Receipt, FolderOpen, Bell,
+  User, LogOut, Menu, X, ChevronRight, Video, AlertCircle, Award, BookCheck, Receipt, FolderOpen, Bell, Radio,
 } from "lucide-react";
 import { ssraSignOut, useSsraAuth } from "@/hooks/useSsraAuth";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
@@ -14,6 +14,7 @@ const NAV = [
   { icon: BookOpen,        label: "My Courses",     href: "/dashboard/courses" },
   { icon: Receipt,         label: "Order Status",   href: "/dashboard/orders" },
   { icon: Video,           label: "Live Sessions",  href: "/dashboard/sessions" },
+  { icon: Radio,           label: "Live Broadcasts", href: "/dashboard/broadcasts" },
   { icon: FolderOpen,      label: "Materials",      href: "/dashboard/materials" },
   { icon: CreditCard,      label: "Subscription",   href: "/dashboard/subscription" },
   { icon: Award,           label: "Certificates",   href: "/dashboard/certificates" },
