@@ -45,6 +45,32 @@ const GERMAN_LEVELS = ["None / A0", "A1", "A2", "B1", "B2", "C1", "C2"];
 const normalizeEmail = (value: string) => value.trim().toLowerCase();
 const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
+// Catches the most common email-domain typos that cause OTP emails to bounce
+// (e.g. "drghazal@jamil.com" instead of "@gmail.com"). Returns a suggested
+// corrected email, or null when nothing looks wrong.
+const DOMAIN_TYPOS: Record<string, string> = {
+  "gmial.com": "gmail.com", "gmai.com": "gmail.com", "gmaill.com": "gmail.com",
+  "gmail.co": "gmail.com",  "gmail.cm": "gmail.com", "gmail.con": "gmail.com",
+  "gmail.om":  "gmail.com", "gmil.com": "gmail.com", "gmail.comm": "gmail.com",
+  "gamil.com": "gmail.com", "gnail.com": "gmail.com", "jamil.com": "gmail.com",
+  "gemail.com":"gmail.com", "ggmail.com":"gmail.com", "gmsil.com": "gmail.com",
+  "yahooo.com":"yahoo.com", "yaho.com":  "yahoo.com", "yahoo.co":  "yahoo.com",
+  "yhaoo.com": "yahoo.com", "yahoo.cm":  "yahoo.com",
+  "hotnail.com":"hotmail.com", "hotmial.com":"hotmail.com", "hotmal.com":"hotmail.com",
+  "hotmail.co":"hotmail.com", "hotmail.cm":"hotmail.com",
+  "outlok.com":"outlook.com", "outloo.com":"outlook.com", "outlook.co":"outlook.com",
+  "iclooud.com":"icloud.com", "icloud.co":"icloud.com",
+};
+function suggestEmailFix(value: string): string | null {
+  const at = value.lastIndexOf("@");
+  if (at < 1) return null;
+  const local = value.slice(0, at);
+  const domain = value.slice(at + 1).toLowerCase();
+  const fixed = DOMAIN_TYPOS[domain];
+  return fixed && fixed !== domain ? `${local}@${fixed}` : null;
+}
+
+
 async function getEmailStatus(email: string): Promise<Exclude<EmailStatus, "idle" | "checking">> {
   const normalizedEmail = normalizeEmail(email);
   if (!isValidEmail(normalizedEmail)) return "invalid";
@@ -624,6 +650,18 @@ export default function StudentLogin() {
                 {(emailCheckStatus === "registered" || emailCheckStatus === "incomplete") && tab === "login" && (
                   <p className="mt-1.5 text-xs text-emerald-600">✓ Account found</p>
                 )}
+                {(() => {
+                  const fix = suggestEmailFix(normalizeEmail(email));
+                  return fix ? (
+                    <p className="mt-1.5 text-xs text-amber-600">
+                      Did you mean{" "}
+                      <button type="button" onClick={() => setEmail(fix)} className="underline font-semibold">
+                        {fix}
+                      </button>
+                      ?
+                    </p>
+                  ) : null;
+                })()}
               </div>
 
               <button
@@ -632,11 +670,13 @@ export default function StudentLogin() {
                   loading || !email ||
                   emailCheckStatus === "checking" ||
                   emailCheckStatus === "invalid" ||
+                  !!suggestEmailFix(normalizeEmail(email)) ||
                   (tab === "signup" && emailCheckStatus === "registered") ||
                   (tab === "login" && emailCheckStatus === "available")
                 }
                 className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2"
               >
+
                 {loading
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending code…</>
                   : <><Mail className="w-4 h-4" /> {tab === "signup" ? "Continue — Send Verification Code" : "Send Verification Code"}</>}
