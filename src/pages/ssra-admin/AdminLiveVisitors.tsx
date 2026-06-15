@@ -42,6 +42,7 @@ export default function AdminLiveVisitors() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [tick, setTick] = useState(0);
+  const [period, setPeriod] = useState<Period>("today");
 
   const [totals, setTotals] = useState<TodayTotals>({ visitors: 0, countries: 0, logins: 0, completedProfiles: 0 });
 
