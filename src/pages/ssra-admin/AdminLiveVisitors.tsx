@@ -46,10 +46,15 @@ export default function AdminLiveVisitors() {
 
   const [totals, setTotals] = useState<TodayTotals>({ visitors: 0, countries: 0, logins: 0, completedProfiles: 0 });
 
-  async function loadTotals() {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const sinceISO = startOfDay.toISOString();
+  async function loadTotals(selectedPeriod: Period = period) {
+    let sinceISO: string;
+    if (selectedPeriod === "today") {
+      sinceISO = startOfDay(new Date()).toISOString();
+    } else if (selectedPeriod === "7days") {
+      sinceISO = startOfDay(subDays(new Date(), 6)).toISOString();
+    } else {
+      sinceISO = startOfDay(subDays(new Date(), 29)).toISOString();
+    }
 
     const [sessionsRes, profilesRes] = await Promise.all([
       supabase
@@ -87,10 +92,16 @@ export default function AdminLiveVisitors() {
     });
   }
 
-  async function load() {
+  async function load(selectedPeriod: Period = period) {
     setRefreshing(true);
     try {
-      const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
+      let since: string;
+      if (selectedPeriod === "today") {
+        since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
+      } else {
+        const days = selectedPeriod === "7days" ? 7 : 30;
+        since = startOfDay(subDays(new Date(), days - 1)).toISOString();
+      }
       const { data, error } = await supabase
         .from("site_visitor_sessions")
         .select("*")
@@ -99,7 +110,7 @@ export default function AdminLiveVisitors() {
         .limit(200);
       if (error) console.error("[live-visitors] load error:", error);
       setVisitors((data as Visitor[]) ?? []);
-      void loadTotals();
+      void loadTotals(selectedPeriod);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -113,9 +124,9 @@ export default function AdminLiveVisitors() {
       .on("postgres_changes", { event: "*", schema: "public", table: "site_visitor_sessions" }, () => load())
       .subscribe();
     const t = setInterval(() => setTick((n) => n + 1), 15_000); // re-render relative times + prune stale
-    const t2 = setInterval(load, 30_000);
+    const t2 = setInterval(() => load(), 30_000);
     return () => { supabase.removeChannel(ch); clearInterval(t); clearInterval(t2); };
-  }, []);
+  }, [period]);
 
   // Group by country / page
   const byCountry = new Map<string, number>();
