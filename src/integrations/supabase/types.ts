@@ -1332,6 +1332,7 @@ export type Database = {
         Row: {
           address: string | null
           avatar_url: string | null
+          bio: string | null
           city: string | null
           country: string | null
           created_at: string | null
@@ -1341,13 +1342,19 @@ export type Database = {
           full_name: string | null
           german_level: string | null
           id: string
+          is_public_team: boolean
           phone_number: string | null
+          photo_url: string | null
           role: string
+          social_links: Json
+          team_display_order: number
+          title: string | null
           updated_at: string | null
         }
         Insert: {
           address?: string | null
           avatar_url?: string | null
+          bio?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
@@ -1357,13 +1364,19 @@ export type Database = {
           full_name?: string | null
           german_level?: string | null
           id: string
+          is_public_team?: boolean
           phone_number?: string | null
+          photo_url?: string | null
           role?: string
+          social_links?: Json
+          team_display_order?: number
+          title?: string | null
           updated_at?: string | null
         }
         Update: {
           address?: string | null
           avatar_url?: string | null
+          bio?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
@@ -1373,8 +1386,13 @@ export type Database = {
           full_name?: string | null
           german_level?: string | null
           id?: string
+          is_public_team?: boolean
           phone_number?: string | null
+          photo_url?: string | null
           role?: string
+          social_links?: Json
+          team_display_order?: number
+          title?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -2102,6 +2120,20 @@ export type Database = {
           courses_count: number
           min_price: number
           students_count: number
+        }[]
+      }
+      get_public_team: {
+        Args: never
+        Returns: {
+          bio: string
+          country: string
+          full_name: string
+          id: string
+          photo_url: string
+          role: string
+          social_links: Json
+          team_display_order: number
+          title: string
         }[]
       }
       get_revenue_summary: {

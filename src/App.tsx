@@ -69,6 +69,8 @@ const SuperAdminSyncStatus = lazy(() => import("./pages/ssra-admin/SuperAdminSyn
 const SuperAdminManualGrant = lazy(() => import("./pages/ssra-admin/SuperAdminManualGrant"));
 const SuperAdminStudentReports = lazy(() => import("./pages/ssra-admin/SuperAdminStudentReports"));
 const SuperAdminSiteSettings = lazy(() => import("./pages/ssra-admin/SuperAdminSiteSettings"));
+const SuperAdminTeam = lazy(() => import("./pages/ssra-admin/SuperAdminTeam"));
+const Team = lazy(() => import("./pages/Team"));
 const AdminLiveVisitors    = lazy(() => import("./pages/ssra-admin/AdminLiveVisitors"));
 const AdminWaitlist        = lazy(() => import("./pages/ssra-admin/AdminWaitlist"));
 const AdminCoupons         = lazy(() => import("./pages/ssra-admin/AdminCoupons"));
@@ -227,6 +229,7 @@ function AppInner() {
                 <Route path="/refund"          element={<RefundCancellation />} />
                 <Route path="/verify/:code"    element={<VerifyCertificate />} />
                 <Route path="/verify"          element={<VerifyCertificate />} />
+                <Route path="/team"            element={<Team />} />
 
                 {/* Forced profile-completion gate (auth required, no profile gate) */}
                 <Route path="/complete-profile" element={<CompleteProfile />} />
@@ -293,6 +296,7 @@ function AppInner() {
                 <Route path="/ssra-admin/student-reports"  element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
                 <Route path="/ssra-super-admin/student-reports" element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/site-settings"     element={<RequireSuperAdmin><SuperAdminSiteSettings /></RequireSuperAdmin>} />
+                <Route path="/ssra-admin/team"              element={<RequireSuperAdmin><SuperAdminTeam /></RequireSuperAdmin>} />
 
                 <Route path="*" element={<NotFound />} />
         </Routes>
