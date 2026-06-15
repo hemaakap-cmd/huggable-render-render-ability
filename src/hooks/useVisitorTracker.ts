@@ -19,8 +19,10 @@ export function useVisitorTracker() {
   const lastPathRef = useRef<string>("");
 
   useEffect(() => {
-    // Skip admin/dashboard so admins don't pollute their own stats
-    if (/^\/(ssra-admin|dashboard)/.test(location.pathname)) return;
+    // Skip internal pages so staff don't pollute their own stats
+    if (/^\/(ssra-admin|dashboard|instructor)/.test(location.pathname)) return;
+    // Skip obvious bots running JS (Lighthouse, headless tools)
+    if (/HeadlessChrome|Lighthouse|PageSpeed|GTmetrix|bot|crawler|spider/i.test(navigator.userAgent || "")) return;
 
     const session_id = getSessionId();
     let cancelled = false;
