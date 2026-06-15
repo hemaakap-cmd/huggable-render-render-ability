@@ -55,6 +55,7 @@ export default function AdminLeads() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [courseId, setCourseId] = useState<string>("");
   const [sending, setSending] = useState(false);
+  const [viewing, setViewing] = useState<Lead | null>(null);
 
   const { data, isLoading } = useAdminLeads(search, page, PAGE_SIZE);
   const { data: stats } = useLeadStudentStats();
