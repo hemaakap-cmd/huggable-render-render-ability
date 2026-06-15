@@ -142,12 +142,26 @@ export default function AdminLiveVisitors() {
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Stat icon={<Users className="w-5 h-5" />} label="Active now" value={visitors.length} color="text-emerald-600" />
-          <Stat icon={<Globe2 className="w-5 h-5" />} label="Countries" value={countries.length} color="text-blue-600" />
-          <Stat icon={<FileText className="w-5 h-5" />} label="Pages viewed" value={pages.length} color="text-violet-600" />
-          <Stat icon={<Activity className="w-5 h-5" />} label="Logged-in users" value={visitors.filter((v) => v.user_id).length} color="text-amber-600" />
+        {/* Today totals */}
+        <div>
+          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Today</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Stat icon={<Users className="w-5 h-5" />} label="Visitors today" value={totals.visitors} color="text-sky-600" />
+            <Stat icon={<MapPin className="w-5 h-5" />} label="Countries today" value={totals.countries} color="text-blue-600" />
+            <Stat icon={<LogIn className="w-5 h-5" />} label="Logins today" value={totals.logins} color="text-amber-600" />
+            <Stat icon={<UserCheck className="w-5 h-5" />} label="Completed profiles" value={totals.completedProfiles} color="text-emerald-600" />
+          </div>
+        </div>
+
+        {/* Live (last 5 min) */}
+        <div>
+          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Live · last {WINDOW_MIN} min</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Stat icon={<Users className="w-5 h-5" />} label="Active now" value={visitors.length} color="text-emerald-600" />
+            <Stat icon={<Globe2 className="w-5 h-5" />} label="Countries" value={countries.length} color="text-blue-600" />
+            <Stat icon={<FileText className="w-5 h-5" />} label="Pages viewed" value={pages.length} color="text-violet-600" />
+            <Stat icon={<Activity className="w-5 h-5" />} label="Logged-in users" value={visitors.filter((v) => v.user_id).length} color="text-amber-600" />
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
