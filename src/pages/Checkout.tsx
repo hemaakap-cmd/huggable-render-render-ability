@@ -204,9 +204,9 @@ export default function Checkout() {
                   <div className="flex items-start gap-2 mb-3">
                     <Heart className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">ساهم بأي مبلغ تقدر عليه</div>
+                      <div className="text-sm font-semibold text-slate-900">اشترك بمبلغ يناسبك</div>
                       <div className="text-xs text-slate-600 mt-0.5">
-                        مساهمتك بتساعدنا نوفر الكورس لأكبر عدد من الطلاب. كله بيقدر يتعلم — وكلنا بنساعد بعض.
+                        اختر مبلغ الاشتراك المناسب لك. الحد الأدنى €{DONATION_MIN} للتسجيل في هذا الكورس.
                       </div>
                     </div>
                   </div>
