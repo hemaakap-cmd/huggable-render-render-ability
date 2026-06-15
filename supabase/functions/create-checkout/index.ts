@@ -138,8 +138,37 @@ Deno.serve(async (req) => {
     const finalReturnUrl = returnUrl ??
       `${req.headers.get("origin") ?? ""}/payment-success?session_id={CHECKOUT_SESSION_ID}&courseId=${courseId}`;
 
+    // Build line items: keep the existing lookup_key/price path for EUR (unchanged),
+    // use price_data referencing the same Stripe Product for other currencies so
+    // existing products/subscriptions stay untouched.
+    const productIdForPriceData = typeof stripePrice.product === "string"
+      ? stripePrice.product
+      : stripePrice.product.id;
+
+    const baseUnitAmountEur = (stripePrice.unit_amount ?? Math.round((course.price_eur ?? 0) * 100)) / 100;
+    const localUnitAmount = currency === "EUR"
+      ? (stripePrice.unit_amount ?? Math.round(baseUnitAmountEur * 100))
+      : toSmallestUnit(baseUnitAmountEur);
+
+    const lineItem: any = currency === "EUR"
+      ? { price: stripePrice.id, quantity: 1 }
+      : {
+          quantity: 1,
+          price_data: {
+            currency: currency.toLowerCase(),
+            unit_amount: localUnitAmount,
+            product: productIdForPriceData,
+            ...(isRecurring && stripePrice.recurring && {
+              recurring: {
+                interval: stripePrice.recurring.interval,
+                interval_count: stripePrice.recurring.interval_count ?? 1,
+              },
+            }),
+          },
+        };
+
     const session = await stripe.checkout.sessions.create({
-      line_items: [{ price: stripePrice.id, quantity: 1 }],
+      line_items: [lineItem],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded_page",
       return_url: finalReturnUrl,
@@ -148,13 +177,18 @@ Deno.serve(async (req) => {
       metadata: {
         userId: user.id,
         courseId: courseId,
+        currency,
+        fxRate: String(rate),
+        baseCurrency: "EUR",
       },
       ...(isRecurring && {
         subscription_data: {
-          metadata: { userId: user.id, courseId: courseId },
+          metadata: { userId: user.id, courseId: courseId, currency, fxRate: String(rate) },
         },
       }),
-      managed_payments: { enabled: true },
+      // managed_payments / automatic_tax is only enabled for EUR (the configured base).
+      // Non-EUR uses ad-hoc price_data and skips it to avoid tax-config conflicts.
+      ...(currency === "EUR" && { managed_payments: { enabled: true } }),
     } as any);
 
     // Create a pending enrollment row tied to this session so PaymentSuccess can poll
