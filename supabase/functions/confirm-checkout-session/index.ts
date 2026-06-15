@@ -168,6 +168,17 @@ Deno.serve(async (req) => {
       }, { onConflict: "stripe_subscription_id" });
     }
 
+    // Mark attempt as succeeded
+    try {
+      await supabase.rpc("update_payment_attempt_by_session", {
+        _session_id: session.id,
+        _status: "succeeded",
+        _failure_reason: null,
+        _failure_code: null,
+        _stripe_payment_intent_id: paymentIntent,
+      });
+    } catch (e) { console.error("update_payment_attempt_by_session failed:", e); }
+
     return new Response(JSON.stringify({ status: "success", enrollment }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
