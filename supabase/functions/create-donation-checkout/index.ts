@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
           currency: "eur",
           product_data: {
             name: productName,
-            description: "Flexible subscription. Choose your amount to enroll in this course.",
+            description: "Donation to support this course. Choose any amount you'd like to contribute.",
           },
           unit_amount: amountCents,
         },
