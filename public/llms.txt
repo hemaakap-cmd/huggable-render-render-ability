@@ -9,7 +9,7 @@ SSRA Academy (Sports Science & Rehabilitation Academy) helps Arabic-speaking spo
 - [Home](/): Overview of SSRA Academy, featured courses, and how the programme works.
 - [Courses](/courses): Full catalogue of one-time clinical and career courses plus the Medical German subscription.
 - [Pricing](/pricing): Subscription and course pricing, plus answers to common questions about payment, refunds, and scholarships.
-- [About](/about): Mission, instructors, and the academy's approach to bilingual clinical training.
+- [About](/about): Mission, instructors, and the academy's approach to clinical training for Arabic speakers.
 - [Apply](/apply): Free application form for prospective students worldwide.
 - [Contact](/contact): How to reach the team for enquiries and support.
 
