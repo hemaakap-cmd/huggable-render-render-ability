@@ -10,6 +10,7 @@ import Footer from "@/components/ssra/Footer";
 import { type Course } from "@/lib/courseCatalog";
 import { usePublicCourses } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 
 function useReveal() {
   useEffect(() => {
@@ -26,6 +27,7 @@ function useReveal() {
 function PriceCard({ course, highlight = false }: { course: Course; highlight?: boolean }) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { format } = useCurrency();
 
   const handleCheckout = () => {
     if (course.requires_verification) {
@@ -75,14 +77,14 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
           ) : course.id === "medical-german" ? (
             <>
               <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
-                From €1
+                From {format(1)}
               </span>
               <span className={`text-sm ml-2 ${highlight ? "text-white/50" : "text-slate-400"}`}>· you choose</span>
             </>
           ) : (
             <>
               <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
-                €{course.price}
+                {format(course.price)}
               </span>
               {course.type === "subscription" && (
                 <span className={`text-sm ml-1 ${highlight ? "text-white/50" : "text-slate-400"}`}>/month</span>
