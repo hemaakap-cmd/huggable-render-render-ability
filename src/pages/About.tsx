@@ -1,11 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Globe2, GraduationCap, Lightbulb, HeartHandshake, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Globe2, GraduationCap, Lightbulb, HeartHandshake, ArrowRight, CheckCircle2, Linkedin, Globe } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
 import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+
+type PublicTeamMember = {
+  id: string;
+  full_name: string | null;
+  role: string;
+  title: string | null;
+  bio: string | null;
+  photo_url: string | null;
+  country: string | null;
+  social_links: Record<string, string> | null;
+  team_display_order: number;
+};
 
 function useReveal() {
   useEffect(() => {
