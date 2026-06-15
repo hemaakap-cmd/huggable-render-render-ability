@@ -33,6 +33,7 @@ const ADMIN_NAV = [
   { icon: BookCheck,        label: "Homework",         href: "/ssra-admin/homework" },
   { icon: Award,            label: "Certificates",     href: "/ssra-admin/certificates" },
   { icon: AlertOctagon,     label: "Fraud Flags",      href: "/ssra-admin/fraud" },
+  { icon: CreditCard,       label: "Payment Monitor",  href: "/ssra-admin/payment-monitor" },
   { icon: RotateCcw,        label: "Cancellations",    href: "/ssra-admin/cancellations" },
 ];
 
