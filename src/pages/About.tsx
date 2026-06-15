@@ -55,11 +55,6 @@ const VALUES = [
   },
 ];
 
-const TEAM = [
-  { name: "Dr. Khaled R.", role: "Founder & Sports Scientist", note: "12 years in international rehabilitation clinics" },
-  { name: "Amira N.", role: "Language Programme Lead", note: "Certified instructor, medical terminology specialist" },
-  { name: "Markus W.", role: "Clinical Advisor", note: "Head physiotherapist, partner clinic network" },
-];
 
 export default function About() {
   useReveal();
