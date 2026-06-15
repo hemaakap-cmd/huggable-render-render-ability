@@ -232,7 +232,7 @@ export default function Checkout() {
                       type="number"
                       min={DONATION_MIN}
                       step={1}
-                      placeholder={`مثلاً 15 — الحد الأدنى €${DONATION_MIN}`}
+                      placeholder={`مثلاً 5 — الحد الأدنى €${DONATION_MIN}`}
                       value={donationCustom}
                       onChange={(e) => { setDonationCustom(e.target.value); setDonationPick("custom"); }}
                       onFocus={() => setDonationPick("custom")}
@@ -242,7 +242,7 @@ export default function Checkout() {
                     />
                   </label>
                   {!donationValid && donationPick === "custom" && donationCustom !== "" && (
-                  <p className="text-xs text-red-600 mt-2">الحد الأدنى للاشتراك €{DONATION_MIN}</p>
+                  <p className="text-xs text-red-600 mt-2">الحد الأدنى للتبرع €{DONATION_MIN}</p>
                   )}
                 </div>
               )}
