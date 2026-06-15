@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Clock, AlertCircle, ArrowRight, Receipt, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/ssra/Header";
@@ -10,17 +10,22 @@ type Status = "checking" | "success" | "pending" | "error";
 
 export default function PaymentSuccess() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useSsraAuth();
   const courseId = params.get("courseId");
   const enrollmentId = params.get("enrollmentId");
-  const sessionId = params.get("session_id");
+  const sessionId = params.get("session_id") || sessionStorage.getItem("ssra:lastCheckoutSessionId");
 
   const [status, setStatus] = useState<Status>("checking");
   const [enrollment, setEnrollment] = useState<any>(null);
   const [attempts, setAttempts] = useState(0);
 
   useEffect(() => {
-    if (authLoading || !user) return;
+    if (authLoading) return;
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`${window.location.pathname}${window.location.search}`)}`);
+      return;
+    }
     let cancelled = false;
     let attempt = 0;
 
@@ -34,6 +39,7 @@ export default function PaymentSuccess() {
           });
           if (cancelled) return;
           if (confirmed?.status === "success" && confirmed.enrollment) {
+            sessionStorage.removeItem("ssra:lastCheckoutSessionId");
             setEnrollment(confirmed.enrollment);
             setStatus("success");
             return;
@@ -43,21 +49,25 @@ export default function PaymentSuccess() {
         let query = supabase
           .from("ssra_enrollments")
           .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
+          .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(1);
         if (sessionId) query = supabase
           .from("ssra_enrollments")
           .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
+          .eq("user_id", user.id)
           .eq("stripe_checkout_session_id", sessionId)
           .limit(1);
         else if (enrollmentId) query = supabase
           .from("ssra_enrollments")
           .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
+          .eq("user_id", user.id)
           .eq("id", enrollmentId)
           .limit(1);
         else if (courseId) query = supabase
           .from("ssra_enrollments")
           .select("id, status, paid_at, amount_eur, order_number, course_title_snapshot, course_id")
+          .eq("user_id", user.id)
           .eq("course_id", courseId)
           .order("created_at", { ascending: false })
           .limit(1);
@@ -85,7 +95,7 @@ export default function PaymentSuccess() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, user, enrollmentId, courseId, sessionId]);
+  }, [authLoading, user, enrollmentId, courseId, sessionId, navigate]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">

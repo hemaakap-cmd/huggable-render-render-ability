@@ -305,6 +305,11 @@ export default function Checkout() {
                   courseId={course.id}
                   returnUrl={returnUrl}
                   donationAmountCents={isDonation ? donationAmount * 100 : undefined}
+                  onPaymentComplete={(sessionId) => {
+                    const qs = new URLSearchParams({ courseId: course.id });
+                    if (sessionId) qs.set("session_id", sessionId);
+                    navigate(`/payment-success?${qs.toString()}`);
+                  }}
                   onAlreadyEnrolled={() => {
                     setShowCheckout(false);
                     setActiveEnrollment({ order_number: "—" });
