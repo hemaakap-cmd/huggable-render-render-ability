@@ -353,6 +353,14 @@ export default function AdminLeads() {
           </div>
         )}
       </div>
+      {viewing && (
+        <UserDetailsDialog
+          userId={viewing.id}
+          userEmail={viewing.email}
+          userName={viewing.full_name}
+          onClose={() => setViewing(null)}
+        />
+      )}
     </AdminLayout>
   );
 }
