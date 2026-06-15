@@ -64,6 +64,84 @@ export default function AdminStudents() {
   const total = data?.total ?? 0;
   const { isSuperAdmin }          = useSsraAuth();
   const navigate                  = useNavigate();
+  const { toast }                 = useToast();
+
+  // Manage modal
+  const [manage, setManage] = useState<StudentRow | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [studentEnrollments, setStudentEnrollments] = useState<any[]>([]);
+  const [loadingEnrollments, setLoadingEnrollments] = useState(false);
+
+  const updateStudent = useUpdateStudent();
+  const deleteStudent = useDeleteStudent();
+  const cancelEnrollment = useCancelEnrollment();
+
+  async function openManage(s: StudentRow) {
+    setManage(s);
+    setEditing(false);
+    setDeleteConfirm(false);
+    setEditForm({
+      full_name: s.full_name ?? "",
+      phone_number: s.phone_number ?? "",
+      country: s.country ?? "",
+      city: s.city ?? "",
+      address: s.address ?? "",
+      date_of_birth: s.date_of_birth ?? "",
+      degree: s.degree ?? "",
+      german_level: s.german_level ?? "",
+    });
+    setLoadingEnrollments(true);
+    try {
+      const { data } = await supabase
+        .from("ssra_enrollments")
+        .select("id, course_id, status, amount_eur, enrolled_at, course_title_snapshot")
+        .eq("user_id", s.id)
+        .order("enrolled_at", { ascending: false });
+      setStudentEnrollments(data || []);
+    } finally {
+      setLoadingEnrollments(false);
+    }
+  }
+
+  async function handleSaveStudent() {
+    if (!manage) return;
+    setSaving(true);
+    try {
+      await updateStudent.mutateAsync({ userId: manage.id, patch: editForm });
+      toast({ title: "تم تحديث بيانات الطالب" });
+      setEditing(false);
+    } catch (e: any) {
+      toast({ title: "فشل الحفظ", description: e.message, variant: "destructive" });
+    } finally { setSaving(false); }
+  }
+
+  async function handleDeleteStudent() {
+    if (!manage) return;
+    setDeleting(true);
+    try {
+      await deleteStudent.mutateAsync({ userId: manage.id });
+      toast({ title: "تم حذف الطالب نهائياً" });
+      setManage(null);
+      setDeleteConfirm(false);
+    } catch (e: any) {
+      toast({ title: "فشل الحذف", description: e.message, variant: "destructive" });
+    } finally { setDeleting(false); }
+  }
+
+  async function handleCancelEnrollment(enrollmentId: string) {
+    if (!confirm("إلغاء تسجيل الطالب من هذا الكورس؟")) return;
+    try {
+      await cancelEnrollment.mutateAsync({ enrollmentId });
+      setStudentEnrollments((prev) => prev.map((e) => e.id === enrollmentId ? { ...e, status: "cancelled" } : e));
+      toast({ title: "تم إلغاء التسجيل" });
+    } catch (e: any) {
+      toast({ title: "فشل الإلغاء", description: e.message, variant: "destructive" });
+    }
+  }
 
   const filtered = useMemo(() => {
     return rows.filter((s) => {
