@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone, MapPin, Calendar, BookOpen, Edit2, Trash2, X, Loader2, Ban, AlertTriangle } from "lucide-react";
+import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone, MapPin, Calendar, BookOpen, Edit2, Trash2, X, Loader2, Ban, AlertTriangle, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import UserDetailsDialog from "@/components/ssra/UserDetailsDialog";
