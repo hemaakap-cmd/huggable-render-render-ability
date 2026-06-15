@@ -164,26 +164,67 @@ export default function About() {
       </section>
 
       {/* Team */}
-      <section className="py-24">
-        <div className="container">
-          <div className="text-center mb-14 reveal">
-            <span className="text-xs font-semibold tracking-widest uppercase text-[hsl(43,96%,50%)] mb-3 block">The People Behind SSRA</span>
-            <h2 className="font-display text-4xl font-bold text-foreground">Our Team</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            {TEAM.map(({ name, role, note }) => (
-              <div key={name} className="card-premium reveal bg-card border border-border rounded-2xl p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[hsl(222,47%,20%)] to-[hsl(215,35%,30%)] flex items-center justify-center mx-auto mb-4">
-                  <GraduationCap className="w-7 h-7 text-[hsl(43,96%,50%)]" />
-                </div>
-                <h3 className="font-semibold text-foreground">{name}</h3>
-                <div className="text-sm text-[hsl(43,96%,50%)] mt-1">{role}</div>
-                <p className="text-xs text-muted-foreground mt-2">{note}</p>
+      {(teamLoading || team.length > 0) && (
+        <section className="py-24">
+          <div className="container">
+            <div className="text-center mb-14 reveal">
+              <span className="text-xs font-semibold tracking-widest uppercase text-[hsl(43,96%,50%)] mb-3 block">The People Behind SSRA</span>
+              <h2 className="font-display text-4xl font-bold text-foreground">Our Team</h2>
+              <p className="text-sm text-muted-foreground mt-3">
+                The instructors and administrators actively running SSRA Academy.
+              </p>
+            </div>
+            {teamLoading ? (
+              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="bg-card border border-border rounded-2xl p-6 h-56 animate-pulse" />
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {team.map((m) => {
+                  const links = m.social_links ?? {};
+                  return (
+                    <div key={m.id} className="card-premium reveal bg-card border border-border rounded-2xl p-6 text-center">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[hsl(222,47%,20%)] to-[hsl(215,35%,30%)] flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                        {m.photo_url ? (
+                          <img src={m.photo_url} alt={m.full_name ?? ""} className="w-full h-full object-cover" />
+                        ) : (
+                          <GraduationCap className="w-8 h-8 text-[hsl(43,96%,50%)]" />
+                        )}
+                      </div>
+                      <h3 className="font-semibold text-foreground">{m.full_name ?? "—"}</h3>
+                      {m.title && <div className="text-sm text-[hsl(43,96%,50%)] mt-1">{m.title}</div>}
+                      {m.bio && <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{m.bio}</p>}
+                      {(links.linkedin || links.website) && (
+                        <div className="flex items-center justify-center gap-2 mt-4">
+                          {links.linkedin && (
+                            <a href={links.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"
+                              className="w-8 h-8 rounded-lg bg-muted hover:bg-muted/70 flex items-center justify-center text-muted-foreground">
+                              <Linkedin className="w-4 h-4" />
+                            </a>
+                          )}
+                          {links.website && (
+                            <a href={links.website} target="_blank" rel="noreferrer" aria-label="Website"
+                              className="w-8 h-8 rounded-lg bg-muted hover:bg-muted/70 flex items-center justify-center text-muted-foreground">
+                              <Globe className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <div className="text-center mt-8">
+              <Link to="/team" className="text-sm font-semibold text-[hsl(43,96%,50%)] hover:underline inline-flex items-center gap-1">
+                View full team <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="py-16 bg-[hsl(222,47%,9%)]">
