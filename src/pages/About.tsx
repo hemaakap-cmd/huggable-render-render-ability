@@ -33,7 +33,7 @@ const VALUES = [
   {
     icon: HeartHandshake,
     title: "Youth First",
-    desc: "We create real job opportunities for young professionals and protect recent graduates from exploitation by building fair, transparent career pathways.",
+    desc: "We empower young professionals with skills, networks, and fair support — protecting recent graduates from exploitation wherever they choose to build their future.",
   },
   {
     icon: GraduationCap,
@@ -43,9 +43,9 @@ const VALUES = [
 ];
 
 const TEAM = [
-  { name: "Dr. Khaled R.", role: "Founder & Sports Scientist", note: "12 years in German rehabilitation clinics" },
-  { name: "Amira N.", role: "Language Programme Lead", note: "Certified DaF instructor, medical German specialist" },
-  { name: "Markus W.", role: "Clinical Advisor", note: "Head physiotherapist, partner clinic Berlin" },
+  { name: "Dr. Khaled R.", role: "Founder & Sports Scientist", note: "12 years in international rehabilitation clinics" },
+  { name: "Amira N.", role: "Language Programme Lead", note: "Certified instructor, medical terminology specialist" },
+  { name: "Markus W.", role: "Clinical Advisor", note: "Head physiotherapist, partner clinic network" },
 ];
 
 export default function About() {
@@ -55,16 +55,16 @@ export default function About() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>About — SSRA Academy</title>
-        <meta name="description" content="SSRA Academy is a German-based academy spreading sports science knowledge to the Arab world. We connect sciences, create opportunities, and advance sports therapy culture." />
+        <meta name="description" content="SSRA Academy is an academy founded in Germany spreading sports science knowledge to the Arab world. We connect sciences, empower learners, and advance sports therapy culture." />
         <link rel="canonical" href="https://ssracourses.com/about" />
         <meta property="og:title" content="About SSRA Academy — Sports Science for the Arab World" />
-        <meta property="og:description" content="A German academy connecting sports science with Arabic speakers worldwide. Modern knowledge, real opportunities, and fair career pathways." />
+        <meta property="og:description" content="An academy founded in Germany connecting sports science with Arabic speakers worldwide. Modern knowledge, fair support, and professional growth." />
         <meta property="og:url" content="https://ssracourses.com/about" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="About SSRA Academy" />
-        <meta name="twitter:description" content="German academy spreading sports science to the Arab world — modern knowledge, real careers." />
+        <meta name="twitter:description" content="Academy founded in Germany spreading sports science to the Arab world — modern knowledge, professional growth." />
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
       </Helmet>
 
@@ -79,7 +79,7 @@ export default function About() {
             Our Mission
           </h1>
           <p className="text-white opacity-60 text-lg leading-relaxed">
-            SSRA is a modern German academy on a mission to spread sports science knowledge across the Arab world and to Arabic speakers globally — connecting disciplines, cultures, and people through education.
+            SSRA is a modern academy founded in Germany with a mission to spread sports science knowledge across the Arab world and to Arabic speakers globally — connecting disciplines, cultures, and people through education.
           </p>
         </div>
       </section>
@@ -94,24 +94,24 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  The world of sports science is advancing rapidly — but much of that knowledge remains locked behind language barriers and geographical borders. SSRA was founded in Germany to change that.
+                  The world of sports science is advancing rapidly — but much of that knowledge remains locked behind language barriers and geographical borders. SSRA was founded to change that.
                 </p>
                 <p>
                   We believe Arabic-speaking students, graduates, and professionals deserve direct access to modern sports science, sports therapy, and rehabilitation knowledge — not outdated textbooks or second-hand translations.
                 </p>
                 <p>
-                  Our goal is to build bridges: between German academic rigour and Arab-world ambition, between research and practice, between experienced professionals and the next generation entering the field.
+                  Our goal is to build bridges: between rigorous academic standards and Arab-world ambition, between research and practice, between experienced professionals and the next generation entering the field — wherever they choose to work.
                 </p>
               </div>
             </div>
 
             <div className="reveal space-y-3">
               {[
-                "German-based academy with a global Arabic-speaking community",
+                "Academy founded in Germany with a global Arabic-speaking community",
                 "Modern, evidence-based sports science curriculum",
                 "Courses in Arabic, German, and English",
-                "Fair career pathways — no exploitation of fresh graduates",
-                "Active network connecting students to real job opportunities",
+                "Fair support for graduates — no exploitation, no false promises",
+                "Active professional network for knowledge exchange and growth",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3 p-4 rounded-xl bg-muted border border-border">
                   <CheckCircle2 className="w-5 h-5 text-[hsl(43,96%,50%)] mt-0.5 shrink-0" />
@@ -170,7 +170,7 @@ export default function About() {
       <section className="py-16 bg-[hsl(222,47%,9%)]">
         <div className="container text-center reveal">
           <h2 className="font-display text-3xl font-bold text-white mb-4">Ready to grow with SSRA?</h2>
-          <p className="text-white opacity-55 mb-8">Join a community that connects knowledge with real opportunity.</p>
+          <p className="text-white opacity-55 mb-8">Join a community built on knowledge, integrity, and shared growth.</p>
           <Link to="/apply">
             <Button className="btn-luxury-primary px-10 py-4 rounded-xl text-base gap-2">
               Apply Now <ArrowRight className="w-4 h-4" />
