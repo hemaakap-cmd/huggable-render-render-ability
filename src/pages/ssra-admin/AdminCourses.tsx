@@ -316,6 +316,13 @@ export default function AdminCourses() {
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
                           <Edit2 className="w-3.5 h-3.5" /> Edit
                         </button>
+                        {isSuperAdmin && (
+                          <button onClick={() => { setDeleteTarget(c); setDeleteForce(false); }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete course (super_admin only)">
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
