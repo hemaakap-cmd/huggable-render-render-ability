@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
-import { Users, Globe2, FileText, Activity, RefreshCw, LogIn, UserCheck, MapPin } from "lucide-react";
+import { Users, Globe2, FileText, Activity, RefreshCw, LogIn, UserCheck, MapPin, Calendar } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, subDays, startOfDay } from "date-fns";
+
+type Period = "today" | "7days" | "30days";
+
+const PERIOD_LABELS: Record<Period, string> = {
+  today: "Today",
+  "7days": "Last 7 days",
+  "30days": "Last 30 days",
+};
 
 type TodayTotals = {
   visitors: number;
@@ -10,6 +18,7 @@ type TodayTotals = {
   logins: number;
   completedProfiles: number;
 };
+
 
 type Visitor = {
   id: string;
@@ -33,13 +42,19 @@ export default function AdminLiveVisitors() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [tick, setTick] = useState(0);
+  const [period, setPeriod] = useState<Period>("today");
 
   const [totals, setTotals] = useState<TodayTotals>({ visitors: 0, countries: 0, logins: 0, completedProfiles: 0 });
 
-  async function loadTotals() {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const sinceISO = startOfDay.toISOString();
+  async function loadTotals(selectedPeriod: Period = period) {
+    let sinceISO: string;
+    if (selectedPeriod === "today") {
+      sinceISO = startOfDay(new Date()).toISOString();
+    } else if (selectedPeriod === "7days") {
+      sinceISO = startOfDay(subDays(new Date(), 6)).toISOString();
+    } else {
+      sinceISO = startOfDay(subDays(new Date(), 29)).toISOString();
+    }
 
     const [sessionsRes, profilesRes] = await Promise.all([
       supabase
@@ -77,10 +92,16 @@ export default function AdminLiveVisitors() {
     });
   }
 
-  async function load() {
+  async function load(selectedPeriod: Period = period) {
     setRefreshing(true);
     try {
-      const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
+      let since: string;
+      if (selectedPeriod === "today") {
+        since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
+      } else {
+        const days = selectedPeriod === "7days" ? 7 : 30;
+        since = startOfDay(subDays(new Date(), days - 1)).toISOString();
+      }
       const { data, error } = await supabase
         .from("site_visitor_sessions")
         .select("*")
@@ -89,7 +110,7 @@ export default function AdminLiveVisitors() {
         .limit(200);
       if (error) console.error("[live-visitors] load error:", error);
       setVisitors((data as Visitor[]) ?? []);
-      void loadTotals();
+      void loadTotals(selectedPeriod);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -103,9 +124,9 @@ export default function AdminLiveVisitors() {
       .on("postgres_changes", { event: "*", schema: "public", table: "site_visitor_sessions" }, () => load())
       .subscribe();
     const t = setInterval(() => setTick((n) => n + 1), 15_000); // re-render relative times + prune stale
-    const t2 = setInterval(load, 30_000);
+    const t2 = setInterval(() => load(), 30_000);
     return () => { supabase.removeChannel(ch); clearInterval(t); clearInterval(t2); };
-  }, []);
+  }, [period]);
 
   // Group by country / page
   const byCountry = new Map<string, number>();
@@ -125,35 +146,59 @@ export default function AdminLiveVisitors() {
           <div>
             <h1 className="font-display text-3xl font-bold text-slate-900">Live Visitors</h1>
             <p className="text-sm text-slate-500 mt-1">
-              Real-time visitors active in the last {WINDOW_MIN} minutes
+              {period === "today" ? (
+                <>Real-time visitors active in the last {WINDOW_MIN} minutes</>
+              ) : (
+                <>Visitors in the {PERIOD_LABELS[period].toLowerCase()}</>
+              )}
               <span className="inline-flex items-center gap-1.5 ml-3 text-emerald-600">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Live
               </span>
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void load()}
-            disabled={refreshing}
-            className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-slate-200 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Refreshing…" : "Refresh"}
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Period filter */}
+            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
+              <Calendar className="w-4 h-4 text-slate-400 ml-2" />
+              {( ["today", "7days", "30days"] as Period[] ).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    period === p
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {PERIOD_LABELS[p]}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => void load()}
+              disabled={refreshing}
+              className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-slate-200 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
         </div>
 
-        {/* Today totals */}
+        {/* Period totals */}
         <div>
-          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Today</h2>
+          <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">{PERIOD_LABELS[period]}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Stat icon={<Users className="w-5 h-5" />} label="Visitors today" value={totals.visitors} color="text-sky-600" />
-            <Stat icon={<MapPin className="w-5 h-5" />} label="Countries today" value={totals.countries} color="text-blue-600" />
-            <Stat icon={<LogIn className="w-5 h-5" />} label="Logins today" value={totals.logins} color="text-amber-600" />
+            <Stat icon={<Users className="w-5 h-5" />} label={`Visitors ${period === "today" ? "today" : ""}`} value={totals.visitors} color="text-sky-600" />
+            <Stat icon={<MapPin className="w-5 h-5" />} label={`Countries ${period === "today" ? "today" : ""}`} value={totals.countries} color="text-blue-600" />
+            <Stat icon={<LogIn className="w-5 h-5" />} label={`Logins ${period === "today" ? "today" : ""}`} value={totals.logins} color="text-amber-600" />
             <Stat icon={<UserCheck className="w-5 h-5" />} label="Completed profiles" value={totals.completedProfiles} color="text-emerald-600" />
           </div>
         </div>
 
-        {/* Live (last 5 min) */}
+        {/* Active now (last 5 min) — only when today */}
+        {period === "today" && (
         <div>
           <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Live · last {WINDOW_MIN} min</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -163,6 +208,7 @@ export default function AdminLiveVisitors() {
             <Stat icon={<Activity className="w-5 h-5" />} label="Logged-in users" value={visitors.filter((v) => v.user_id).length} color="text-amber-600" />
           </div>
         </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* By Country */}
