@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { Search, UserPlus, Mail, Globe2, Phone, Download, FileSpreadsheet, ChevronLeft, ChevronRight, TrendingUp, MapPin, Calendar, Send, Loader2 } from "lucide-react";
+import { Search, UserPlus, Mail, Globe2, Phone, Download, FileSpreadsheet, ChevronLeft, ChevronRight, TrendingUp, MapPin, Calendar, Send, Loader2, Eye } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
+import UserDetailsDialog from "@/components/ssra/UserDetailsDialog";
 import { useAdminLeads, useLeadStudentStats, useAdminCourses } from "@/hooks/useSsraData";
 import { exportToCSV, exportToExcel, profileCompletion, type ExportColumn } from "@/lib/exportUtils";
 import { supabase } from "@/integrations/supabase/client";
