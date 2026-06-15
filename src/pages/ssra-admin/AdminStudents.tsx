@@ -364,6 +364,144 @@ export default function AdminStudents() {
           </div>
         )}
       </div>
+
+      {/* Manage Student Modal */}
+      {manage && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div>
+                <h2 className="font-bold text-slate-900">إدارة الطالب</h2>
+                <p className="text-xs text-slate-500 mt-0.5">{manage.email}</p>
+              </div>
+              <button onClick={() => setManage(null)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* Profile section */}
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-700">البيانات الشخصية</h3>
+                  {!editing ? (
+                    <button onClick={() => setEditing(true)}
+                      className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
+                      <Edit2 className="w-3 h-3" /> تعديل
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditing(false)} className="text-xs text-slate-500 hover:underline">إلغاء</button>
+                      <button onClick={handleSaveStudent} disabled={saving}
+                        className="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg flex items-center gap-1 disabled:opacity-50">
+                        {saving && <Loader2 className="w-3 h-3 animate-spin" />} حفظ
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  {([
+                    ["full_name", "الاسم الكامل"],
+                    ["phone_number", "رقم الهاتف"],
+                    ["country", "الدولة"],
+                    ["city", "المدينة"],
+                    ["date_of_birth", "تاريخ الميلاد", "date"],
+                    ["degree", "الشهادة"],
+                    ["german_level", "مستوى الألمانية"],
+                  ] as const).map(([k, label, type]) => (
+                    <div key={k}>
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{label}</label>
+                      {editing ? (
+                        <input
+                          type={type ?? "text"}
+                          value={editForm[k] ?? ""}
+                          onChange={(e) => setEditForm((f) => ({ ...f, [k]: e.target.value }))}
+                          className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                        />
+                      ) : (
+                        <div className="mt-1 text-slate-800">{editForm[k] || "—"}</div>
+                      )}
+                    </div>
+                  ))}
+                  <div className="md:col-span-2">
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">العنوان</label>
+                    {editing ? (
+                      <textarea value={editForm.address ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, address: e.target.value }))}
+                        className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm" rows={2} />
+                    ) : (
+                      <div className="mt-1 text-slate-800">{editForm.address || "—"}</div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Enrollments */}
+              <section>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">تسجيلات الكورسات</h3>
+                {loadingEnrollments ? (
+                  <div className="text-sm text-slate-400 text-center py-4"><Loader2 className="w-4 h-4 animate-spin inline mr-2" />جارٍ التحميل…</div>
+                ) : studentEnrollments.length === 0 ? (
+                  <div className="text-sm text-slate-400 text-center py-4">لا توجد تسجيلات</div>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
+                    {studentEnrollments.map((e) => (
+                      <div key={e.id} className="flex items-center justify-between px-3 py-2">
+                        <div>
+                          <div className="text-sm font-medium text-slate-800">{e.course_title_snapshot || e.course_id}</div>
+                          <div className="text-xs text-slate-500">
+                            {new Date(e.enrolled_at).toLocaleDateString("ar-EG")} · €{e.amount_eur ?? "—"} ·{" "}
+                            <span className={
+                              e.status === "active" ? "text-emerald-600" :
+                              e.status === "cancelled" ? "text-red-600" :
+                              e.status === "refunded" ? "text-orange-600" : "text-slate-500"
+                            }>{e.status}</span>
+                          </div>
+                        </div>
+                        {e.status === "active" && (
+                          <button onClick={() => handleCancelEnrollment(e.id)}
+                            className="text-xs font-semibold text-red-600 hover:bg-red-50 px-2 py-1 rounded inline-flex items-center gap-1">
+                            <Ban className="w-3 h-3" /> إلغاء
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              {/* Danger zone */}
+              {isSuperAdmin && (
+                <section className="border border-red-200 bg-red-50 rounded-lg p-4">
+                  <h3 className="text-sm font-bold text-red-900 flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4" /> منطقة الخطر
+                  </h3>
+                  {!deleteConfirm ? (
+                    <button onClick={() => setDeleteConfirm(true)}
+                      className="text-xs font-semibold text-red-700 border border-red-300 bg-white px-3 py-1.5 rounded-lg hover:bg-red-100 flex items-center gap-1.5">
+                      <Trash2 className="w-3 h-3" /> حذف الطالب نهائياً
+                    </button>
+                  ) : (
+                    <div>
+                      <p className="text-xs text-red-800 mb-3">
+                        سيتم حذف الحساب نهائياً وإلغاء كل التسجيلات النشطة. هذا لا يمكن التراجع عنه.
+                      </p>
+                      <div className="flex gap-2">
+                        <button onClick={() => setDeleteConfirm(false)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-200">إلغاء</button>
+                        <button onClick={handleDeleteStudent} disabled={deleting}
+                          className="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 disabled:opacity-50">
+                          {deleting && <Loader2 className="w-3 h-3 animate-spin" />} تأكيد الحذف
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
