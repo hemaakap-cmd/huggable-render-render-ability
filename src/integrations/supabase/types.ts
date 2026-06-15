@@ -1247,6 +1247,87 @@ export type Database = {
         }
         Relationships: []
       }
+      ssra_payment_attempts: {
+        Row: {
+          amount_eur: number | null
+          attempt_number: number
+          completed_at: string | null
+          country: string | null
+          coupon_code: string | null
+          course_id: string | null
+          course_title: string | null
+          created_at: string
+          duration_ms: number | null
+          enrollment_id: string | null
+          environment: string
+          failure_code: string | null
+          failure_reason: string | null
+          id: string
+          initiated_at: string
+          ip_address: string | null
+          metadata: Json | null
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_eur?: number | null
+          attempt_number?: number
+          completed_at?: string | null
+          country?: string | null
+          coupon_code?: string | null
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          enrollment_id?: string | null
+          environment?: string
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          initiated_at?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_eur?: number | null
+          attempt_number?: number
+          completed_at?: string | null
+          country?: string | null
+          coupon_code?: string | null
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          enrollment_id?: string | null
+          environment?: string
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          initiated_at?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ssra_profiles: {
         Row: {
           address: string | null
@@ -1986,6 +2067,10 @@ export type Database = {
         Args: { _window_minutes?: number }
         Returns: Json
       }
+      get_payment_monitor_stats: {
+        Args: { _env?: string; _hours?: number }
+        Returns: Json
+      }
       get_public_home_stats: {
         Args: never
         Returns: {
@@ -2010,6 +2095,16 @@ export type Database = {
       }
       get_ssra_email_status: { Args: { _email: string }; Returns: string }
       get_ssra_role: { Args: { _uid: string }; Returns: string }
+      get_top_failed_users: {
+        Args: { _env?: string; _hours?: number; _min_fails?: number }
+        Returns: {
+          failed_count: number
+          last_attempt_at: string
+          total_attempts: number
+          user_email: string
+          user_id: string
+        }[]
+      }
       increment_coupon_uses: {
         Args: { _coupon_id: string }
         Returns: undefined
@@ -2050,6 +2145,23 @@ export type Database = {
         Args: { _course_id: string }
         Returns: number
       }
+      record_payment_attempt: {
+        Args: {
+          _amount_eur: number
+          _country: string
+          _coupon_code: string
+          _course_id: string
+          _course_title: string
+          _enrollment_id: string
+          _environment: string
+          _ip_address: string
+          _stripe_session_id: string
+          _user_agent: string
+          _user_email: string
+          _user_id: string
+        }
+        Returns: string
+      }
       report_profile_charset_violations: {
         Args: never
         Returns: {
@@ -2076,6 +2188,26 @@ export type Database = {
       session_has_credentials: {
         Args: { _session_id: string }
         Returns: boolean
+      }
+      update_payment_attempt: {
+        Args: {
+          _attempt_id: string
+          _failure_code: string
+          _failure_reason: string
+          _status: string
+          _stripe_payment_intent_id: string
+        }
+        Returns: undefined
+      }
+      update_payment_attempt_by_session: {
+        Args: {
+          _failure_code: string
+          _failure_reason: string
+          _session_id: string
+          _status: string
+          _stripe_payment_intent_id: string
+        }
+        Returns: undefined
       }
       validate_coupon: {
         Args: {

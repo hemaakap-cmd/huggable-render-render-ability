@@ -1,78 +1,68 @@
-# Payments Audit & Reconciliation System
+# نظام مراقبة الدفع (Payment Monitoring)
 
-Goal: make every euro in/out traceable, auto-detect mismatches between Paddle (source of truth) and the database, and run continuous checks so the numbers shown to admins are always trustworthy before opening the site to the public.
+نظام متكامل لتتبع كل محاولات الدفع على الموقع، تسجيل بيانات الفشل، عدد المحاولات لكل مستخدم، وأوقات الدفع، مع لوحة تحكم للأدمن.
 
-## 1. Audit Ledger (database)
+## 1) جدول جديد: `ssra_payment_attempts`
 
-New table `payment_audit_log` — append-only, every financial event captured:
-- `id`, `occurred_at`, `environment` (sandbox/live)
-- `event_type` (transaction.completed, subscription.canceled, refund.issued, reconciliation.mismatch, manual.adjustment, …)
-- `paddle_event_id` (unique, idempotent)
-- `paddle_resource_id` (txn/sub/customer/adjustment id)
-- `user_id`, `enrollment_id` (nullable links)
-- `amount_cents`, `currency`, `direction` (credit/debit)
-- `before_state`, `after_state` (jsonb snapshots)
-- `actor` (system/webhook/admin/reconciler), `actor_id`
-- `severity` (info/warn/critical), `notes`
-- Trigger blocks UPDATE/DELETE (immutable, like `revenue_events`)
-- RLS: super admin read-only; service role write
+تسجيل كل محاولة دفع (نجاح/فشل/قيد التنفيذ) مع كل التفاصيل.
 
-New table `payment_reconciliation_runs`:
-- run id, started_at, finished_at, environment
-- counts: paddle_txns, db_events, matched, missing_in_db, missing_in_paddle, amount_mismatches
-- status (running/ok/discrepancies/failed), summary jsonb
+**الحقول الأساسية:**
+- `user_id`, `user_email`, `course_id`, `course_title`
+- `enrollment_id` (ربط بالحجز المؤقت)
+- `amount_eur`, `coupon_code`
+- `status`: `initiated` | `processing` | `succeeded` | `failed` | `abandoned`
+- `failure_reason`, `failure_code` (من Stripe)
+- `stripe_session_id`, `stripe_payment_intent_id`
+- `attempt_number` (رقم المحاولة لنفس المستخدم/الكورس)
+- `ip_address`, `user_agent`, `country`
+- `initiated_at`, `completed_at`, `duration_ms`
+- `environment` (sandbox/live)
 
-New table `payment_discrepancies`:
-- run_id, type (missing_event, amount_mismatch, orphan_enrollment, orphan_subscription, refund_not_applied, …)
-- paddle_id, db_id, expected, actual, severity, resolved_at, resolution_notes
+**الحماية (RLS):**
+- المستخدم يشوف محاولاته فقط
+- الأدمن يشوف الكل
+- Service role يكتب من الـ edge functions
 
-## 2. Reconciliation Edge Functions
+## 2) دالة `record_payment_attempt`
 
-- `payments-reconcile` — pulls Paddle `/transactions`, `/subscriptions`, `/adjustments` for a window (default last 24h, configurable), diffs against `revenue_events` + `ssra_enrollments` + `ssra_subscriptions`. Writes a run row + discrepancy rows + audit log entries. Runs for both `sandbox` and `live`.
-- `payments-audit-snapshot` — daily snapshot of totals (gross, refunds, net, MRR, active subs) per environment into `payment_audit_log` for trend integrity.
-- `payments-webhook` — extend existing handler to also write to `payment_audit_log` on every event with before/after snapshot.
-- pg_cron schedule:
-  - reconcile every 30 min (last 2h window)
-  - full daily reconcile at 02:00 UTC (last 48h window)
-  - snapshot daily at 00:05 UTC
+دالة SQL تستدعى من الـ edge functions لتسجيل المحاولة وحساب `attempt_number` تلقائياً.
 
-## 3. Admin "Financial Audit" page
+## 3) تحديث Edge Functions
 
-New route `/ssra-admin/audit` (super admin only):
-- **Health banner**: latest reconciliation status (✓ all matched / ⚠ N discrepancies / ✗ failed)
-- **Reconciliation runs** table with filters by env and date
-- **Open discrepancies** list with one-click "investigate" drawer showing Paddle payload + DB rows side-by-side, and actions: mark resolved, create manual adjustment, replay webhook
-- **Audit log** searchable feed (filter by event type, user, severity, date)
-- **Revenue integrity card**: Paddle total vs DB total per period; red if drift > €0.01
-- **Run reconciliation now** button
+- `create-checkout`: تسجيل المحاولة عند البدء (status=`initiated`)
+- `confirm-checkout-session`: تحديث الحالة عند النجاح/الفشل
+- `payments-webhook`: تحديث من webhook events (`payment_intent.failed`, `checkout.session.completed`)
 
-## 4. Pre-publish hardening
+## 4) لوحة تحكم الأدمن `/ssra-admin/payment-monitor`
 
-- Force RLS check on every `ssra_*` and `payment_*` table; deny-by-default policies verified
-- Remove any test-only enrollments older than 7d in live env (sandbox untouched)
-- Add `data_integrity_checks` SQL view exposing: enrollments without payments, payments without enrollments, subscriptions with no matching auth user, profiles with admin role outside allowlist
-- Cron job hits the view hourly; any non-empty row → critical audit log entry + admin notification
-- Verify webhook secrets present for both envs; surface missing in audit page
+**الإحصائيات (KPIs):**
+- إجمالي المحاولات (آخر 24 ساعة / 7 أيام / 30 يوم)
+- معدل النجاح (Success Rate %)
+- معدل الفشل + أكثر أسباب الفشل
+- متوسط مدة عملية الدفع
+- المستخدمين اللي عندهم محاولات متكررة فاشلة (تنبيه احتيال)
 
-## 5. Continuous monitoring
+**الجداول:**
+- آخر 100 محاولة (مع filters: status, course, date range)
+- top failed users (>3 محاولات فاشلة)
+- توزيع الفشل حسب السبب (chart)
+- توزيع المحاولات حسب الوقت (chart)
 
-- `ssra_notifications` entry to every super_admin when:
-  - reconciliation finds discrepancies
-  - integrity view returns rows
-  - webhook signature verification fails
-  - manual DB mutation detected on financial tables (trigger compares actor)
+**إجراءات:**
+- export CSV
+- إعادة تشغيل محاولة فاشلة (resend payment link)
+- تحديد محاولة كاحتيال (flag)
 
-## Technical notes
+## 5) تنبيهات تلقائية
 
-- All new functions use existing `_shared/paddle.ts` (`getPaddleClient`, `gatewayFetch`)
-- All cron jobs scheduled via `supabase--insert` (contains project URL + anon key, per knowledge rule)
-- Frontend uses existing `useSsraData` patterns; new hook `useAuditData`
-- No changes to checkout/customer flow — audit is observational
-- Both `sandbox` and `live` reconciled separately; UI tab-switches between them
+- إذا مستخدم فشل 3+ مرات → notification للأدمن + flag في `ssra_fraud_flags`
+- إذا معدل الفشل العام تخطى 30% في ساعة → تنبيه
 
-## Out of scope (ask if needed)
-- Email/Slack alerts (currently only in-app notifications)
-- Auto-remediation of discrepancies (manual review required for safety)
-- Historical backfill beyond 90 days (one-off if requested)
+## التفاصيل التقنية
 
-Shall I proceed with implementation?
+- جدول جديد + indexes على (`user_id`, `course_id`, `status`, `created_at`)
+- 3 edge functions يتم تعديلها
+- صفحة React جديدة مع Recharts للرسوم البيانية
+- استخدام `supabase.channel` للتحديث الحي (realtime)
+
+هل أبدأ التنفيذ بهذا الشكل، أم تريد تعديل/إضافة شيء (مثلاً ربط بـ WhatsApp/Email للتنبيهات)؟
