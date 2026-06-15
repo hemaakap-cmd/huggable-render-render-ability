@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
-import { Users, Globe2, FileText, Activity, RefreshCw, LogIn, UserCheck, MapPin } from "lucide-react";
+import { Users, Globe2, FileText, Activity, RefreshCw, LogIn, UserCheck, MapPin, Calendar } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, subDays, startOfDay } from "date-fns";
+
+type Period = "today" | "7days" | "30days";
+
+const PERIOD_LABELS: Record<Period, string> = {
+  today: "Today",
+  "7days": "Last 7 days",
+  "30days": "Last 30 days",
+};
 
 type TodayTotals = {
   visitors: number;
@@ -10,6 +18,7 @@ type TodayTotals = {
   logins: number;
   completedProfiles: number;
 };
+
 
 type Visitor = {
   id: string;
