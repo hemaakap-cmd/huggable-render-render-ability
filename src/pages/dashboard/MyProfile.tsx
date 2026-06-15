@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { User, Mail, Globe, GraduationCap, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Mail, Globe, GraduationCap, Loader2, CheckCircle2, AlertTriangle, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMyProfile, useUpdateProfile } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ssraSignOut } from "@/hooks/useSsraAuth";
 
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
@@ -26,6 +27,30 @@ export default function MyProfile() {
   const [pwForm, setPwForm]   = useState({ current: "", next: "", confirm: "" });
   const [pwSaving, setPwSaving] = useState(false);
   const [showPw, setShowPw]   = useState(false);
+
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  async function deleteAccount() {
+    if (deleteConfirm.trim().toUpperCase() !== "DELETE") {
+      toast({ title: "Please type DELETE to confirm", variant: "destructive" });
+      return;
+    }
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("self-delete-account", {
+        body: { confirm: "DELETE" },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: "Account deleted", description: "Your account and data have been removed." });
+      await ssraSignOut();
+    } catch (err: any) {
+      toast({ title: "Could not delete account", description: err.message, variant: "destructive" });
+      setDeleting(false);
+    }
+  }
 
   function startEdit() {
     setForm({
@@ -228,6 +253,58 @@ export default function MyProfile() {
                 Update Password
               </button>
             </form>
+          )}
+        </div>
+
+        {/* Danger zone — self delete */}
+        <div className="bg-white border border-red-200 rounded-2xl p-6">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-semibold text-slate-900 text-sm">Delete Account</h2>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Permanently delete your SSRA Academy account, profile, and access to all courses.
+                Active enrollments will be cancelled. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          {!showDelete ? (
+            <button
+              onClick={() => setShowDelete(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors">
+              <Trash2 className="w-3.5 h-3.5" /> Delete my account
+            </button>
+          ) : (
+            <div className="space-y-3 mt-2">
+              <div className="text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg p-3">
+                To confirm, type <span className="font-mono font-bold">DELETE</span> below. Your data will be removed immediately.
+              </div>
+              <input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder="Type DELETE to confirm"
+                className={inputClass}
+                autoComplete="off"
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={deleteAccount}
+                  disabled={deleting || deleteConfirm.trim().toUpperCase() !== "DELETE"}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  Permanently delete
+                </button>
+                <button
+                  onClick={() => { setShowDelete(false); setDeleteConfirm(""); }}
+                  disabled={deleting}
+                  className="px-4 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-100 transition-colors">
+                  Cancel
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
