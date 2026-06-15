@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video, AlertTriangle } from "lucide-react";
+import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video, AlertTriangle, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
-import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden } from "@/hooks/useSsraData";
+import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden, useDeleteCourse } from "@/hooks/useSsraData";
+import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
