@@ -229,6 +229,7 @@ function AppInner() {
                 <Route path="/refund"          element={<RefundCancellation />} />
                 <Route path="/verify/:code"    element={<VerifyCertificate />} />
                 <Route path="/verify"          element={<VerifyCertificate />} />
+                <Route path="/team"            element={<Team />} />
 
                 {/* Forced profile-completion gate (auth required, no profile gate) */}
                 <Route path="/complete-profile" element={<CompleteProfile />} />
@@ -295,6 +296,7 @@ function AppInner() {
                 <Route path="/ssra-admin/student-reports"  element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
                 <Route path="/ssra-super-admin/student-reports" element={<RequireSuperAdmin><SuperAdminStudentReports /></RequireSuperAdmin>} />
                 <Route path="/ssra-admin/site-settings"     element={<RequireSuperAdmin><SuperAdminSiteSettings /></RequireSuperAdmin>} />
+                <Route path="/ssra-admin/team"              element={<RequireSuperAdmin><SuperAdminTeam /></RequireSuperAdmin>} />
 
                 <Route path="*" element={<NotFound />} />
         </Routes>
