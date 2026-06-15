@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone, MapPin, Calendar, BookOpen, Edit2, Trash2, X, Loader2, Ban, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
+import UserDetailsDialog from "@/components/ssra/UserDetailsDialog";
 import { useAdminStudents, useLeadStudentStats, useAdminCourses, useUpdateStudent, useDeleteStudent, useCancelEnrollment } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { supabase } from "@/integrations/supabase/client";
