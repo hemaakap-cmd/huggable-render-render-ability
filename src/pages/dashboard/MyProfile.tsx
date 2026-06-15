@@ -28,6 +28,30 @@ export default function MyProfile() {
   const [pwSaving, setPwSaving] = useState(false);
   const [showPw, setShowPw]   = useState(false);
 
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  async function deleteAccount() {
+    if (deleteConfirm.trim().toUpperCase() !== "DELETE") {
+      toast({ title: "Please type DELETE to confirm", variant: "destructive" });
+      return;
+    }
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("self-delete-account", {
+        body: { confirm: "DELETE" },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: "Account deleted", description: "Your account and data have been removed." });
+      await ssraSignOut();
+    } catch (err: any) {
+      toast({ title: "Could not delete account", description: err.message, variant: "destructive" });
+      setDeleting(false);
+    }
+  }
+
   function startEdit() {
     setForm({
       full_name: profile?.full_name ?? "",
