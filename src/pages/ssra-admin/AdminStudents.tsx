@@ -325,6 +325,12 @@ export default function AdminStudents() {
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
                             <button
+                              onClick={() => setViewing(s)}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 border border-amber-200 px-2 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                              title="خطاب الدوافع وقائمة الانتظار">
+                              <FileText className="w-3 h-3" />
+                            </button>
+                            <button
                               onClick={() => openManage(s)}
                               className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
                               title="Manage student">
