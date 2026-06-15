@@ -76,6 +76,7 @@ export default function AdminStudents() {
   const [deleting, setDeleting] = useState(false);
   const [studentEnrollments, setStudentEnrollments] = useState<any[]>([]);
   const [loadingEnrollments, setLoadingEnrollments] = useState(false);
+  const [viewing, setViewing] = useState<StudentRow | null>(null);
 
   const updateStudent = useUpdateStudent();
   const deleteStudent = useDeleteStudent();
