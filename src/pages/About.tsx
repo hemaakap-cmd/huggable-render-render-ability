@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Globe2, GraduationCap, Target, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Globe2, GraduationCap, Lightbulb, HeartHandshake, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
 import BackButton from "@/components/ssra/BackButton";
@@ -21,24 +21,24 @@ function useReveal() {
 
 const VALUES = [
   {
-    icon: Heart,
-    title: "Non-Profit First",
-    desc: "We exist to serve students, not shareholders. All revenue goes back into improving the academy and supporting students who cannot afford fees.",
-  },
-  {
     icon: Globe2,
-    title: "Global Community",
-    desc: "Our students come from Egypt, Morocco, Syria, Tunisia, Jordan, and beyond — united by a common goal: a career in German healthcare.",
+    title: "Bridging Worlds",
+    desc: "We connect sports science expertise from Germany with the Arab world, making cutting-edge knowledge accessible to Arabic speakers everywhere.",
   },
   {
-    icon: Target,
-    title: "Practical Focus",
-    desc: "Every lesson is tied to a real scenario in the German healthcare system. We don't teach theory for theory's sake.",
+    icon: Lightbulb,
+    title: "Culture of Growth",
+    desc: "We spread a culture of continuous development, modern research, and evidence-based practice — so knowledge evolves with the profession.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Youth First",
+    desc: "We create real job opportunities for young professionals and protect recent graduates from exploitation by building fair, transparent career pathways.",
   },
   {
     icon: GraduationCap,
-    title: "Evidence-Based",
-    desc: "Our curriculum is built with practising German sports therapists and physiotherapists to ensure it reflects current clinical standards.",
+    title: "Sports Therapy & Rehab",
+    desc: "We advance awareness of sports therapy, movement rehabilitation, and clinical sports science as vital, respected healthcare disciplines.",
   },
 ];
 
@@ -55,16 +55,16 @@ export default function About() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>About — SSRA Academy</title>
-        <meta name="description" content="SSRA Academy helps Arabic-speaking sports science graduates build careers in Germany. Our mission: accessible, high-quality education in Arabic." />
+        <meta name="description" content="SSRA Academy is a German-based academy spreading sports science knowledge to the Arab world. We connect sciences, create opportunities, and advance sports therapy culture." />
         <link rel="canonical" href="https://ssracourses.com/about" />
-        <meta property="og:title" content="About SSRA Academy — Sports Science for Arabic Speakers" />
-        <meta property="og:description" content="Our mission, team, and why we help Arabic-speaking sports scientists launch careers in Germany." />
+        <meta property="og:title" content="About SSRA Academy — Sports Science for the Arab World" />
+        <meta property="og:description" content="A German academy connecting sports science with Arabic speakers worldwide. Modern knowledge, real opportunities, and fair career pathways." />
         <meta property="og:url" content="https://ssracourses.com/about" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="About SSRA Academy" />
-        <meta name="twitter:description" content="Our mission and team — sports science education in Arabic, careers in Germany." />
+        <meta name="twitter:description" content="German academy spreading sports science to the Arab world — modern knowledge, real careers." />
         <meta name="twitter:image" content="https://ssracourses.com/og-image.png" />
       </Helmet>
 
@@ -79,39 +79,39 @@ export default function About() {
             Our Mission
           </h1>
           <p className="text-white opacity-60 text-lg leading-relaxed">
-            SSRA was founded by sports scientists who immigrated to Germany and experienced first-hand how difficult the transition is. We built the resource we wished had existed.
+            SSRA is a modern German academy on a mission to spread sports science knowledge across the Arab world and to Arabic speakers globally — connecting disciplines, cultures, and people through education.
           </p>
         </div>
       </section>
 
-      {/* Story */}
+      {/* Vision */}
       <section className="py-24">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="reveal">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
-                The Gap We're Closing
+                Why We Exist
               </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Every year, hundreds of sports science graduates from Arabic-speaking countries arrive in Germany with solid academic qualifications — and find themselves lost. The German healthcare system has its own language, its own protocols, its own bureaucracy.
+                  The world of sports science is advancing rapidly — but much of that knowledge remains locked behind language barriers and geographical borders. SSRA was founded in Germany to change that.
                 </p>
                 <p>
-                  A degree in sports science from Cairo or Tunis is valuable. But without knowing how to call a health insurance company in German, how to write a therapy report, or how to get your credentials officially recognised, that degree stays locked away.
+                  We believe Arabic-speaking students, graduates, and professionals deserve direct access to modern sports science, sports therapy, and rehabilitation knowledge — not outdated textbooks or second-hand translations.
                 </p>
                 <p>
-                  SSRA unlocks it. We're a non-profit online academy offering targeted, practical courses for this exact situation — in Arabic, in German, and in English.
+                  Our goal is to build bridges: between German academic rigour and Arab-world ambition, between research and practice, between experienced professionals and the next generation entering the field.
                 </p>
               </div>
             </div>
 
             <div className="reveal space-y-3">
               {[
-                "Founded in Germany by sports scientists with migration experience",
-                "Entirely online — study from anywhere in the world",
+                "German-based academy with a global Arabic-speaking community",
+                "Modern, evidence-based sports science curriculum",
                 "Courses in Arabic, German, and English",
-                "Sliding-scale fees with full scholarships for financial need",
-                "Active alumni network across Germany",
+                "Fair career pathways — no exploitation of fresh graduates",
+                "Active network connecting students to real job opportunities",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3 p-4 rounded-xl bg-muted border border-border">
                   <CheckCircle2 className="w-5 h-5 text-[hsl(43,96%,50%)] mt-0.5 shrink-0" />
@@ -128,7 +128,7 @@ export default function About() {
         <div className="container">
           <div className="text-center mb-14 reveal">
             <h2 className="font-display text-4xl font-bold text-white mb-4">Our Values</h2>
-            <p className="text-white opacity-50 max-w-md mx-auto">Everything we do flows from these four commitments.</p>
+            <p className="text-white opacity-50 max-w-md mx-auto">Everything we do is rooted in these four commitments.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {VALUES.map(({ icon: Icon, title, desc }) => (
@@ -169,8 +169,8 @@ export default function About() {
       {/* CTA */}
       <section className="py-16 bg-[hsl(222,47%,9%)]">
         <div className="container text-center reveal">
-          <h2 className="font-display text-3xl font-bold text-white mb-4">Ready to join SSRA?</h2>
-          <p className="text-white opacity-55 mb-8">Applications take less than 5 minutes. No fees required.</p>
+          <h2 className="font-display text-3xl font-bold text-white mb-4">Ready to grow with SSRA?</h2>
+          <p className="text-white opacity-55 mb-8">Join a community that connects knowledge with real opportunity.</p>
           <Link to="/apply">
             <Button className="btn-luxury-primary px-10 py-4 rounded-xl text-base gap-2">
               Apply Now <ArrowRight className="w-4 h-4" />
