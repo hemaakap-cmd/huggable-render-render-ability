@@ -147,7 +147,7 @@ export default function Checkout() {
               <div className="border-t border-slate-100 pt-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
-                    {isDonation ? "Pay what you want" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
+                    {isDonation ? "Minimum subscription" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
                   </span>
                   <span className="font-bold font-display text-xl text-slate-900">
                     {isDonation ? (
@@ -159,7 +159,7 @@ export default function Checkout() {
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
                   {isDonation
-                    ? "Choose any amount from €1 upwards. 100% goes toward keeping the course free for more students."
+                    ? `Choose your subscription amount starting from €${DONATION_MIN}. The minimum amount is required to enroll in this course.`
                     : "Tax is calculated automatically at checkout based on your country."}
                 </p>
               </div>
