@@ -87,6 +87,18 @@ Deno.serve(async (req) => {
     );
 
     if (!paymentIsComplete) {
+      // Update attempt status to processing/failed depending on payment status
+      try {
+        const failed = session.payment_status === "unpaid" && session.status === "expired";
+        await supabase.rpc("update_payment_attempt_by_session", {
+          _session_id: session.id,
+          _status: failed ? "failed" : "processing",
+          _failure_reason: failed ? "Session expired before payment" : null,
+          _failure_code: null,
+          _stripe_payment_intent_id: null,
+        });
+      } catch (e) { console.error("update_payment_attempt_by_session failed:", e); }
+
       return new Response(JSON.stringify({
         status: "pending",
         sessionStatus: session.status,
@@ -155,6 +167,17 @@ Deno.serve(async (req) => {
         updated_at: now,
       }, { onConflict: "stripe_subscription_id" });
     }
+
+    // Mark attempt as succeeded
+    try {
+      await supabase.rpc("update_payment_attempt_by_session", {
+        _session_id: session.id,
+        _status: "succeeded",
+        _failure_reason: null,
+        _failure_code: null,
+        _stripe_payment_intent_id: paymentIntent,
+      });
+    } catch (e) { console.error("update_payment_attempt_by_session failed:", e); }
 
     return new Response(JSON.stringify({ status: "success", enrollment }), {
       status: 200,

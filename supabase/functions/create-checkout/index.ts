@@ -152,6 +152,30 @@ Deno.serve(async (req) => {
       student_email_snapshot: user.email,
     }, { onConflict: "user_id,course_id", ignoreDuplicates: false });
 
+    // Record payment attempt for monitoring
+    try {
+      const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                        req.headers.get("cf-connecting-ip") || null;
+      const userAgent = req.headers.get("user-agent") || null;
+      const country = req.headers.get("cf-ipcountry") || null;
+      await supabase.rpc("record_payment_attempt", {
+        _user_id: user.id,
+        _user_email: user.email ?? null,
+        _course_id: courseId,
+        _course_title: course.title,
+        _enrollment_id: null,
+        _amount_eur: course.price_eur,
+        _coupon_code: null,
+        _stripe_session_id: session.id,
+        _ip_address: ipAddress,
+        _user_agent: userAgent,
+        _country: country,
+        _environment: environment,
+      });
+    } catch (e) {
+      console.error("record_payment_attempt failed:", e);
+    }
+
     return new Response(
       JSON.stringify({ clientSecret: session.client_secret, sessionId: session.id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

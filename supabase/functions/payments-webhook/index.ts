@@ -164,6 +164,42 @@ async function handleChargeRefunded(charge: any, env: StripeEnv) {
     .eq("environment", env);
 }
 
+async function handlePaymentIntentFailed(pi: any, env: StripeEnv) {
+  const sb = getSupabase();
+  const reason = pi.last_payment_error?.message || "Payment failed";
+  const code = pi.last_payment_error?.code || pi.last_payment_error?.decline_code || null;
+  // Find session by payment_intent id via the embedded checkout session reference
+  await sb.rpc("update_payment_attempt_by_session", {
+    _session_id: pi.metadata?.checkout_session_id ?? "",
+    _status: "failed",
+    _failure_reason: reason,
+    _failure_code: code,
+    _stripe_payment_intent_id: pi.id,
+  });
+  // Also try to update any attempt where stripe_payment_intent_id matches
+  await sb.from("ssra_payment_attempts")
+    .update({
+      status: "failed",
+      failure_reason: reason,
+      failure_code: code,
+      stripe_payment_intent_id: pi.id,
+      completed_at: new Date().toISOString(),
+    })
+    .eq("stripe_payment_intent_id", pi.id)
+    .eq("environment", env);
+}
+
+async function handleCheckoutExpired(session: any, env: StripeEnv) {
+  const sb = getSupabase();
+  await sb.rpc("update_payment_attempt_by_session", {
+    _session_id: session.id,
+    _status: "abandoned",
+    _failure_reason: "Checkout session expired",
+    _failure_code: "session_expired",
+    _stripe_payment_intent_id: null,
+  });
+}
+
 async function handleWebhook(req: Request, env: StripeEnv) {
   const event = await verifyWebhook(req, env);
   console.log("Stripe event:", event.type, "env:", env);
@@ -171,6 +207,22 @@ async function handleWebhook(req: Request, env: StripeEnv) {
   switch (event.type) {
     case "checkout.session.completed":
       await handleCheckoutCompleted(event.data.object, env);
+      // mark monitor attempt as succeeded
+      try {
+        await getSupabase().rpc("update_payment_attempt_by_session", {
+          _session_id: (event.data.object as any).id,
+          _status: "succeeded",
+          _failure_reason: null,
+          _failure_code: null,
+          _stripe_payment_intent_id: (event.data.object as any).payment_intent ?? null,
+        });
+      } catch (e) { console.error("attempt update failed:", e); }
+      break;
+    case "checkout.session.expired":
+      await handleCheckoutExpired(event.data.object, env);
+      break;
+    case "payment_intent.payment_failed":
+      await handlePaymentIntentFailed(event.data.object, env);
       break;
     case "customer.subscription.created":
     case "customer.subscription.updated":
@@ -183,7 +235,6 @@ async function handleWebhook(req: Request, env: StripeEnv) {
       await handleChargeRefunded(event.data.object, env);
       break;
     case "invoice.payment_failed":
-      // Stripe is retrying; ssra_subscriptions.status will go to past_due via subscription.updated
       console.log("Invoice payment failed:", event.data.object?.id);
       break;
     default:

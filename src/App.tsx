@@ -76,6 +76,7 @@ const AdminInstructors     = lazy(() => import("./pages/ssra-admin/AdminInstruct
 const AdminBatches         = lazy(() => import("./pages/ssra-admin/AdminBatches"));
 const AdminHomework        = lazy(() => import("./pages/ssra-admin/AdminHomework"));
 const AdminFraud           = lazy(() => import("./pages/ssra-admin/AdminFraud"));
+const AdminPaymentMonitor  = lazy(() => import("./pages/ssra-admin/AdminPaymentMonitor"));
 const AdminSystemHealth    = lazy(() => import("./pages/ssra-admin/AdminSystemHealth"));
 const AdminOperations      = lazy(() => import("./pages/ssra-admin/AdminOperations"));
 const AdminCertificates    = lazy(() => import("./pages/ssra-admin/AdminCertificates"));
@@ -261,6 +262,7 @@ function AppInner() {
                 <Route path="/ssra-admin/batches"           element={<RequireAdmin><AdminBatches /></RequireAdmin>} />
                 <Route path="/ssra-admin/homework"          element={<RequireAdmin><AdminHomework /></RequireAdmin>} />
                 <Route path="/ssra-admin/fraud"             element={<RequireAdmin><AdminFraud /></RequireAdmin>} />
+                <Route path="/ssra-admin/payment-monitor"   element={<RequireAdmin><AdminPaymentMonitor /></RequireAdmin>} />
                 <Route path="/ssra-admin/certificates"      element={<RequireAdmin><AdminCertificates /></RequireAdmin>} />
                 <Route path="/ssra-admin/cancellations"     element={<RequireAdmin><AdminCancellations /></RequireAdmin>} />
                 <Route path="/ssra-admin/zoom-broadcast"     element={<RequireAdmin><AdminZoomBroadcast /></RequireAdmin>} />
