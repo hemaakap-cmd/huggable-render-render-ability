@@ -18,10 +18,12 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { courseId, environment, returnUrl } = body as {
+    const { courseId, environment, returnUrl, currency: requestedCurrency, fxRate } = body as {
       courseId?: string;
       environment?: StripeEnv;
       returnUrl?: string;
+      currency?: string;
+      fxRate?: number;
     };
 
     if (!courseId || typeof courseId !== "string") {
@@ -36,6 +38,25 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Currency validation + smallest-unit conversion (TND is 3-decimal in Stripe)
+    const ALLOWED = new Set(["EUR", "EGP", "SAR", "TND"]);
+    const currency = (requestedCurrency && ALLOWED.has(requestedCurrency.toUpperCase()))
+      ? requestedCurrency.toUpperCase()
+      : "EUR";
+    const rate = currency === "EUR" ? 1 : (typeof fxRate === "number" && fxRate > 0 ? fxRate : 0);
+    if (currency !== "EUR" && !rate) {
+      return new Response(JSON.stringify({ error: "fxRate is required for non-EUR currencies" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const decimals = currency === "TND" ? 3 : 2;
+    const toSmallestUnit = (eur: number) => {
+      const local = eur * rate;
+      const raw = Math.round(local * Math.pow(10, decimals));
+      return currency === "TND" ? Math.round(raw / 10) * 10 : raw;
+    };
+
 
     // Authenticate the user
     const token = req.headers.get("Authorization")?.replace("Bearer ", "");
