@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     const finalReturnUrl = returnUrl ??
       `${req.headers.get("origin") ?? ""}/payment-success?session_id={CHECKOUT_SESSION_ID}&courseId=${courseId}`;
 
-    const productName = `${course.title ?? "Course"} — Enrollment`;
+    const productName = `${course.title ?? "Course"} — Donation`;
 
     const session = await stripe.checkout.sessions.create({
       line_items: [{
