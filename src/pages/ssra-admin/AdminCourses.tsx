@@ -585,6 +585,40 @@ export default function AdminCourses() {
           </div>
         </div>
       )}
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">حذف الكورس</h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  هل أنت متأكد من حذف <strong>{deleteTarget.title}</strong>؟ هذا الإجراء لا يمكن التراجع عنه.
+                </p>
+              </div>
+            </div>
+            <label className="flex items-start gap-2 text-sm text-slate-700 bg-red-50 border border-red-100 rounded-lg p-3 cursor-pointer">
+              <input type="checkbox" checked={deleteForce} onChange={(e) => setDeleteForce(e.target.checked)} className="mt-0.5" />
+              <span>
+                <strong>حذف قسري</strong> — إلغاء تسجيل كل الطلاب النشطين في هذا الكورس تلقائياً.
+              </span>
+            </label>
+            <div className="flex justify-end gap-2 mt-5">
+              <button onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100">إلغاء</button>
+              <button onClick={handleDelete} disabled={deleting}
+                className="flex items-center gap-2 px-5 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50">
+                {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {deleting ? "جارٍ الحذف…" : "حذف نهائي"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
