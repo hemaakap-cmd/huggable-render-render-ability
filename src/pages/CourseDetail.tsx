@@ -64,19 +64,7 @@ export default function CourseDetail() {
   }
 
   if (!course) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <Header />
-        <div className="flex-1 container py-32 text-center">
-          <BackButton className="mb-4" />
-          <h1 className="font-display text-3xl font-bold text-slate-900 mb-4">Course not found</h1>
-          <Link to="/courses" className="text-[hsl(220,91%,54%)] font-medium inline-flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" /> Back to all courses
-          </Link>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <CourseNotFoundRedirect />;
   }
 
   const handleEnrol = () => {
