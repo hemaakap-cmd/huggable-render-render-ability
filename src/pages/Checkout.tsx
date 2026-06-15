@@ -40,7 +40,7 @@ export default function Checkout() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [activeEnrollment, setActiveEnrollment] = useState<any>(null);
   const isDonation = DONATION_COURSE_IDS.has(courseId);
-  const [donationPick, setDonationPick] = useState<number | "custom">(10);
+  const [donationPick, setDonationPick] = useState<number | "custom">(DONATION_SUGGESTED[0]);
   const [donationCustom, setDonationCustom] = useState<string>("");
   const donationAmount = useMemo(() => {
     if (donationPick === "custom") {
