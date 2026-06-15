@@ -11,6 +11,7 @@ import Footer from "@/components/ssra/Footer";
 import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlist, usePublicCourses } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 
 function formatDate(d?: string | null) {
   if (!d) return null;
@@ -46,6 +47,7 @@ export default function CourseDetail() {
   const navigate   = useNavigate();
   const { user }   = useSsraAuth();
   const { toast }  = useToast();
+  const { format } = useCurrency();
   const { data: courses, isLoading: coursesLoading } = usePublicCourses();
   const course     = courses?.find((c) => c.id === id);
   const { data: priceHidden = {} } = usePriceHiddenMap();
@@ -135,11 +137,11 @@ export default function CourseDetail() {
               </span>
             ) : course.type === "subscription" ? (
               <span className="badge-gold flex items-center gap-1">
-                <Crown className="w-3 h-3" /> Subscription · €{course.price}/mo
+                <Crown className="w-3 h-3" /> Subscription · {format(course.price)}/mo
               </span>
             ) : (
               <span className="badge-gold flex items-center gap-1">
-                <CreditCard className="w-3 h-3" /> €{course.price} one-time
+                <CreditCard className="w-3 h-3" /> {format(course.price)} one-time
               </span>
             )}
             <span className="text-xs px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/20 capitalize">
@@ -257,12 +259,12 @@ export default function CourseDetail() {
                   </div>
                 ) : course.type === "subscription" ? (
                   <div className="font-display text-3xl font-bold text-slate-900">
-                    €{course.price}
+                    {format(course.price)}
                     <span className="text-base font-medium text-slate-400">/month</span>
                   </div>
                 ) : (
                   <div className="font-display text-3xl font-bold text-slate-900">
-                    €{course.price}
+                    {format(course.price)}
                   </div>
                 )}
               </div>

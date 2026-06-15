@@ -13,6 +13,7 @@ import { isProfileComplete } from "./lib/profileCompletion";
 import { lazyWithRetry as lazy } from "./lib/lazyWithRetry";
 import Index from "./pages/Index";
 import WhatsAppButton from "./components/ssra/WhatsAppButton";
+import { CurrencyProvider } from "./hooks/useCurrency";
 
 
 
@@ -310,13 +311,15 @@ const App = () => (
   <ErrorBoundary>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppInner />
-          </BrowserRouter>
-        </TooltipProvider>
+        <CurrencyProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppInner />
+            </BrowserRouter>
+          </TooltipProvider>
+        </CurrencyProvider>
       </QueryClientProvider>
     </HelmetProvider>
   </ErrorBoundary>

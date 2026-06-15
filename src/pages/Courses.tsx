@@ -6,6 +6,7 @@ import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { type Course } from "@/lib/courseCatalog";
 import { useCoursesCapacityMap, usePublicCourses } from "@/hooks/useSsraData";
+import { useCurrency } from "@/hooks/useCurrency";
 
 function useReveal() {
   useEffect(() => {
@@ -36,6 +37,7 @@ function CourseRow({
   isFull?: boolean;
 }) {
   const navigate = useNavigate();
+  const { format } = useCurrency();
 
   return (
     <div className="card-lift reveal bg-white border border-slate-200 rounded-2xl overflow-hidden">
@@ -64,9 +66,9 @@ function CourseRow({
                   <Clock className="w-3 h-3" /> Coming Soon
                 </span>
               ) : course.type === "subscription" ? (
-                <span className="badge-gold flex items-center gap-1"><Crown className="w-3 h-3" /> Subscription · €{course.price}/mo</span>
+                <span className="badge-gold flex items-center gap-1"><Crown className="w-3 h-3" /> Subscription · {format(course.price)}/mo</span>
               ) : (
-                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> €{course.price} one-time</span>
+                <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> {format(course.price)} one-time</span>
               )}
               {!course.price_hidden && isFull && (
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200">

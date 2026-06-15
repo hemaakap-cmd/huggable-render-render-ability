@@ -12,6 +12,7 @@ import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { isPaymentsConfigured } from "@/lib/stripe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/hooks/useCurrency";
 
 // Courses that use "pay what you want" donation pricing instead of fixed price.
 // Medical German is a monthly subscription in the catalogue, so it must stay on
@@ -36,6 +37,7 @@ export default function Checkout() {
   const { data: schedule } = useCourseSchedule(courseId);
 
   const { user, profile, loading: authLoading } = useSsraAuth();
+  const { format, currency } = useCurrency();
 
   const [showCheckout, setShowCheckout] = useState(false);
   const [activeEnrollment, setActiveEnrollment] = useState<any>(null);
@@ -151,9 +153,9 @@ export default function Checkout() {
                   </span>
                   <span className="font-bold font-display text-xl text-slate-900">
                     {isDonation ? (
-                      <>€{donationValid ? donationAmount : "—"}</>
+                      <>{donationValid ? format(donationAmount) : "—"}</>
                     ) : (
-                      <>€{course.price}{course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}</>
+                      <>{format(course.price)}{course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}</>
                     )}
                   </span>
                 </div>
@@ -297,8 +299,8 @@ export default function Checkout() {
                 >
                   {isDonation ? <Heart className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
                   {isDonation
-                    ? `تبرع بـ €${donationValid ? donationAmount : "—"}`
-                    : <>Pay €{course.price}{course.type === "subscription" ? "/mo" : ""}</>}
+                    ? <>تبرع بـ {donationValid ? format(donationAmount) : "—"}</>
+                    : <>Pay {format(course.price)}{course.type === "subscription" ? "/mo" : ""}</>}
                 </button>
               )}
 

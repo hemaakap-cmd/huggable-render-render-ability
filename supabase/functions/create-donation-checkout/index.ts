@@ -23,12 +23,19 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { courseId, amountCents, environment, returnUrl } = body as {
+    const { courseId, amountCents, environment, returnUrl, currency: requestedCurrency, fxRate } = body as {
       courseId?: string;
       amountCents?: number;
       environment?: StripeEnv;
       returnUrl?: string;
+      currency?: string;
+      fxRate?: number;
     };
+    const ALLOWED = new Set(["EUR", "EGP", "SAR", "TND"]);
+    const currency = (requestedCurrency && ALLOWED.has(requestedCurrency.toUpperCase()))
+      ? requestedCurrency.toUpperCase()
+      : "EUR";
+    const rate = currency === "EUR" ? 1 : (typeof fxRate === "number" && fxRate > 0 ? fxRate : 0);
 
     if (!courseId || typeof courseId !== "string" || !DONATION_COURSE_IDS.has(courseId)) {
       return new Response(JSON.stringify({ error: "Donation pricing is not enabled for this course" }), {
@@ -94,15 +101,28 @@ Deno.serve(async (req) => {
 
     const productName = `${course.title ?? "Course"} — Donation`;
 
+    if (currency !== "EUR" && !rate) {
+      return new Response(JSON.stringify({ error: "fxRate is required for non-EUR currencies" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const decimals = currency === "TND" ? 3 : 2;
+    const amountEur = amountCents / 100;
+    const localUnitAmount = (() => {
+      if (currency === "EUR") return amountCents;
+      const raw = Math.round(amountEur * rate * Math.pow(10, decimals));
+      return currency === "TND" ? Math.round(raw / 10) * 10 : raw;
+    })();
+
     const session = await stripe.checkout.sessions.create({
       line_items: [{
         price_data: {
-          currency: "eur",
+          currency: currency.toLowerCase(),
           product_data: {
             name: productName,
             description: "Donation to support this course. Choose any amount you'd like to contribute.",
           },
-          unit_amount: amountCents,
+          unit_amount: localUnitAmount,
         },
         quantity: 1,
       }],
@@ -115,6 +135,9 @@ Deno.serve(async (req) => {
         userId: user.id,
         courseId: courseId,
         donation: "true",
+        currency,
+        fxRate: String(rate),
+        baseCurrency: "EUR",
       },
     } as any);
 

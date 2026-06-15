@@ -2,17 +2,19 @@ import { useCallback, useRef } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface Props {
   courseId: string;
   returnUrl?: string;
-  donationAmountCents?: number; // when set, routes through create-donation-checkout
+  donationAmountCents?: number; // EUR cents when set, routes through create-donation-checkout
   onAlreadyEnrolled?: () => void;
   onPaymentComplete?: (sessionId: string | null) => void;
 }
 
 export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCents, onAlreadyEnrolled, onPaymentComplete }: Props) {
   const sessionIdRef = useRef<string | null>(null);
+  const { currency, rate } = useCurrency();
 
   const fetchClientSecret = useCallback(async (): Promise<string> => {
     const isDonation = typeof donationAmountCents === "number" && donationAmountCents > 0;
@@ -20,8 +22,8 @@ export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCent
       isDonation ? "create-donation-checkout" : "create-checkout",
       {
         body: isDonation
-          ? { courseId, amountCents: donationAmountCents, environment: getStripeEnvironment(), returnUrl }
-          : { courseId, environment: getStripeEnvironment(), returnUrl },
+          ? { courseId, amountCents: donationAmountCents, environment: getStripeEnvironment(), returnUrl, currency, fxRate: rate }
+          : { courseId, environment: getStripeEnvironment(), returnUrl, currency, fxRate: rate },
       },
     );
     if (data?.alreadyEnrolled) {
@@ -34,7 +36,7 @@ export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCent
     sessionIdRef.current = data.sessionId ?? null;
     if (data.sessionId) sessionStorage.setItem("ssra:lastCheckoutSessionId", data.sessionId);
     return data.clientSecret;
-  }, [courseId, donationAmountCents, onAlreadyEnrolled, returnUrl]);
+  }, [courseId, donationAmountCents, onAlreadyEnrolled, returnUrl, currency, rate]);
 
   const handleComplete = useCallback(() => {
     onPaymentComplete?.(sessionIdRef.current ?? sessionStorage.getItem("ssra:lastCheckoutSessionId"));
@@ -48,3 +50,4 @@ export function StripeEmbeddedCheckout({ courseId, returnUrl, donationAmountCent
     </div>
   );
 }
+

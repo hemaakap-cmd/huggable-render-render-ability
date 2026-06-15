@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { usePublicCourses } from "@/hooks/useSsraData";
+import { useCurrency } from "@/hooks/useCurrency";
 import { supabase } from "@/integrations/supabase/client";
 import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 import heroBiomechanicsMobile from "@/assets/hero-biomechanics-mobile.jpg";
@@ -65,6 +66,7 @@ export default function Index() {
   useReveal();
 
   const { data: courses = [] } = usePublicCourses();
+  const { format } = useCurrency();
   const featuredCourses = courses.slice(0, 3);
   const subscriptionCourse = courses.find((course) => course.type === "subscription");
   const { data: stats } = useHomeStats();
@@ -86,7 +88,7 @@ export default function Index() {
       icon: Globe2,
     },
     {
-      value: stats?.min_price != null ? `€${stats.min_price}` : "—",
+      value: stats?.min_price != null ? format(stats.min_price) : "—",
       label: "Starting price",
       icon: CreditCard,
     },
@@ -248,7 +250,7 @@ export default function Index() {
                 </div>
                 <div className="mt-8">
                   <div className="text-4xl font-bold text-white font-display">
-                    €{subscriptionCourse.price}
+                    {format(subscriptionCourse.price)}
                     <span className="text-base font-normal text-white/50">/month</span>
                   </div>
                   <div className="text-xs text-white/40 mt-1">Open to all · Cancel anytime</div>
@@ -323,7 +325,7 @@ export default function Index() {
                         ? "bg-amber-50 text-amber-700 border border-amber-200"
                         : "bg-slate-100 text-slate-600"
                     }`}>
-                      {course.price_hidden ? "Coming Soon" : course.type === "subscription" ? `€${course.price}/mo` : `€${course.price}`}
+                      {course.price_hidden ? "Coming Soon" : course.type === "subscription" ? `${format(course.price)}/mo` : format(course.price)}
                     </span>
                     <span className="text-xs text-slate-400">{course.weeks}</span>
                   </div>
