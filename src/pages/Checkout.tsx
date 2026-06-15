@@ -17,8 +17,8 @@ import { supabase } from "@/integrations/supabase/client";
 // Medical German is a monthly subscription in the catalogue, so it must stay on
 // the recurring checkout path and not be treated as a contribution.
 const DONATION_COURSE_IDS = new Set<string>(["medical-german"]);
-const DONATION_SUGGESTED = [10, 15, 25, 50, 75, 100, 150, 200];
-const DONATION_MIN = 10;
+const DONATION_SUGGESTED = [1, 5, 10, 25, 50, 75, 100, 200];
+const DONATION_MIN = 1;
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
