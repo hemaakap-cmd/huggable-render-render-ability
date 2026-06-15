@@ -28,7 +28,7 @@ const VALUES = [
   {
     icon: Lightbulb,
     title: "Culture of Growth",
-    desc: "We spread a culture of continuous development, modern research, and evidence-based practice — so knowledge evolves with the profession.",
+    desc: "We spread a culture of continuous development, transferring expert knowledge into practical, evidence-based education — so learning evolves with the profession.",
   },
   {
     icon: HeartHandshake,
