@@ -11,6 +11,7 @@ import Footer from "@/components/ssra/Footer";
 import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlist, usePublicCourses } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 
 function formatDate(d?: string | null) {
   if (!d) return null;
