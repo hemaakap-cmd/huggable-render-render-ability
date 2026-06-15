@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import {
-  Crown, CheckCircle2, XCircle, Clock, AlertCircle,
+  Crown, CheckCircle2, XCircle, Clock, AlertCircle, BookOpen,
   ExternalLink, ArrowRight, Loader2,
 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
-import { useMySubscription } from "@/hooks/useSsraData";
+import { useMyEnrollments, useMySubscription } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { toast } from "@/hooks/use-toast";
@@ -20,7 +20,9 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; cl
 
 export default function MySubscription() {
   const { data: subscription, isLoading } = useMySubscription();
+  const { data: enrollments = [], isLoading: enrollmentsLoading } = useMyEnrollments();
   const hasActiveSub = subscription?.status === "active" || subscription?.status === "trialing";
+  const subscriptionCourseAccess = enrollments.find((e: any) => e.course_id === "medical-german");
   const statusCfg    = subscription ? (STATUS_CONFIG[subscription.status] ?? STATUS_CONFIG.incomplete) : null;
   const [portalLoading, setPortalLoading] = useState(false);
   const [devCancelLoading, setDevCancelLoading] = useState(false);
@@ -70,7 +72,7 @@ export default function MySubscription() {
           <p className="text-slate-500 text-sm mt-1">Manage your Medical German subscription.</p>
         </div>
 
-        {isLoading ? (
+        {isLoading || enrollmentsLoading ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
             <Loader2 className="w-6 h-6 animate-spin text-slate-300 mx-auto" />
           </div>
@@ -144,6 +146,23 @@ export default function MySubscription() {
               </div>
             </div>
           </>
+        ) : subscriptionCourseAccess ? (
+          <div className="bg-white border border-emerald-200 rounded-2xl p-7 text-center">
+            <BookOpen className="w-10 h-10 text-emerald-600 mx-auto mb-4" />
+            <div className="font-display text-xl font-bold text-slate-900 mb-2">Course access is active</div>
+            <div className="text-slate-500 text-sm mb-1">
+              Your payment is confirmed and Medical German is available in My Courses.
+            </div>
+            <div className="text-slate-400 text-xs mb-6">
+              Order: {(subscriptionCourseAccess as any).order_number ?? "confirmed"}
+            </div>
+            <Link to="/dashboard/courses">
+              <button className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors">
+                <BookOpen className="w-4 h-4" /> Open My Courses
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </div>
         ) : (
           /* No active subscription — direct to courses catalog */
           <div className="bg-white border border-slate-200 rounded-2xl p-7 text-center">

@@ -14,7 +14,9 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Courses that use "pay what you want" donation pricing instead of fixed price.
-const DONATION_COURSE_IDS = new Set(["medical-german"]);
+// Medical German is a monthly subscription in the catalogue, so it must stay on
+// the recurring checkout path and not be treated as a contribution.
+const DONATION_COURSE_IDS = new Set<string>();
 const DONATION_SUGGESTED = [5, 10, 25, 50];
 const DONATION_MIN = 1;
 
