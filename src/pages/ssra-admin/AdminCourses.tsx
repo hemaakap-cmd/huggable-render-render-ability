@@ -37,7 +37,13 @@ export default function AdminCourses() {
   const upsert       = useUpsertCourse();
   const toggle       = useToggleCourse();
   const togglePrice  = useTogglePriceHidden();
+  const deleteCourse = useDeleteCourse();
+  const { isSuperAdmin } = useSsraAuth();
   const { toast } = useToast();
+
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleteForce, setDeleteForce] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [modal, setModal]     = useState(false);
   const [form, setForm]       = useState<Record<string, unknown>>({ ...EMPTY });
