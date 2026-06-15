@@ -146,21 +146,44 @@ export default function AdminLiveVisitors() {
           <div>
             <h1 className="font-display text-3xl font-bold text-slate-900">Live Visitors</h1>
             <p className="text-sm text-slate-500 mt-1">
-              Real-time visitors active in the last {WINDOW_MIN} minutes
+              {period === "today" ? (
+                <>Real-time visitors active in the last {WINDOW_MIN} minutes</>
+              ) : (
+                <>Visitors in the {PERIOD_LABELS[period].toLowerCase()}</>
+              )}
               <span className="inline-flex items-center gap-1.5 ml-3 text-emerald-600">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Live
               </span>
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void load()}
-            disabled={refreshing}
-            className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-slate-200 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Refreshing…" : "Refresh"}
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Period filter */}
+            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
+              <Calendar className="w-4 h-4 text-slate-400 ml-2" />
+              {( ["today", "7days", "30days"] as Period[] ).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    period === p
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {PERIOD_LABELS[p]}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => void load()}
+              disabled={refreshing}
+              className="btn-outline px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-slate-200 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
         </div>
 
         {/* Today totals */}
