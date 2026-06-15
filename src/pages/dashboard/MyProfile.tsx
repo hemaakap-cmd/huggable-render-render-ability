@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { User, Mail, Globe, GraduationCap, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Mail, Globe, GraduationCap, Loader2, CheckCircle2, AlertTriangle, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMyProfile, useUpdateProfile } from "@/hooks/useSsraData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ssraSignOut } from "@/hooks/useSsraAuth";
 
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Jordan", "Morocco",
