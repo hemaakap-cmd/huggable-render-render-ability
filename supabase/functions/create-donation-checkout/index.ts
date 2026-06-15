@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     const finalReturnUrl = returnUrl ??
       `${req.headers.get("origin") ?? ""}/payment-success?session_id={CHECKOUT_SESSION_ID}&courseId=${courseId}`;
 
-    const productName = `${course.title ?? "Course"} — Contribution`;
+    const productName = `${course.title ?? "Course"} — Enrollment`;
 
     const session = await stripe.checkout.sessions.create({
       line_items: [{
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
           currency: "eur",
           product_data: {
             name: productName,
-            description: "Pay-what-you-want contribution. Helps us reach more students.",
+            description: "Flexible subscription. Choose your amount to enroll in this course.",
           },
           unit_amount: amountCents,
         },
