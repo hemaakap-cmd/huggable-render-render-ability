@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { Users, Globe2, FileText, Activity, RefreshCw } from "lucide-react";
+import { Users, Globe2, FileText, Activity, RefreshCw, LogIn, UserCheck, MapPin } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+
+type TodayTotals = {
+  visitors: number;
+  countries: number;
+  logins: number;
+  completedProfiles: number;
+};
 
 type Visitor = {
   id: string;
