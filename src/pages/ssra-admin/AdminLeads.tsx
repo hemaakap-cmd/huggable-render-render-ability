@@ -261,6 +261,7 @@ export default function AdminLeads() {
                     <th className="text-left px-4 py-3">Location</th>
                     <th className="text-center px-4 py-3">Profile</th>
                     <th className="text-left px-4 py-3">Registered</th>
+                    <th className="text-center px-4 py-3 w-12"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
