@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { courseFromRecord, type CourseRecord } from "@/lib/courseCatalog";
 
+const COURSE_PUBLIC_SELECT = "id,title,title_ar,subtitle,category,price_eur,course_type,is_subscription";
+
 /* ── My enrollments ── */
 export function useMyEnrollments() {
   return useQuery({
@@ -11,7 +13,7 @@ export function useMyEnrollments() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_enrollments")
-        .select("*, ssra_courses(*)")
+        .select(`*, ssra_courses(${COURSE_PUBLIC_SELECT})`)
         .eq("status", "active")
         .order("enrolled_at", { ascending: false });
       if (error) throw error;
@@ -27,7 +29,7 @@ export function useMySubscription() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ssra_subscriptions")
-        .select("*, ssra_courses(*)")
+        .select(`*, ssra_courses(${COURSE_PUBLIC_SELECT})`)
         .in("status", ["active", "trialing", "past_due"])
         .order("created_at", { ascending: false })
         .limit(1)
