@@ -9,7 +9,7 @@ const supabase = createClient(
 
 // Courses opted into "pay what you want" donation pricing.
 const DONATION_COURSE_IDS = new Set<string>(["medical-german"]);
-const MIN_AMOUNT_CENTS = 1000; // €10 minimum
+const MIN_AMOUNT_CENTS = 100; // €1 minimum
 const MAX_AMOUNT_CENTS = 1_000_000; // €10,000 sanity cap
 
 Deno.serve(async (req) => {
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     const finalReturnUrl = returnUrl ??
       `${req.headers.get("origin") ?? ""}/payment-success?session_id={CHECKOUT_SESSION_ID}&courseId=${courseId}`;
 
-    const productName = `${course.title ?? "Course"} — Enrollment`;
+    const productName = `${course.title ?? "Course"} — Donation`;
 
     const session = await stripe.checkout.sessions.create({
       line_items: [{
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
           currency: "eur",
           product_data: {
             name: productName,
-            description: "Flexible subscription. Choose your amount to enroll in this course.",
+            description: "Donation to support this course. Choose any amount you'd like to contribute.",
           },
           unit_amount: amountCents,
         },

@@ -17,8 +17,8 @@ import { supabase } from "@/integrations/supabase/client";
 // Medical German is a monthly subscription in the catalogue, so it must stay on
 // the recurring checkout path and not be treated as a contribution.
 const DONATION_COURSE_IDS = new Set<string>(["medical-german"]);
-const DONATION_SUGGESTED = [10, 15, 25, 50, 75, 100, 150, 200];
-const DONATION_MIN = 10;
+const DONATION_SUGGESTED = [1, 5, 10, 25, 50, 75, 100, 200];
+const DONATION_MIN = 1;
 
 function fmtDate(d?: string | null) {
   if (!d) return null;
@@ -147,7 +147,7 @@ export default function Checkout() {
               <div className="border-t border-slate-100 pt-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
-                    {isDonation ? "Minimum subscription" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
+                    {isDonation ? "Donation" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
                   </span>
                   <span className="font-bold font-display text-xl text-slate-900">
                     {isDonation ? (
@@ -159,7 +159,7 @@ export default function Checkout() {
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
                   {isDonation
-                    ? `Choose your subscription amount starting from €${DONATION_MIN}. The minimum amount is required to enroll in this course.`
+                    ? `Choose any amount you'd like to donate, starting from €${DONATION_MIN}.`
                     : "Tax is calculated automatically at checkout based on your country."}
                 </p>
               </div>
@@ -204,9 +204,9 @@ export default function Checkout() {
                   <div className="flex items-start gap-2 mb-3">
                     <Heart className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">اشترك بمبلغ يناسبك</div>
+                      <div className="text-sm font-semibold text-slate-900">ساهم بأي مبلغ</div>
                       <div className="text-xs text-slate-600 mt-0.5">
-                        اختر مبلغ الاشتراك المناسب لك. الحد الأدنى €{DONATION_MIN} للتسجيل في هذا الكورس.
+                        تبرعك بيساعدنا نكمل تقديم الكورس. اختر أي مبلغ يناسبك، الحد الأدنى €{DONATION_MIN}.
                       </div>
                     </div>
                   </div>
@@ -232,7 +232,7 @@ export default function Checkout() {
                       type="number"
                       min={DONATION_MIN}
                       step={1}
-                      placeholder={`مثلاً 15 — الحد الأدنى €${DONATION_MIN}`}
+                      placeholder={`مثلاً 5 — الحد الأدنى €${DONATION_MIN}`}
                       value={donationCustom}
                       onChange={(e) => { setDonationCustom(e.target.value); setDonationPick("custom"); }}
                       onFocus={() => setDonationPick("custom")}
@@ -242,7 +242,7 @@ export default function Checkout() {
                     />
                   </label>
                   {!donationValid && donationPick === "custom" && donationCustom !== "" && (
-                  <p className="text-xs text-red-600 mt-2">الحد الأدنى للاشتراك €{DONATION_MIN}</p>
+                  <p className="text-xs text-red-600 mt-2">الحد الأدنى للتبرع €{DONATION_MIN}</p>
                   )}
                 </div>
               )}
@@ -297,7 +297,7 @@ export default function Checkout() {
                 >
                   {isDonation ? <Heart className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
                   {isDonation
-                    ? `اشترك بـ €${donationValid ? donationAmount : "—"}`
+                    ? `تبرع بـ €${donationValid ? donationAmount : "—"}`
                     : <>Pay €{course.price}{course.type === "subscription" ? "/mo" : ""}</>}
                 </button>
               )}
