@@ -1,9 +1,11 @@
 import { useState, useMemo } from "react";
-import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone, MapPin, Calendar, BookOpen } from "lucide-react";
+import { Search, Users, Mail, Globe2, Eye, ChevronLeft, ChevronRight, Download, FileSpreadsheet, TrendingUp, Phone, MapPin, Calendar, BookOpen, Edit2, Trash2, X, Loader2, Ban, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/ssra/AdminLayout";
-import { useAdminStudents, useLeadStudentStats, useAdminCourses } from "@/hooks/useSsraData";
+import { useAdminStudents, useLeadStudentStats, useAdminCourses, useUpdateStudent, useDeleteStudent, useCancelEnrollment } from "@/hooks/useSsraData";
 import { useSsraAuth } from "@/hooks/useSsraAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { exportToCSV, exportToExcel, type ExportColumn } from "@/lib/exportUtils";
 
 type SubFilter = "all" | "active" | "none";
@@ -62,6 +64,84 @@ export default function AdminStudents() {
   const total = data?.total ?? 0;
   const { isSuperAdmin }          = useSsraAuth();
   const navigate                  = useNavigate();
+  const { toast }                 = useToast();
+
+  // Manage modal
+  const [manage, setManage] = useState<StudentRow | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [studentEnrollments, setStudentEnrollments] = useState<any[]>([]);
+  const [loadingEnrollments, setLoadingEnrollments] = useState(false);
+
+  const updateStudent = useUpdateStudent();
+  const deleteStudent = useDeleteStudent();
+  const cancelEnrollment = useCancelEnrollment();
+
+  async function openManage(s: StudentRow) {
+    setManage(s);
+    setEditing(false);
+    setDeleteConfirm(false);
+    setEditForm({
+      full_name: s.full_name ?? "",
+      phone_number: s.phone_number ?? "",
+      country: s.country ?? "",
+      city: s.city ?? "",
+      address: s.address ?? "",
+      date_of_birth: s.date_of_birth ?? "",
+      degree: s.degree ?? "",
+      german_level: s.german_level ?? "",
+    });
+    setLoadingEnrollments(true);
+    try {
+      const { data } = await supabase
+        .from("ssra_enrollments")
+        .select("id, course_id, status, amount_eur, enrolled_at, course_title_snapshot")
+        .eq("user_id", s.id)
+        .order("enrolled_at", { ascending: false });
+      setStudentEnrollments(data || []);
+    } finally {
+      setLoadingEnrollments(false);
+    }
+  }
+
+  async function handleSaveStudent() {
+    if (!manage) return;
+    setSaving(true);
+    try {
+      await updateStudent.mutateAsync({ userId: manage.id, patch: editForm });
+      toast({ title: "تم تحديث بيانات الطالب" });
+      setEditing(false);
+    } catch (e: any) {
+      toast({ title: "فشل الحفظ", description: e.message, variant: "destructive" });
+    } finally { setSaving(false); }
+  }
+
+  async function handleDeleteStudent() {
+    if (!manage) return;
+    setDeleting(true);
+    try {
+      await deleteStudent.mutateAsync({ userId: manage.id });
+      toast({ title: "تم حذف الطالب نهائياً" });
+      setManage(null);
+      setDeleteConfirm(false);
+    } catch (e: any) {
+      toast({ title: "فشل الحذف", description: e.message, variant: "destructive" });
+    } finally { setDeleting(false); }
+  }
+
+  async function handleCancelEnrollment(enrollmentId: string) {
+    if (!confirm("إلغاء تسجيل الطالب من هذا الكورس؟")) return;
+    try {
+      await cancelEnrollment.mutateAsync({ enrollmentId });
+      setStudentEnrollments((prev) => prev.map((e) => e.id === enrollmentId ? { ...e, status: "cancelled" } : e));
+      toast({ title: "تم إلغاء التسجيل" });
+    } catch (e: any) {
+      toast({ title: "فشل الإلغاء", description: e.message, variant: "destructive" });
+    }
+  }
 
   const filtered = useMemo(() => {
     return rows.filter((s) => {
@@ -177,7 +257,7 @@ export default function AdminStudents() {
                     <th className="text-left px-4 py-3">Location</th>
                     <th className="text-left px-4 py-3">Courses</th>
                     <th className="text-center px-4 py-3">Sub</th>
-                    {isSuperAdmin && <th className="text-center px-4 py-3">View As</th>}
+                    <th className="text-center px-4 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -240,15 +320,24 @@ export default function AdminStudents() {
                             <span className="text-xs text-slate-300">—</span>
                           )}
                         </td>
-                        {isSuperAdmin && (
-                          <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
                             <button
-                              onClick={() => navigate(`/ssra-admin/view-as/${s.id}`)}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors">
-                              <Eye className="w-3 h-3" /> View as
+                              onClick={() => openManage(s)}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                              title="Manage student">
+                              <Edit2 className="w-3 h-3" /> إدارة
                             </button>
-                          </td>
-                        )}
+                            {isSuperAdmin && (
+                              <button
+                                onClick={() => navigate(`/ssra-admin/view-as/${s.id}`)}
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 border border-amber-200 px-2 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                                title="View as student">
+                                <Eye className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
@@ -275,6 +364,144 @@ export default function AdminStudents() {
           </div>
         )}
       </div>
+
+      {/* Manage Student Modal */}
+      {manage && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <div>
+                <h2 className="font-bold text-slate-900">إدارة الطالب</h2>
+                <p className="text-xs text-slate-500 mt-0.5">{manage.email}</p>
+              </div>
+              <button onClick={() => setManage(null)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* Profile section */}
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-700">البيانات الشخصية</h3>
+                  {!editing ? (
+                    <button onClick={() => setEditing(true)}
+                      className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
+                      <Edit2 className="w-3 h-3" /> تعديل
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditing(false)} className="text-xs text-slate-500 hover:underline">إلغاء</button>
+                      <button onClick={handleSaveStudent} disabled={saving}
+                        className="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg flex items-center gap-1 disabled:opacity-50">
+                        {saving && <Loader2 className="w-3 h-3 animate-spin" />} حفظ
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  {([
+                    ["full_name", "الاسم الكامل"],
+                    ["phone_number", "رقم الهاتف"],
+                    ["country", "الدولة"],
+                    ["city", "المدينة"],
+                    ["date_of_birth", "تاريخ الميلاد", "date"],
+                    ["degree", "الشهادة"],
+                    ["german_level", "مستوى الألمانية"],
+                  ] as const).map(([k, label, type]) => (
+                    <div key={k}>
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{label}</label>
+                      {editing ? (
+                        <input
+                          type={type ?? "text"}
+                          value={editForm[k] ?? ""}
+                          onChange={(e) => setEditForm((f) => ({ ...f, [k]: e.target.value }))}
+                          className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                        />
+                      ) : (
+                        <div className="mt-1 text-slate-800">{editForm[k] || "—"}</div>
+                      )}
+                    </div>
+                  ))}
+                  <div className="md:col-span-2">
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">العنوان</label>
+                    {editing ? (
+                      <textarea value={editForm.address ?? ""}
+                        onChange={(e) => setEditForm((f) => ({ ...f, address: e.target.value }))}
+                        className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm" rows={2} />
+                    ) : (
+                      <div className="mt-1 text-slate-800">{editForm.address || "—"}</div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Enrollments */}
+              <section>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">تسجيلات الكورسات</h3>
+                {loadingEnrollments ? (
+                  <div className="text-sm text-slate-400 text-center py-4"><Loader2 className="w-4 h-4 animate-spin inline mr-2" />جارٍ التحميل…</div>
+                ) : studentEnrollments.length === 0 ? (
+                  <div className="text-sm text-slate-400 text-center py-4">لا توجد تسجيلات</div>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
+                    {studentEnrollments.map((e) => (
+                      <div key={e.id} className="flex items-center justify-between px-3 py-2">
+                        <div>
+                          <div className="text-sm font-medium text-slate-800">{e.course_title_snapshot || e.course_id}</div>
+                          <div className="text-xs text-slate-500">
+                            {new Date(e.enrolled_at).toLocaleDateString("ar-EG")} · €{e.amount_eur ?? "—"} ·{" "}
+                            <span className={
+                              e.status === "active" ? "text-emerald-600" :
+                              e.status === "cancelled" ? "text-red-600" :
+                              e.status === "refunded" ? "text-orange-600" : "text-slate-500"
+                            }>{e.status}</span>
+                          </div>
+                        </div>
+                        {e.status === "active" && (
+                          <button onClick={() => handleCancelEnrollment(e.id)}
+                            className="text-xs font-semibold text-red-600 hover:bg-red-50 px-2 py-1 rounded inline-flex items-center gap-1">
+                            <Ban className="w-3 h-3" /> إلغاء
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              {/* Danger zone */}
+              {isSuperAdmin && (
+                <section className="border border-red-200 bg-red-50 rounded-lg p-4">
+                  <h3 className="text-sm font-bold text-red-900 flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4" /> منطقة الخطر
+                  </h3>
+                  {!deleteConfirm ? (
+                    <button onClick={() => setDeleteConfirm(true)}
+                      className="text-xs font-semibold text-red-700 border border-red-300 bg-white px-3 py-1.5 rounded-lg hover:bg-red-100 flex items-center gap-1.5">
+                      <Trash2 className="w-3 h-3" /> حذف الطالب نهائياً
+                    </button>
+                  ) : (
+                    <div>
+                      <p className="text-xs text-red-800 mb-3">
+                        سيتم حذف الحساب نهائياً وإلغاء كل التسجيلات النشطة. هذا لا يمكن التراجع عنه.
+                      </p>
+                      <div className="flex gap-2">
+                        <button onClick={() => setDeleteConfirm(false)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-200">إلغاء</button>
+                        <button onClick={handleDeleteStudent} disabled={deleting}
+                          className="text-xs font-semibold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 disabled:opacity-50">
+                          {deleting && <Loader2 className="w-3 h-3 animate-spin" />} تأكيد الحذف
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

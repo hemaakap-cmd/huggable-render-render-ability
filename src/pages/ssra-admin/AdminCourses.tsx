@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video, AlertTriangle } from "lucide-react";
+import { Plus, Edit2, ImageIcon, ToggleLeft, ToggleRight, Loader2, X, Upload, Eye, EyeOff, Video, AlertTriangle, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/ssra/AdminLayout";
-import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden } from "@/hooks/useSsraData";
+import { useAdminCourses, useUpsertCourse, useToggleCourse, useTogglePriceHidden, useDeleteCourse } from "@/hooks/useSsraData";
+import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,7 +37,13 @@ export default function AdminCourses() {
   const upsert       = useUpsertCourse();
   const toggle       = useToggleCourse();
   const togglePrice  = useTogglePriceHidden();
+  const deleteCourse = useDeleteCourse();
+  const { isSuperAdmin } = useSsraAuth();
   const { toast } = useToast();
+
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleteForce, setDeleteForce] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [modal, setModal]     = useState(false);
   const [form, setForm]       = useState<Record<string, unknown>>({ ...EMPTY });
@@ -157,6 +164,30 @@ export default function AdminCourses() {
   async function handleTogglePrice(c: { id: string; price_hidden: boolean }) {
     await togglePrice.mutateAsync({ id: c.id, price_hidden: !c.price_hidden });
     toast({ title: c.price_hidden ? "Price is now visible" : "Price hidden — showing 'Coming Soon'" });
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteCourse.mutateAsync({ courseId: deleteTarget.id, force: deleteForce });
+      toast({ title: "تم حذف الكورس" });
+      setDeleteTarget(null);
+      setDeleteForce(false);
+    } catch (e: any) {
+      const msg = e?.message || "Delete failed";
+      if (msg.includes("active enrollments")) {
+        toast({
+          title: "لا يمكن الحذف",
+          description: "يوجد طلاب مسجلون حالياً. فعّل 'حذف قسري' لإلغاء تسجيلهم والمتابعة.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "فشل الحذف", description: msg, variant: "destructive" });
+      }
+    } finally {
+      setDeleting(false);
+    }
   }
 
   const categoryColor: Record<string, string> = {
@@ -285,6 +316,13 @@ export default function AdminCourses() {
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
                           <Edit2 className="w-3.5 h-3.5" /> Edit
                         </button>
+                        {isSuperAdmin && (
+                          <button onClick={() => { setDeleteTarget(c); setDeleteForce(false); }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete course (super_admin only)">
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -544,6 +582,40 @@ export default function AdminCourses() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">حذف الكورس</h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  هل أنت متأكد من حذف <strong>{deleteTarget.title}</strong>؟ هذا الإجراء لا يمكن التراجع عنه.
+                </p>
+              </div>
+            </div>
+            <label className="flex items-start gap-2 text-sm text-slate-700 bg-red-50 border border-red-100 rounded-lg p-3 cursor-pointer">
+              <input type="checkbox" checked={deleteForce} onChange={(e) => setDeleteForce(e.target.checked)} className="mt-0.5" />
+              <span>
+                <strong>حذف قسري</strong> — إلغاء تسجيل كل الطلاب النشطين في هذا الكورس تلقائياً.
+              </span>
+            </label>
+            <div className="flex justify-end gap-2 mt-5">
+              <button onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100">إلغاء</button>
+              <button onClick={handleDelete} disabled={deleting}
+                className="flex items-center gap-2 px-5 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50">
+                {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {deleting ? "جارٍ الحذف…" : "حذف نهائي"}
+              </button>
+            </div>
           </div>
         </div>
       )}

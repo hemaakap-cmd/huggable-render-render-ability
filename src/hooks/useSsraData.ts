@@ -443,6 +443,58 @@ export function useTogglePriceHidden() {
   });
 }
 
+/* ── Admin destructive / management ops via edge function ── */
+async function callAdminOps(payload: Record<string, unknown>) {
+  const { data, error } = await supabase.functions.invoke("admin-ops", { body: payload });
+  if (error) throw new Error((error as any).message || "Operation failed");
+  if (data && (data as any).error) throw new Error((data as any).error);
+  return data;
+}
+
+export function useDeleteCourse() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ courseId, force }: { courseId: string; force?: boolean }) =>
+      callAdminOps({ action: "delete_course", courseId, force: !!force }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-courses"] });
+      qc.invalidateQueries({ queryKey: ["ssra-public-courses"] });
+      qc.invalidateQueries({ queryKey: ["public-home-stats"] });
+    },
+  });
+}
+
+export function useUpdateStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId, patch }: { userId: string; patch: Record<string, unknown> }) =>
+      callAdminOps({ action: "update_student", userId, patch }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-students"] }),
+  });
+}
+
+export function useDeleteStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId }: { userId: string }) =>
+      callAdminOps({ action: "delete_student", userId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ssra-admin-students"] }),
+  });
+}
+
+export function useCancelEnrollment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ enrollmentId }: { enrollmentId: string }) =>
+      callAdminOps({ action: "cancel_enrollment", enrollmentId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ssra-admin-students"] });
+      qc.invalidateQueries({ queryKey: ["ssra-admin-enrollments"] });
+    },
+  });
+}
+
+
 export function usePriceHiddenMap() {
   return useQuery({
     queryKey: ["ssra-price-hidden-map"],
