@@ -22,6 +22,25 @@ function formatTime(t?: string | null) {
   return t.length >= 5 ? t.slice(0, 5) : t;
 }
 
+function CourseNotFoundRedirect() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const t = setTimeout(() => navigate("/courses", { replace: true }), 1500);
+    return () => clearTimeout(t);
+  }, [navigate]);
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Header />
+      <div className="flex-1 container py-32 text-center">
+        <h1 className="font-display text-2xl font-bold text-slate-900 mb-3">This course is no longer available</h1>
+        <p className="text-slate-500 mb-6">Redirecting you to all available courses…</p>
+        <Loader2 className="w-6 h-6 animate-spin text-slate-300 mx-auto" />
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
 export default function CourseDetail() {
   const { id = "" } = useParams();
   const navigate   = useNavigate();
