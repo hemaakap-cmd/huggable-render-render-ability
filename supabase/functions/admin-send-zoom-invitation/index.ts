@@ -145,25 +145,22 @@ Deno.serve(async (req: Request) => {
       const trackingPixelUrl = `${fnBase}/track-broadcast-open?t=${encodeURIComponent(token)}`;
       const trackedJoinUrl = `${fnBase}/track-broadcast-join?t=${encodeURIComponent(token)}&r=${encodeURIComponent(String(zoomLink))}`;
 
-      const payload = {
-        to: r.email,
-        template: "zoom-invitation",
-        idempotency_key: `zoom-broadcast-${broadcast.id}-${r.user_id}`,
-        purpose: "transactional",
-        data: {
-          studentName: r.full_name || "there",
-          title: String(title),
-          description: description ?? "",
-          scheduledAt: scheduledLabel,
-          durationMinutes: duration,
-          zoomLink: trackedJoinUrl,
-          zoomPassword: zoomPassword ? String(zoomPassword) : "",
-          trackingPixelUrl,
+      const { error: qErr } = await adminClient.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "zoom-invitation",
+          recipientEmail: r.email,
+          idempotencyKey: `zoom-broadcast-${broadcast.id}-${r.user_id}`,
+          templateData: {
+            studentName: r.full_name || "there",
+            title: String(title),
+            description: description ?? "",
+            scheduledAt: scheduledLabel,
+            durationMinutes: duration,
+            zoomLink: trackedJoinUrl,
+            zoomPassword: zoomPassword ? String(zoomPassword) : "",
+            trackingPixelUrl,
+          },
         },
-      };
-      const { error: qErr } = await adminClient.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload,
       });
       if (qErr) {
         failed++;
