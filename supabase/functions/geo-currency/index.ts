@@ -97,8 +97,10 @@ Deno.serve(async (req) => {
         rates: {
           EUR: 1,
           USD: rates.USD ?? null,
+          GBP: rates.GBP ?? null,
           EGP: rates.EGP ?? null,
           SAR: rates.SAR ?? null,
+          AED: rates.AED ?? null,
           TND: rates.TND ?? null,
         },
         updatedAt: fxCache?.at ?? Date.now(),
