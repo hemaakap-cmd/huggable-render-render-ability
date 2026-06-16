@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, CheckCircle2, ArrowRight, ShoppingBag, XCircle, Clock } from "lucide-react";
+import { BookOpen, ArrowRight, ShoppingBag, XCircle, Clock, PlayCircle, Video, Calendar, User } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
 import { useMyEnrollments, useMySubscription } from "@/hooks/useSsraData";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import CancelEnrollmentDialog from "@/components/ssra/CancelEnrollmentDialog";
+import { resolveCourseMeta, formatCourseDate } from "@/lib/courseDefaults";
 
 const CANCEL_WINDOW_DAYS = 14;
 
