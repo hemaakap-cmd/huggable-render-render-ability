@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, FileText, ListOrdered, Loader2, Mail, ExternalLink } from "lucide-react";
+import { X, FileText, ListOrdered, Loader2, Mail, ExternalLink, Radio } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Verification = {
@@ -42,12 +42,13 @@ export default function UserDetailsDialog({
   const [verifications, setVerifications] = useState<Verification[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
   const [courseTitles, setCourseTitles] = useState<Record<string, string>>({});
+  const [broadcastHistory, setBroadcastHistory] = useState<any[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [vRes, wRes] = await Promise.all([
+      const [vRes, wRes, bRes] = await Promise.all([
         supabase
           .from("ssra_verifications")
           .select("id, full_name, email, country, degree, graduation_year, german_level, motivation, course_id, diploma_url, status, created_at")
@@ -58,6 +59,7 @@ export default function UserDetailsDialog({
           .select("id, course_id, position, status, notified_at, expires_at, created_at")
           .eq("user_id", userId)
           .order("created_at", { ascending: false }),
+        supabase.rpc("get_student_broadcast_history" as never, { _user_id: userId } as never),
       ]);
 
       // Fallback by email for anonymous applications
@@ -93,6 +95,7 @@ export default function UserDetailsDialog({
         setVerifications(vRows);
         setWaitlist(wRows);
         setCourseTitles(titles);
+        setBroadcastHistory(((bRes as any)?.data ?? []) as any[]);
         setLoading(false);
       }
     })();
