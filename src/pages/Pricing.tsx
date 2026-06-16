@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   CheckCircle2, ArrowRight, CreditCard, Shield, RefreshCcw,
   Globe2, Zap, Crown,
