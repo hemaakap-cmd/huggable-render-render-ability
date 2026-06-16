@@ -21,12 +21,9 @@ export default function MyBroadcasts() {
     queryKey: ["my-zoom-broadcasts", profile?.id],
     enabled: !!profile?.id,
     queryFn: async () => {
-      // RLS restricts to broadcasts the student is a recipient of.
-      const { data, error } = await supabase
-        .from("ssra_zoom_broadcasts" as never)
-        .select("id, title, description, scheduled_at, duration_minutes, zoom_link, zoom_password")
-        .order("scheduled_at", { ascending: false })
-        .limit(50);
+      // SECURITY DEFINER RPC returns only the columns students need —
+      // never exposes admin analytics (sent_count, audience_filters, etc.).
+      const { data, error } = await (supabase as any).rpc("get_my_zoom_broadcasts");
       if (error) throw error;
       return (data ?? []) as unknown as BroadcastRow[];
     },
