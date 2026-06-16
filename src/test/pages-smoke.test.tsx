@@ -50,6 +50,7 @@ vi.mock("@/integrations/supabase/client", () => ({
     from: vi.fn((table?: string) =>
       table === "ssra_courses" ? makeQuery(MOCK_COURSES) : makeQuery()),
     functions: { invoke: vi.fn().mockResolvedValue({ data: null, error: null }) },
+    rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
     auth: {
       getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
       getUser:    vi.fn().mockResolvedValue({ data: { user: null } }),
