@@ -26,8 +26,6 @@ function useReveal() {
 }
 
 function PriceCard({ course, highlight = false }: { course: Course; highlight?: boolean }) {
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const { format } = useCurrency();
   const gate = useEnrollGate();
 
