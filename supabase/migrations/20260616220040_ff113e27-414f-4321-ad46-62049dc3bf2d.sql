@@ -1,0 +1,1 @@
+UPDATE public.ssra_courses SET price_hidden = true WHERE id='medical-german';
