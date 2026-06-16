@@ -9,7 +9,7 @@ import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { type Course } from "@/lib/courseCatalog";
 import { usePublicCourses } from "@/hooks/useSsraData";
-import { useToast } from "@/hooks/use-toast";
+
 import { useCurrency } from "@/hooks/useCurrency";
 import { useEnrollGate } from "@/hooks/useEnrollGate";
 
