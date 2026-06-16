@@ -12,6 +12,7 @@ import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlis
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useEnrollGate } from "@/hooks/useEnrollGate";
 
 function formatDate(d?: string | null) {
   if (!d) return null;
