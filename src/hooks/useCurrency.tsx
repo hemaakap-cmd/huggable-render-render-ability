@@ -13,7 +13,8 @@ interface CurrencyState {
 
 const CurrencyContext = createContext<CurrencyState | null>(null);
 
-const STORAGE_KEY = "ssra:currencyOverride";
+const STORAGE_KEY = "ssra:currencyOverride";       // user-chosen currency
+const STORAGE_COUNTRY_KEY = "ssra:overrideCountry"; // country at time of override
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<SupportedCurrency>("EUR");
@@ -29,10 +30,28 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase.functions.invoke("geo-currency", { method: "GET" });
         if (cancelled || !data) return;
         const detected: SupportedCurrency = isSupportedCurrency(data.currency) ? data.currency : "EUR";
+        const detectedCountry: string | null = data.country ?? null;
         setRates(data.rates ?? { EUR: 1 });
-        setCountry(data.country ?? null);
+        setCountry(detectedCountry);
 
-        const stored = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+        // Read stored override + the country it was set under. If the user has
+        // travelled (detected country changed since), discard the stale override
+        // so they see the local currency of where they actually are now.
+        let stored: string | null = null;
+        let storedCountry: string | null = null;
+        try {
+          stored = window.localStorage.getItem(STORAGE_KEY);
+          storedCountry = window.localStorage.getItem(STORAGE_COUNTRY_KEY);
+        } catch { /* ignore */ }
+
+        if (stored && storedCountry && detectedCountry && storedCountry !== detectedCountry) {
+          try {
+            window.localStorage.removeItem(STORAGE_KEY);
+            window.localStorage.removeItem(STORAGE_COUNTRY_KEY);
+          } catch { /* ignore */ }
+          stored = null;
+        }
+
         const initial: SupportedCurrency = isSupportedCurrency(stored) ? stored : detected;
         setCurrencyState(initial);
         const r = initial === "EUR" ? 1 : Number(data.rates?.[initial]) || Number(data.rate) || 1;
@@ -50,8 +69,11 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     setCurrencyState(c);
     const r = c === "EUR" ? 1 : Number(rates[c]) || 1;
     setRate(r);
-    try { window.localStorage.setItem(STORAGE_KEY, c); } catch { /* ignore */ }
-  }, [rates]);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, c);
+      if (country) window.localStorage.setItem(STORAGE_COUNTRY_KEY, country);
+    } catch { /* ignore */ }
+  }, [rates, country]);
 
   const value = useMemo<CurrencyState>(() => ({
     currency, rate, country, loading, setCurrency,

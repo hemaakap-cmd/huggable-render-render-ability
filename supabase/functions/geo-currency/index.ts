@@ -9,7 +9,9 @@ const EU_COUNTRIES = new Set([
 const COUNTRY_TO_CURRENCY: Record<string, string> = {
   EG: "EGP",
   SA: "SAR",
+  AE: "AED",
   TN: "TND",
+  GB: "GBP",
 };
 
 type FxCache = { at: number; rates: Record<string, number> };
@@ -36,7 +38,7 @@ async function getRates(): Promise<Record<string, number>> {
   } catch (e) {
     // Fallback to last cache or a sane default if first call fails
     if (fxCache) return fxCache.rates;
-    return { EUR: 1, EGP: 52, SAR: 4, TND: 3.4 };
+    return { EUR: 1, USD: 1.08, GBP: 0.85, EGP: 52, SAR: 4, AED: 3.97, TND: 3.4 };
   }
 }
 
@@ -95,8 +97,10 @@ Deno.serve(async (req) => {
         rates: {
           EUR: 1,
           USD: rates.USD ?? null,
+          GBP: rates.GBP ?? null,
           EGP: rates.EGP ?? null,
           SAR: rates.SAR ?? null,
+          AED: rates.AED ?? null,
           TND: rates.TND ?? null,
         },
         updatedAt: fxCache?.at ?? Date.now(),
