@@ -78,39 +78,48 @@ export default function MySubscription() {
           </div>
         ) : hasActiveSub && subscription ? (
           <>
-            {/* Active subscription card */}
-            <div className="bg-gradient-to-br from-[hsl(222,47%,9%)] to-[hsl(220,60%,18%)] rounded-2xl p-7 text-white">
-              <div className="flex items-center gap-2 mb-4">
+            {/* Payment Information */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-5">
                 <Crown className="w-5 h-5 text-[hsl(43,96%,50%)]" />
-                <span className="text-xs font-semibold text-white/50 uppercase tracking-wide">Active Plan</span>
-              </div>
-              <div className="font-display text-2xl font-bold mb-1">{(subscription as any).ssra_courses?.title ?? "Your course"}</div>
-              <div className="text-white/50 text-sm mb-6">
-                Monthly subscription
-                {(subscription as any).ssra_courses?.price_eur != null && <> · €{Number((subscription as any).ssra_courses.price_eur)}/month</>}
+                <h2 className="font-semibold text-slate-900">Payment Information</h2>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-white/8 rounded-xl p-4">
-                  <div className="text-xs text-white/40 mb-1">Status</div>
-                  {statusCfg && (
-                    <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${statusCfg.cls}`}>
-                      <statusCfg.icon className="w-3 h-3" /> {statusCfg.label}
-                    </div>
-                  )}
+              <dl className="grid sm:grid-cols-2 gap-4 mb-5">
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                  <dt className="text-xs uppercase tracking-wider text-slate-400 mb-1">Status</dt>
+                  <dd>
+                    {statusCfg && (
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${statusCfg.cls}`}>
+                        <statusCfg.icon className="w-3 h-3" /> {statusCfg.label}
+                      </span>
+                    )}
+                  </dd>
                 </div>
-                <div className="bg-white/8 rounded-xl p-4">
-                  <div className="text-xs text-white/40 mb-1">Next Renewal</div>
-                  <div className="text-sm font-semibold text-white">
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                  <dt className="text-xs uppercase tracking-wider text-slate-400 mb-1">Monthly amount</dt>
+                  <dd className="text-sm font-semibold text-slate-900">
+                    {(subscription as any).ssra_courses?.price_eur != null
+                      ? <>€{Number((subscription as any).ssra_courses.price_eur).toFixed(2)} <span className="text-xs font-normal text-slate-500">/ month</span></>
+                      : <span className="text-slate-500">Pay what you can</span>}
+                  </dd>
+                </div>
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                  <dt className="text-xs uppercase tracking-wider text-slate-400 mb-1">Next billing date</dt>
+                  <dd className="text-sm font-semibold text-slate-900">
                     {subscription.current_period_end
-                      ? new Date(subscription.current_period_end).toLocaleDateString("en-DE", { day: "numeric", month: "short", year: "numeric" })
+                      ? new Date(subscription.current_period_end).toLocaleDateString("en-DE", { day: "numeric", month: "long", year: "numeric" })
                       : "—"}
-                  </div>
+                  </dd>
                 </div>
-              </div>
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                  <dt className="text-xs uppercase tracking-wider text-slate-400 mb-1">Payment method</dt>
+                  <dd className="text-sm font-semibold text-slate-900">Card on file</dd>
+                </div>
+              </dl>
 
               {subscription.cancel_at_period_end && (
-                <div className="bg-red-500/15 border border-red-500/20 rounded-xl p-3 mb-4 text-xs text-red-300">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-xs text-red-700">
                   Your subscription will cancel at the end of this period and won't renew.
                 </div>
               )}
@@ -118,17 +127,19 @@ export default function MySubscription() {
               <button
                 onClick={openBillingPortal}
                 disabled={portalLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-colors disabled:opacity-60">
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(220,91%,54%)] text-white font-semibold text-sm hover:bg-[hsl(220,91%,46%)] transition-colors disabled:opacity-60">
                 {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
-                Manage Billing
+                Manage Subscription
               </button>
-              <p className="text-xs text-white/30 text-center mt-2">Update card, cancel subscription, or download invoices</p>
+              <p className="text-xs text-slate-500 text-center mt-2">
+                Update your card, change your monthly amount, download invoices, or cancel anytime.
+              </p>
 
               {isTestCourse && (
                 <button
                   onClick={devCancelTestSub}
                   disabled={devCancelLoading}
-                  className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-500/15 text-red-200 border border-red-500/30 font-semibold text-xs hover:bg-red-500/25 transition-colors disabled:opacity-60">
+                  className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-50 text-red-700 border border-red-200 font-semibold text-xs hover:bg-red-100 transition-colors disabled:opacity-60">
                   {devCancelLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                   TEST ONLY · Cancel immediately & free seat
                 </button>
@@ -139,22 +150,20 @@ export default function MySubscription() {
             <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
               <h3 className="font-semibold text-slate-800 text-sm">Need help?</h3>
               <div className="text-xs text-slate-500 space-y-1.5">
-                <p>• To <strong>cancel</strong> your subscription, click "Manage Billing" above.</p>
+                <p>• To <strong>cancel</strong> your subscription, click "Manage Subscription" above.</p>
                 <p>• You keep access until the end of the current billing period.</p>
-                <p>• To <strong>update your payment method</strong>, use the billing portal above.</p>
+                <p>• To <strong>update your payment method</strong>, use the same button above.</p>
                 <p>• For any other issues, <Link to="/contact" className="text-[hsl(220,91%,54%)] hover:underline">contact us</Link>.</p>
               </div>
             </div>
           </>
+
         ) : subscriptionCourseAccess ? (
           <div className="bg-white border border-emerald-200 rounded-2xl p-7 text-center">
             <BookOpen className="w-10 h-10 text-emerald-600 mx-auto mb-4" />
             <div className="font-display text-xl font-bold text-slate-900 mb-2">Course access is active</div>
-            <div className="text-slate-500 text-sm mb-1">
+            <div className="text-slate-500 text-sm mb-6">
               Your payment is confirmed and Medical German is available in My Courses.
-            </div>
-            <div className="text-slate-400 text-xs mb-6">
-              Order: {(subscriptionCourseAccess as any).order_number ?? "confirmed"}
             </div>
             <Link to="/dashboard/courses">
               <button className="btn-primary w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors">

@@ -80,25 +80,25 @@ export default function OrderStatus() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-slate-900">Order &amp; Payment Status</h1>
+          <h1 className="font-display text-2xl font-bold text-slate-900">Payment Status</h1>
           <p className="text-slate-500 text-sm mt-1">
-            Track every course registration and payment attempt on your account.
+            A simple view of your payments and registrations.
           </p>
         </div>
 
         {isLoading ? (
           <div className="space-y-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-32 bg-white rounded-2xl border border-slate-200 animate-pulse" />
+              <div key={i} className="h-24 bg-white rounded-2xl border border-slate-200 animate-pulse" />
             ))}
           </div>
         ) : rows.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center">
             <Receipt className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <div className="font-semibold text-slate-900">No orders yet</div>
-            <p className="text-sm text-slate-500 mt-1 mb-4">You haven't registered for any course yet.</p>
+            <div className="font-semibold text-slate-900">No payments yet</div>
+            <p className="text-sm text-slate-500 mt-1 mb-4">You haven't enrolled in any course yet.</p>
             <Link
               to="/courses"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[hsl(220,91%,54%)] text-white text-sm font-semibold hover:bg-[hsl(220,91%,48%)]"
@@ -113,48 +113,35 @@ export default function OrderStatus() {
               const title = r.course_title_snapshot || r.ssra_courses?.title || r.course_id || "Course";
               return (
                 <div key={r.id} className="bg-white rounded-2xl border border-slate-200 p-5">
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-                        <Receipt className="w-3.5 h-3.5" />
-                        <span className="font-mono">{r.order_number ?? r.id.slice(0, 8)}</span>
-                      </div>
                       <div className="font-display text-lg font-bold text-slate-900 truncate">{title}</div>
+                      <div className="text-xs text-slate-500 mt-1">{fmtDate(r.paid_at ?? r.enrolled_at ?? r.created_at)}</div>
                     </div>
                     <StatusBadge status={r.status} paid={paid} />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                     <div className="rounded-xl bg-slate-50 p-3">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
-                        <BookOpen className="w-3.5 h-3.5" /> Registration
-                      </div>
+                      <div className="text-xs text-slate-500 mb-1">Amount</div>
                       <div className="font-semibold text-slate-900">
-                        {r.status === "active"
-                          ? "Confirmed"
-                          : r.status === "cancelled"
-                          ? "Cancelled"
-                          : r.status === "pending"
-                          ? "Awaiting payment"
-                          : r.status}
+                        {r.amount_eur != null ? `€${Number(r.amount_eur).toFixed(2)}` : "—"}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">{fmtDate(r.enrolled_at ?? r.created_at)}</div>
                     </div>
-
                     <div className="rounded-xl bg-slate-50 p-3">
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
                         <CreditCard className="w-3.5 h-3.5" /> Payment
                       </div>
                       <div className="font-semibold text-slate-900">
-                        {paid ? "Received" : r.status === "cancelled" ? "Not charged" : "Not received"}
+                        {paid ? "Received" : r.status === "cancelled" ? "Not charged" : "Pending"}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">{paid ? fmtDate(r.paid_at) : "—"}</div>
                     </div>
-
                     <div className="rounded-xl bg-slate-50 p-3">
-                      <div className="text-xs text-slate-500 mb-1">Amount</div>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
+                        <BookOpen className="w-3.5 h-3.5" /> Access
+                      </div>
                       <div className="font-semibold text-slate-900">
-                        {r.amount_eur != null ? `€${Number(r.amount_eur).toFixed(2)}` : "—"}
+                        {r.status === "active" ? "Active" : r.status === "pending" ? "Awaiting payment" : r.status === "cancelled" ? "Cancelled" : r.status}
                       </div>
                     </div>
                   </div>
@@ -164,9 +151,17 @@ export default function OrderStatus() {
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <div>
                         Your payment hasn't been confirmed yet. If you already paid, it may take a few minutes to
-                        reflect. Otherwise you can retry from the course page.
+                        reflect.
                       </div>
                     </div>
+                  )}
+
+                  {/* Internal reference, hidden by default for support */}
+                  {r.order_number && (
+                    <details className="mt-3 text-[11px] text-slate-400">
+                      <summary className="cursor-pointer hover:text-slate-600 select-none">Reference (for support)</summary>
+                      <div className="mt-1 font-mono">{r.order_number}</div>
+                    </details>
                   )}
                 </div>
               );

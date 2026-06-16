@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Video, Clock, ExternalLink, Calendar, Loader2, AlertCircle, Download } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Video, Clock, ExternalLink, Calendar, Loader2, AlertCircle, Download, ArrowRight } from "lucide-react";
 import DashboardLayout from "@/components/ssra/DashboardLayout";
-import { useMyUpcomingSessions, usePastSessions } from "@/hooks/useSsraData";
+import { useMyUpcomingSessions, usePastSessions, useMyEnrollments, useMySubscription } from "@/hooks/useSsraData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { resolveCourseMeta, formatCourseDate } from "@/lib/courseDefaults";
 
 function formatIcsDate(dateStr: string): string {
   return new Date(dateStr).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
@@ -172,6 +174,14 @@ function SessionCard({ s, isPast = false }: { s: any; isPast?: boolean }) {
 export default function MySessions() {
   const { data: upcoming = [], isLoading: uLoading } = useMyUpcomingSessions();
   const { data: past = [],     isLoading: pLoading } = usePastSessions();
+  const { data: enrollments = [] } = useMyEnrollments();
+  const { data: subscription }     = useMySubscription();
+
+  const primaryCourseId: string =
+    (subscription as any)?.course_id ??
+    (enrollments as any[])[0]?.course_id ??
+    "medical-german";
+  const meta = resolveCourseMeta(primaryCourseId, null);
 
   return (
     <DashboardLayout>
@@ -205,10 +215,24 @@ export default function MySessions() {
           {uLoading ? (
             <div className="text-sm text-slate-400 py-6 text-center">Loading…</div>
           ) : (upcoming as any[]).length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
-              <Video className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <div className="text-slate-500 text-sm">No upcoming sessions yet.</div>
-              <div className="text-xs text-slate-400 mt-1">Check back soon — sessions are added regularly.</div>
+            <div className="rounded-2xl p-6 text-white bg-gradient-to-br from-[hsl(222,47%,9%)] via-[hsl(220,60%,18%)] to-[hsl(220,91%,28%)] relative overflow-hidden">
+              <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-blue-500/20 blur-3xl pointer-events-none" />
+              <div className="relative flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                  <Video className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-[10px] uppercase tracking-widest text-white/50 mb-1">Next Session</div>
+                  <div className="font-display text-lg font-bold">{meta.title}</div>
+                  <div className="text-sm text-white/70 mt-1">
+                    {formatCourseDate(new Date(meta.startDateISO + "T00:00:00"))} · {meta.startTime} {meta.timezoneLabel}
+                  </div>
+                  <div className="text-xs text-white/50 mt-1">{meta.cadence} · with {meta.instructor}</div>
+                  <Link to="/dashboard/courses" className="inline-flex items-center gap-1 mt-4 text-xs font-semibold bg-white text-slate-900 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors">
+                    View course <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-3">
