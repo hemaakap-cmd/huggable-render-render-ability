@@ -2136,6 +2136,18 @@ export type Database = {
         Args: { _window_minutes?: number }
         Returns: Json
       }
+      get_my_zoom_broadcasts: {
+        Args: never
+        Returns: {
+          description: string
+          duration_minutes: number
+          id: string
+          scheduled_at: string
+          title: string
+          zoom_link: string
+          zoom_password: string
+        }[]
+      }
       get_payment_monitor_stats: {
         Args: { _env?: string; _hours?: number }
         Returns: Json
