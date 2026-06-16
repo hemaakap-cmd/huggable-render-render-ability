@@ -15,16 +15,28 @@ import { supabase } from "@/integrations/supabase/client";
 import heroBiomechanics from "@/assets/hero-biomechanics.jpg";
 import heroBiomechanicsMobile from "@/assets/hero-biomechanics-mobile.jpg";
 
-function useReveal() {
+function useReveal(deps: unknown[] = []) {
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal");
+    const els = document.querySelectorAll(".reveal:not(.is-visible)");
+    if (els.length === 0) return;
     const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("is-visible"); }),
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("is-visible");
+          io.unobserve(e.target);
+        }
+      }),
       { threshold: 0.1 }
     );
     els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+    // Fallback: ensure content shows even if IO never fires
+    const t = window.setTimeout(() => {
+      document.querySelectorAll(".reveal:not(.is-visible)")
+        .forEach((el) => el.classList.add("is-visible"));
+    }, 1500);
+    return () => { io.disconnect(); window.clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 }
 
 type HomeStats = {
@@ -63,13 +75,14 @@ const FEATURES = [
 
 
 export default function Index() {
-  useReveal();
-
   const { data: courses = [] } = usePublicCourses();
   const { format } = useCurrency();
   const featuredCourses = courses.slice(0, 3);
   const subscriptionCourse = courses.find((course) => course.type === "subscription");
   const { data: stats } = useHomeStats();
+
+  useReveal([courses.length, !!subscriptionCourse, !!stats]);
+
 
   const STATS = [
     {
