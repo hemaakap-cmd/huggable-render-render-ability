@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Shield, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Heart } from "lucide-react";
+import { CreditCard, Shield, Loader2, CheckCircle2, Lock, AlertCircle, Calendar, Clock, User, Heart, RefreshCcw } from "lucide-react";
 import Header from "@/components/ssra/Header";
 import BackButton from "@/components/ssra/BackButton";
 import Footer from "@/components/ssra/Footer";
@@ -149,11 +149,11 @@ export default function Checkout() {
               <div className="border-t border-slate-100 pt-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500">
-                    {isDonation ? "Donation" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
+                    {isDonation ? "Monthly support" : course.type === "subscription" ? "Monthly subscription" : "One-time payment"}
                   </span>
                   <span className="font-bold font-display text-xl text-slate-900">
                     {isDonation ? (
-                      <>{donationValid ? format(donationAmount) : "—"}</>
+                      <>{donationValid ? format(donationAmount) : "—"}{donationValid && <span className="text-sm font-normal text-slate-400">/mo</span>}</>
                     ) : (
                       <>{format(course.price)}{course.type === "subscription" && <span className="text-sm font-normal text-slate-400">/mo</span>}</>
                     )}
@@ -161,7 +161,7 @@ export default function Checkout() {
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
                   {isDonation
-                    ? `Choose any amount you'd like to donate, starting from €${DONATION_MIN}.`
+                    ? `Pay what you can — minimum €${DONATION_MIN}/month. Renews automatically. Cancel anytime.`
                     : "Tax is calculated automatically at checkout based on your country."}
                 </p>
               </div>
@@ -206,9 +206,12 @@ export default function Checkout() {
                   <div className="flex items-start gap-2 mb-3">
                     <Heart className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">ساهم بأي مبلغ</div>
+                      <div className="text-sm font-semibold text-slate-900">Choose your monthly support</div>
                       <div className="text-xs text-slate-600 mt-0.5">
-                        تبرعك بيساعدنا نكمل تقديم الكورس. اختر أي مبلغ يناسبك، الحد الأدنى €{DONATION_MIN}.
+                        Pay what you can. Minimum monthly contribution €{DONATION_MIN}.
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-1">
+                        ساهم بأي مبلغ يناسبك — هنساعد بعض. الحد الأدنى €{DONATION_MIN} شهريًا.
                       </div>
                     </div>
                   </div>
@@ -229,12 +232,12 @@ export default function Checkout() {
                     ))}
                   </div>
                   <label className="block">
-                    <div className="text-xs font-medium text-slate-600 mb-1">أو اكتب مبلغ مخصص (€)</div>
+                    <div className="text-xs font-medium text-slate-600 mb-1">Or enter a custom monthly amount (€)</div>
                     <input
                       type="number"
                       min={DONATION_MIN}
                       step={1}
-                      placeholder={`مثلاً 5 — الحد الأدنى €${DONATION_MIN}`}
+                      placeholder={`Minimum €${DONATION_MIN}`}
                       value={donationCustom}
                       onChange={(e) => { setDonationCustom(e.target.value); setDonationPick("custom"); }}
                       onFocus={() => setDonationPick("custom")}
@@ -244,8 +247,23 @@ export default function Checkout() {
                     />
                   </label>
                   {!donationValid && donationPick === "custom" && donationCustom !== "" && (
-                  <p className="text-xs text-red-600 mt-2">الحد الأدنى للتبرع €{DONATION_MIN}</p>
+                    <p className="text-xs text-red-600 mt-2">Minimum monthly contribution is €{DONATION_MIN}</p>
                   )}
+                </div>
+              )}
+
+              {/* Recurring billing notice — always shown for subscription / donation courses */}
+              {(isDonation || course.type === "subscription") && !activeEnrollment && (
+                <div className="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-sm text-blue-900">
+                  <div className="flex items-start gap-2">
+                    <RefreshCcw className="w-4 h-4 shrink-0 mt-0.5 text-[hsl(220,91%,54%)]" />
+                    <div className="space-y-1">
+                      <div className="font-semibold">Your selected amount will renew automatically every month.</div>
+                      <div className="text-xs text-blue-800/80">
+                        Cancel anytime from your dashboard. You'll receive an email reminder before each renewal.
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -299,7 +317,7 @@ export default function Checkout() {
                 >
                   {isDonation ? <Heart className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
                   {isDonation
-                    ? <>تبرع بـ {donationValid ? format(donationAmount) : "—"}</>
+                    ? <>Subscribe for {donationValid ? format(donationAmount) : "—"}/month</>
                     : <>Pay {format(course.price)}{course.type === "subscription" ? "/mo" : ""}</>}
                 </button>
               )}
