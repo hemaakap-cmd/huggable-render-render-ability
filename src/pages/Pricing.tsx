@@ -76,10 +76,12 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
             </div>
           ) : course.id === "medical-german" ? (
             <>
-              <span className={`text-4xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
-                From {format(1)}
-              </span>
-              <span className={`text-sm ml-2 ${highlight ? "text-white/50" : "text-slate-400"}`}>· you choose</span>
+              <div className={`text-3xl font-bold font-display ${highlight ? "text-white" : "text-slate-900"}`}>
+                Choose your monthly support
+              </div>
+              <div className={`text-sm mt-1 ${highlight ? "text-white/60" : "text-slate-500"}`}>
+                Pay what you can · Minimum {format(10)}/month
+              </div>
             </>
           ) : (
             <>
@@ -95,7 +97,7 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
             {course.price_hidden
               ? "Price will be announced soon"
               : course.id === "medical-german"
-              ? "ساهم بأي مبلغ يناسبك — هنساعد بعض"
+              ? "Renews automatically every month · Cancel anytime"
               : course.type === "subscription" ? "Cancel anytime" : "One-time payment"}
             {!course.price_hidden && course.requires_verification && " · Verification required"}
           </div>
@@ -130,7 +132,7 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
               highlight ? "btn-gold" : "btn-primary"
             }`}
           >
-            {course.id === "medical-german" ? "Contribute & Enrol" : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
+            {course.id === "medical-german" ? "Support & Enrol" : course.requires_verification ? "Apply & Subscribe" : "Enrol Now"}
             <ArrowRight className="w-4 h-4" />
           </button>
         )}
@@ -158,10 +160,10 @@ export default function Pricing() {
     <div className="min-h-screen bg-slate-50">
       <Helmet>
         <title>Pricing — SSRA Academy</title>
-        <meta name="description" content="Transparent pricing for all SSRA Academy courses. Medical German subscription from €19/month. One-time clinical and career courses from €29–€79." />
+        <meta name="description" content="Transparent pricing for SSRA Academy. Medical German is a pay-what-you-can monthly support model (minimum €10/month). One-time clinical and career courses available too." />
         <link rel="canonical" href="https://ssracourses.com/pricing" />
         <meta property="og:title" content="Pricing — SSRA Academy" />
-        <meta property="og:description" content="Transparent pricing for SSRA Academy. Medical German from €19/month and clinical/career courses from €29–€79." />
+        <meta property="og:description" content="Pay-what-you-can monthly support for Medical German, starting from €10/month. Cancel anytime." />
         <meta property="og:url" content="https://ssracourses.com/pricing" />
         <meta property="og:image" content="https://ssracourses.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
