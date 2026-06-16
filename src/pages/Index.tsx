@@ -56,7 +56,7 @@ const FEATURES = [
   { icon: Shield,   title: "Verified Curriculum",   desc: "Every course reviewed by practising German sports scientists and physiotherapists." },
   { icon: Languages,title: "Arabic-First Support",  desc: "All modules explained in Arabic — no language barrier." },
   { icon: Zap,      title: "Job-Ready in Weeks",    desc: "Practical, scenario-based learning — not theory for theory's sake." },
-  { icon: CreditCard,title:"Secure Global Payments",desc: "Pay securely from anywhere in the world via Paddle — all major cards accepted." },
+  { icon: CreditCard,title:"Secure Global Payments",desc: "Pay securely from anywhere in the world via Stripe — all major cards accepted." },
 ];
 
 
@@ -193,7 +193,7 @@ export default function Index() {
             <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-8 text-[11px] md:text-xs text-white/75">
               <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Non-profit mission</span>
               <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Arabic support</span>
-              <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Paddle secure</span>
+              <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Stripe secure</span>
               <span className="flex items-center gap-1.5 justify-center"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Cancel anytime</span>
             </div>
           </div>
@@ -396,7 +396,7 @@ export default function Index() {
             Start Learning Today
           </h2>
           <p className="text-white/55 text-lg max-w-xl mx-auto mb-10">
-            Applications are free. Pay only for the courses you choose. Cancel subscriptions anytime at paddle.net. We accept cards from all over the world via Paddle, our Merchant of Record.
+            Applications are free. Pay only for the courses you choose. Cancel subscriptions anytime at ssracourses.com/dashboard. We accept cards from all over the world via Stripe.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/apply">
@@ -412,10 +412,10 @@ export default function Index() {
             </Link>
           </div>
 
-          {/* Paddle badge */}
+          {/* Stripe badge */}
           <div className="mt-10 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/12 text-white/50 text-xs">
             <CreditCard className="w-3.5 h-3.5" />
-            Payments processed by Paddle.com (Merchant of Record) · Visa · Mastercard · Apple Pay · Google Pay
+            Payments processed by Stripe · Visa · Mastercard · Apple Pay · Google Pay
           </div>
         </div>
       </section>

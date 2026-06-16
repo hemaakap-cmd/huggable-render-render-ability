@@ -47,7 +47,7 @@ export default function Legal() {
             <ul className="list-disc pl-5 space-y-1">
               <li>Account information: name, email address, country, academic degree</li>
               <li>Application data: German language level, course interest, motivation statement</li>
-              <li>Payment data: processed exclusively by Paddle.com (our Merchant of Record) — we do not store card details</li>
+              <li>Payment data: processed exclusively by Stripe — we do not store card details</li>
               <li>Usage data: session logs, page visits (anonymised)</li>
             </ul>
 
@@ -65,7 +65,7 @@ export default function Legal() {
             <h3 className="font-semibold text-foreground text-base mt-6">5. Data Sharing</h3>
             <p>We share data only with:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong className="text-foreground">Paddle.com</strong> — our Merchant of Record, handles checkout, payment processing, subscription management, tax compliance, invoicing, and refund requests (UK/USA, EU Standard Contractual Clauses and EU-US Data Privacy Framework)</li>
+              <li><strong className="text-foreground">Stripe</strong> — our payment processor, handles checkout, payment processing, subscription management, tax compliance, invoicing, and refund requests (UK/USA, EU Standard Contractual Clauses and EU-US Data Privacy Framework)</li>
               <li><strong className="text-foreground">Supabase</strong> — database hosting (EU region)</li>
               <li><strong className="text-foreground">Resend</strong> — transactional email delivery</li>
             </ul>
@@ -100,17 +100,17 @@ export default function Legal() {
             <p>Upon payment you receive a personal, non-transferable licence to access the purchased course content. Sharing login credentials or course materials with third parties is prohibited.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">4. Subscriptions &amp; Payments</h3>
-            <p>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle will appear on your bank or card statement, handles all customer service inquiries related to billing, and processes refunds. Payment, billing, tax, cancellation and refund mechanics are governed by Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">Buyer Terms</a>.</p>
-            <p>Subscriptions renew automatically until cancelled. You can cancel at any time from your account dashboard or directly at <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> using the email address you used at checkout.</p>
+            <p>Our order process is conducted by our online reseller Stripe. Stripe is the payment processor. Stripe will appear on your bank or card statement, handles all customer service inquiries related to billing, and processes refunds. Payment, billing, tax, cancellation and refund mechanics are governed by Stripe's <a href="https://stripe.com/legal/consumer" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">Buyer Terms</a>.</p>
+            <p>Subscriptions renew automatically until cancelled. You can cancel at any time from your account dashboard or directly at <a href="https://ssracourses.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">ssracourses.com/dashboard</a> using the email address you used at checkout.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">4a. Refund Policy</h3>
             <p>We offer a <strong className="text-foreground">14-day money-back guarantee</strong> on all course purchases and the first billing period of any subscription. If you are not satisfied, you may request a full refund within 14 days of your order date.</p>
-            <p>Refunds are handled by Paddle.com, our Merchant of Record. To request a refund:</p>
+            <p>Refunds are handled by Stripe. To request a refund:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> and enter the email address used at checkout to manage your order, or</li>
-              <li>Email <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a> with subject "Refund Request" and your order number — we will forward your request to Paddle.</li>
+              <li>Visit <a href="https://ssracourses.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">ssracourses.com/dashboard</a> and enter the email address used at checkout to manage your order, or</li>
+              <li>Email <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline">info@ssracourses.com</a> with subject "Refund Request" and your order number — we will forward your request to Stripe.</li>
             </ul>
-            <p>Approved refunds are returned to the original payment method within 5–14 business days. Subscriptions cancelled after the 14-day window remain active until the end of the current paid period; any refund request is handled by Paddle under Paddle's Refund Policy and Buyer Terms.</p>
+            <p>Approved refunds are returned to the original payment method within 5–14 business days. Subscriptions cancelled after the 14-day window remain active until the end of the current paid period; any refund request is handled by Stripe under Stripe's Refund Policy and Buyer Terms.</p>
 
             <h3 className="font-semibold text-foreground text-base mt-6">5. Intellectual Property</h3>
             <p>All course content — videos, documents, exercises — is owned by SSRA academy. You may not reproduce, distribute, or create derivative works without written permission.</p>
