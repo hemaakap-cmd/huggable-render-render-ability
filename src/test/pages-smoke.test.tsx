@@ -50,6 +50,7 @@ vi.mock("@/integrations/supabase/client", () => ({
     from: vi.fn((table?: string) =>
       table === "ssra_courses" ? makeQuery(MOCK_COURSES) : makeQuery()),
     functions: { invoke: vi.fn().mockResolvedValue({ data: null, error: null }) },
+    rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
     auth: {
       getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
       getUser:    vi.fn().mockResolvedValue({ data: { user: null } }),
@@ -132,7 +133,9 @@ describe("Key page content", () => {
     // so we must WAIT for the data to resolve and the card to render. The mocked
     // course is not price_hidden, so the €19 figure appears; accept "Coming
     // Soon" too so the test survives a future price-visibility toggle.
-    const matches = await screen.findAllByText(/€19|Coming Soon/i, undefined, { timeout: 5000 });
+    // Medical German is a pay-what-you-can subscription: card shows
+    // "Minimum €10/month". Also accept €19 (legacy) and "Coming Soon".
+    const matches = await screen.findAllByText(/€10|€19|Coming Soon/i, undefined, { timeout: 5000 });
     expect(matches.length).toBeGreaterThan(0);
   });
 

@@ -80,7 +80,11 @@ describe("Signup — Arabic name rejection", () => {
     await submitSignupWithName("محمد علي");
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith(
-        expect.objectContaining({ title: "English characters only", variant: "destructive" }),
+        expect.objectContaining({
+          title: "Please correct your details",
+          description: expect.stringMatching(/English \(Latin\) letters only/i),
+          variant: "destructive",
+        }),
       ),
     );
     expect(signInWithOtp).not.toHaveBeenCalled();
@@ -90,7 +94,11 @@ describe("Signup — Arabic name rejection", () => {
     await submitSignupWithName("Ahmed محمد");
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith(
-        expect.objectContaining({ title: "English characters only", variant: "destructive" }),
+        expect.objectContaining({
+          title: "Please correct your details",
+          description: expect.stringMatching(/English \(Latin\) letters only/i),
+          variant: "destructive",
+        }),
       ),
     );
     expect(signInWithOtp).not.toHaveBeenCalled();
@@ -100,7 +108,9 @@ describe("Signup — Arabic name rejection", () => {
     await submitSignupWithName("Ahmed Hassan");
     await waitFor(() => expect(signInWithOtp).toHaveBeenCalledTimes(1));
     expect(toast).not.toHaveBeenCalledWith(
-      expect.objectContaining({ title: "English characters only" }),
+      expect.objectContaining({
+        description: expect.stringMatching(/English \(Latin\) letters only/i),
+      }),
     );
   });
 });
