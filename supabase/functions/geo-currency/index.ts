@@ -38,7 +38,7 @@ async function getRates(): Promise<Record<string, number>> {
   } catch (e) {
     // Fallback to last cache or a sane default if first call fails
     if (fxCache) return fxCache.rates;
-    return { EUR: 1, EGP: 52, SAR: 4, TND: 3.4 };
+    return { EUR: 1, USD: 1.08, GBP: 0.85, EGP: 52, SAR: 4, AED: 3.97, TND: 3.4 };
   }
 }
 
