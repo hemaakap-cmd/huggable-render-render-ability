@@ -75,13 +75,14 @@ const FEATURES = [
 
 
 export default function Index() {
-  useReveal();
-
   const { data: courses = [] } = usePublicCourses();
   const { format } = useCurrency();
   const featuredCourses = courses.slice(0, 3);
   const subscriptionCourse = courses.find((course) => course.type === "subscription");
   const { data: stats } = useHomeStats();
+
+  useReveal([courses.length, !!subscriptionCourse, !!stats]);
+
 
   const STATS = [
     {
