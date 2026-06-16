@@ -221,15 +221,20 @@ export default function Apply() {
 
       {/* Hero */}
       <section className="bg-[hsl(222,47%,9%)] pt-32 pb-20">
-        <div className="container max-w-2xl text-center reveal">
-          <BackButton variant="dark" className="mb-4" />
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase text-[hsl(43,96%,50%)] mb-4">Apply to SSRA</span>
-          <h1 className="font-display text-5xl font-bold text-white mb-4">
-            Start Your Journey
-          </h1>
-          <p className="text-white opacity-60 leading-relaxed">
-            Free to apply. Open to all sports science graduates worldwide. Fill in the form below and we'll get back to you within 3–5 days.
-          </p>
+        <div className="container max-w-2xl reveal">
+          {/* Back button on its own row so the "APPLY TO SSRA" pill never collides with it on mobile */}
+          <div className="flex justify-start mb-4">
+            <BackButton variant="dark" />
+          </div>
+          <div className="text-center">
+            <span className="inline-block text-xs font-semibold tracking-widest uppercase text-[hsl(43,96%,50%)] mb-4">Apply to SSRA</span>
+            <h1 className="font-display text-5xl font-bold text-white mb-4">
+              Start Your Journey
+            </h1>
+            <p className="text-white opacity-60 leading-relaxed">
+              Free to apply. Open to all sports science graduates worldwide. Fill in the form below and we'll get back to you within 3–5 days.
+            </p>
+          </div>
         </div>
       </section>
 

@@ -134,15 +134,19 @@ export default function CourseDetail() {
 
           <div className="flex flex-wrap items-center gap-2 mb-5">
             {hidden ? (
-              <span className="badge-gold flex items-center gap-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-[hsl(43,96%,55%)] text-[hsl(222,47%,11%)] border border-[hsl(43,96%,65%)] shadow-sm">
                 <CreditCard className="w-3 h-3" /> Coming soon · قريبًا
               </span>
+            ) : course.id === "medical-german" ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-[hsl(43,96%,55%)] text-[hsl(222,47%,11%)] border border-[hsl(43,96%,65%)] shadow-sm">
+                <Crown className="w-3 h-3" /> Pay what you can · From {format(10)}/mo
+              </span>
             ) : course.type === "subscription" ? (
-              <span className="badge-gold flex items-center gap-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-[hsl(43,96%,55%)] text-[hsl(222,47%,11%)] border border-[hsl(43,96%,65%)] shadow-sm">
                 <Crown className="w-3 h-3" /> Subscription · {format(course.price)}/mo
               </span>
             ) : (
-              <span className="badge-gold flex items-center gap-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-[hsl(43,96%,55%)] text-[hsl(222,47%,11%)] border border-[hsl(43,96%,65%)] shadow-sm">
                 <CreditCard className="w-3 h-3" /> {format(course.price)} one-time
               </span>
             )}
@@ -258,6 +262,15 @@ export default function CourseDetail() {
                   <div className="font-display text-2xl font-bold text-slate-900">
                     Coming soon
                     <div className="text-xs font-normal text-slate-400 mt-1">قريبًا</div>
+                  </div>
+                ) : course.id === "medical-german" ? (
+                  <div>
+                    <div className="font-display text-2xl font-bold text-slate-900 leading-tight">
+                      Choose your monthly support
+                    </div>
+                    <div className="text-sm text-slate-500 mt-1">
+                      Pay what you can · Minimum {format(10)}/month
+                    </div>
                   </div>
                 ) : course.type === "subscription" ? (
                   <div className="font-display text-3xl font-bold text-slate-900">
