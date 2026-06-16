@@ -67,6 +67,7 @@ const ALL_COURSES: Course[] = [
     requires_verification: false,
     modules: ["Body & movement vocabulary", "Clinic conversations", "Written report templates", "Patient explanation scripts", "B1 exam preparation"],
     color: "from-emerald-600 to-teal-800",
+    price_hidden: true,
   },
 
   /* ── CLINICAL (one-time) ── */
