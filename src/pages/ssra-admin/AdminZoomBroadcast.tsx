@@ -71,7 +71,7 @@ export default function AdminZoomBroadcast() {
   const [filterBatchId, setFilterBatchId]   = useState("");
   const [filterPriorId, setFilterPriorId]   = useState("");
   const [filterEmails, setFilterEmails]     = useState("");
-  const [excludePrior, setExcludePrior]     = useState(true);
+  const [excludePrior, setExcludePrior]     = useState(false);
 
   const audienceFilters = useMemo(() => {
     const f: Record<string, unknown> = {};
