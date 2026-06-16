@@ -29,13 +29,10 @@ function PriceCard({ course, highlight = false }: { course: Course; highlight?: 
   const { toast } = useToast();
   const navigate = useNavigate();
   const { format } = useCurrency();
+  const gate = useEnrollGate();
 
   const handleCheckout = () => {
-    if (course.requires_verification) {
-      navigate("/apply?course=" + course.id + "&intent=subscribe");
-      return;
-    }
-    navigate("/checkout?courseId=" + course.id);
+    void gate(course);
   };
 
   return (
