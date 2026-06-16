@@ -1841,30 +1841,45 @@ export type Database = {
           broadcast_id: string
           created_at: string
           email: string
+          email_opened: boolean
           error: string | null
           id: string
+          joined_at: string | null
+          joined_session: boolean
+          opened_at: string | null
           sent_at: string | null
           status: string
+          unsubscribe_token: string
           user_id: string | null
         }
         Insert: {
           broadcast_id: string
           created_at?: string
           email: string
+          email_opened?: boolean
           error?: string | null
           id?: string
+          joined_at?: string | null
+          joined_session?: boolean
+          opened_at?: string | null
           sent_at?: string | null
           status?: string
+          unsubscribe_token?: string
           user_id?: string | null
         }
         Update: {
           broadcast_id?: string
           created_at?: string
           email?: string
+          email_opened?: boolean
           error?: string | null
           id?: string
+          joined_at?: string | null
+          joined_session?: boolean
+          opened_at?: string | null
           sent_at?: string | null
           status?: string
+          unsubscribe_token?: string
           user_id?: string | null
         }
         Relationships: [
@@ -1880,11 +1895,15 @@ export type Database = {
       ssra_zoom_broadcasts: {
         Row: {
           audience: string
+          audience_filters: Json
+          audience_type: string
           created_at: string
           description: string | null
           duration_minutes: number
           failed_count: number
           id: string
+          joined_count: number
+          opened_count: number
           scheduled_at: string
           sent_by: string | null
           sent_count: number
@@ -1897,11 +1916,15 @@ export type Database = {
         }
         Insert: {
           audience?: string
+          audience_filters?: Json
+          audience_type?: string
           created_at?: string
           description?: string | null
           duration_minutes?: number
           failed_count?: number
           id?: string
+          joined_count?: number
+          opened_count?: number
           scheduled_at: string
           sent_by?: string | null
           sent_count?: number
@@ -1914,11 +1937,15 @@ export type Database = {
         }
         Update: {
           audience?: string
+          audience_filters?: Json
+          audience_type?: string
           created_at?: string
           description?: string | null
           duration_minutes?: number
           failed_count?: number
           id?: string
+          joined_count?: number
+          opened_count?: number
           scheduled_at?: string
           sent_by?: string | null
           sent_count?: number
@@ -2151,6 +2178,19 @@ export type Database = {
       }
       get_ssra_email_status: { Args: { _email: string }; Returns: string }
       get_ssra_role: { Args: { _uid: string }; Returns: string }
+      get_student_broadcast_history: {
+        Args: { _user_id: string }
+        Returns: {
+          broadcast_id: string
+          duration_minutes: number
+          email_opened: boolean
+          joined_session: boolean
+          scheduled_at: string
+          sent_at: string
+          status: string
+          title: string
+        }[]
+      }
       get_top_failed_users: {
         Args: { _env?: string; _hours?: number; _min_fails?: number }
         Returns: {
@@ -2239,6 +2279,18 @@ export type Database = {
           enrollment_id: string
           outcome: string
           reason: string
+        }[]
+      }
+      resolve_broadcast_audience: {
+        Args: {
+          _audience_type: string
+          _exclude_prior?: boolean
+          _filters?: Json
+        }
+        Returns: {
+          email: string
+          full_name: string
+          user_id: string
         }[]
       }
       session_has_credentials: {
