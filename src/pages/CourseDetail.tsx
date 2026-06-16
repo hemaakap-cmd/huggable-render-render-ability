@@ -91,7 +91,7 @@ export default function CourseDetail() {
   }
 
   const handleEnrol = () => {
-    navigate(`/checkout?courseId=${course.id}`);
+    void gate(course);
   };
 
   const related = (courses ?? []).filter((c) => c.category === course.category && c.id !== course.id).slice(0, 3);
