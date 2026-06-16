@@ -9,7 +9,9 @@ const EU_COUNTRIES = new Set([
 const COUNTRY_TO_CURRENCY: Record<string, string> = {
   EG: "EGP",
   SA: "SAR",
+  AE: "AED",
   TN: "TND",
+  GB: "GBP",
 };
 
 type FxCache = { at: number; rates: Record<string, number> };
