@@ -35,13 +35,55 @@ export default function Apply() {
   useReveal();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const courseIdParam = searchParams.get("course") ?? "";
   const { data: courses = [] } = usePublicCourses();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [gateStatus, setGateStatus] = useState<"checking" | "ok" | "pending" | "approved">("checking");
   const [form, setForm] = useState({
     fullName: "", email: "", country: "", degree: "",
     graduationYear: "", germanLevel: "", course: "", motivation: "",
   });
+
+  // Pre-select course from query string
+  useEffect(() => {
+    if (courseIdParam && !form.course) {
+      setForm((f) => ({ ...f, course: courseIdParam }));
+    }
+  }, [courseIdParam]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Gate: approved → checkout; pending → status screen; otherwise show form
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { if (!cancelled) setGateStatus("ok"); return; }
+      const { data } = await supabase
+        .from("ssra_verifications")
+        .select("status, course_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      const rows = data ?? [];
+      const forCourse = courseIdParam ? rows.find((r) => r.course_id === courseIdParam) : undefined;
+      const anyApproved = rows.some((r) => r.status === "approved");
+      if (cancelled) return;
+      if (forCourse?.status === "approved" || anyApproved) {
+        const target = courseIdParam ? `/checkout?courseId=${courseIdParam}` : "/dashboard";
+        toast({ title: "You're already approved", description: "Sending you to checkout." });
+        navigate(target, { replace: true });
+        setGateStatus("approved");
+        return;
+      }
+      const pending =
+        forCourse?.status === "pending" ||
+        (!forCourse && rows.some((r) => r.status === "pending"));
+      if (pending) { setGateStatus("pending"); return; }
+      setGateStatus("ok");
+    })();
+    return () => { cancelled = true; };
+  }, [courseIdParam, navigate, toast]);
+
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [k]: e.target.value });
