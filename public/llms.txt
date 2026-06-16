@@ -15,6 +15,6 @@ SSRA Academy (Sports Science & Rehabilitation Academy) helps Arabic-speaking spo
 
 ## Legal
 
-- [Privacy Policy](/privacy-policy): How personal data is collected, processed, and shared (including Paddle as Merchant of Record).
+- [Privacy Policy](/privacy-policy): How personal data is collected, processed, and shared (including Stripe as payment processor).
 - [Terms of Service](/terms): Terms governing use of the site, courses, and subscriptions.
-- [Refund Policy](/refund-policy): 14-day money-back guarantee and refund process via Paddle.
+- [Refund Policy](/refund-policy): 14-day money-back guarantee and refund process via Stripe.
