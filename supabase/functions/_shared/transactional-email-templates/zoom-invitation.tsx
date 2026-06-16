@@ -16,10 +16,11 @@ interface Props {
   durationMinutes?: number | string
   zoomLink?: string
   zoomPassword?: string
+  trackingPixelUrl?: string
 }
 
 const ZoomInvitationEmail = ({
-  studentName, title, description, scheduledAt, durationMinutes, zoomLink, zoomPassword,
+  studentName, title, description, scheduledAt, durationMinutes, zoomLink, zoomPassword, trackingPixelUrl,
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -65,6 +66,9 @@ const ZoomInvitationEmail = ({
           Questions? Email <a href={`mailto:${CONTACT_EMAIL}`} style={link}>{CONTACT_EMAIL}</a>.
         </Text>
         <Text style={footer}>{SITE_NAME} · ssracourses.com</Text>
+        {trackingPixelUrl ? (
+          <Img src={trackingPixelUrl} width="1" height="1" alt="" style={{ display: 'block', border: 0 }} />
+        ) : null}
       </Container>
     </Body>
   </Html>
