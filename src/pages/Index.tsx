@@ -262,11 +262,10 @@ export default function Index() {
                   </ul>
                 </div>
                 <div className="mt-8">
-                  <div className="text-4xl font-bold text-white font-display">
-                    {format(subscriptionCourse.price)}
-                    <span className="text-base font-normal text-white/50">/month</span>
+                  <div className="text-3xl font-bold text-white font-display leading-tight">
+                    Pay what you can
                   </div>
-                  <div className="text-xs text-white/40 mt-1">Open to all · Cancel anytime</div>
+                  <div className="text-sm text-white/50 mt-1">Minimum {format(10)}/month · Cancel anytime</div>
                 </div>
               </div>
 
@@ -338,7 +337,7 @@ export default function Index() {
                         ? "bg-amber-50 text-amber-700 border border-amber-200"
                         : "bg-slate-100 text-slate-600"
                     }`}>
-                      {course.price_hidden ? "Coming Soon" : course.type === "subscription" ? `${format(course.price)}/mo` : format(course.price)}
+                      {course.id === "medical-german" ? "Pay what you can" : course.type === "subscription" ? `${format(course.price)}/mo` : format(course.price)}
                     </span>
                     <span className="text-xs text-slate-400">{course.weeks}</span>
                   </div>

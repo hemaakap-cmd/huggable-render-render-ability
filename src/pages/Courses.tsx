@@ -61,16 +61,14 @@ function CourseRow({
         <div className="md:col-span-3 p-8 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {course.price_hidden ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-                  <Clock className="w-3 h-3" /> Coming Soon
-                </span>
+              {course.id === "medical-german" ? (
+                <span className="badge-gold flex items-center gap-1"><Crown className="w-3 h-3" /> Pay what you can · From {format(10)}/mo</span>
               ) : course.type === "subscription" ? (
                 <span className="badge-gold flex items-center gap-1"><Crown className="w-3 h-3" /> Subscription · {format(course.price)}/mo</span>
               ) : (
                 <span className="badge-blue flex items-center gap-1"><CreditCard className="w-3 h-3" /> {format(course.price)} one-time</span>
               )}
-              {!course.price_hidden && isFull && (
+              {isFull && course.id !== "medical-german" && (
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200">
                   <AlertCircle className="w-3 h-3" /> Sold Out
                 </span>
@@ -93,10 +91,14 @@ function CourseRow({
           </div>
 
           <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-            {course.price_hidden ? (
-              <Link to="/contact" className="btn-outline px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-500">
-                Get Notified <ArrowRight className="w-4 h-4" />
-              </Link>
+            {course.id === "medical-german" ? (
+              <button
+                onClick={() => navigate(`/checkout?courseId=${course.id}`)}
+                className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2"
+              >
+                Enrol Now
+                <ArrowRight className="w-4 h-4" />
+              </button>
             ) : isFull ? (
               <Link
                 to={`/courses/${course.id}`}
