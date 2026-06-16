@@ -1,12 +1,16 @@
 /**
  * admin-send-zoom-invitation
  *
- * Admin-only broadcast: send a Zoom meeting invitation to all registered
- * students (auth users with role='student'). Each recipient is logged in
- * `ssra_zoom_broadcast_recipients`, totals on the parent broadcast row.
+ * Admin-only broadcast: send a Zoom meeting invitation to a targeted audience.
+ * Audience is resolved server-side via resolve_broadcast_audience() RPC.
  *
- * Body: { title, description?, scheduledAt (ISO), durationMinutes,
- *         zoomLink, zoomPassword? }
+ * Body: {
+ *   title, description?, scheduledAt (ISO), durationMinutes, zoomLink, zoomPassword?,
+ *   audienceType?: 'all_students'|'enrolled_after'|'enrolled_before'|'course'|
+ *                  'cohort'|'active_subscribers'|'custom'|'not_previously_invited'|'unattended_previous',
+ *   audienceFilters?: { date?, course_id?, batch_id?, emails?, prior_broadcast_id? },
+ *   excludePriorRecipients?: boolean
+ * }
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
@@ -36,13 +40,12 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json().catch(() => ({}));
     const {
-      title,
-      description,
-      scheduledAt,
-      durationMinutes,
-      zoomLink,
-      zoomPassword,
-    } = body as Record<string, string | number | undefined>;
+      title, description, scheduledAt, durationMinutes,
+      zoomLink, zoomPassword,
+      audienceType = "all_students",
+      audienceFilters = {},
+      excludePriorRecipients = false,
+    } = body as Record<string, unknown>;
 
     if (!title || !scheduledAt || !zoomLink) {
       return json({ error: "title, scheduledAt and zoomLink are required" }, 400);
@@ -57,7 +60,27 @@ Deno.serve(async (req: Request) => {
     if (isNaN(scheduledIso.getTime())) return json({ error: "Invalid scheduledAt" }, 400);
     const duration = Number(durationMinutes) || 60;
 
-    // 1. Create broadcast row
+    // 1. Resolve audience server-side as the admin user (RLS check happens inside RPC)
+    const { data: audience, error: audErr } = await userClient.rpc(
+      "resolve_broadcast_audience" as never,
+      {
+        _audience_type: String(audienceType),
+        _filters: audienceFilters,
+        _exclude_prior: !!excludePriorRecipients,
+      } as never,
+    );
+    if (audErr) {
+      console.error("resolve_broadcast_audience:", audErr.message);
+      return json({ error: "Could not resolve audience: " + audErr.message }, 400);
+    }
+    const recipients = ((audience ?? []) as Array<{ user_id: string; email: string; full_name: string }>)
+      .filter((r) => r.email && r.email.includes("@"));
+
+    if (recipients.length === 0) {
+      return json({ error: "Audience is empty — refine your targeting filters." }, 400);
+    }
+
+    // 2. Create broadcast row
     const { data: broadcast, error: bErr } = await adminClient
       .from("ssra_zoom_broadcasts")
       .insert({
@@ -67,10 +90,12 @@ Deno.serve(async (req: Request) => {
         duration_minutes: duration,
         zoom_link: String(zoomLink),
         zoom_password: zoomPassword ? String(zoomPassword) : null,
-        audience: "all_students",
+        audience: String(audienceType),
+        audience_type: String(audienceType),
+        audience_filters: audienceFilters,
         status: "sending",
         sent_by: user.id,
-      })
+      } as never)
       .select("id")
       .single();
     if (bErr || !broadcast) {
@@ -78,52 +103,52 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Could not create broadcast" }, 500);
     }
 
-    // 2. Fetch all student recipients
-    const { data: students, error: sErr } = await adminClient
-      .from("ssra_profiles")
-      .select("id, email, full_name")
-      .eq("role", "student")
-      .not("email", "is", null);
-    if (sErr) {
-      console.error("students fetch failed:", sErr.message);
-      return json({ error: "Could not load recipients" }, 500);
-    }
-
-    const recipients = (students ?? []).filter((s) => s.email && s.email.includes("@"));
-
-    // 3. Insert recipient rows (chunked)
+    // 3. Insert recipient rows (chunked) — DB generates unsubscribe_token
     const rows = recipients.map((s) => ({
       broadcast_id: broadcast.id,
-      user_id: s.id,
-      email: s.email!.toLowerCase().trim(),
+      user_id: s.user_id,
+      email: s.email.toLowerCase().trim(),
       status: "pending" as const,
     }));
-    if (rows.length > 0) {
-      for (let i = 0; i < rows.length; i += 500) {
-        await adminClient.from("ssra_zoom_broadcast_recipients").insert(rows.slice(i, i + 500));
-      }
+    for (let i = 0; i < rows.length; i += 500) {
+      await adminClient.from("ssra_zoom_broadcast_recipients").insert(rows.slice(i, i + 500));
     }
     await adminClient
       .from("ssra_zoom_broadcasts")
       .update({ total_recipients: rows.length })
       .eq("id", broadcast.id);
 
-    // 4. Enqueue an email per recipient
+    // 4. Pull back recipient ids + tokens to build tracked links per row
+    const { data: inserted } = await adminClient
+      .from("ssra_zoom_broadcast_recipients")
+      .select("id, user_id, email, unsubscribe_token")
+      .eq("broadcast_id", broadcast.id);
+
+    const tokenByUser = new Map<string, string>();
+    (inserted ?? []).forEach((r: { user_id: string | null; unsubscribe_token: string }) => {
+      if (r.user_id) tokenByUser.set(r.user_id, r.unsubscribe_token);
+    });
+
+    // 5. Enqueue an email per recipient with tracking pixel + tracked join link
     const scheduledLabel = scheduledIso.toLocaleString("en-GB", {
       dateStyle: "full",
       timeStyle: "short",
       timeZone: "Africa/Cairo",
     }) + " (Cairo)";
 
+    const fnBase = `${SUPABASE_URL}/functions/v1`;
     let sent = 0;
     let failed = 0;
-    const failures: { email: string; error: string }[] = [];
 
     for (const r of recipients) {
+      const token = tokenByUser.get(r.user_id) ?? "";
+      const trackingPixelUrl = `${fnBase}/track-broadcast-open?t=${encodeURIComponent(token)}`;
+      const trackedJoinUrl = `${fnBase}/track-broadcast-join?t=${encodeURIComponent(token)}&r=${encodeURIComponent(String(zoomLink))}`;
+
       const payload = {
         to: r.email,
         template: "zoom-invitation",
-        idempotency_key: `zoom-broadcast-${broadcast.id}-${r.id}`,
+        idempotency_key: `zoom-broadcast-${broadcast.id}-${r.user_id}`,
         purpose: "transactional",
         data: {
           studentName: r.full_name || "there",
@@ -131,8 +156,9 @@ Deno.serve(async (req: Request) => {
           description: description ?? "",
           scheduledAt: scheduledLabel,
           durationMinutes: duration,
-          zoomLink: String(zoomLink),
+          zoomLink: trackedJoinUrl,
           zoomPassword: zoomPassword ? String(zoomPassword) : "",
+          trackingPixelUrl,
         },
       };
       const { error: qErr } = await adminClient.rpc("enqueue_email", {
@@ -141,19 +167,18 @@ Deno.serve(async (req: Request) => {
       });
       if (qErr) {
         failed++;
-        failures.push({ email: r.email!, error: qErr.message });
         await adminClient
           .from("ssra_zoom_broadcast_recipients")
           .update({ status: "failed", error: qErr.message })
           .eq("broadcast_id", broadcast.id)
-          .eq("email", r.email!.toLowerCase().trim());
+          .eq("email", r.email.toLowerCase().trim());
       } else {
         sent++;
         await adminClient
           .from("ssra_zoom_broadcast_recipients")
           .update({ status: "queued", sent_at: new Date().toISOString() })
           .eq("broadcast_id", broadcast.id)
-          .eq("email", r.email!.toLowerCase().trim());
+          .eq("email", r.email.toLowerCase().trim());
       }
     }
 
@@ -166,13 +191,7 @@ Deno.serve(async (req: Request) => {
       })
       .eq("id", broadcast.id);
 
-    return json({
-      ok: true,
-      broadcastId: broadcast.id,
-      total: rows.length,
-      sent,
-      failed,
-    });
+    return json({ ok: true, broadcastId: broadcast.id, total: rows.length, sent, failed });
   } catch (e) {
     console.error("admin-send-zoom-invitation error:", e instanceof Error ? e.message : e);
     return json({ error: "Internal server error" }, 500);

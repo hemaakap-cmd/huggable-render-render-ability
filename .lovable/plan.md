@@ -1,92 +1,72 @@
-# SSRA Academy – Pre-Launch UX Overhaul
 
-A focused pass to reframe the student experience around the **monthly support / pay-what-you-can** model and surface the most important info (course start, next session, how to continue learning) the moment a student logs in.
+# Zoom Broadcast Audience Management Redesign
 
-Scope is **frontend / presentation only** — no schema, no payment-logic changes. Pricing copy and minimum amount (€10) are content updates; existing donation checkout already accepts a variable amount.
+Make broadcasts targeted, deduplicated, and trackable end-to-end.
 
----
+## 1. Database changes
 
-## 1. Student Dashboard (`StudentDashboard.tsx`) — full redesign
+### Extend `ssra_zoom_broadcasts`
+- `audience_type` text (existed as `audience`; extend with new enum values): `all_students`, `enrolled_after`, `enrolled_before`, `course`, `active_subscribers`, `custom`, `unattended_previous`, `not_previously_invited`, `cohort`
+- `audience_filters` jsonb — stores `{ date?, course_id?, batch_id?, broadcast_id?, emails?[] }`
+- `opened_count` int default 0
+- `joined_count` int default 0
 
-New layout, top to bottom:
+### Extend `ssra_zoom_broadcast_recipients`
+Already has: id, broadcast_id, user_id, email, status, sent_at, error.
+Add:
+- `email_opened` bool default false, `opened_at` timestamptz
+- `joined_session` bool default false, `joined_at` timestamptz
+- `unsubscribe_token` uuid default gen_random_uuid()
+- Index on `(user_id, broadcast_id)` and `(email_opened)`.
 
-```
-WELCOME BACK, <name>
-┌─────────────────────────────────────────────┐
-│ CURRENT COURSE — Medical German             │
-│ Starts 1 July 2026 · Every Tue · 21:00 CET  │
-│ Instructor: Mr Mahmud Hammam · 41.8 hrs     │
-│ Progress ▓░░░░░░░░░░ 0%  (Lesson 0 of 32)   │
-│ [ Start Learning ] [ Join Live ] [ Manage ] │
-└─────────────────────────────────────────────┘
-┌──── Next Session ────┐ ┌──── Subscription ───┐
-│ Medical German       │ │ Status: Active      │
-│ 1 Jul 2026 · 21:00   │ │ Next billing: …     │
-│ [ Add to calendar ]  │ │ [ Manage ]          │
-└──────────────────────┘ └─────────────────────┘
-┌──── Quick links: Materials · Homework · Certificates · Profile ────┐
-```
+### New RPC `resolve_broadcast_audience(_audience text, _filters jsonb, _exclude_prior bool)` → returns table `(user_id uuid, email text, full_name text)`
+Server-side resolver used by both preview-count and send. Centralizes targeting logic and supports `not_previously_invited` and `unattended_previous` via NOT EXISTS subqueries against `ssra_zoom_broadcast_recipients`.
 
-- "Upcoming Sessions = 0" tile removed; replaced with **Next Session** card. If no scheduled sessions, show the course's `start_date / start_time` as the next session.
-- Progress block reads from existing homework/materials counts; if none, shows `0%` with "Lessons unlock as the course begins".
-- All three primary buttons present:
-  - **Start Learning** → `/dashboard/materials`
-  - **Join Live Session** → `/dashboard/sessions`
-  - **Manage Subscription** → `/dashboard/subscription`
+### New view `ssra_student_broadcast_history` (security definer fn)
+Returns broadcasts + recipient row for a given `_user_id`. Used in student profile.
 
-## 2. My Courses (`MyCourses.tsx`) — de-duplicate
+## 2. Edge function `admin-send-zoom-invitation`
+- Accept `audienceType`, `audienceFilters`, `excludePriorRecipients`.
+- Validate admin (unchanged).
+- Replace direct `select role=student` with `supabase.rpc("resolve_broadcast_audience", …)`.
+- Insert recipients with per-row `unsubscribe_token`.
+- Email template gets a tracking pixel URL `…/functions/v1/track-broadcast-open?t=<token>` and join-link wrapper `…/track-broadcast-join?t=<token>&r=<zoomLink>`.
 
-- Rename heading `One-time Enrollments` → **My Active Courses**.
-- The big "Active Subscription" hero card is removed from this page (it lives on the Subscription page and the dashboard). Subscription course is rendered as a normal card in the same list with an "Active subscription" badge, so each course appears once.
-- Each card gains a **Course Information** panel: start date, time (CET), instructor, duration, next live session, plus a **Start Learning** primary button and a smaller "Join live session" link.
+## 3. New edge functions
+- `track-broadcast-open` (GET, no JWT): marks recipient `email_opened=true`, returns 1×1 GIF, increments `opened_count`.
+- `track-broadcast-join` (GET, no JWT): marks `joined_session=true`, 302-redirects to the real Zoom URL.
+- `preview-broadcast-audience` (POST, admin): returns `{ total, sample[] }` for current audience selection — replaces the unconditional count in the UI.
 
-## 3. Subscription page (`MySubscription.tsx`)
+## 4. Admin UI — `AdminZoomBroadcast.tsx`
+New "Audience" card above the compose form:
+- Radio group with the 8 target types.
+- Conditional sub-controls (date picker, course select, batch select, prior-broadcast select, emails textarea).
+- Live preview chip showing resolved count + first 10 names (calls `preview-broadcast-audience` debounced).
+- Checkbox `☑ Exclude students who already received this broadcast`.
 
-Student-friendly layout:
+Recent broadcasts list:
+- Add columns: Opened, Joined.
+- Each row links to a new "Broadcast detail" drawer showing the full recipient table with status / opened / joined.
 
-- **Payment Information** block: Status · Monthly amount · Next billing date · Payment method (brand · last4 if available, otherwise "Card on file") · "Cancel anytime".
-- Big **Manage Subscription** button (opens Stripe portal — wiring already exists).
-- Hide raw IDs (`sub_…`, `cus_…`) behind a collapsed "Technical details" disclosure for support purposes.
+## 5. Student profile — `UserDetailsDialog.tsx`
+New "Broadcast history" section listing session title, date, sent/opened/joined badges.
 
-## 4. Order Status (`OrderStatus.tsx`) — student-friendly
-
-- Hide `SSRA-ENR-…` order numbers and internal "registration confirmed" record blocks from the main view.
-- Show: Course · Status (Active / Pending / Cancelled) · Amount · Date.
-- Move internal IDs into a small "Reference" line shown only on click (for support).
-
-## 5. Sessions (`MySessions.tsx`)
-
-- When zero sessions exist, show a friendly **Next Session** card built from course start date instead of an empty state, matching the dashboard.
-
-## 6. Pricing page (`Pricing.tsx`) — reframe
-
-- Remove the hard `€19/month` headline.
-- New headline: **Choose your monthly support · Pay what you can · Minimum €10**.
-- Slider / preset chips (€10 · €15 · €25 · custom) feeding the existing donation checkout. Copy: "Renews automatically every month · Cancel anytime."
-
-## 7. Checkout page (`Checkout.tsx`) — recurring clarity
-
-- Add a prominent notice above the pay button:
-  > "Your selected amount will renew automatically every month. Cancel anytime from your dashboard."
-- Show monthly amount + "Next renewal: <date>" preview.
-
-## 8. Shared content
-
-- Course meta (start date, time, instructor, duration, lesson count) read from existing `ssra_courses` row when present; fall back to the supplied defaults (1 Jul 2026, 21:00 CET, Mahmud Hammam, 41.8 hrs, 32 lessons) so the UI is never empty pre-launch.
-
----
+## 6. Cohort support
+Use existing `ssra_batches` table as the cohort entity; `audience_type='cohort'` filters enrollments by `batch_id` in filters.
 
 ## Technical notes
+- All grants follow the four-step pattern; new columns inherit existing GRANTs.
+- `resolve_broadcast_audience` is `security definer`, admin-only check at top (`is_ssra_admin(auth.uid())`).
+- Tracking endpoints use the `unsubscribe_token` (opaque UUID) — no auth, idempotent.
+- Email template (`zoom-invitation.tsx`) updated to inject `{{trackingPixelUrl}}` and `{{trackedJoinUrl}}`.
 
-- All edits are React/Tailwind in `src/pages/dashboard/*`, `src/pages/Checkout.tsx`, `src/pages/Pricing.tsx`, plus a small `src/lib/courseDefaults.ts` helper for fallback metadata.
-- No DB migrations. No edge-function changes. No changes to Stripe amounts / currency logic.
-- Dark premium look preserved (slate-950 sidebar, blue accent `hsl(220 91% 54%)`, gradient hero cards already in use).
-- Existing hooks reused: `useMyEnrollments`, `useMySubscription`, `useSsraAuth`, `useCurrency`.
+## Out of scope
+- Resend.com webhook-based open tracking (we use pixel; can layer later).
+- Per-recipient email A/B variants.
+- Scheduled future sends (current send is immediate).
 
-## Out of scope (call out explicitly)
+---
 
-- Real lesson-level progress tracking (no lessons table exists yet) — progress shown is derived from homework completion; a true LMS progress system is a separate feature.
-- Stripe portal / billing logic — unchanged.
-- Backend pricing rules — already supports variable amount via donation checkout; only copy changes.
+**Estimated surface**: 1 migration, 3 edge functions (1 modified + 2 new + 1 new preview), 2 React files, 1 email template. No business-logic changes outside broadcasts.
 
-Approve and I'll ship it.
+Confirm and I'll build it.

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, FileText, ListOrdered, Loader2, Mail, ExternalLink } from "lucide-react";
+import { X, FileText, ListOrdered, Loader2, Mail, ExternalLink, Radio } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Verification = {
@@ -42,12 +42,13 @@ export default function UserDetailsDialog({
   const [verifications, setVerifications] = useState<Verification[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
   const [courseTitles, setCourseTitles] = useState<Record<string, string>>({});
+  const [broadcastHistory, setBroadcastHistory] = useState<any[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [vRes, wRes] = await Promise.all([
+      const [vRes, wRes, bRes] = await Promise.all([
         supabase
           .from("ssra_verifications")
           .select("id, full_name, email, country, degree, graduation_year, german_level, motivation, course_id, diploma_url, status, created_at")
@@ -58,6 +59,7 @@ export default function UserDetailsDialog({
           .select("id, course_id, position, status, notified_at, expires_at, created_at")
           .eq("user_id", userId)
           .order("created_at", { ascending: false }),
+        supabase.rpc("get_student_broadcast_history" as never, { _user_id: userId } as never),
       ]);
 
       // Fallback by email for anonymous applications
@@ -93,6 +95,7 @@ export default function UserDetailsDialog({
         setVerifications(vRows);
         setWaitlist(wRows);
         setCourseTitles(titles);
+        setBroadcastHistory(((bRes as any)?.data ?? []) as any[]);
         setLoading(false);
       }
     })();
@@ -221,6 +224,48 @@ export default function UserDetailsDialog({
                               }`}>{w.status}</span>
                             </td>
                             <td className="px-3 py-2 text-slate-500">{new Date(w.created_at).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+
+              {/* Broadcast history */}
+              <section>
+                <div className="flex items-center gap-2 mb-3">
+                  <Radio className="w-4 h-4 text-blue-500" />
+                  <h3 className="font-semibold text-slate-800 text-sm">Zoom Broadcast History</h3>
+                </div>
+                {broadcastHistory.length === 0 ? (
+                  <div className="text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+                    No Zoom invitations sent to this user.
+                  </div>
+                ) : (
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-xs">
+                      <thead className="bg-slate-50 text-slate-500">
+                        <tr>
+                          <th className="text-left px-3 py-2 font-semibold">Session</th>
+                          <th className="text-left px-3 py-2 font-semibold">Date</th>
+                          <th className="text-center px-2 py-2 font-semibold">Sent</th>
+                          <th className="text-center px-2 py-2 font-semibold">Opened</th>
+                          <th className="text-center px-2 py-2 font-semibold">Joined</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {broadcastHistory.map((b: any) => (
+                          <tr key={b.broadcast_id}>
+                            <td className="px-3 py-2 text-slate-700 truncate max-w-[180px]">{b.title}</td>
+                            <td className="px-3 py-2 text-slate-500">{new Date(b.scheduled_at).toLocaleDateString()}</td>
+                            <td className="px-2 py-2 text-center">{b.sent_at ? "✓" : "—"}</td>
+                            <td className="px-2 py-2 text-center">{b.email_opened ? "✓" : "—"}</td>
+                            <td className="px-2 py-2 text-center">
+                              {b.joined_session
+                                ? <span className="text-emerald-600 font-semibold">✓</span>
+                                : <span className="text-slate-300">absent</span>}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
