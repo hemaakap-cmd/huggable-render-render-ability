@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, GraduationCap } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/ssra/Header";
@@ -35,13 +35,55 @@ export default function Apply() {
   useReveal();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const courseIdParam = searchParams.get("course") ?? "";
   const { data: courses = [] } = usePublicCourses();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [gateStatus, setGateStatus] = useState<"checking" | "ok" | "pending" | "approved">("checking");
   const [form, setForm] = useState({
     fullName: "", email: "", country: "", degree: "",
     graduationYear: "", germanLevel: "", course: "", motivation: "",
   });
+
+  // Pre-select course from query string
+  useEffect(() => {
+    if (courseIdParam && !form.course) {
+      setForm((f) => ({ ...f, course: courseIdParam }));
+    }
+  }, [courseIdParam]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Gate: approved → checkout; pending → status screen; otherwise show form
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { if (!cancelled) setGateStatus("ok"); return; }
+      const { data } = await supabase
+        .from("ssra_verifications")
+        .select("status, course_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      const rows = data ?? [];
+      const forCourse = courseIdParam ? rows.find((r) => r.course_id === courseIdParam) : undefined;
+      const anyApproved = rows.some((r) => r.status === "approved");
+      if (cancelled) return;
+      if (forCourse?.status === "approved" || anyApproved) {
+        const target = courseIdParam ? `/checkout?courseId=${courseIdParam}` : "/dashboard";
+        toast({ title: "You're already approved", description: "Sending you to checkout." });
+        navigate(target, { replace: true });
+        setGateStatus("approved");
+        return;
+      }
+      const pending =
+        forCourse?.status === "pending" ||
+        (!forCourse && rows.some((r) => r.status === "pending"));
+      if (pending) { setGateStatus("pending"); return; }
+      setGateStatus("ok");
+    })();
+    return () => { cancelled = true; };
+  }, [courseIdParam, navigate, toast]);
+
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [k]: e.target.value });
@@ -101,6 +143,42 @@ export default function Apply() {
       setSubmitting(false);
     }
   };
+
+  if (gateStatus === "checking" || gateStatus === "approved") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center py-32 text-muted-foreground text-sm">
+          Checking your application status…
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (gateStatus === "pending") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center py-32">
+          <div className="text-center max-w-md px-6 reveal">
+            <BackButton className="mb-4" />
+            <div className="w-20 h-20 rounded-full bg-[hsl(43,96%,50%)] bg-opacity-15 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-10 h-10 text-[hsl(43,96%,50%)]" />
+            </div>
+            <h1 className="font-display text-4xl font-bold text-foreground mb-4">Application Under Review</h1>
+            <p className="text-muted-foreground leading-relaxed mb-6">
+              You've already submitted an application. Our team reviews every application personally and will respond within 3–5 business days. We'll email you as soon as it's approved.
+            </p>
+            <Button onClick={() => navigate("/dashboard")} className="btn-luxury-primary px-6 py-3 rounded-xl">
+              Go to Dashboard
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (submitted) {
     return (

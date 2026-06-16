@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   CheckCircle2, ArrowRight, CreditCard, Shield, RefreshCcw,
   Globe2, Zap, Crown,
@@ -9,8 +9,9 @@ import Header from "@/components/ssra/Header";
 import Footer from "@/components/ssra/Footer";
 import { type Course } from "@/lib/courseCatalog";
 import { usePublicCourses } from "@/hooks/useSsraData";
-import { useToast } from "@/hooks/use-toast";
+
 import { useCurrency } from "@/hooks/useCurrency";
+import { useEnrollGate } from "@/hooks/useEnrollGate";
 
 function useReveal() {
   useEffect(() => {
@@ -25,16 +26,11 @@ function useReveal() {
 }
 
 function PriceCard({ course, highlight = false }: { course: Course; highlight?: boolean }) {
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const { format } = useCurrency();
+  const gate = useEnrollGate();
 
   const handleCheckout = () => {
-    if (course.requires_verification) {
-      navigate("/apply?course=" + course.id + "&intent=subscribe");
-      return;
-    }
-    navigate("/checkout?courseId=" + course.id);
+    void gate(course);
   };
 
   return (

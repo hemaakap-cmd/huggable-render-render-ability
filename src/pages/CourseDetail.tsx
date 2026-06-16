@@ -12,6 +12,7 @@ import { usePriceHiddenMap, useCourseSchedule, useCourseCapacity, useJoinWaitlis
 import { useSsraAuth } from "@/hooks/useSsraAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useEnrollGate } from "@/hooks/useEnrollGate";
 
 function formatDate(d?: string | null) {
   if (!d) return null;
@@ -50,6 +51,7 @@ export default function CourseDetail() {
   const { format } = useCurrency();
   const { data: courses, isLoading: coursesLoading } = usePublicCourses();
   const course     = courses?.find((c) => c.id === id);
+  const gate       = useEnrollGate();
   const { data: priceHidden = {} } = usePriceHiddenMap();
   const { data: schedule }         = useCourseSchedule(id);
   const { data: capacity }         = useCourseCapacity(id);
@@ -89,7 +91,7 @@ export default function CourseDetail() {
   }
 
   const handleEnrol = () => {
-    navigate(`/checkout?courseId=${course.id}`);
+    void gate(course);
   };
 
   const related = (courses ?? []).filter((c) => c.category === course.category && c.id !== course.id).slice(0, 3);
