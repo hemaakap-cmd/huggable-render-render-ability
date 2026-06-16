@@ -51,6 +51,7 @@ export default function CourseDetail() {
   const { format } = useCurrency();
   const { data: courses, isLoading: coursesLoading } = usePublicCourses();
   const course     = courses?.find((c) => c.id === id);
+  const gate       = useEnrollGate();
   const { data: priceHidden = {} } = usePriceHiddenMap();
   const { data: schedule }         = useCourseSchedule(id);
   const { data: capacity }         = useCourseCapacity(id);
