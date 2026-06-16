@@ -93,29 +93,29 @@ export default function RefundCancellation() {
                   <li>You request a cancellation within 14 calendar days of your initial purchase date or first subscription charge.</li>
                   <li>Approved cancellations are refunded at <strong>80% of the amount paid</strong>. SSRA Academy retains <strong>20% as an administrative fee</strong> to cover payment processing and operational costs.</li>
                   <li>Example: a €19.00 payment → administrative fee €3.80 → refund €15.20.</li>
-                  <li>Refunds are returned to your original payment method through Paddle.com, our Merchant of Record.</li>
-                  <li>Use the email address used at checkout so Paddle can locate your order.</li>
+                  <li>Refunds are returned to your original payment method through Stripe.</li>
+                  <li>Use the email address used at checkout so Stripe can locate your order.</li>
                 </ul>
-                <p className="text-sm text-slate-500 italic mt-2">Taxes (VAT/Sales Tax) charged at checkout follow the same 80/20 split. Refund and cancellation mechanics are governed by Paddle's Buyer Terms.</p>
+                <p className="text-sm text-slate-500 italic mt-2">Taxes (VAT/Sales Tax) charged at checkout follow the same 80/20 split. Refund and cancellation mechanics are governed by Stripe's Buyer Terms.</p>
               </div>
             </div>
 
             <div className="divider" />
 
-            {/* 3. Paddle Refund Handling */}
+            {/* 3. Stripe Refund Handling */}
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
                   <XCircle className="w-5 h-5 text-red-500" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-900 font-display">3. Paddle Refund Handling</h2>
+                <h2 className="text-xl font-bold text-slate-900 font-display">3. Stripe Refund Handling</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>Paddle.com processes refund requests for our orders as Merchant of Record. This means Paddle may review purchase details, billing status, and applicable buyer terms before completing a refund.</p>
+                <p>Stripe processes refund requests for our orders as payment processor. This means Stripe may review purchase details, billing status, and applicable buyer terms before completing a refund.</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li>Submit refund requests within 14 days through <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline font-medium">paddle.net</a>.</li>
+                  <li>Submit refund requests within 14 days through <a href="https://ssracourses.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline font-medium">ssracourses.com/dashboard</a>.</li>
                   <li>Approved refunds are returned to the original payment method.</li>
-                  <li>Questions about an order can also be sent to us and we will help route the request to Paddle.</li>
+                  <li>Questions about an order can also be sent to us and we will help route the request to Stripe.</li>
                 </ul>
               </div>
             </div>
@@ -131,11 +131,11 @@ export default function RefundCancellation() {
                 <h2 className="text-xl font-bold text-slate-900 font-display">4. How to Request a Refund</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>Our payments are processed by Paddle.com, our Merchant of Record. To request a refund, please follow these steps:</p>
+                <p>Our payments are processed by Stripe. To request a refund, please follow these steps:</p>
                 <ol className="list-decimal list-inside space-y-2 ml-2">
-                  <li>Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline font-medium">paddle.net</a> and enter the email address used at checkout to manage your order and request a refund directly.</li>
-                  <li>Or email us at <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> with subject "Refund Request" and your order number — we will forward to Paddle.</li>
-                  <li>Allow up to 5-10 business days for our team or Paddle to review your request.</li>
+                  <li>Visit <a href="https://ssracourses.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline font-medium">ssracourses.com/dashboard</a> and enter the email address used at checkout to manage your order and request a refund directly.</li>
+                  <li>Or email us at <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> with subject "Refund Request" and your order number — we will forward to Stripe.</li>
+                  <li>Allow up to 5-10 business days for our team or Stripe to review your request.</li>
                 </ol>
                 <p>Approved refunds will be processed to the original payment method within 5-14 business days, depending on your bank or payment provider.</p>
               </div>
@@ -155,7 +155,7 @@ export default function RefundCancellation() {
                 <p>You may cancel your subscription at any time. Here's what happens when you cancel:</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li><strong className="text-slate-800">Access until period end:</strong> You will continue to have full access to all course content until the end of your current billing period.</li>
-                  <li><strong className="text-slate-800">Refund handling:</strong> Refund requests are handled by Paddle under Paddle's Refund Policy and Buyer Terms.</li>
+                  <li><strong className="text-slate-800">Refund handling:</strong> Refund requests are handled by Stripe under Stripe's Refund Policy and Buyer Terms.</li>
                   <li><strong className="text-slate-800">No reactivation fee:</strong> You can reactivate your subscription at any time without penalty.</li>
                   <li><strong className="text-slate-800">Data retention:</strong> Your progress and account data will be retained for 12 months in case you decide to return.</li>
                 </ul>
@@ -177,7 +177,7 @@ export default function RefundCancellation() {
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li><strong className="text-slate-800">Account Settings:</strong> Log into your SSRA Academy account, go to "My Subscription," and click "Cancel Subscription."</li>
                   <li><strong className="text-slate-800">Email:</strong> Send a cancellation request to <a href="mailto:info@ssracourses.com" className="text-[hsl(220,91%,54%)] hover:underline font-medium">info@ssracourses.com</a> from your registered email address.</li>
-                  <li><strong className="text-slate-800">Paddle order support:</strong> Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">paddle.net</a> with the email used at checkout to cancel directly.</li>
+                  <li><strong className="text-slate-800">Stripe order support:</strong> Visit <a href="https://ssracourses.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-[hsl(220,91%,54%)] hover:underline">ssracourses.com/dashboard</a> with the email used at checkout to cancel directly.</li>
                 </ul>
                 <p className="text-sm text-slate-500 italic">Cancellation requests are typically processed within 24-48 hours. You will receive a confirmation email once your cancellation is complete.</p>
               </div>
