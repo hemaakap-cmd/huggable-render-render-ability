@@ -186,9 +186,12 @@ Deno.serve(async (req) => {
           metadata: { userId: user.id, courseId: courseId, currency, fxRate: String(rate) },
         },
       }),
-      // managed_payments / automatic_tax is only enabled for EUR (the configured base).
-      // Non-EUR uses ad-hoc price_data and skips it to avoid tax-config conflicts.
-      ...(currency === "EUR" && { managed_payments: { enabled: true } }),
+      // Full compliance handling (tax + fraud + disputes + support) is enabled
+      // for every currency. Stripe handles end-to-end tax for buyers in ~80
+      // countries and falls back to calculation-only elsewhere — checkout works
+      // in all cases. Safe for both real Stripe prices (EUR) and ad-hoc
+      // price_data sessions used for non-EUR currencies.
+      managed_payments: { enabled: true },
     } as any);
 
     // Create a pending enrollment row tied to this session so PaymentSuccess can poll
