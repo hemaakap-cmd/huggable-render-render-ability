@@ -40,7 +40,10 @@ export default function Apply() {
   const { data: courses = [] } = usePublicCourses();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [gateStatus, setGateStatus] = useState<"checking" | "ok" | "pending" | "approved">("checking");
+  // Default to "ok" so unauthenticated visitors (and tests) see the form
+  // immediately. The effect below upgrades the state to "pending"/"approved"
+  // only for signed-in users whose verifications check returns those statuses.
+  const [gateStatus, setGateStatus] = useState<"checking" | "ok" | "pending" | "approved">("ok");
   const [form, setForm] = useState({
     fullName: "", email: "", country: "", degree: "",
     graduationYear: "", germanLevel: "", course: "", motivation: "",
