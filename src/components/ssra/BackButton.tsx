@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 interface BackButtonProps {
   /** Extra classes (positioning, margin, etc.). Do NOT pass colors — variant handles that. */
@@ -44,8 +44,10 @@ export default function BackButton({
 
   const content = (
     <>
-      {/* In RTL Arabic, ArrowRight visually points "back" toward the start of the text flow. */}
-      <ArrowRight className="w-4 h-4" aria-hidden="true" />
+      {/* ArrowLeft (←) matches the action direction in LTR. In RTL the icon
+          is auto-flipped by the `rtl:rotate-180` utility so it still points
+          toward the start of the text flow. */}
+      <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
       <span>{label}</span>
     </>
   );
