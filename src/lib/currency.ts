@@ -1,24 +1,28 @@
 // Currency helpers shared by UI and checkout invocation.
 
-export type SupportedCurrency = "EUR" | "USD" | "EGP" | "SAR" | "TND";
+export type SupportedCurrency = "EUR" | "USD" | "GBP" | "EGP" | "SAR" | "AED" | "TND";
 
-export const SUPPORTED_CURRENCIES: SupportedCurrency[] = ["EUR", "USD", "EGP", "SAR", "TND"];
+export const SUPPORTED_CURRENCIES: SupportedCurrency[] = ["EUR", "USD", "GBP", "EGP", "SAR", "AED", "TND"];
 
 // Stripe smallest-unit decimal places.
 // TND is a 3-decimal currency in Stripe — amounts are in millimes.
 export const CURRENCY_DECIMALS: Record<SupportedCurrency, number> = {
   EUR: 2,
   USD: 2,
+  GBP: 2,
   EGP: 2,
   SAR: 2,
+  AED: 2,
   TND: 3,
 };
 
 export const CURRENCY_SYMBOL: Record<SupportedCurrency, string> = {
   EUR: "€",
   USD: "$",
+  GBP: "£",
   EGP: "E£",
   SAR: "ر.س",
+  AED: "د.إ",
   TND: "د.ت",
 };
 
