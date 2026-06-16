@@ -520,9 +520,9 @@
     "refund24": "Stornierung ≥ 24 Stunden vor dem Termin:",
     "refund24Desc": "Volle Rückerstattung auf das ursprüngliche Zahlungsmittel.",
     "refundLate": "Stornierung < 24 Stunden vor dem Termin:",
-    "refundLateDesc": "Rückerstattungsanfragen werden von Paddle gemäß dem Käufer-Rückerstattungsprozess bearbeitet.",
+    "refundLateDesc": "Rückerstattungsanfragen werden von Stripe gemäß dem Käufer-Rückerstattungsprozess bearbeitet.",
     "noShow": "Nichterscheinen (No-Show):",
-    "noShowDesc": "Rückerstattungsanfragen werden von Paddle gemäß dem Käufer-Rückerstattungsprozess bearbeitet.",
+    "noShowDesc": "Rückerstattungsanfragen werden von Stripe gemäß dem Käufer-Rückerstattungsprozess bearbeitet.",
     "refundException": "In Ausnahmefällen (z. B. medizinischer Notfall) kontaktiere uns bitte unter",
     "towelTitle": "Eigenes Handtuch",
     "towelDesc": "Bitte bringe **dein eigenes Handtuch** zu jedem Termin mit. Aus Hygienegründen stellen wir keine Handtücher zur Verfügung.",
@@ -549,7 +549,7 @@
       "Gesundheitsbestätigung"
     ],
     "s2PaymentTitle": "Zahlungsinformationen",
-    "s2PaymentDesc": "Die Zahlungsabwicklung erfolgt sicher über Paddle.com, unseren Merchant of Record. Wir speichern keine vollständigen Kreditkartendaten auf unseren Servern. Paddle kann Zahlungskartendaten, Rechnungsadressen und Transaktionsverläufe für Checkout, Zahlungsabwicklung, Steuer-Compliance, Rechnungsstellung und Rückerstattungsanfragen erheben.",
+    "s2PaymentDesc": "Die Zahlungsabwicklung erfolgt sicher über Stripe, unseren payment processor. Wir speichern keine vollständigen Kreditkartendaten auf unseren Servern. Stripe kann Zahlungskartendaten, Rechnungsadressen und Transaktionsverläufe für Checkout, Zahlungsabwicklung, Steuer-Compliance, Rechnungsstellung und Rückerstattungsanfragen erheben.",
     "s3Title": "3. Verwendung deiner Daten",
     "s3Desc": "Wir verwenden die erhobenen Daten für:",
     "s3Items": [
@@ -561,7 +561,7 @@
       "Erfüllung gesetzlicher Pflichten"
     ],
     "s4Title": "4. Zahlungsabwicklung",
-    "s4Text": "Wir nutzen Paddle.com als Merchant of Record. Bei einer Zahlung werden deine Zahlungsinformationen direkt an Paddle mittels branchenüblicher Verschlüsselung übermittelt. Soweit anwendbar nutzt Paddle geeignete Schutzmaßnahmen für internationale Datenübermittlungen, einschließlich EU-Standardvertragsklauseln und EU-US Data Privacy Framework. Die Verwendung deiner Daten durch Paddle unterliegt deren Datenschutzrichtlinie, verfügbar unter",
+    "s4Text": "Wir nutzen Stripe als Zahlungsanbieter. Bei einer Zahlung werden deine Zahlungsinformationen direkt an Stripe mittels branchenüblicher Verschlüsselung übermittelt. Soweit anwendbar nutzt Stripe geeignete Schutzmaßnahmen für internationale Datenübermittlungen, einschließlich EU-Standardvertragsklauseln und EU-US Data Privacy Framework. Die Verwendung deiner Daten durch Stripe unterliegt deren Datenschutzrichtlinie, verfügbar unter",
     "s5Title": "5. Datensicherheit",
     "s5Text": "Wir setzen angemessene technische und organisatorische Sicherheitsmaßnahmen ein, um deine personenbezogenen Daten vor unbefugtem Zugriff, Veränderung, Offenlegung oder Zerstörung zu schützen. Dies umfasst Verschlüsselung, sichere Server und regelmäßige Sicherheitsüberprüfungen.",
     "s6Title": "6. Datenaufbewahrung",
@@ -577,7 +577,7 @@
       "Widerruf deiner Einwilligung jederzeit"
     ],
     "s8Title": "8. Drittanbieter",
-    "s8Text": "Unser Service nutzt Drittanbieter, darunter Paddle.com als Merchant of Record für Checkout, Zahlungen, Abonnementverwaltung, Steuer-Compliance, Rechnungsstellung und Rückerstattungsanfragen. Diese Drittanbieter haben eigene Datenschutzrichtlinien, die die Verwendung deiner Daten regeln.",
+    "s8Text": "Unser Service nutzt Drittanbieter, darunter Stripe als Zahlungsanbieter für Checkout, Zahlungen, Abonnementverwaltung, Steuer-Compliance, Rechnungsstellung und Rückerstattungsanfragen. Diese Drittanbieter haben eigene Datenschutzrichtlinien, die die Verwendung deiner Daten regeln.",
     "s9Title": "9. Cookies",
     "s9Text": "Wir verwenden essenzielle Cookies, um die ordnungsgemäße Funktion unserer Website sicherzustellen. Diese Cookies sind für den Betrieb unseres Buchungssystems notwendig und verfolgen dich nicht zu Werbezwecken.",
     "s10Title": "10. Änderungen dieser Datenschutzerklärung",
@@ -597,15 +597,15 @@
       "Alle Buchungen sind abhängig von der Verfügbarkeit",
       "Die Zahlung ist bei Buchung fällig",
       "Preise werden in der Landeswährung angezeigt und enthalten die gesetzliche Mehrwertsteuer",
-      "Unser Bestellvorgang wird von Paddle.com durchgeführt, unserem Online-Reseller und Merchant of Record. Paddle verarbeitet Zahlungen, kann auf deiner Bank- oder Kartenabrechnung erscheinen, bietet Kundenservice für Abrechnung und bearbeitet Rückgaben und Rückerstattungen.",
+      "Unser Bestellvorgang wird von Stripe durchgeführt, unserem Zahlungsanbieter und payment processor. Stripe verarbeitet Zahlungen, kann auf deiner Bank- oder Kartenabrechnung erscheinen, bietet Kundenservice für Abrechnung und bearbeitet Rückgaben und Rückerstattungen.",
       "Nach erfolgreicher Buchung erhältst du eine Bestätigungs-E-Mail"
     ],
     "s4Title": "4. Stornierungsrichtlinien",
     "s4Desc": "Du kannst deine Buchung über den Stornierungslink in deiner Bestätigungs-E-Mail oder über die Seite 'Buchung verwalten' stornieren. Bitte beachte:",
     "s4Items": [
       "Stornierungen mindestens 24 Stunden vor dem Termin: Volle Rückerstattung",
-      "Rückerstattungsanfragen werden von Paddle gemäß Paddle Refund Policy und Buyer Terms bearbeitet",
-      "Besuche paddle.net mit der beim Checkout verwendeten E-Mail-Adresse, um direkt eine Rückerstattung zu beantragen"
+      "Rückerstattungsanfragen werden von Stripe gemäß Stripe Refund Policy und Buyer Terms bearbeitet",
+      "Besuche ssracourses.com/dashboard mit der beim Checkout verwendeten E-Mail-Adresse, um direkt eine Rückerstattung zu beantragen"
     ],
     "s5Title": "5. Gesundheit und Sicherheit",
     "s5Desc": "Mit der Buchung einer Massage bestätigst du, dass:",
@@ -629,7 +629,7 @@
     "s8Title": "8. Haftungsbeschränkung",
     "s8Text": "MASSAVO haftet nicht für indirekte, zufällige, besondere oder Folgeschäden, die aus der Nutzung unserer Dienste entstehen. Unsere Gesamthaftung ist auf den Betrag beschränkt, den du für die konkrete Dienstleistung bezahlt hast, die den Anspruch begründet.",
     "s9Title": "9. Drittanbieter",
-    "s9Text": "Unsere Plattform nutzt Drittanbieterdienste, darunter Paddle.com als Merchant of Record für Zahlungsabwicklung, Abrechnung, Steuern, Stornierungen und Rückerstattungen. Deine Nutzung dieser Dienste unterliegt deren jeweiligen Nutzungsbedingungen und Datenschutzrichtlinien.",
+    "s9Text": "Unsere Plattform nutzt Drittanbieterdienste, darunter Stripe als Zahlungsanbieter für Zahlungsabwicklung, Abrechnung, Steuern, Stornierungen und Rückerstattungen. Deine Nutzung dieser Dienste unterliegt deren jeweiligen Nutzungsbedingungen und Datenschutzrichtlinien.",
     "s10Title": "10. Änderungen der Nutzungsbedingungen",
     "s10Text": "Wir behalten uns das Recht vor, diese Nutzungsbedingungen jederzeit zu ändern. Änderungen werden sofort nach Veröffentlichung auf dieser Seite wirksam. Die fortgesetzte Nutzung unserer Dienste gilt als Zustimmung zu den geänderten Bedingungen.",
     "s11Title": "11. Anwendbares Recht",

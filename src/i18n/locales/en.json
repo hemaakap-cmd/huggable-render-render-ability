@@ -520,9 +520,9 @@
     "refund24": "Cancellation ≥ 24 hours before appointment:",
     "refund24Desc": "Full refund to the original payment method.",
     "refundLate": "Cancellation < 24 hours before appointment:",
-    "refundLateDesc": "Refund requests are handled by Paddle under Paddle's buyer refund process.",
+    "refundLateDesc": "Refund requests are handled by Stripe under Stripe's buyer refund process.",
     "noShow": "No-Show:",
-    "noShowDesc": "Refund requests are handled by Paddle under Paddle's buyer refund process.",
+    "noShowDesc": "Refund requests are handled by Stripe under Stripe's buyer refund process.",
     "refundException": "In exceptional cases (e.g. medical emergency), please contact us at",
     "towelTitle": "Bring Your Own Towel",
     "towelDesc": "Please bring **your own towel** to every appointment. For hygiene reasons, we do not provide towels.",
@@ -549,7 +549,7 @@
       "Health confirmation"
     ],
     "s2PaymentTitle": "Payment Information",
-    "s2PaymentDesc": "Payment processing is handled securely by Paddle.com, our Merchant of Record. We do not store complete credit card data on our servers. Paddle may collect payment card data, billing addresses and transaction histories for checkout, payment processing, tax compliance, invoicing and refund requests.",
+    "s2PaymentDesc": "Payment processing is handled securely by Stripe. We do not store complete credit card data on our servers. Stripe may collect payment card data, billing addresses and transaction histories for checkout, payment processing, tax compliance, invoicing and refund requests.",
     "s3Title": "3. Use of Your Data",
     "s3Desc": "We use the collected data for:",
     "s3Items": [
@@ -561,7 +561,7 @@
       "Fulfilling legal obligations"
     ],
     "s4Title": "4. Payment Processing",
-    "s4Text": "We use Paddle.com as our Merchant of Record. When making a payment, your payment information is transmitted directly to Paddle using industry-standard encryption. Where applicable, Paddle uses appropriate international transfer safeguards including the EU Standard Contractual Clauses and the EU-US Data Privacy Framework. Paddle's use of your data is governed by their privacy policy, available at",
+    "s4Text": "We use Stripe as our payment processor. When making a payment, your payment information is transmitted directly to Stripe using industry-standard encryption. Where applicable, Stripe uses appropriate international transfer safeguards including the EU Standard Contractual Clauses and the EU-US Data Privacy Framework. Stripe's use of your data is governed by their privacy policy, available at",
     "s5Title": "5. Data Security",
     "s5Text": "We implement appropriate technical and organizational security measures to protect your personal data from unauthorized access, alteration, disclosure or destruction. This includes encryption, secure servers and regular security audits.",
     "s6Title": "6. Data Retention",
@@ -577,7 +577,7 @@
       "Withdraw your consent at any time"
     ],
     "s8Title": "8. Third Parties",
-    "s8Text": "Our service uses third-party providers, including Paddle.com as Merchant of Record for checkout, payments, subscription management, tax compliance, invoicing and refund requests. These third parties have their own privacy policies governing the use of your data.",
+    "s8Text": "Our service uses third-party providers, including Stripe as payment processor for checkout, payments, subscription management, tax compliance, invoicing and refund requests. These third parties have their own privacy policies governing the use of your data.",
     "s9Title": "9. Cookies",
     "s9Text": "We use essential cookies to ensure the proper functioning of our website. These cookies are necessary for the operation of our booking system and do not track you for advertising purposes.",
     "s10Title": "10. Changes to This Privacy Policy",
@@ -597,15 +597,15 @@
       "All bookings are subject to availability",
       "Payment is due at the time of booking",
       "Prices are displayed in the local currency and include applicable taxes",
-      "Our order process is conducted by Paddle.com, our online reseller and Merchant of Record. Paddle processes payments, may appear on your bank or card statement, provides billing customer service, and handles returns and refunds.",
+      "Our order process is conducted by Stripe, our online reseller. Stripe processes payments, may appear on your bank or card statement, provides billing customer service, and handles returns and refunds.",
       "You will receive a confirmation email after a successful booking"
     ],
     "s4Title": "4. Cancellation Policy",
     "s4Desc": "You can cancel your booking via the cancellation link in your confirmation email or through the \"Manage Booking\" page. Please note:",
     "s4Items": [
       "Cancellation at least 24 hours before appointment: Full refund",
-      "Refund requests are handled by Paddle under Paddle's Refund Policy and Buyer Terms",
-      "Visit paddle.net with the email used at checkout to request a refund directly"
+      "Refund requests are handled by Stripe under Stripe's Refund Policy and Buyer Terms",
+      "Visit ssracourses.com/dashboard with the email used at checkout to request a refund directly"
     ],
     "s5Title": "5. Health and Safety",
     "s5Desc": "By booking a massage, you confirm that:",
@@ -629,7 +629,7 @@
     "s8Title": "8. Limitation of Liability",
     "s8Text": "SSRA Academy is not liable for indirect, incidental, special or consequential damages arising from the use of our services. Our total liability is limited to the amount you paid for the specific service giving rise to the claim.",
     "s9Title": "9. Third Parties",
-    "s9Text": "Our platform uses third-party services, including Paddle.com as Merchant of Record for payment processing, billing, taxes, cancellations and refunds. Your use of these services is subject to their respective terms of service and privacy policies.",
+    "s9Text": "Our platform uses third-party services, including Stripe as payment processor for payment processing, billing, taxes, cancellations and refunds. Your use of these services is subject to their respective terms of service and privacy policies.",
     "s10Title": "10. Changes to Terms",
     "s10Text": "We reserve the right to change these Terms of Service at any time. Changes become effective immediately upon publication on this page. Continued use of our services constitutes acceptance of the amended terms.",
     "s11Title": "11. Governing Law",
