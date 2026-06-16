@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     }
 
     // Currency validation + smallest-unit conversion (TND is 3-decimal in Stripe)
-    const ALLOWED = new Set(["EUR", "USD", "EGP", "SAR", "TND"]);
+    const ALLOWED = new Set(["EUR", "USD", "GBP", "EGP", "SAR", "AED", "TND"]);
     const currency = (requestedCurrency && ALLOWED.has(requestedCurrency.toUpperCase()))
       ? requestedCurrency.toUpperCase()
       : "EUR";
