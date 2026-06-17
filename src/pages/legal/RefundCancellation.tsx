@@ -92,7 +92,7 @@ export default function RefundCancellation() {
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li>You request a cancellation within 14 calendar days of your initial purchase date or first subscription charge.</li>
                   <li>Approved cancellations are refunded at <strong>80% of the amount paid</strong>. SSRA Academy retains <strong>20% as an administrative fee</strong> to cover payment processing and operational costs.</li>
-                  <li>Example: a €19.00 payment → administrative fee €3.80 → refund €15.20.</li>
+                  <li>Example: a €10.00 payment → administrative fee €2.00 → refund €8.00.</li>
                   <li>Refunds are returned to your original payment method through Stripe.</li>
                   <li>Use the email address used at checkout so Stripe can locate your order.</li>
                 </ul>
