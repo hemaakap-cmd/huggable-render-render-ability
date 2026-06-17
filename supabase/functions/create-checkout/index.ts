@@ -200,6 +200,8 @@ Deno.serve(async (req) => {
       course_id: courseId,
       stripe_checkout_session_id: session.id,
       amount_eur: course.price_eur,
+      paid_amount: currency === "EUR" ? course.price_eur : (course.price_eur ?? 0) * rate,
+      paid_currency: currency,
       status: "pending",
       environment,
       course_title_snapshot: course.title,
