@@ -115,7 +115,25 @@ export default function Checkout() {
     );
   }
 
+  if (course.price_hidden && course.id !== "test-course") {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center max-w-md px-4">
+            <BackButton className="mb-4" />
+            <h2 className="font-display text-2xl font-bold text-slate-900 mb-2">Coming Soon</h2>
+            <p className="text-slate-500 mb-4">This course is not yet open for enrolment. Please check back later or explore the Medical German course.</p>
+            <Link to="/courses" className="text-[hsl(220,91%,54%)] font-semibold hover:underline">Browse courses</Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const returnUrl = `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}&courseId=${course.id}`;
+
 
   return (
     <div className="min-h-screen bg-slate-50">
