@@ -899,7 +899,9 @@ export type Database = {
           id: string
           instructor_snapshot: string | null
           order_number: string | null
+          paid_amount: number | null
           paid_at: string | null
+          paid_currency: string | null
           start_date_snapshot: string | null
           start_time_snapshot: string | null
           status: string
@@ -923,7 +925,9 @@ export type Database = {
           id?: string
           instructor_snapshot?: string | null
           order_number?: string | null
+          paid_amount?: number | null
           paid_at?: string | null
+          paid_currency?: string | null
           start_date_snapshot?: string | null
           start_time_snapshot?: string | null
           status?: string
@@ -947,7 +951,9 @@ export type Database = {
           id?: string
           instructor_snapshot?: string | null
           order_number?: string | null
+          paid_amount?: number | null
           paid_at?: string | null
+          paid_currency?: string | null
           start_date_snapshot?: string | null
           start_time_snapshot?: string | null
           status?: string
