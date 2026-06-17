@@ -141,11 +141,20 @@ Deno.serve(async (req) => {
       },
     } as any);
 
+    // amountCents is in the buyer's selected currency. Convert back to EUR
+    // for amount_eur, and keep the original local amount/currency separately.
+    const amountEurValue = currency === "EUR"
+      ? amountCents / 100
+      : (amountCents / Math.pow(10, decimals)) / rate;
+    const paidAmountValue = amountCents / Math.pow(10, decimals);
+
     await supabase.from("ssra_enrollments").upsert({
       user_id: user.id,
       course_id: courseId,
       stripe_checkout_session_id: session.id,
-      amount_eur: amountCents / 100,
+      amount_eur: amountEurValue,
+      paid_amount: paidAmountValue,
+      paid_currency: currency,
       status: "pending",
       environment,
       course_title_snapshot: course.title,
