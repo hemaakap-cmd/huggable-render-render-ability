@@ -100,7 +100,7 @@ export default function AdminStudents() {
     try {
       const { data } = await supabase
         .from("ssra_enrollments")
-        .select("id, course_id, status, amount_eur, enrolled_at, course_title_snapshot")
+        .select("id, course_id, status, amount_eur, paid_amount, paid_currency, enrolled_at, course_title_snapshot")
         .eq("user_id", s.id)
         .order("enrolled_at", { ascending: false });
       setStudentEnrollments(data || []);
