@@ -57,7 +57,7 @@ const ALL_COURSES: Course[] = [
     titleAr: "الألمانية الطبية",
     subtitle: "German for Sports Scientists — Monthly Subscription",
     desc: "The cornerstone subscription course. Medical vocabulary, clinic conversations, patient communication, and B1 exam prep — all in Arabic-guided modules. New content every month.",
-    price: 19,
+    price: 0,
     interval: "month",
     type: "subscription",
     priceId: coursePriceId("medical-german", true),
