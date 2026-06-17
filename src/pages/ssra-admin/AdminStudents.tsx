@@ -100,7 +100,7 @@ export default function AdminStudents() {
     try {
       const { data } = await supabase
         .from("ssra_enrollments")
-        .select("id, course_id, status, amount_eur, enrolled_at, course_title_snapshot")
+        .select("id, course_id, status, amount_eur, paid_amount, paid_currency, enrolled_at, course_title_snapshot")
         .eq("user_id", s.id)
         .order("enrolled_at", { ascending: false });
       setStudentEnrollments(data || []);
@@ -458,7 +458,11 @@ export default function AdminStudents() {
                         <div>
                           <div className="text-sm font-medium text-slate-800">{e.course_title_snapshot || e.course_id}</div>
                           <div className="text-xs text-slate-500">
-                            {new Date(e.enrolled_at).toLocaleDateString("en-GB")} · €{e.amount_eur ?? "—"} ·{" "}
+                            {new Date(e.enrolled_at).toLocaleDateString("en-GB")} · €{e.amount_eur ?? "—"}
+                            {e.paid_currency && e.paid_currency !== "EUR" && (
+                              <span className="text-slate-400"> ({e.paid_amount} {e.paid_currency})</span>
+                            )}
+                            {" "}·{" "}
                             <span className={
                               e.status === "active" ? "text-emerald-600" :
                               e.status === "cancelled" ? "text-red-600" :
