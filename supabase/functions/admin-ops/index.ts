@@ -122,15 +122,76 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
-    // ── CANCEL STUDENT ENROLLMENT ────────────────────────────────────
+    // ── CANCEL STUDENT ENROLLMENT (auto-refund + email) ──────────────
     if (action === "cancel_enrollment") {
       const enrollmentId = String(body?.enrollmentId ?? "");
       if (!enrollmentId) return json({ error: "enrollmentId required" }, 400);
 
+      // Load the enrollment so we have the payment intent + amount
+      const { data: enr, error: loadErr } = await admin
+        .from("ssra_enrollments")
+        .select("id, user_id, course_id, status, environment, stripe_payment_intent, amount_eur, paid_amount, paid_currency, course_title_snapshot, student_email_snapshot, student_name_snapshot, order_number")
+        .eq("id", enrollmentId)
+        .maybeSingle();
+      if (loadErr || !enr) return json({ error: loadErr?.message ?? "Enrollment not found" }, 404);
+
+      let refundIssued = false;
+      let refundError: string | null = null;
+
+      // Issue Stripe refund if we have a payment intent and it's not already refunded
+      if (enr.stripe_payment_intent && enr.status !== "refunded") {
+        try {
+          const { createStripeClient } = await import("../_shared/stripe.ts");
+          const stripeEnv = (enr.environment === "live" ? "live" : "sandbox") as "live" | "sandbox";
+          const stripe = createStripeClient(stripeEnv);
+          // Check for existing refunds to avoid double-refund
+          const existing = await stripe.refunds.list({ payment_intent: enr.stripe_payment_intent, limit: 1 });
+          if (existing.data.length === 0) {
+            await stripe.refunds.create({
+              payment_intent: enr.stripe_payment_intent,
+              reason: "requested_by_customer",
+            });
+          }
+          refundIssued = true;
+        } catch (e) {
+          console.error("Refund failed:", e);
+          refundError = e instanceof Error ? e.message : String(e);
+        }
+      }
+
+      // Update enrollment status
+      const newStatus = refundIssued ? "refunded" : "cancelled";
       const { error } = await admin.from("ssra_enrollments")
-        .update({ status: "cancelled" })
+        .update({ status: newStatus })
         .eq("id", enrollmentId);
       if (error) return json({ error: error.message }, 500);
+
+      // Send cancellation confirmation email
+      if (enr.student_email_snapshot) {
+        try {
+          const amountDisplay = enr.paid_currency && enr.paid_currency !== "EUR"
+            ? `${enr.paid_amount} ${enr.paid_currency}`
+            : `€${enr.amount_eur ?? 0}`;
+          await admin.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "cancellation-confirmation",
+              recipientEmail: enr.student_email_snapshot,
+              idempotencyKey: `cancel-${enrollmentId}`,
+              templateData: {
+                studentName: enr.student_name_snapshot ?? undefined,
+                courseName: enr.course_title_snapshot ?? enr.course_id,
+                orderNumber: enr.order_number ?? undefined,
+                amountPaid: amountDisplay,
+                refundIssued,
+                refundAmount: refundIssued ? amountDisplay : undefined,
+                cancellationDate: new Date().toLocaleDateString("en-GB"),
+              },
+            },
+          });
+        } catch (e) {
+          console.error("Cancellation email failed:", e);
+        }
+      }
 
       await admin.from("ssra_audit_log").insert({
         actor_id: caller.id,
@@ -139,10 +200,10 @@ Deno.serve(async (req) => {
         action: "enrollment_cancelled",
         resource_type: "enrollment",
         resource_id: enrollmentId,
-        details: {},
+        details: { refund_issued: refundIssued, refund_error: refundError },
       });
 
-      return json({ ok: true });
+      return json({ ok: true, refundIssued, refundError });
     }
 
     // ── DELETE STUDENT (hard) ────────────────────────────────────────
