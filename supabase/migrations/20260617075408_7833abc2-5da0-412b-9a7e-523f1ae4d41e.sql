@@ -1,0 +1,1 @@
+GRANT SELECT ON public.ssra_courses TO anon, authenticated; GRANT ALL ON public.ssra_courses TO service_role;
