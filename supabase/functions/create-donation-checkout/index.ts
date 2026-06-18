@@ -141,12 +141,11 @@ Deno.serve(async (req) => {
       },
     } as any);
 
-    // amountCents is in the buyer's selected currency. Convert back to EUR
-    // for amount_eur, and keep the original local amount/currency separately.
-    const amountEurValue = currency === "EUR"
-      ? amountCents / 100
-      : (amountCents / Math.pow(10, decimals)) / rate;
-    const paidAmountValue = amountCents / Math.pow(10, decimals);
+    // amountCents from the client is ALWAYS in EUR cents (the donation
+    // picker is denominated in EUR). The local-currency amount Stripe
+    // actually charged is `localUnitAmount` in minor units of `currency`.
+    const amountEurValue = amountCents / 100;
+    const paidAmountValue = localUnitAmount / Math.pow(10, decimals);
 
     await supabase.from("ssra_enrollments").upsert({
       user_id: user.id,
